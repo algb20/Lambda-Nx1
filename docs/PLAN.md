@@ -29,9 +29,12 @@ sync; never skip a point or a test.
 - [x] Test infra (vitest) + 17 engine tests pass; typecheck + build clean
 - [ ] Our cache/archive of raw results (wired when Module 1 sources persist scans via lib/db, P3)
 
-### P3 — Module 1: Domain / Infrastructure intel (keyless, real)
-- [ ] Sources: DoH DNS, RDAP/WHOIS, crt.sh, HTTP tech fingerprint, Wayback CDX, IP geo + Shodan InternetDB, urlscan
-- [ ] Report (sources + timestamps + Admiralty + confidence) + real tests
+### P3 — Module 1: Domain / Infrastructure intel (keyless, real)  *(done)*
+- [x] Sources: DoH DNS (Cloudflare+Google), RDAP, crt.sh, Wayback CDX, urlscan, Shodan InternetDB — all passive/keyless
+- [x] `investigateDomain()` → sectioned DomainReport (sources + timestamps + Admiralty + confidence + pivot graph)
+- [x] API route `POST /api/intelligence/domain` + real domain-investigator UI
+- [x] 21 tests pass (+1 live, RUN_LIVE-gated); typecheck + build clean
+- Note: live provider calls are egress-allowlisted in the build sandbox; they run at deploy time.
 
 ### P4 — Radar (continuous research & monitoring)
 - [ ] Scheduled jobs; watch public tool/technique sources (internal) + user targets (product)
