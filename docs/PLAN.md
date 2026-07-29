@@ -18,7 +18,7 @@ sync; never skip a point or a test.
 ### P1 — Skeleton & isolation layers  *(in progress)*
 - [x] Migrate real Next.js app into repo; delete all mock (`Math.random`) engine + false ML docs (build + typecheck pass)
 - [x] Postgres schema (Drizzle migrations, `db/migrations/0000_init.sql`, 10 tables) + `lib/db` repository layer
-- [ ] Adapter layers: `lib/auth`, `lib/payments`, `lib/storage`, `lib/queue`
+- [x] Adapter layers: `lib/auth`, `lib/payments`, `lib/storage`, `lib/queue` (ports + real default impls + env registry)
 - [ ] Clean fabricated status badges in `user-preferences` (task #17)
 - [ ] Upgrade Next.js off 15.2.4 (CVE) — hardening
 
