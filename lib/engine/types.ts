@@ -19,6 +19,7 @@ export type Capability =
   | 'email_breach'
   | 'username_presence'
   | 'image_metadata'
+  | 'threat'
 
 export type EntityType =
   | 'domain'

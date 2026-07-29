@@ -15,6 +15,8 @@ import { urlscan } from './urlscan'
 import { usernameWeb } from './username'
 import { xposedornot } from './breach'
 import { gravatar } from './gravatar'
+// Gateway — Threat Intelligence (CTI)
+import { feodo, urlhaus, threatfox } from './threat'
 
 export const moduleOneSources: Source[] = [
   cloudflareDns,
@@ -27,6 +29,8 @@ export const moduleOneSources: Source[] = [
 ]
 
 export const moduleTwoSources: Source[] = [usernameWeb, xposedornot, gravatar]
+
+export const threatGatewaySources: Source[] = [feodo, urlhaus, threatfox]
 
 interface CatalogRow {
   key: string
@@ -52,10 +56,21 @@ export const moduleTwoSourceCatalog: CatalogRow[] = [
   { key: 'gravatar', name: 'Gravatar profile', capability: 'email_breach', passive: true, enabled: true },
 ]
 
-export const allSourceCatalog: CatalogRow[] = [...moduleOneSourceCatalog, ...moduleTwoSourceCatalog]
+export const threatGatewayCatalog: CatalogRow[] = [
+  { key: 'feodo', name: 'Feodo Tracker (abuse.ch)', capability: 'threat', passive: true, enabled: true },
+  { key: 'urlhaus', name: 'URLhaus (abuse.ch)', capability: 'threat', passive: true, enabled: true },
+  { key: 'threatfox', name: 'ThreatFox (abuse.ch)', capability: 'threat', passive: true, enabled: true },
+]
+
+export const allSourceCatalog: CatalogRow[] = [
+  ...moduleOneSourceCatalog,
+  ...moduleTwoSourceCatalog,
+  ...threatGatewayCatalog,
+]
 
 let registeredOne = false
 let registeredTwo = false
+let registeredThreat = false
 
 export function registerModuleOneSources(): void {
   if (registeredOne) return
@@ -69,9 +84,16 @@ export function registerModuleTwoSources(): void {
   registeredTwo = true
 }
 
+export function registerThreatGateway(): void {
+  if (registeredThreat) return
+  registry.registerAll(threatGatewaySources)
+  registeredThreat = true
+}
+
 export function registerAllSources(): void {
   registerModuleOneSources()
   registerModuleTwoSources()
+  registerThreatGateway()
 }
 
 export {
@@ -85,4 +107,7 @@ export {
   usernameWeb,
   xposedornot,
   gravatar,
+  feodo,
+  urlhaus,
+  threatfox,
 }

@@ -5,11 +5,12 @@
  * construction, not by discipline:
  *   1. Sources may only contact hosts they pre-declare (a provider allowlist);
  *      a request to any other host is refused.
- *   2. Only read-only methods (GET/HEAD) are permitted.
+ *   2. Only read/query methods are permitted (GET/HEAD/POST — POST covers
+ *      provider query APIs); state-changing methods (PUT/PATCH/DELETE) are refused.
  *   3. Per-source minimum intervals throttle requests.
  *
- * Because a subject/target host is never on the allowlist, active probing
- * (port scans, nmap, non-GET calls) is impossible.
+ * The passive guarantee is the allowlist: a subject/target host is never on it,
+ * so the engine can never contact the target (no port scans, no nmap, no probing).
  */
 import type { Source } from './types'
 
@@ -61,8 +62,8 @@ export class Guardrail {
       }
 
       const method = (init?.method ?? 'GET').toUpperCase()
-      if (method !== 'GET' && method !== 'HEAD') {
-        throw new PassiveGuardrailError(`only read-only GET/HEAD allowed, got ${method}`)
+      if (method !== 'GET' && method !== 'HEAD' && method !== 'POST') {
+        throw new PassiveGuardrailError(`state-changing method not allowed: ${method}`)
       }
 
       if (minIntervalMs && minIntervalMs > 0) {

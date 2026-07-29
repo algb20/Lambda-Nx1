@@ -6,6 +6,7 @@ import {
   AtSign,
   Mail,
   Image as ImageIcon,
+  ShieldAlert,
   Loader2,
   ShieldCheck,
   AlertCircle,
@@ -19,18 +20,21 @@ import { Input } from '@/components/ui/input'
 import type { DomainReport } from '@/lib/modules/domain'
 import type { UsernameReport, EmailReport } from '@/lib/modules/identity'
 import type { MediaReport } from '@/lib/modules/media'
+import type { ThreatReport } from '@/lib/modules/threat'
 
-type Mode = 'domain' | 'username' | 'email' | 'media'
+type Mode = 'domain' | 'username' | 'email' | 'media' | 'threat'
 type Result =
   | { kind: 'domain'; data: DomainReport }
   | { kind: 'username'; data: UsernameReport }
   | { kind: 'email'; data: EmailReport }
   | { kind: 'media'; data: MediaReport }
+  | { kind: 'threat'; data: ThreatReport }
 
 const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: string }> = [
   { id: 'domain', label: 'Domain', icon: Globe, placeholder: 'example.com' },
   { id: 'username', label: 'Username', icon: AtSign, placeholder: 'octocat' },
   { id: 'email', label: 'Email', icon: Mail, placeholder: 'name@example.com' },
+  { id: 'threat', label: 'Threat', icon: ShieldAlert, placeholder: 'IP, domain, URL or hash' },
   { id: 'media', label: 'Media', icon: ImageIcon, placeholder: 'https://…/image.jpg' },
 ]
 
@@ -185,6 +189,45 @@ function EmailView({ r }: { r: EmailReport }) {
   )
 }
 
+function ThreatView({ r }: { r: ThreatReport }) {
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 className="font-semibold break-all">{r.indicator}</h3>
+            <p className="text-[11px] text-muted-foreground">
+              {r.type} · {new Date(r.generatedAt).toLocaleString()}
+            </p>
+          </div>
+          <Badge
+            variant={r.flagged ? 'outline' : 'secondary'}
+            className={r.flagged ? 'border-destructive/50 text-destructive' : 'text-green-600'}
+          >
+            {r.flagged ? `Flagged (${r.summary.hits})` : 'No known threat'}
+          </Badge>
+        </div>
+      </Card>
+
+      {r.findings.length > 0 ? (
+        <Card className="p-4">
+          <h4 className="mb-1 text-sm font-semibold">Threat findings</h4>
+          {r.findings.map((e, i) => (
+            <div key={i} className="flex items-start justify-between gap-3 border-b border-border/40 py-2 last:border-0">
+              <span className="text-sm">{e.claim}</span>
+              <SourceTag e={e} />
+            </div>
+          ))}
+        </Card>
+      ) : (
+        <Card className="p-4 text-sm text-muted-foreground">
+          No entries in the checked public threat feeds. This is not a guarantee of safety.
+        </Card>
+      )}
+    </div>
+  )
+}
+
 function MediaView({ r }: { r: MediaReport }) {
   const m = r.metadata
   const rows: Array<[string, string | undefined]> = [
@@ -304,7 +347,8 @@ export function IntelligenceDashboard() {
         const value = query.trim()
         if (!value) throw new Error('Enter a value to investigate.')
         endpoint = `/api/intelligence/${mode}`
-        payload = { [mode]: value }
+        const bodyKey = mode === 'threat' ? 'indicator' : mode
+        payload = { [bodyKey]: value }
       }
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -325,7 +369,7 @@ export function IntelligenceDashboard() {
     <div className="space-y-4">
       <h2 className="text-xl font-bold">Intelligence</h2>
 
-      <div className="grid grid-cols-4 gap-1 rounded-lg bg-muted/50 p-1">
+      <div className="grid grid-cols-5 gap-1 rounded-lg bg-muted/50 p-1">
         {MODES.map((m) => {
           const Icon = m.icon
           const isActive = m.id === mode
@@ -408,6 +452,7 @@ export function IntelligenceDashboard() {
       {result?.kind === 'domain' ? <DomainView r={result.data} /> : null}
       {result?.kind === 'username' ? <UsernameView r={result.data} /> : null}
       {result?.kind === 'email' ? <EmailView r={result.data} /> : null}
+      {result?.kind === 'threat' ? <ThreatView r={result.data} /> : null}
       {result?.kind === 'media' ? <MediaView r={result.data} /> : null}
     </div>
   )

@@ -60,6 +60,14 @@ sync; never skip a point or a test.
 ### P7 — Finalize
 - [ ] E2E tests, security review, build, deploy, Pi App Studio zip (every point verified)
 
+### P8 — More gateways (multi-gateway vision; see docs/GATEWAYS.md)
+- [x] Threat Intelligence (CTI): Feodo/URLhaus/ThreatFox + module + API + UI mode + tests
+- [ ] Financial / Sanctions / Corporate (#22)
+- [ ] Geospatial / Transport (#23)
+- [ ] AI-analyst layer (#24)
+- [ ] Subscription tiers free/paid (#25)
+- Note: guardrail now allows provider POST (allowlist remains the passive guarantee).
+
 ## Deferred ledger (intentional — nothing forgotten)
 
 Everything marked "done" is real and tested for its layer. These are the pieces

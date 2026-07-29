@@ -16,11 +16,11 @@ This design is future-proof: the platform grows by *families*, not rewrites.
 | Email / Username | username_presence, email_breach | 11-platform check, XposedOrNot, Gravatar |
 | Media verification | (local) | exifr EXIF/GPS, reverse-image links |
 | Monitoring / Radar | change detection | reuses Domain family |
+| Threat (CTI) | is this IP/domain/URL/hash malicious? | Feodo Tracker, URLhaus, ThreatFox (abuse.ch) |
 
 ### ⏭️ Planned families (all lawful, free-source-first)
 | Gateway | What it answers | Candidate free sources | Tier |
 |---|---|---|---|
-| **Threat (CTI)** | is this domain/IP/hash malicious? | URLhaus, ThreatFox, abuse.ch, InternetDB, (GreyNoise community) | free + paid |
 | **Financial / Sanctions / Corporate** | is this entity/wallet safe to deal with? | OpenSanctions, GLEIF, Companies House, mempool.space, Blockchair | paid-leaning |
 | **Geospatial / Transport** | where/when did this happen? | OpenStreetMap/Overpass, OpenSky (flights), AIS/marine | free + paid |
 | **AI-analyst layer** | triage + summarize + suggest next pivot | Claude (Anthropic API) over our own evidence | **paid** |

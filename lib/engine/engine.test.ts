@@ -51,11 +51,20 @@ describe('guardrail — passive-only enforcement', () => {
     await expect(f('https://evil.test/probe')).rejects.toThrow(/not allow-listed/)
   })
 
-  it('blocks non-read-only methods (no active probing)', async () => {
+  it('allows provider query POST but blocks state-changing methods', async () => {
     const g = new Guardrail()
     g.allowHosts(['api.good.test'])
     const f = g.createFetch('s')
-    await expect(f('https://api.good.test/x', { method: 'POST' })).rejects.toThrow(/read-only/)
+    await expect(f('https://api.good.test/x', { method: 'DELETE' })).rejects.toThrow(/state-changing/)
+
+    const fetchMock = vi.fn().mockResolvedValue(new Response('ok'))
+    vi.stubGlobal('fetch', fetchMock)
+    try {
+      await f('https://api.good.test/x', { method: 'POST' })
+      expect(fetchMock).toHaveBeenCalledOnce()
+    } finally {
+      vi.unstubAllGlobals()
+    }
   })
 
   it('allows a GET to an allow-listed host', async () => {
