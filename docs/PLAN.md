@@ -10,15 +10,17 @@ sync; never skip a point or a test.
 
 ## Phases
 
-### P0 — Foundation  *(in progress)*
-- [x] Master task list created (16 tasks)
-- [~] Charter + architecture + plan + radar + sources docs
-- [ ] Committed to branch
+### P0 — Foundation  *(done)*
+- [x] Master task list created (17 tasks)
+- [x] Charter + architecture + plan + radar + sources docs
+- [x] Committed & pushed to branch
 
-### P1 — Skeleton & isolation layers
-- [ ] Migrate real Next.js app into repo; delete all mock (`Math.random`) engine + false ML docs
-- [ ] Postgres schema (Drizzle migrations) + `lib/db` repository
+### P1 — Skeleton & isolation layers  *(in progress)*
+- [x] Migrate real Next.js app into repo; delete all mock (`Math.random`) engine + false ML docs (build + typecheck pass)
+- [x] Postgres schema (Drizzle migrations, `db/migrations/0000_init.sql`, 10 tables) + `lib/db` repository layer
 - [ ] Adapter layers: `lib/auth`, `lib/payments`, `lib/storage`, `lib/queue`
+- [ ] Clean fabricated status badges in `user-preferences` (task #17)
+- [ ] Upgrade Next.js off 15.2.4 (CVE) — hardening
 
 ### P2 — Core engine
 - [ ] Source-adapter framework + multi-source fallback + our cache/archive
