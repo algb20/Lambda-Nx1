@@ -27,7 +27,7 @@ const modules = [
     icon: Image,
     title: 'Media verification',
     desc: 'Reverse-image links, EXIF metadata, AI-generated-content indicators.',
-    status: 'Planned',
+    status: 'Ready',
   },
   {
     icon: Bell,

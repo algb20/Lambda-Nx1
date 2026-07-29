@@ -53,14 +53,30 @@ sync; never skip a point or a test.
 - [ ] Standalone UI shell + standard payment gateway (Stripe) — task #20 (deploy-time)
 
 ### P6 — More modules
-- [ ] Module 2: Email/Username footprint
-- [ ] Module 3: Media/content verification
-- [ ] Module 4: Monitoring & alerts
+- [x] Module 2: Email/Username footprint (3 sources + multi-mode UI + tests)
+- [x] Module 3: Media/content verification (local EXIF via exifr + GPS + AI hints + reverse links + UI)
+- [ ] Module 4: Monitoring & alerts (+ monitor-management UI)
 
 ### P7 — Finalize
 - [ ] E2E tests, security review, build, deploy, Pi App Studio zip (every point verified)
 
+## Deferred ledger (intentional — nothing forgotten)
+
+Everything marked "done" is real and tested for its layer. These are the pieces
+deliberately deferred to their correct phase (dependency ordering) or to deploy.
+
+| Item | Why deferred | Where it lands |
+|---|---|---|
+| Live network calls to sources | build sandbox egress allowlist | at deploy (or allowlist hosts) |
+| Live DB run of DB-dependent flows | no Supabase project provisioned yet | when DB provisioned / deploy |
+| Identity (username/email) persistence | only domain persists today | with Module 4 / follow-up |
+| Monitor-management UI + API | needed auth (now done) | Module 4 (#15) |
+| Durable radar scheduler (pg_cron/pgmq) | needs live DB/cron | deploy (#16) |
+| Object-store storage provider | filesystem is the dev default | deploy |
+| Standalone UI shell + Stripe payments | needs provider choice | task #20 (P7) |
+| OAuth standalone provider | email/password shipped | future |
+| Next.js upgrade (CVE-2025-66478) | can break build; not exploitable pre-deploy | task #19 (P7) |
+
 ## Open decisions (defaults chosen; user may override)
-- Hosting: **Netlify + Supabase** (least disruption to verified Pi domain). 
-- Supabase project: create when P1 DB work starts (not before).
-- First module: **Domain/Infrastructure** (strongest keyless base).
+- Hosting: **Netlify + Supabase** (least disruption to verified Pi domain).
+- First module shipped: **Domain/Infrastructure**; then **Email/Username**.
