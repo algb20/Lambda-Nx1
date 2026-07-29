@@ -5,7 +5,7 @@
  * so the logic is testable without a live database.
  */
 import { repo } from '../db'
-import { moduleOneSourceCatalog } from '../engine/sources'
+import { allSourceCatalog } from '../engine/sources'
 import type { DomainReport } from './domain'
 import type { Evidence, EntityType } from '../engine/types'
 
@@ -32,7 +32,7 @@ export interface DomainPersistence {
 }
 
 export const defaultDomainPersistence: DomainPersistence = {
-  seedSources: () => repo.sources.upsertMany(moduleOneSourceCatalog),
+  seedSources: () => repo.sources.upsertMany(allSourceCatalog),
   createInvestigation: (i) => repo.investigations.create(i),
   addEntity: (e) => repo.entities.add(e),
   addLink: (l) => repo.links.add(l),

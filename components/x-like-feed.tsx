@@ -15,13 +15,13 @@ const modules = [
     icon: Globe,
     title: 'Domain & Infrastructure',
     desc: 'DNS, RDAP/WHOIS, certificate-transparency subdomains, tech fingerprint, archive history, IP exposure.',
-    status: 'Building',
+    status: 'Ready',
   },
   {
     icon: AtSign,
     title: 'Email & Username footprint',
     desc: 'Breach-exposure checks and public-profile presence across many platforms.',
-    status: 'Planned',
+    status: 'Ready',
   },
   {
     icon: Image,
@@ -38,7 +38,7 @@ const modules = [
 ]
 
 function statusVariant(status: string) {
-  return status === 'Building' ? 'default' : 'secondary'
+  return status === 'Ready' ? 'default' : 'secondary'
 }
 
 export function XLikeFeed() {

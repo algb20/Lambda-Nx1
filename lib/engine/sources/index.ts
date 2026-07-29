@@ -1,16 +1,20 @@
 /**
- * Module 1 sources (Domain / Infrastructure) — all passive, all keyless.
- * Registering them wires each into the default registry under its capability,
- * with fallback siblings where available (e.g. two DoH providers for `dns`).
+ * OSINT sources — all passive, all keyless. Registering them wires each into the
+ * default registry under its capability, with fallback siblings where available.
  */
 import { registry } from '../registry'
+import type { Source } from '../types'
+// Module 1 — Domain / Infrastructure
 import { cloudflareDns, googleDns } from './dns'
 import { rdap } from './rdap'
 import { crtsh } from './crtsh'
 import { wayback } from './wayback'
 import { internetdb } from './internetdb'
 import { urlscan } from './urlscan'
-import type { Source } from '../types'
+// Module 2 — Email / Username footprint
+import { usernameWeb } from './username'
+import { xposedornot } from './breach'
+import { gravatar } from './gravatar'
 
 export const moduleOneSources: Source[] = [
   cloudflareDns,
@@ -22,14 +26,17 @@ export const moduleOneSources: Source[] = [
   internetdb,
 ]
 
-/** Catalog rows for the sources table (referential integrity for evidence/scans). */
-export const moduleOneSourceCatalog: Array<{
+export const moduleTwoSources: Source[] = [usernameWeb, xposedornot, gravatar]
+
+interface CatalogRow {
   key: string
   name: string
   capability: string
   passive: boolean
   enabled: boolean
-}> = [
+}
+
+export const moduleOneSourceCatalog: CatalogRow[] = [
   { key: 'dns.cloudflare', name: 'Cloudflare DNS-over-HTTPS', capability: 'dns', passive: true, enabled: true },
   { key: 'dns.google', name: 'Google DNS-over-HTTPS', capability: 'dns', passive: true, enabled: true },
   { key: 'rdap', name: 'RDAP registration', capability: 'whois', passive: true, enabled: true },
@@ -39,13 +46,43 @@ export const moduleOneSourceCatalog: Array<{
   { key: 'shodan.internetdb', name: 'Shodan InternetDB', capability: 'ip_reputation', passive: true, enabled: true },
 ]
 
-let registered = false
+export const moduleTwoSourceCatalog: CatalogRow[] = [
+  { key: 'username.web', name: 'Username presence (web)', capability: 'username_presence', passive: true, enabled: true },
+  { key: 'xposedornot', name: 'XposedOrNot breach check', capability: 'email_breach', passive: true, enabled: true },
+  { key: 'gravatar', name: 'Gravatar profile', capability: 'email_breach', passive: true, enabled: true },
+]
 
-/** Idempotently register Module 1 sources into the default registry. */
+export const allSourceCatalog: CatalogRow[] = [...moduleOneSourceCatalog, ...moduleTwoSourceCatalog]
+
+let registeredOne = false
+let registeredTwo = false
+
 export function registerModuleOneSources(): void {
-  if (registered) return
+  if (registeredOne) return
   registry.registerAll(moduleOneSources)
-  registered = true
+  registeredOne = true
 }
 
-export { cloudflareDns, googleDns, rdap, crtsh, wayback, internetdb, urlscan }
+export function registerModuleTwoSources(): void {
+  if (registeredTwo) return
+  registry.registerAll(moduleTwoSources)
+  registeredTwo = true
+}
+
+export function registerAllSources(): void {
+  registerModuleOneSources()
+  registerModuleTwoSources()
+}
+
+export {
+  cloudflareDns,
+  googleDns,
+  rdap,
+  crtsh,
+  wayback,
+  internetdb,
+  urlscan,
+  usernameWeb,
+  xposedornot,
+  gravatar,
+}
