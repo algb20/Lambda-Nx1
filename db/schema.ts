@@ -36,6 +36,8 @@ export const entityTypeEnum = pgEnum('entity_type', [
   'url',
   'image',
   'wallet',
+  'company',
+  'person',
   'other',
 ])
 

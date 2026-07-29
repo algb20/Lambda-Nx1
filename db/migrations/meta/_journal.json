@@ -22,6 +22,13 @@
       "when": 1785320843571,
       "tag": "0002_credentials",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1785346129826,
+      "tag": "0003_entity_types",
+      "breakpoints": true
     }
   ]
 }

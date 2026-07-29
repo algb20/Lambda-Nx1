@@ -2,7 +2,7 @@
 
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Radar, Globe, AtSign, Image, Bell, ShieldCheck, ShieldAlert } from 'lucide-react'
+import { Radar, Globe, AtSign, Image, Bell, ShieldCheck, ShieldAlert, Landmark } from 'lucide-react'
 
 /**
  * Home screen. The previous version rendered a fabricated social feed
@@ -27,6 +27,12 @@ const modules = [
     icon: ShieldAlert,
     title: 'Threat intelligence (CTI)',
     desc: 'Check an IP, domain, URL or hash against public threat feeds (abuse.ch).',
+    status: 'Ready',
+  },
+  {
+    icon: Landmark,
+    title: 'Financial / sanctions',
+    desc: 'Sanctions/PEP + legal-entity screening (OpenSanctions, GLEIF) and Bitcoin ledger facts.',
     status: 'Ready',
   },
   {

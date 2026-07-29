@@ -62,7 +62,7 @@ sync; never skip a point or a test.
 
 ### P8 — More gateways (multi-gateway vision; see docs/GATEWAYS.md)
 - [x] Threat Intelligence (CTI): Feodo/URLhaus/ThreatFox + module + API + UI mode + tests
-- [ ] Financial / Sanctions / Corporate (#22)
+- [x] Financial / Sanctions / Corporate: OpenSanctions/GLEIF/mempool + module + API + UI + tests (migration 0003 adds company/person entity types)
 - [ ] Geospatial / Transport (#23)
 - [ ] AI-analyst layer (#24)
 - [ ] Subscription tiers free/paid (#25)

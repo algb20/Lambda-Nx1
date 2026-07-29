@@ -20,6 +20,8 @@ export type Capability =
   | 'username_presence'
   | 'image_metadata'
   | 'threat'
+  | 'sanctions'
+  | 'wallet'
 
 export type EntityType =
   | 'domain'
@@ -31,6 +33,8 @@ export type EntityType =
   | 'url'
   | 'image'
   | 'wallet'
+  | 'company'
+  | 'person'
   | 'other'
 
 /** Standardized confidence grades (reference §5.3). */

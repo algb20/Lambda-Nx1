@@ -17,6 +17,8 @@ import { xposedornot } from './breach'
 import { gravatar } from './gravatar'
 // Gateway — Threat Intelligence (CTI)
 import { feodo, urlhaus, threatfox } from './threat'
+// Gateway — Financial / Sanctions / Corporate
+import { opensanctions, gleif, mempool } from './finance'
 
 export const moduleOneSources: Source[] = [
   cloudflareDns,
@@ -31,6 +33,8 @@ export const moduleOneSources: Source[] = [
 export const moduleTwoSources: Source[] = [usernameWeb, xposedornot, gravatar]
 
 export const threatGatewaySources: Source[] = [feodo, urlhaus, threatfox]
+
+export const financeGatewaySources: Source[] = [opensanctions, gleif, mempool]
 
 interface CatalogRow {
   key: string
@@ -62,10 +66,17 @@ export const threatGatewayCatalog: CatalogRow[] = [
   { key: 'threatfox', name: 'ThreatFox (abuse.ch)', capability: 'threat', passive: true, enabled: true },
 ]
 
+export const financeGatewayCatalog: CatalogRow[] = [
+  { key: 'opensanctions', name: 'OpenSanctions', capability: 'sanctions', passive: true, enabled: true },
+  { key: 'gleif', name: 'GLEIF (LEI)', capability: 'sanctions', passive: true, enabled: true },
+  { key: 'mempool', name: 'mempool.space (BTC)', capability: 'wallet', passive: true, enabled: true },
+]
+
 export const allSourceCatalog: CatalogRow[] = [
   ...moduleOneSourceCatalog,
   ...moduleTwoSourceCatalog,
   ...threatGatewayCatalog,
+  ...financeGatewayCatalog,
 ]
 
 let registeredOne = false
@@ -90,10 +101,18 @@ export function registerThreatGateway(): void {
   registeredThreat = true
 }
 
+let registeredFinance = false
+export function registerFinanceGateway(): void {
+  if (registeredFinance) return
+  registry.registerAll(financeGatewaySources)
+  registeredFinance = true
+}
+
 export function registerAllSources(): void {
   registerModuleOneSources()
   registerModuleTwoSources()
   registerThreatGateway()
+  registerFinanceGateway()
 }
 
 export {
@@ -110,4 +129,7 @@ export {
   feodo,
   urlhaus,
   threatfox,
+  opensanctions,
+  gleif,
+  mempool,
 }

@@ -7,6 +7,7 @@ import {
   Mail,
   Image as ImageIcon,
   ShieldAlert,
+  Landmark,
   Loader2,
   ShieldCheck,
   AlertCircle,
@@ -21,22 +22,27 @@ import type { DomainReport } from '@/lib/modules/domain'
 import type { UsernameReport, EmailReport } from '@/lib/modules/identity'
 import type { MediaReport } from '@/lib/modules/media'
 import type { ThreatReport } from '@/lib/modules/threat'
+import type { FinanceReport } from '@/lib/modules/finance'
 
-type Mode = 'domain' | 'username' | 'email' | 'media' | 'threat'
+type Mode = 'domain' | 'username' | 'email' | 'threat' | 'finance' | 'media'
 type Result =
   | { kind: 'domain'; data: DomainReport }
   | { kind: 'username'; data: UsernameReport }
   | { kind: 'email'; data: EmailReport }
-  | { kind: 'media'; data: MediaReport }
   | { kind: 'threat'; data: ThreatReport }
+  | { kind: 'finance'; data: FinanceReport }
+  | { kind: 'media'; data: MediaReport }
 
 const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: string }> = [
   { id: 'domain', label: 'Domain', icon: Globe, placeholder: 'example.com' },
   { id: 'username', label: 'Username', icon: AtSign, placeholder: 'octocat' },
   { id: 'email', label: 'Email', icon: Mail, placeholder: 'name@example.com' },
   { id: 'threat', label: 'Threat', icon: ShieldAlert, placeholder: 'IP, domain, URL or hash' },
+  { id: 'finance', label: 'Finance', icon: Landmark, placeholder: 'company name or BTC address' },
   { id: 'media', label: 'Media', icon: ImageIcon, placeholder: 'https://…/image.jpg' },
 ]
+
+const BODY_KEY: Partial<Record<Mode, string>> = { threat: 'indicator', finance: 'query' }
 
 type EvidenceItem = DomainReport['sections']['dns'][number]
 
@@ -185,6 +191,41 @@ function EmailView({ r }: { r: EmailReport }) {
           ))}
         </Card>
       ) : null}
+    </div>
+  )
+}
+
+function FinanceView({ r }: { r: FinanceReport }) {
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 className="font-semibold break-all">{r.subject}</h3>
+            <p className="text-[11px] text-muted-foreground">
+              {r.type} · {new Date(r.generatedAt).toLocaleString()}
+            </p>
+          </div>
+          <Badge variant="secondary">{r.summary.matches} match{r.summary.matches === 1 ? '' : 'es'}</Badge>
+        </div>
+      </Card>
+      <Card className="p-4">
+        <h4 className="mb-1 text-sm font-semibold">
+          {r.type === 'wallet' ? 'Ledger facts' : 'Screening results'}
+        </h4>
+        {r.findings.length === 0 ? (
+          <p className="py-2 text-sm text-muted-foreground">
+            No matches in the checked registries. This is not a clearance.
+          </p>
+        ) : (
+          r.findings.map((e, i) => (
+            <div key={i} className="flex items-start justify-between gap-3 border-b border-border/40 py-2 last:border-0">
+              <span className="text-sm">{e.claim}</span>
+              <SourceTag e={e} />
+            </div>
+          ))
+        )}
+      </Card>
     </div>
   )
 }
@@ -347,8 +388,7 @@ export function IntelligenceDashboard() {
         const value = query.trim()
         if (!value) throw new Error('Enter a value to investigate.')
         endpoint = `/api/intelligence/${mode}`
-        const bodyKey = mode === 'threat' ? 'indicator' : mode
-        payload = { [bodyKey]: value }
+        payload = { [BODY_KEY[mode] ?? mode]: value }
       }
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -369,7 +409,7 @@ export function IntelligenceDashboard() {
     <div className="space-y-4">
       <h2 className="text-xl font-bold">Intelligence</h2>
 
-      <div className="grid grid-cols-5 gap-1 rounded-lg bg-muted/50 p-1">
+      <div className="grid grid-cols-3 gap-1 rounded-lg bg-muted/50 p-1 sm:grid-cols-6">
         {MODES.map((m) => {
           const Icon = m.icon
           const isActive = m.id === mode
@@ -453,6 +493,7 @@ export function IntelligenceDashboard() {
       {result?.kind === 'username' ? <UsernameView r={result.data} /> : null}
       {result?.kind === 'email' ? <EmailView r={result.data} /> : null}
       {result?.kind === 'threat' ? <ThreatView r={result.data} /> : null}
+      {result?.kind === 'finance' ? <FinanceView r={result.data} /> : null}
       {result?.kind === 'media' ? <MediaView r={result.data} /> : null}
     </div>
   )
