@@ -22,10 +22,12 @@ sync; never skip a point or a test.
 - [ ] Clean fabricated status badges in `user-preferences` (task #17)
 - [ ] Upgrade Next.js off 15.2.4 (CVE) — hardening
 
-### P2 — Core engine
-- [ ] Source-adapter framework + multi-source fallback + our cache/archive
-- [ ] Analysis core: entities, pivot graph, confidence, Admiralty code, evidence model
-- [ ] Passive-only + legal guardrail policy module (enforced in code)
+### P2 — Core engine  *(done)*
+- [x] Source-adapter framework: `Source` port + registry + orchestrator with multi-source fallback
+- [x] Analysis core: pivot graph, confidence grading, Admiralty code, evidence de-dup (`lib/engine/analysis.ts`)
+- [x] Passive-only guardrail (allowlist + read-only + rate limit) — active probing impossible by construction
+- [x] Test infra (vitest) + 17 engine tests pass; typecheck + build clean
+- [ ] Our cache/archive of raw results (wired when Module 1 sources persist scans via lib/db, P3)
 
 ### P3 — Module 1: Domain / Infrastructure intel (keyless, real)
 - [ ] Sources: DoH DNS, RDAP/WHOIS, crt.sh, HTTP tech fingerprint, Wayback CDX, IP geo + Shodan InternetDB, urlscan
