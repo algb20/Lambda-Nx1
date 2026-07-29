@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getAuthProvider } from '@/lib/auth'
-import { createSession, SESSION_COOKIE, SESSION_MAX_AGE } from '@/lib/auth/session'
+import { attachSession } from '@/lib/auth/cookie'
 import { repo } from '@/lib/db'
 
 /**
@@ -42,12 +42,6 @@ export async function POST(request: Request) {
   })
 
   const res = NextResponse.json({ id: user.id, username: user.displayName ?? identity.externalId })
-  res.cookies.set(SESSION_COOKIE, createSession(user.id), {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    maxAge: SESSION_MAX_AGE,
-  })
+  attachSession(res, user.id)
   return res
 }

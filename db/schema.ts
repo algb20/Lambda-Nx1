@@ -67,6 +67,20 @@ export const users = pgTable(
   (t) => [unique('users_provider_external_uq').on(t.authProvider, t.externalId)],
 )
 
+// ── Standalone credentials (email + password, off-Pi mode) ───────────────────
+
+export const credentials = pgTable('credentials', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' })
+    .unique(),
+  email: text('email').notNull().unique(),
+  /** scrypt hash as "saltHex:hashHex" — never a plaintext password. */
+  passwordHash: text('password_hash').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 // ── Source catalog (our engine's adapters) ───────────────────────────────────
 
 export const sources = pgTable('sources', {

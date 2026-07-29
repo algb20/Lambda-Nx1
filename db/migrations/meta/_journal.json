@@ -15,6 +15,13 @@
       "when": 1785286180992,
       "tag": "0001_radar_fingerprint",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1785320843571,
+      "tag": "0002_credentials",
+      "breakpoints": true
     }
   ]
 }

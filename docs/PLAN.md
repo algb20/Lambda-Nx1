@@ -44,9 +44,13 @@ sync; never skip a point or a test.
 - [ ] Monitor-management UI + API — depends on auth (P5); unlocks there
 - [ ] Durable scheduler (pg_cron/pgmq) — at deploy (P7)
 
-### P5 — Pi + standalone
-- [ ] Pi auth + Pi payments via adapters (Pi Browser)
-- [ ] Standalone auth + standard payments via same adapters
+### P5 — Pi + standalone  *(done)*
+- [x] Our own signed sessions (HMAC) — independent of the App Studio backend
+- [x] Pi auth wired: `/api/auth/pi` (verify Pi token → upsert user → session); pi-auth-context uses it
+- [x] Pi payments wired: `/api/payments` via lib/payments (auth-gated)
+- [x] Persistence: signed-in domain investigations archived to DB (investigation/entities/links/evidence)
+- [x] Standalone auth backend: `/api/auth/register` + `/api/auth/login` (scrypt, first-party)
+- [ ] Standalone UI shell + standard payment gateway (Stripe) — task #20 (deploy-time)
 
 ### P6 — More modules
 - [ ] Module 2: Email/Username footprint

@@ -15,6 +15,7 @@ export * as schema from '@/db/schema'
 // Row types inferred from the schema (single source of truth).
 export type User = typeof s.users.$inferSelect
 export type NewUser = typeof s.users.$inferInsert
+export type Credential = typeof s.credentials.$inferSelect
 export type Investigation = typeof s.investigations.$inferSelect
 export type Entity = typeof s.entities.$inferSelect
 export type EntityLink = typeof s.entityLinks.$inferSelect
@@ -45,6 +46,23 @@ export const repo = {
     async getById(id: string): Promise<User | undefined> {
       const db = getDb()
       const [row] = await db.select().from(s.users).where(eq(s.users.id, id)).limit(1)
+      return row
+    },
+  },
+
+  credentials: {
+    async getByEmail(email: string): Promise<Credential | undefined> {
+      const db = getDb()
+      const [row] = await db
+        .select()
+        .from(s.credentials)
+        .where(eq(s.credentials.email, email))
+        .limit(1)
+      return row
+    },
+    async create(input: { userId: string; email: string; passwordHash: string }): Promise<Credential> {
+      const db = getDb()
+      const [row] = await db.insert(s.credentials).values(input).returning()
       return row
     },
   },
