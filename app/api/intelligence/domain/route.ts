@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { investigateDomain } from '@/lib/modules/domain'
+import { persistDomainReport } from '@/lib/modules/persist'
+import { getSessionUserId } from '@/lib/auth/server'
 
 /**
  * POST /api/intelligence/domain  { domain }
@@ -25,7 +27,17 @@ export async function POST(request: Request) {
 
   try {
     const report = await investigateDomain(domain)
-    return NextResponse.json(report)
+
+    // If signed in, archive the report to our database (best-effort).
+    let investigationId: string | undefined
+    try {
+      const userId = await getSessionUserId()
+      if (userId) investigationId = await persistDomainReport(userId, report)
+    } catch (persistErr) {
+      console.error('[domain] persistence skipped:', persistErr)
+    }
+
+    return NextResponse.json({ ...report, investigationId })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Investigation failed'
     return NextResponse.json({ error: message }, { status: 400 })

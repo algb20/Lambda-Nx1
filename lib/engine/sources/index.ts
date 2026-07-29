@@ -22,6 +22,23 @@ export const moduleOneSources: Source[] = [
   internetdb,
 ]
 
+/** Catalog rows for the sources table (referential integrity for evidence/scans). */
+export const moduleOneSourceCatalog: Array<{
+  key: string
+  name: string
+  capability: string
+  passive: boolean
+  enabled: boolean
+}> = [
+  { key: 'dns.cloudflare', name: 'Cloudflare DNS-over-HTTPS', capability: 'dns', passive: true, enabled: true },
+  { key: 'dns.google', name: 'Google DNS-over-HTTPS', capability: 'dns', passive: true, enabled: true },
+  { key: 'rdap', name: 'RDAP registration', capability: 'whois', passive: true, enabled: true },
+  { key: 'crtsh', name: 'crt.sh Certificate Transparency', capability: 'subdomains', passive: true, enabled: true },
+  { key: 'wayback', name: 'Wayback Machine', capability: 'archive', passive: true, enabled: true },
+  { key: 'urlscan', name: 'urlscan.io', capability: 'tech', passive: true, enabled: true },
+  { key: 'shodan.internetdb', name: 'Shodan InternetDB', capability: 'ip_reputation', passive: true, enabled: true },
+]
+
 let registered = false
 
 /** Idempotently register Module 1 sources into the default registry. */
