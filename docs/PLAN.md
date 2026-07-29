@@ -55,7 +55,7 @@ sync; never skip a point or a test.
 ### P6 — More modules
 - [x] Module 2: Email/Username footprint (3 sources + multi-mode UI + tests)
 - [x] Module 3: Media/content verification (local EXIF via exifr + GPS + AI hints + reverse links + UI)
-- [ ] Module 4: Monitoring & alerts (+ monitor-management UI)
+- [x] Module 4: Monitoring & alerts — monitors CRUD API + alerts feed + radar-run (cron-guarded) + manager UI
 
 ### P7 — Finalize
 - [ ] E2E tests, security review, build, deploy, Pi App Studio zip (every point verified)
@@ -69,9 +69,8 @@ deliberately deferred to their correct phase (dependency ordering) or to deploy.
 |---|---|---|
 | Live network calls to sources | build sandbox egress allowlist | at deploy (or allowlist hosts) |
 | Live DB run of DB-dependent flows | no Supabase project provisioned yet | when DB provisioned / deploy |
-| Identity (username/email) persistence | only domain persists today | with Module 4 / follow-up |
-| Monitor-management UI + API | needed auth (now done) | Module 4 (#15) |
-| Durable radar scheduler (pg_cron/pgmq) | needs live DB/cron | deploy (#16) |
+| Identity (username/email) persistence | only domain persists today | follow-up |
+| Durable radar scheduler (pg_cron/pgmq) | needs live DB/cron; POST /api/radar/run is ready | deploy (#16) |
 | Object-store storage provider | filesystem is the dev default | deploy |
 | Standalone UI shell + Stripe payments | needs provider choice | task #20 (P7) |
 | OAuth standalone provider | email/password shipped | future |

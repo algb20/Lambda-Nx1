@@ -212,7 +212,20 @@ export const repo = {
     },
     async listByUser(userId: string): Promise<Monitor[]> {
       const db = getDb()
-      return db.select().from(s.monitors).where(eq(s.monitors.userId, userId))
+      return db
+        .select()
+        .from(s.monitors)
+        .where(eq(s.monitors.userId, userId))
+        .orderBy(desc(s.monitors.createdAt))
+    },
+    async getById(id: string): Promise<Monitor | undefined> {
+      const db = getDb()
+      const [row] = await db.select().from(s.monitors).where(eq(s.monitors.id, id)).limit(1)
+      return row
+    },
+    async remove(id: string): Promise<void> {
+      const db = getDb()
+      await db.delete(s.monitors).where(eq(s.monitors.id, id))
     },
     /** Active monitors whose interval has elapsed since lastRunAt (or never ran). */
     async listDue(now: Date = new Date()): Promise<Monitor[]> {
@@ -262,6 +275,18 @@ export const repo = {
     async markSeen(id: string): Promise<void> {
       const db = getDb()
       await db.update(s.alerts).set({ seen: true }).where(eq(s.alerts.id, id))
+    },
+    /** All alerts across a user's monitors (newest first). */
+    async listByUser(userId: string, limit = 50): Promise<Alert[]> {
+      const db = getDb()
+      const rows = await db
+        .select()
+        .from(s.alerts)
+        .innerJoin(s.monitors, eq(s.alerts.monitorId, s.monitors.id))
+        .where(eq(s.monitors.userId, userId))
+        .orderBy(desc(s.alerts.createdAt))
+        .limit(limit)
+      return rows.map((r) => r.alerts)
     },
   },
 

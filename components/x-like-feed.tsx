@@ -32,8 +32,8 @@ const modules = [
   {
     icon: Bell,
     title: 'Monitoring & alerts',
-    desc: 'Watch a domain, keyword or brand and get alerted on new public signals.',
-    status: 'Planned',
+    desc: 'Watch a domain and get alerted when its public footprint changes.',
+    status: 'Ready',
   },
 ]
 
