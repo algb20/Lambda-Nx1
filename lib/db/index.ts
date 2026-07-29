@@ -214,6 +214,10 @@ export const repo = {
       const db = getDb()
       await db.update(s.monitors).set({ lastRunAt: at }).where(eq(s.monitors.id, id))
     },
+    async setFingerprint(id: string, fingerprint: string): Promise<void> {
+      const db = getDb()
+      await db.update(s.monitors).set({ lastFingerprint: fingerprint }).where(eq(s.monitors.id, id))
+    },
     async setStatus(id: string, status: Monitor['status']): Promise<void> {
       const db = getDb()
       await db.update(s.monitors).set({ status }).where(eq(s.monitors.id, id))

@@ -36,9 +36,13 @@ sync; never skip a point or a test.
 - [x] 21 tests pass (+1 live, RUN_LIVE-gated); typecheck + build clean
 - Note: live provider calls are egress-allowlisted in the build sandbox; they run at deploy time.
 
-### P4 — Radar (continuous research & monitoring)
-- [ ] Scheduled jobs; watch public tool/technique sources (internal) + user targets (product)
-- [ ] Knowledge base with confidence-graded findings
+### P4 — Radar (continuous research & monitoring)  *(engine done)*
+- [x] Change detection: domain fingerprint + precise diff (subdomains/IPs/nameservers/registrar)
+- [x] Scheduler: `runDueMonitors` (dependency-injected) + real wiring `runRadarSweep` over repo+engine
+- [x] Knowledge base: internal feed ingest with de-dup; product findings on change
+- [x] Queue job `radar.run` registered; 11 radar tests pass (30 total +1 live)
+- [ ] Monitor-management UI + API — depends on auth (P5); unlocks there
+- [ ] Durable scheduler (pg_cron/pgmq) — at deploy (P7)
 
 ### P5 — Pi + standalone
 - [ ] Pi auth + Pi payments via adapters (Pi Browser)

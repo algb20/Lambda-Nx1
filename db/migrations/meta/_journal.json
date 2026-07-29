@@ -8,6 +8,13 @@
       "when": 1785283777998,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1785286180992,
+      "tag": "0001_radar_fingerprint",
+      "breakpoints": true
     }
   ]
 }

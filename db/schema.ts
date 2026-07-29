@@ -196,6 +196,8 @@ export const monitors = pgTable(
     intervalMinutes: integer('interval_minutes').notNull().default(1440),
     status: monitorStatusEnum('status').notNull().default('active'),
     lastRunAt: timestamp('last_run_at', { withTimezone: true }),
+    /** JSON fingerprint of the last observed state, for change detection. */
+    lastFingerprint: text('last_fingerprint'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('monitors_user_idx').on(t.userId)],

@@ -9,11 +9,12 @@ import { ModulePlaceholder } from '@/components/module-placeholder'
  */
 export function AgenticSwarmDashboard() {
   return (
-    <ModulePlaceholder title="Orchestration & Radar" phase="P2 · P4">
+    <ModulePlaceholder title="Radar — monitoring" phase="engine built · UI in P5">
       <p>
-        This will orchestrate the engine&apos;s sources with automatic fallback, and host the
-        Radar — continuous, lawful monitoring of public signals, each finding stored with a
-        confidence grade. The previous simulated &quot;swarm&quot; has been removed.
+        The Radar engine is built and tested: it re-checks a watched domain, detects exactly
+        what changed (subdomains, IPs, nameservers, registrar) against a stored fingerprint,
+        and records confidence-graded findings. Managing your own watchlist appears here once
+        sign-in is connected (P5). Nothing shown is simulated.
       </p>
     </ModulePlaceholder>
   )
