@@ -6,8 +6,11 @@
 
 ## 1. What this project is
 
-Lambda NX is a **real, legal, open-source-intelligence (OSINT) & intelligence-analysis
-platform**. It runs as a Pi Network app (Pi auth + Pi payments) **and** as a fully
+Lambda NX is a **real, legal, multi-gateway intelligence platform**. Its first and core
+family is **OSINT & intelligence-analysis**; the *same engine* powers additional lawful
+intelligence families ("gateways") — **threat (CTI)**, **financial / sanctions /
+corporate**, **geospatial / transport** — plus an **AI-analyst layer** that triages and
+summarizes results. It runs as a Pi Network app (Pi auth + Pi payments) **and** as a fully
 independent standalone web app/site (standard auth + standard payments) from the same
 codebase.
 
@@ -15,8 +18,21 @@ It is an *analysis* product, not a data dump: its value is in **pivoting, verifi
 confidence grading and documentation** — applying real intelligence-analysis method,
 not wrapping tools.
 
-The reference domain knowledge lives in `docs/OSINT_REFERENCE.md` (the full 13-chapter,
-20-discipline reference). Read it before building any module.
+**Design preservation.** We build on the existing app's visual design and shell (Next.js +
+shadcn/ui + its tab layout). We *realize* the fake features as real ones — we do not
+redesign. New gateways reuse the same UI language.
+
+**Continuity of intent.** We did not change the app's original goal (an intelligence /
+monitoring / analysis platform). We merged and organized what the app aimed at + the OSINT
+reference + our research into a *real* version, and removed only what was impossible or
+unlawful (future-prediction "forecasts", "quantum/agentic swarm", mass surveillance).
+
+**Monetization (future).** Subscription tiers (free + paid), gated through the payments
+layer: free gives core access with limits; paid unlocks all gateways, the AI-analyst,
+monitoring and higher rate limits. Studied in `docs/GATEWAYS.md`.
+
+Reference domain knowledge: `docs/OSINT_REFERENCE.md` (13-chapter, 20-discipline). New
+families **extend, never replace** this method. Family roadmap: `docs/GATEWAYS.md`.
 
 ## 2. Governing rules (never violated)
 
@@ -35,6 +51,11 @@ The reference domain knowledge lives in `docs/OSINT_REFERENCE.md` (the full 13-c
    an app rewrite. See `docs/ARCHITECTURE.md`.
 5. **Living task list.** The master checklist is tracked in the task tool and mirrored in
    `docs/PLAN.md`. Update it on every step. Never skip a point or a test.
+6. **One engine, many gateways.** Every new capability is a new source/family over the
+   *same* engine (guardrail + registry + analysis core) — never a parallel stack. The
+   passive-only and legal guardrails (§3) apply to every family, always.
+7. **Preserve the design.** Keep the existing shell and visual language; realize fake as
+   real without redesigning (see §1).
 
 ## 3. Hard legal & ethical guardrails (enforced in code)
 
