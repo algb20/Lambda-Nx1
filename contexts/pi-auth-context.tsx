@@ -7,14 +7,15 @@ import React, {
   useEffect,
   type ReactNode,
 } from "react";
-import { PI_NETWORK_CONFIG, BACKEND_URLS } from "@/lib/system-config";
+import { PI_NETWORK_CONFIG } from "@/lib/system-config";
 import { api, setApiAuthToken } from "@/lib/api";
+
+// Our own login endpoint (independent of the App Studio default backend).
+const LOGIN_URL = "/api/auth/pi";
 
 export type LoginDTO = {
   id: string;
   username: string;
-  credits_balance: number;
-  terms_accepted: boolean;
 };
 
 interface PiAuthResult {
@@ -77,8 +78,8 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
     setAuthMessage("Authenticating with Pi Network...");
     const piAuthResult = await window.Pi.authenticate(["username"]);
 
-    setAuthMessage("Logging in to backend...");
-    const loginRes = await api.post<LoginDTO>(BACKEND_URLS.LOGIN, {
+    setAuthMessage("Logging in...");
+    const loginRes = await api.post<LoginDTO>(LOGIN_URL, {
       pi_auth_token: piAuthResult.accessToken,
     });
 
