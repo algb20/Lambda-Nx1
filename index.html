@@ -200,12 +200,12 @@
                 const callbacks = {
                   onReadyForServerApproval: (id) => {
                     statusEl.textContent = "Approving...";
-                    postJson("/.netlify/functions/pi-approve", { paymentId: id, accessToken: auth.accessToken })
+                    postJson("/api/pi-approve", { paymentId: id, accessToken: auth.accessToken })
                       .then(res => statusEl.textContent = res.ok ? "Approved" : "Approve failed");
                   },
                   onReadyForServerCompletion: (id, txid) => {
                     statusEl.textContent = "Completing...";
-                    postJson("/.netlify/functions/pi-complete", { paymentId: id, txid, accessToken: auth.accessToken })
+                    postJson("/api/pi-complete", { paymentId: id, txid, accessToken: auth.accessToken })
                       .then(res => statusEl.textContent = res.ok ? "Done! Thank you." : "Complete failed");
                   },
                   onCancel: () => statusEl.textContent = "Cancelled",

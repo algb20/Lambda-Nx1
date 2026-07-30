@@ -1,0 +1,7 @@
+# Keep the existing Netlify deployment working after the frontend was
+# switched to call /api/* (the Vercel-style path). This maps those calls
+# back onto the existing functions in netlify/functions/.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
