@@ -1,10 +1,10 @@
 "use client"
 
-import { Zap, User, Building2, Settings, Brain, Cpu, Lightbulb } from "lucide-react"
+import { Zap, User, Building2, Settings, Brain, Cpu, Lightbulb, Target } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useT } from "@/lib/i18n"
 
-type Tab = "feed" | "personal" | "enterprise" | "intelligence" | "swarm" | "ideas" | "preferences"
+type Tab = "feed" | "personal" | "enterprise" | "intelligence" | "swarm" | "ideas" | "calibration" | "preferences"
 
 interface BottomNavProps {
   activeTab: Tab
@@ -81,6 +81,17 @@ export function BottomNav({ activeTab, setActiveTab }: BottomNavProps) {
           >
             <Lightbulb className="h-5 w-5" />
             <span className="text-[10px] font-medium">{t("nav.ideas")}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("calibration")}
+            className={cn(
+              "flex flex-col items-center gap-1 transition-colors",
+              activeTab === "calibration" ? "text-primary" : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <Target className="h-5 w-5" />
+            <span className="text-[10px] font-medium">{t("nav.calibration")}</span>
           </button>
 
           <button

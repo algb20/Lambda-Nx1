@@ -38,7 +38,7 @@ import { useT } from '@/lib/i18n'
  * card opens a real tool. Keeps the app's shadcn/Tailwind visual language.
  */
 
-type NavTab = 'intelligence' | 'swarm' | 'ideas' | 'preferences'
+type NavTab = 'intelligence' | 'swarm' | 'ideas' | 'calibration' | 'preferences'
 
 interface FeedItem {
   icon: LucideIcon
@@ -107,7 +107,7 @@ const FAMILIES: Family[] = [
     items: [
       { icon: MapPin, title: 'Geospatial & real estate', desc: 'Flights (OpenSky), maritime (AIS), OSM land-use, industrial & logistics assets.', status: 'Planned', tag: 'geo' },
       { icon: Microscope, title: 'Research & tech-trend', desc: 'Papers, patents and R&D frontier signals (OpenAlex, arXiv, USPTO, GitHub/HF).', status: 'Planned', tag: 'research' },
-      { icon: Activity, title: 'Calibration ledger', desc: 'Track published forecasts vs outcomes — whose foresight proved right, including ours.', status: 'Planned', tag: 'foresight' },
+      { icon: Activity, title: 'Calibration scoreboard', desc: 'Track published forecasts vs outcomes — whose foresight proved right, including ours. Honest accuracy, by author and confidence.', status: 'Live', tab: 'calibration', tag: 'foresight' },
       { icon: Boxes, title: 'Supply-chain & trade', desc: 'Trade exposure and dependency mapping from public customs/trade data.', status: 'Planned', tag: 'trade' },
     ],
   },

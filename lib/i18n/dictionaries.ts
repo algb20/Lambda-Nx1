@@ -27,6 +27,7 @@ const en: Dict = {
   'feed.hero.sub': 'domain · IP · email · company · wallet · hash — every gateway at once, in an instant',
   'feed.open': 'Open',
   'nav.ideas': 'Ideas',
+  'nav.calibration': 'Score',
   'ideas.title': 'Ideas & feedback',
   'ideas.subtitle':
     'Suggest features, improvements, integrations or data sources. Every idea is auto-triaged and clustered; the most-wanted rise to the top.',
@@ -60,6 +61,7 @@ const ar: Dict = {
   'feed.hero.sub': 'نطاق · IP · بريد · شركة · محفظة · بصمة — كل البوّابات دفعةً واحدة، في لحظة',
   'feed.open': 'افتح',
   'nav.ideas': 'أفكار',
+  'nav.calibration': 'الدقّة',
   'ideas.title': 'الأفكار والملاحظات',
   'ideas.subtitle':
     'اقترح ميزات أو تحسينات أو تكاملات أو مصادر بيانات. كل فكرة تُصنَّف وتُجمَّع تلقائيًا، والأكثر طلبًا يتصدّر.',
