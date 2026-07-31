@@ -19,6 +19,7 @@ This design is future-proof: the platform grows by *families*, not rewrites.
 | Threat (CTI) | is this IP/domain/URL/hash malicious? | Feodo Tracker, URLhaus, ThreatFox (abuse.ch) |
 | Financial / Sanctions / Corporate | is this entity/wallet safe to deal with? | OpenSanctions, GLEIF, mempool.space |
 | Markets & Economy | what is this asset/company/currency doing now? | CoinGecko, SEC EDGAR, Frankfurter (ECB) |
+| Procurement & Public Contracts | who receives public money / contracts? | USAspending.gov, World Bank projects |
 | AI-analyst layer | triage + summarize + suggest next pivot | Claude (Anthropic API) over our own evidence |
 
 ### ⏭️ Planned families (all lawful, free-source-first)
@@ -28,9 +29,12 @@ This design is future-proof: the platform grows by *families*, not rewrites.
 | **Research & Tech-trend** | what's advancing in science/AI/patents? | OpenAlex, Crossref, arXiv, GitHub/HF trends, USPTO | free + paid |
 | **Macro / Economy** | indicators, commodities, funding | World Bank, IMF, OECD, FRED, EIA | free + paid |
 | **Calibration ledger** | whose published foresight proved right? | our own record of attributed claims vs outcomes | **paid** |
+| **Ownership networks** | who really owns/controls this? | GLEIF + OpenCorporates + registries | free + paid |
+| **Real estate / assets** | land, industrial & logistics assets | OSM/Overpass, open cadastres, filings | free + paid |
+| **Supply-chain / trade** | trade exposure & dependencies | UN Comtrade, public shipping/customs | **paid** |
 
-See `docs/FORESIGHT.md` for the anti-bias protocol, the foresight-tracking / calibration
-mechanism, and the full source-expansion roadmap.
+See `docs/FORESIGHT.md` (anti-bias + calibration) and `docs/LANDSCAPE.md` (the full
+ambition map — Palantir-class domains and our lawful public-source realization of each).
 
 Each planned gateway follows the shipped pattern: `lib/engine/sources/*`, a
 `lib/modules/*` orchestrator returning a documented report, an API route, and a UI mode —

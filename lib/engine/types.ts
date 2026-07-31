@@ -25,6 +25,7 @@ export type Capability =
   | 'market'
   | 'securities'
   | 'fx'
+  | 'procurement'
 
 export type EntityType =
   | 'domain'

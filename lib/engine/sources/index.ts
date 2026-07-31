@@ -21,6 +21,8 @@ import { feodo, urlhaus, threatfox } from './threat'
 import { opensanctions, gleif, mempool } from './finance'
 // Gateway — Markets & Economy
 import { coingecko, edgar, frankfurter } from './markets'
+// Gateway — Procurement & Public Contracts
+import { usaspending, worldbankProjects } from './procurement'
 
 export const moduleOneSources: Source[] = [
   cloudflareDns,
@@ -39,6 +41,8 @@ export const threatGatewaySources: Source[] = [feodo, urlhaus, threatfox]
 export const financeGatewaySources: Source[] = [opensanctions, gleif, mempool]
 
 export const marketsGatewaySources: Source[] = [coingecko, edgar, frankfurter]
+
+export const procurementGatewaySources: Source[] = [usaspending, worldbankProjects]
 
 interface CatalogRow {
   key: string
@@ -82,12 +86,18 @@ export const marketsGatewayCatalog: CatalogRow[] = [
   { key: 'frankfurter', name: 'Frankfurter (ECB FX)', capability: 'fx', passive: true, enabled: true },
 ]
 
+export const procurementGatewayCatalog: CatalogRow[] = [
+  { key: 'usaspending', name: 'USAspending.gov (US federal awards)', capability: 'procurement', passive: true, enabled: true },
+  { key: 'worldbank_projects', name: 'World Bank projects', capability: 'procurement', passive: true, enabled: true },
+]
+
 export const allSourceCatalog: CatalogRow[] = [
   ...moduleOneSourceCatalog,
   ...moduleTwoSourceCatalog,
   ...threatGatewayCatalog,
   ...financeGatewayCatalog,
   ...marketsGatewayCatalog,
+  ...procurementGatewayCatalog,
 ]
 
 let registeredOne = false
@@ -126,12 +136,20 @@ export function registerMarketsGateway(): void {
   registeredMarkets = true
 }
 
+let registeredProcurement = false
+export function registerProcurementGateway(): void {
+  if (registeredProcurement) return
+  registry.registerAll(procurementGatewaySources)
+  registeredProcurement = true
+}
+
 export function registerAllSources(): void {
   registerModuleOneSources()
   registerModuleTwoSources()
   registerThreatGateway()
   registerFinanceGateway()
   registerMarketsGateway()
+  registerProcurementGateway()
 }
 
 export {
@@ -154,4 +172,6 @@ export {
   coingecko,
   edgar,
   frankfurter,
+  usaspending,
+  worldbankProjects,
 }
