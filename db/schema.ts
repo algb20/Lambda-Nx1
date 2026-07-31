@@ -268,6 +268,49 @@ export const radarFindings = pgTable('radar_findings', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
+// ── Global ontology (accumulating knowledge graph across all investigations) ──
+
+export const ontologyNodes = pgTable(
+  'ontology_nodes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    type: entityTypeEnum('type').notNull(),
+    value: text('value').notNull(),
+    /** How many times this entity has been observed across runs. */
+    mentions: integer('mentions').notNull().default(1),
+    /** Union of source keys that have touched this entity. */
+    sources: jsonb('sources'),
+    firstSeen: timestamp('first_seen', { withTimezone: true }).notNull().defaultNow(),
+    lastSeen: timestamp('last_seen', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [unique('ontology_nodes_type_value_uq').on(t.type, t.value)],
+)
+
+export const ontologyEdges = pgTable(
+  'ontology_edges',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    fromNodeId: uuid('from_node_id')
+      .notNull()
+      .references(() => ontologyNodes.id, { onDelete: 'cascade' }),
+    toNodeId: uuid('to_node_id')
+      .notNull()
+      .references(() => ontologyNodes.id, { onDelete: 'cascade' }),
+    /** Controlled predicate vocabulary (see lib/engine/ontology). */
+    predicate: text('predicate').notNull(),
+    confidence: confidenceEnum('confidence').notNull().default('possible'),
+    sources: jsonb('sources'),
+    evidenceCount: integer('evidence_count').notNull().default(1),
+    firstSeen: timestamp('first_seen', { withTimezone: true }).notNull().defaultNow(),
+    lastSeen: timestamp('last_seen', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique('ontology_edges_uq').on(t.fromNodeId, t.toNodeId, t.predicate),
+    index('ontology_edges_from_idx').on(t.fromNodeId),
+    index('ontology_edges_to_idx').on(t.toNodeId),
+  ],
+)
+
 // ── Suggestions (the community feedback loop, AI-triaged) ────────────────────
 
 export const suggestions = pgTable(

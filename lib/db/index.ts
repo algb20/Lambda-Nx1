@@ -5,7 +5,7 @@
  * touch the Drizzle client or a vendor SDK directly. This keeps the storage
  * backend swappable (charter rule #4).
  */
-import { and, desc, eq, lte, or, isNull, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray, lte, or, isNull, sql } from 'drizzle-orm'
 import { getDb, isDbConfigured } from './client'
 import * as s from '@/db/schema'
 
@@ -29,6 +29,8 @@ export type NewRadarFinding = typeof s.radarFindings.$inferInsert
 export type Source = typeof s.sources.$inferSelect
 export type Suggestion = typeof s.suggestions.$inferSelect
 export type NewSuggestion = typeof s.suggestions.$inferInsert
+export type OntologyNode = typeof s.ontologyNodes.$inferSelect
+export type OntologyEdge = typeof s.ontologyEdges.$inferSelect
 
 export const repo = {
   users: {
@@ -354,6 +356,72 @@ export const repo = {
         .where(eq(s.suggestions.id, id))
         .returning()
       return row
+    },
+  },
+
+  ontology: {
+    /** Upsert a global entity, accumulating mentions + last-seen. */
+    async upsertNode(input: { type: Entity['type']; value: string; sources: string[] }): Promise<OntologyNode> {
+      const db = getDb()
+      const [row] = await db
+        .insert(s.ontologyNodes)
+        .values({ type: input.type, value: input.value, sources: input.sources })
+        .onConflictDoUpdate({
+          target: [s.ontologyNodes.type, s.ontologyNodes.value],
+          set: {
+            mentions: sql`${s.ontologyNodes.mentions} + 1`,
+            lastSeen: sql`now()`,
+            sources: input.sources,
+          },
+        })
+        .returning()
+      return row
+    },
+    /** Upsert a global edge, accumulating evidence + last-seen. */
+    async upsertEdge(input: {
+      fromNodeId: string
+      toNodeId: string
+      predicate: string
+      confidence: OntologyEdge['confidence']
+      sources: string[]
+      evidenceCount: number
+    }): Promise<OntologyEdge> {
+      const db = getDb()
+      const [row] = await db
+        .insert(s.ontologyEdges)
+        .values(input)
+        .onConflictDoUpdate({
+          target: [s.ontologyEdges.fromNodeId, s.ontologyEdges.toNodeId, s.ontologyEdges.predicate],
+          set: {
+            evidenceCount: sql`${s.ontologyEdges.evidenceCount} + ${input.evidenceCount}`,
+            confidence: input.confidence,
+            lastSeen: sql`now()`,
+            sources: input.sources,
+          },
+        })
+        .returning()
+      return row
+    },
+    async getNode(type: Entity['type'], value: string): Promise<OntologyNode | undefined> {
+      const db = getDb()
+      const [row] = await db
+        .select()
+        .from(s.ontologyNodes)
+        .where(and(eq(s.ontologyNodes.type, type), eq(s.ontologyNodes.value, value)))
+        .limit(1)
+      return row
+    },
+    async edgesForNode(nodeId: string): Promise<OntologyEdge[]> {
+      const db = getDb()
+      return db
+        .select()
+        .from(s.ontologyEdges)
+        .where(or(eq(s.ontologyEdges.fromNodeId, nodeId), eq(s.ontologyEdges.toNodeId, nodeId)))
+    },
+    async nodesByIds(ids: string[]): Promise<OntologyNode[]> {
+      if (ids.length === 0) return []
+      const db = getDb()
+      return db.select().from(s.ontologyNodes).where(inArray(s.ontologyNodes.id, ids))
     },
   },
 

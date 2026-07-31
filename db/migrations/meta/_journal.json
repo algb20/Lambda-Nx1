@@ -36,6 +36,13 @@
       "when": 1785520143965,
       "tag": "0004_complex_doctor_faustus",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1785537905544,
+      "tag": "0005_majestic_zarek",
+      "breakpoints": true
     }
   ]
 }

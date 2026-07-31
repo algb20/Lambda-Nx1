@@ -17,6 +17,8 @@ import { registry } from '../engine/registry'
 import { buildGraph, dedupeEvidence, type Graph } from '../engine/analysis'
 import { buildOntology, type Ontology } from '../engine/ontology'
 import { assessTrust, sealFindings, type TrustScore } from '../engine/trust'
+import { isDbConfigured } from '../db'
+import { defaultGlobalOntology, mergeOntology } from './ontology-global'
 import { registerAllSources } from '../engine/sources'
 import type { Capability, EntityType, Evidence, SourceResult } from '../engine/types'
 
@@ -218,5 +220,15 @@ export async function investigateNexus(input: string): Promise<NexusReport> {
   }
 
   cache.set(cacheKey, { at: Date.now(), report })
+
+  // Accumulate into the global knowledge graph (best-effort; never blocks/breaks
+  // the dossier). Only when a DB is configured — no-op in dev/build.
+  if (isDbConfigured() && ontology.edges.length > 0) {
+    try {
+      await mergeOntology(defaultGlobalOntology, ontology)
+    } catch {
+      /* accumulation is opportunistic; the dossier stands on its own */
+    }
+  }
   return report
 }
