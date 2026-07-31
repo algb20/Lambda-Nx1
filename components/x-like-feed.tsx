@@ -15,6 +15,7 @@ import {
   Network,
   Sparkles,
   Newspaper,
+  ScanSearch,
   Search,
   ArrowRight,
   Activity,
@@ -52,6 +53,13 @@ interface Family {
 }
 
 const FAMILIES: Family[] = [
+  {
+    group: 'Flagship',
+    blurb: 'One query, the whole picture — fast.',
+    items: [
+      { icon: ScanSearch, title: 'Unified investigation (Nexus)', desc: 'Type anything — domain, IP, email, company, wallet, hash. We classify it and run every relevant gateway in parallel into one graded dossier with a link graph and AI triage. Instant, auditable.', status: 'Live', tab: 'intelligence', tag: 'nexus' },
+    ],
+  },
   {
     group: 'OSINT core',
     blurb: 'The founding discipline — public-footprint intelligence.',
@@ -153,8 +161,11 @@ export function XLikeFeed({ onNavigate }: { onNavigate?: (tab: NavTab) => void }
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
             <Search className="h-4 w-4 text-primary" />
           </span>
-          <span className="flex-1 text-sm text-muted-foreground">
-            Investigate a domain, company, wallet, indicator…
+          <span className="flex-1">
+            <span className="block text-sm text-foreground">Investigate anything — one query, full dossier</span>
+            <span className="block text-[11px] text-muted-foreground">
+              domain · IP · email · company · wallet · hash — every gateway at once, in an instant
+            </span>
           </span>
           <span className="flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">
             Open <ArrowRight className="h-3 w-3" />

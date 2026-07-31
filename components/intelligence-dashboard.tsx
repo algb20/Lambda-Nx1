@@ -14,6 +14,8 @@ import {
   Newspaper,
   Radio,
   Gauge,
+  ScanSearch,
+  Zap,
   Loader2,
   ShieldCheck,
   AlertCircle,
@@ -35,10 +37,12 @@ import type { ProcurementReport } from '@/lib/modules/procurement'
 import type { OwnershipReport } from '@/lib/modules/ownership'
 import type { NewsReport } from '@/lib/modules/news'
 import type { MarketsBoardReport } from '@/lib/modules/markets-board'
+import type { NexusReport } from '@/lib/modules/nexus'
 import type { Evidence } from '@/lib/engine/types'
 import type { AnalystVerdict, Severity } from '@/lib/ai/types'
 
 type Mode =
+  | 'nexus'
   | 'domain'
   | 'username'
   | 'email'
@@ -51,6 +55,7 @@ type Mode =
   | 'board'
   | 'media'
 type Result =
+  | { kind: 'nexus'; data: NexusReport }
   | { kind: 'domain'; data: DomainReport }
   | { kind: 'username'; data: UsernameReport }
   | { kind: 'email'; data: EmailReport }
@@ -64,6 +69,7 @@ type Result =
   | { kind: 'media'; data: MediaReport }
 
 const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: string }> = [
+  { id: 'nexus', label: 'Unified', icon: ScanSearch, placeholder: 'anything — domain, IP, email, company, wallet, hash…' },
   { id: 'domain', label: 'Domain', icon: Globe, placeholder: 'example.com' },
   { id: 'username', label: 'Username', icon: AtSign, placeholder: 'octocat' },
   { id: 'email', label: 'Email', icon: Mail, placeholder: 'name@example.com' },
@@ -78,6 +84,7 @@ const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: s
 ]
 
 const BODY_KEY: Partial<Record<Mode, string>> = {
+  nexus: 'query',
   threat: 'indicator',
   finance: 'query',
   markets: 'query',
@@ -506,6 +513,87 @@ function NewsView({ r, onReload, loading }: { r: NewsReport; onReload: () => voi
   )
 }
 
+function NexusView({ r }: { r: NexusReport }) {
+  const active = r.sections.filter((s) => s.findings.length > 0)
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold break-all">{r.input}</h3>
+            <Badge variant="outline" className="text-[10px] uppercase">
+              {r.selectorType}
+            </Badge>
+          </div>
+          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <Zap className={`h-3.5 w-3.5 ${r.speed.cacheHit ? 'text-amber-500' : 'text-emerald-500'}`} />
+            {r.speed.cacheHit ? 'cached · instant' : `${r.speed.elapsedMs}ms`}
+          </div>
+        </div>
+        <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-5">
+          <Stat label="Findings" value={r.summary.findings} />
+          <Stat label="Entities" value={r.summary.entities} />
+          <Stat label="Links" value={r.graph.edges.length} />
+          <Stat label="Gateways ✓" value={r.summary.sourcesOk} />
+          <Stat label="Fastest" value={r.speed.fastestMs !== null ? `${r.speed.fastestMs}ms` : '—'} />
+        </div>
+      </Card>
+
+      {/* Coverage strip — every gateway that ran, with its latency. */}
+      <Card className="p-4">
+        <h4 className="mb-2 text-sm font-semibold">Coverage</h4>
+        <div className="flex flex-wrap gap-1.5">
+          {r.sections.map((s) => (
+            <span
+              key={s.gateway}
+              className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] ${
+                s.findings.length > 0
+                  ? 'border-emerald-500/30 text-foreground'
+                  : 'border-border text-muted-foreground'
+              }`}
+              title={`${s.capability} · ${s.ms}ms`}
+            >
+              {s.gateway}
+              <span className="tabular-nums text-muted-foreground">{s.findings.length}</span>
+              <span className="text-[10px] text-muted-foreground/70">{s.ms}ms</span>
+            </span>
+          ))}
+        </div>
+      </Card>
+
+      {active.length === 0 ? (
+        <Card className="p-4 text-sm text-muted-foreground">
+          No public findings across the gateways for this selector. Absence of a record is not a
+          conclusion.
+        </Card>
+      ) : (
+        active.map((s) => (
+          <Card key={s.gateway} className="p-4">
+            <div className="mb-1 flex items-center justify-between">
+              <h4 className="text-sm font-semibold">{s.gateway}</h4>
+              <Badge variant="secondary" className="text-[10px]">
+                {s.findings.length} · {s.ms}ms
+              </Badge>
+            </div>
+            {s.findings.slice(0, 12).map((e, i) => (
+              <div key={i} className="flex items-start justify-between gap-3 border-b border-border/40 py-2 last:border-0">
+                {e.sourceUrl ? (
+                  <a href={e.sourceUrl} target="_blank" rel="noreferrer" className="text-sm hover:underline">
+                    {e.claim}
+                  </a>
+                ) : (
+                  <span className="text-sm">{e.claim}</span>
+                )}
+                <SourceTag e={e} />
+              </div>
+            ))}
+          </Card>
+        ))
+      )}
+    </div>
+  )
+}
+
 function fmtBoardPrice(n: number): string {
   if (n >= 1000) return n.toLocaleString('en-US', { maximumFractionDigits: 2 })
   if (n >= 1) return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -731,6 +819,8 @@ function collectFindings(result: Result): { subject: string; gateway: string; fi
     }))
 
   switch (result.kind) {
+    case 'nexus':
+      return { subject: result.data.input, gateway: result.data.selectorType, findings: slim(result.data.findings) }
     case 'domain': {
       const findings = Object.values(result.data.sections).flat() as Evidence[]
       return { subject: result.data.subject, gateway: 'domain', findings: slim(findings) }
@@ -891,7 +981,7 @@ function readFileAsBase64(file: File): Promise<string> {
 }
 
 export function IntelligenceDashboard() {
-  const [mode, setMode] = useState<Mode>('domain')
+  const [mode, setMode] = useState<Mode>('nexus')
   const [query, setQuery] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
@@ -1045,6 +1135,7 @@ export function IntelligenceDashboard() {
         </Card>
       ) : null}
 
+      {result?.kind === 'nexus' ? <NexusView r={result.data} /> : null}
       {result?.kind === 'domain' ? <DomainView r={result.data} /> : null}
       {result?.kind === 'username' ? <UsernameView r={result.data} /> : null}
       {result?.kind === 'email' ? <EmailView r={result.data} /> : null}
