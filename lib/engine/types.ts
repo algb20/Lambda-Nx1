@@ -22,6 +22,9 @@ export type Capability =
   | 'threat'
   | 'sanctions'
   | 'wallet'
+  | 'market'
+  | 'securities'
+  | 'fx'
 
 export type EntityType =
   | 'domain'

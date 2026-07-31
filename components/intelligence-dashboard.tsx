@@ -8,6 +8,7 @@ import {
   Image as ImageIcon,
   ShieldAlert,
   Landmark,
+  LineChart,
   Loader2,
   ShieldCheck,
   AlertCircle,
@@ -24,16 +25,18 @@ import type { UsernameReport, EmailReport } from '@/lib/modules/identity'
 import type { MediaReport } from '@/lib/modules/media'
 import type { ThreatReport } from '@/lib/modules/threat'
 import type { FinanceReport } from '@/lib/modules/finance'
+import type { MarketsReport } from '@/lib/modules/markets'
 import type { Evidence } from '@/lib/engine/types'
 import type { AnalystVerdict, Severity } from '@/lib/ai/types'
 
-type Mode = 'domain' | 'username' | 'email' | 'threat' | 'finance' | 'media'
+type Mode = 'domain' | 'username' | 'email' | 'threat' | 'finance' | 'markets' | 'media'
 type Result =
   | { kind: 'domain'; data: DomainReport }
   | { kind: 'username'; data: UsernameReport }
   | { kind: 'email'; data: EmailReport }
   | { kind: 'threat'; data: ThreatReport }
   | { kind: 'finance'; data: FinanceReport }
+  | { kind: 'markets'; data: MarketsReport }
   | { kind: 'media'; data: MediaReport }
 
 const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: string }> = [
@@ -42,10 +45,11 @@ const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: s
   { id: 'email', label: 'Email', icon: Mail, placeholder: 'name@example.com' },
   { id: 'threat', label: 'Threat', icon: ShieldAlert, placeholder: 'IP, domain, URL or hash' },
   { id: 'finance', label: 'Finance', icon: Landmark, placeholder: 'company name or BTC address' },
+  { id: 'markets', label: 'Markets', icon: LineChart, placeholder: 'BTC, AAPL, or USD/EUR' },
   { id: 'media', label: 'Media', icon: ImageIcon, placeholder: 'https://…/image.jpg' },
 ]
 
-const BODY_KEY: Partial<Record<Mode, string>> = { threat: 'indicator', finance: 'query' }
+const BODY_KEY: Partial<Record<Mode, string>> = { threat: 'indicator', finance: 'query', markets: 'query' }
 
 type EvidenceItem = DomainReport['sections']['dns'][number]
 
@@ -233,6 +237,49 @@ function FinanceView({ r }: { r: FinanceReport }) {
   )
 }
 
+function MarketsView({ r }: { r: MarketsReport }) {
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 className="font-semibold break-all">{r.subject}</h3>
+            <p className="text-[11px] text-muted-foreground">
+              {r.kind === 'fx' ? 'currency pair' : 'asset / company'} ·{' '}
+              {new Date(r.generatedAt).toLocaleString()}
+            </p>
+          </div>
+          <Badge variant="secondary">
+            {r.summary.matches} fact{r.summary.matches === 1 ? '' : 's'}
+          </Badge>
+        </div>
+      </Card>
+      <Card className="p-4">
+        <h4 className="mb-1 text-sm font-semibold">Market &amp; disclosure facts</h4>
+        {r.findings.length === 0 ? (
+          <p className="py-2 text-sm text-muted-foreground">
+            No public market data or filings matched. Try a ticker, coin, company name, or a
+            pair like USD/EUR.
+          </p>
+        ) : (
+          r.findings.map((e, i) => (
+            <div key={i} className="flex items-start justify-between gap-3 border-b border-border/40 py-2 last:border-0">
+              {e.sourceUrl ? (
+                <a href={e.sourceUrl} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline">
+                  {e.claim}
+                </a>
+              ) : (
+                <span className="text-sm">{e.claim}</span>
+              )}
+              <SourceTag e={e} />
+            </div>
+          ))
+        )}
+      </Card>
+    </div>
+  )
+}
+
 function ThreatView({ r }: { r: ThreatReport }) {
   return (
     <div className="space-y-4">
@@ -376,6 +423,8 @@ function collectFindings(result: Result): { subject: string; gateway: string; fi
       return { subject: result.data.indicator, gateway: 'threat', findings: slim(result.data.findings) }
     case 'finance':
       return { subject: result.data.subject, gateway: 'finance', findings: slim(result.data.findings) }
+    case 'markets':
+      return { subject: result.data.subject, gateway: 'markets', findings: slim(result.data.findings) }
     case 'media':
       return null
   }
@@ -564,7 +613,7 @@ export function IntelligenceDashboard() {
     <div className="space-y-4">
       <h2 className="text-xl font-bold">Intelligence</h2>
 
-      <div className="grid grid-cols-3 gap-1 rounded-lg bg-muted/50 p-1 sm:grid-cols-6">
+      <div className="grid grid-cols-4 gap-1 rounded-lg bg-muted/50 p-1 sm:grid-cols-7">
         {MODES.map((m) => {
           const Icon = m.icon
           const isActive = m.id === mode
@@ -649,6 +698,7 @@ export function IntelligenceDashboard() {
       {result?.kind === 'email' ? <EmailView r={result.data} /> : null}
       {result?.kind === 'threat' ? <ThreatView r={result.data} /> : null}
       {result?.kind === 'finance' ? <FinanceView r={result.data} /> : null}
+      {result?.kind === 'markets' ? <MarketsView r={result.data} /> : null}
       {result?.kind === 'media' ? <MediaView r={result.data} /> : null}
 
       {aiInput && aiInput.findings.length > 0 ? (

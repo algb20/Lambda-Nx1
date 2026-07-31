@@ -64,7 +64,10 @@ sync; never skip a point or a test.
 - [x] Threat Intelligence (CTI): Feodo/URLhaus/ThreatFox + module + API + UI mode + tests
 - [x] Financial / Sanctions / Corporate: OpenSanctions/GLEIF/mempool + module + API + UI + tests (migration 0003 adds company/person entity types)
 - [x] AI-analyst layer (#24): `lib/ai` (Claude provider behind a swappable port) + `lib/modules/analyst` + auth-gated `POST /api/analyst` + "Analyze with AI" panel over every report + tests. Sorts, never verifies; degrades gracefully with no key.
+- [x] Markets & Economy (#26): CoinGecko (crypto) + SEC EDGAR (filings) + Frankfurter/ECB (FX) → `lib/modules/markets` + `POST /api/intelligence/markets` + Markets UI mode + tests. Reports the market as it is; never predicts. See `docs/FORESIGHT.md`.
 - [ ] Geospatial / Transport (#23)
+- [ ] Research & Tech-trend sources + Macro/Economy sources (#27) — see docs/FORESIGHT.md §4
+- [ ] Calibration ledger + forecast-tracking in the Radar sweep (#28) — see docs/FORESIGHT.md §2
 - [ ] Subscription tiers free/paid (#25)
 - Note: guardrail now allows provider POST (allowlist remains the passive guarantee).
 

@@ -19,6 +19,8 @@ import { gravatar } from './gravatar'
 import { feodo, urlhaus, threatfox } from './threat'
 // Gateway — Financial / Sanctions / Corporate
 import { opensanctions, gleif, mempool } from './finance'
+// Gateway — Markets & Economy
+import { coingecko, edgar, frankfurter } from './markets'
 
 export const moduleOneSources: Source[] = [
   cloudflareDns,
@@ -35,6 +37,8 @@ export const moduleTwoSources: Source[] = [usernameWeb, xposedornot, gravatar]
 export const threatGatewaySources: Source[] = [feodo, urlhaus, threatfox]
 
 export const financeGatewaySources: Source[] = [opensanctions, gleif, mempool]
+
+export const marketsGatewaySources: Source[] = [coingecko, edgar, frankfurter]
 
 interface CatalogRow {
   key: string
@@ -72,11 +76,18 @@ export const financeGatewayCatalog: CatalogRow[] = [
   { key: 'mempool', name: 'mempool.space (BTC)', capability: 'wallet', passive: true, enabled: true },
 ]
 
+export const marketsGatewayCatalog: CatalogRow[] = [
+  { key: 'coingecko', name: 'CoinGecko (crypto markets)', capability: 'market', passive: true, enabled: true },
+  { key: 'edgar', name: 'SEC EDGAR (filings)', capability: 'securities', passive: true, enabled: true },
+  { key: 'frankfurter', name: 'Frankfurter (ECB FX)', capability: 'fx', passive: true, enabled: true },
+]
+
 export const allSourceCatalog: CatalogRow[] = [
   ...moduleOneSourceCatalog,
   ...moduleTwoSourceCatalog,
   ...threatGatewayCatalog,
   ...financeGatewayCatalog,
+  ...marketsGatewayCatalog,
 ]
 
 let registeredOne = false
@@ -108,11 +119,19 @@ export function registerFinanceGateway(): void {
   registeredFinance = true
 }
 
+let registeredMarkets = false
+export function registerMarketsGateway(): void {
+  if (registeredMarkets) return
+  registry.registerAll(marketsGatewaySources)
+  registeredMarkets = true
+}
+
 export function registerAllSources(): void {
   registerModuleOneSources()
   registerModuleTwoSources()
   registerThreatGateway()
   registerFinanceGateway()
+  registerMarketsGateway()
 }
 
 export {
@@ -132,4 +151,7 @@ export {
   opensanctions,
   gleif,
   mempool,
+  coingecko,
+  edgar,
+  frankfurter,
 }

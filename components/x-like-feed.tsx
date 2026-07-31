@@ -2,7 +2,7 @@
 
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Radar, Globe, AtSign, Image, Bell, ShieldCheck, ShieldAlert, Landmark, Sparkles } from 'lucide-react'
+import { Radar, Globe, AtSign, Image, Bell, ShieldCheck, ShieldAlert, Landmark, LineChart, Sparkles } from 'lucide-react'
 
 /**
  * Home screen. The previous version rendered a fabricated social feed
@@ -33,6 +33,12 @@ const modules = [
     icon: Landmark,
     title: 'Financial / sanctions',
     desc: 'Sanctions/PEP + legal-entity screening (OpenSanctions, GLEIF) and Bitcoin ledger facts.',
+    status: 'Ready',
+  },
+  {
+    icon: LineChart,
+    title: 'Markets & economy',
+    desc: 'Live crypto markets (CoinGecko), public company filings (SEC EDGAR) and ECB reference FX — facts with source and time. It reports the market, it never predicts it.',
     status: 'Ready',
   },
   {
