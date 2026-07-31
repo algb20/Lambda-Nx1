@@ -20,6 +20,7 @@ This design is future-proof: the platform grows by *families*, not rewrites.
 | Financial / Sanctions / Corporate | is this entity/wallet safe to deal with? | OpenSanctions, GLEIF, mempool.space |
 | Markets & Economy | what is this asset/company/currency doing now? | CoinGecko, SEC EDGAR, Frankfurter (ECB) |
 | Procurement & Public Contracts | who receives public money / contracts? | USAspending.gov, World Bank projects |
+| Ownership & control networks | who owns / controls this entity? | GLEIF Level-2 (parents, ultimate parents, subsidiaries) |
 | AI-analyst layer | triage + summarize + suggest next pivot | Claude (Anthropic API) over our own evidence |
 
 ### ⏭️ Planned families (all lawful, free-source-first)
@@ -29,7 +30,6 @@ This design is future-proof: the platform grows by *families*, not rewrites.
 | **Research & Tech-trend** | what's advancing in science/AI/patents? | OpenAlex, Crossref, arXiv, GitHub/HF trends, USPTO | free + paid |
 | **Macro / Economy** | indicators, commodities, funding | World Bank, IMF, OECD, FRED, EIA | free + paid |
 | **Calibration ledger** | whose published foresight proved right? | our own record of attributed claims vs outcomes | **paid** |
-| **Ownership networks** | who really owns/controls this? | GLEIF + OpenCorporates + registries | free + paid |
 | **Real estate / assets** | land, industrial & logistics assets | OSM/Overpass, open cadastres, filings | free + paid |
 | **Supply-chain / trade** | trade exposure & dependencies | UN Comtrade, public shipping/customs | **paid** |
 

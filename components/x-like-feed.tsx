@@ -2,7 +2,7 @@
 
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Radar, Globe, AtSign, Image, Bell, ShieldCheck, ShieldAlert, Landmark, LineChart, Gavel, Sparkles } from 'lucide-react'
+import { Radar, Globe, AtSign, Image, Bell, ShieldCheck, ShieldAlert, Landmark, LineChart, Gavel, Network, Sparkles } from 'lucide-react'
 
 /**
  * Home screen. The previous version rendered a fabricated social feed
@@ -45,6 +45,12 @@ const modules = [
     icon: Gavel,
     title: 'Procurement & contracts',
     desc: 'Who receives public money and contracts — US federal awards (USAspending) and World Bank development finance, from official published records.',
+    status: 'Ready',
+  },
+  {
+    icon: Network,
+    title: 'Ownership & control',
+    desc: 'Who owns and controls a company — parents, ultimate parents and subsidiaries mapped into a control graph from GLEIF Level-2 filed relationships.',
     status: 'Ready',
   },
   {

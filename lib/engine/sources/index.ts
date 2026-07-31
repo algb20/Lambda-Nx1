@@ -23,6 +23,8 @@ import { opensanctions, gleif, mempool } from './finance'
 import { coingecko, edgar, frankfurter } from './markets'
 // Gateway — Procurement & Public Contracts
 import { usaspending, worldbankProjects } from './procurement'
+// Gateway — Ownership & beneficial-control networks
+import { gleifOwnership } from './ownership'
 
 export const moduleOneSources: Source[] = [
   cloudflareDns,
@@ -43,6 +45,8 @@ export const financeGatewaySources: Source[] = [opensanctions, gleif, mempool]
 export const marketsGatewaySources: Source[] = [coingecko, edgar, frankfurter]
 
 export const procurementGatewaySources: Source[] = [usaspending, worldbankProjects]
+
+export const ownershipGatewaySources: Source[] = [gleifOwnership]
 
 interface CatalogRow {
   key: string
@@ -91,6 +95,10 @@ export const procurementGatewayCatalog: CatalogRow[] = [
   { key: 'worldbank_projects', name: 'World Bank projects', capability: 'procurement', passive: true, enabled: true },
 ]
 
+export const ownershipGatewayCatalog: CatalogRow[] = [
+  { key: 'gleif_ownership', name: 'GLEIF ownership (Level 2)', capability: 'ownership', passive: true, enabled: true },
+]
+
 export const allSourceCatalog: CatalogRow[] = [
   ...moduleOneSourceCatalog,
   ...moduleTwoSourceCatalog,
@@ -98,6 +106,7 @@ export const allSourceCatalog: CatalogRow[] = [
   ...financeGatewayCatalog,
   ...marketsGatewayCatalog,
   ...procurementGatewayCatalog,
+  ...ownershipGatewayCatalog,
 ]
 
 let registeredOne = false
@@ -143,6 +152,13 @@ export function registerProcurementGateway(): void {
   registeredProcurement = true
 }
 
+let registeredOwnership = false
+export function registerOwnershipGateway(): void {
+  if (registeredOwnership) return
+  registry.registerAll(ownershipGatewaySources)
+  registeredOwnership = true
+}
+
 export function registerAllSources(): void {
   registerModuleOneSources()
   registerModuleTwoSources()
@@ -150,6 +166,7 @@ export function registerAllSources(): void {
   registerFinanceGateway()
   registerMarketsGateway()
   registerProcurementGateway()
+  registerOwnershipGateway()
 }
 
 export {
@@ -174,4 +191,5 @@ export {
   frankfurter,
   usaspending,
   worldbankProjects,
+  gleifOwnership,
 }

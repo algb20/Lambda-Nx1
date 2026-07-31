@@ -66,10 +66,10 @@ sync; never skip a point or a test.
 - [x] AI-analyst layer (#24): `lib/ai` (Claude provider behind a swappable port) + `lib/modules/analyst` + auth-gated `POST /api/analyst` + "Analyze with AI" panel over every report + tests. Sorts, never verifies; degrades gracefully with no key.
 - [x] Markets & Economy (#26): CoinGecko (crypto) + SEC EDGAR (filings) + Frankfurter/ECB (FX) → `lib/modules/markets` + `POST /api/intelligence/markets` + Markets UI mode + tests. Reports the market as it is; never predicts. See `docs/FORESIGHT.md`.
 - [x] Procurement & Public Contracts (#29): USAspending.gov + World Bank projects → `lib/modules/procurement` + `POST /api/intelligence/procurement` + Contracts UI mode + tests. "Who receives public money/contracts" from official published records. See `docs/LANDSCAPE.md`.
+- [x] Ownership & control networks (#30): GLEIF Level-2 relationships → `lib/modules/ownership` (resolves name→LEI, maps parents/ultimate/subsidiaries into a graded control graph) + `POST /api/intelligence/ownership` + Ownership UI mode (control map) + tests.
 - [ ] Geospatial / Transport + real-estate overlay (#23) — see docs/LANDSCAPE.md §3
 - [ ] Research & Tech-trend sources + Macro/Economy sources (#27) — see docs/FORESIGHT.md §4
 - [ ] Calibration ledger + forecast-tracking in the Radar sweep (#28) — see docs/FORESIGHT.md §2
-- [ ] Ownership & beneficial-control networks (#30) — see docs/LANDSCAPE.md §1
 - [ ] Subscription tiers free/paid (#25)
 - Note: guardrail now allows provider POST (allowlist remains the passive guarantee).
 

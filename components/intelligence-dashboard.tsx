@@ -10,6 +10,7 @@ import {
   Landmark,
   LineChart,
   Gavel,
+  Network,
   Loader2,
   ShieldCheck,
   AlertCircle,
@@ -28,10 +29,20 @@ import type { ThreatReport } from '@/lib/modules/threat'
 import type { FinanceReport } from '@/lib/modules/finance'
 import type { MarketsReport } from '@/lib/modules/markets'
 import type { ProcurementReport } from '@/lib/modules/procurement'
+import type { OwnershipReport } from '@/lib/modules/ownership'
 import type { Evidence } from '@/lib/engine/types'
 import type { AnalystVerdict, Severity } from '@/lib/ai/types'
 
-type Mode = 'domain' | 'username' | 'email' | 'threat' | 'finance' | 'markets' | 'procurement' | 'media'
+type Mode =
+  | 'domain'
+  | 'username'
+  | 'email'
+  | 'threat'
+  | 'finance'
+  | 'markets'
+  | 'procurement'
+  | 'ownership'
+  | 'media'
 type Result =
   | { kind: 'domain'; data: DomainReport }
   | { kind: 'username'; data: UsernameReport }
@@ -40,6 +51,7 @@ type Result =
   | { kind: 'finance'; data: FinanceReport }
   | { kind: 'markets'; data: MarketsReport }
   | { kind: 'procurement'; data: ProcurementReport }
+  | { kind: 'ownership'; data: OwnershipReport }
   | { kind: 'media'; data: MediaReport }
 
 const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: string }> = [
@@ -50,6 +62,7 @@ const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: s
   { id: 'finance', label: 'Finance', icon: Landmark, placeholder: 'company name or BTC address' },
   { id: 'markets', label: 'Markets', icon: LineChart, placeholder: 'BTC, AAPL, or USD/EUR' },
   { id: 'procurement', label: 'Contracts', icon: Gavel, placeholder: 'company, agency or project name' },
+  { id: 'ownership', label: 'Ownership', icon: Network, placeholder: 'company / legal-entity name' },
   { id: 'media', label: 'Media', icon: ImageIcon, placeholder: 'https://…/image.jpg' },
 ]
 
@@ -58,6 +71,7 @@ const BODY_KEY: Partial<Record<Mode, string>> = {
   finance: 'query',
   markets: 'query',
   procurement: 'query',
+  ownership: 'query',
 }
 
 type EvidenceItem = DomainReport['sections']['dns'][number]
@@ -331,6 +345,64 @@ function ProcurementView({ r }: { r: ProcurementReport }) {
   )
 }
 
+function OwnershipView({ r }: { r: OwnershipReport }) {
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <ReportHeader title={r.resolvedEntity ?? r.subject} at={r.generatedAt} />
+        {r.resolvedEntity && r.resolvedEntity !== r.subject ? (
+          <p className="text-[11px] text-muted-foreground">matched from “{r.subject}”</p>
+        ) : null}
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          <Stat label="Parents" value={r.summary.parents} />
+          <Stat label="Ultimate" value={r.summary.ultimateParents} />
+          <Stat label="Subsidiaries" value={r.summary.subsidiaries} />
+        </div>
+      </Card>
+
+      {r.graph.edges.length > 0 ? (
+        <Card className="p-4">
+          <h4 className="mb-2 text-sm font-semibold">Control map</h4>
+          <div className="space-y-1.5">
+            {r.graph.edges.map((e, i) => (
+              <div key={i} className="flex items-center gap-2 text-sm">
+                <span className="font-medium break-all">{r.resolvedEntity ?? r.subject}</span>
+                <Badge variant="outline" className="shrink-0 text-[10px]">
+                  {e.relation}
+                </Badge>
+                <span className="break-all text-muted-foreground">{e.to.replace(/^company:/, '')}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      ) : null}
+
+      <Card className="p-4">
+        <h4 className="mb-1 text-sm font-semibold">GLEIF records</h4>
+        {r.findings.length === 0 ? (
+          <p className="py-2 text-sm text-muted-foreground">
+            No GLEIF legal-entity match. Absence of a filed relationship is not a claim of
+            independence.
+          </p>
+        ) : (
+          r.findings.map((e, i) => (
+            <div key={i} className="flex items-start justify-between gap-3 border-b border-border/40 py-2 last:border-0">
+              {e.sourceUrl ? (
+                <a href={e.sourceUrl} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline">
+                  {e.claim}
+                </a>
+              ) : (
+                <span className="text-sm">{e.claim}</span>
+              )}
+              <SourceTag e={e} />
+            </div>
+          ))
+        )}
+      </Card>
+    </div>
+  )
+}
+
 function ThreatView({ r }: { r: ThreatReport }) {
   return (
     <div className="space-y-4">
@@ -478,6 +550,12 @@ function collectFindings(result: Result): { subject: string; gateway: string; fi
       return { subject: result.data.subject, gateway: 'markets', findings: slim(result.data.findings) }
     case 'procurement':
       return { subject: result.data.subject, gateway: 'procurement', findings: slim(result.data.findings) }
+    case 'ownership':
+      return {
+        subject: result.data.resolvedEntity ?? result.data.subject,
+        gateway: 'ownership',
+        findings: slim(result.data.findings),
+      }
     case 'media':
       return null
   }
@@ -666,7 +744,7 @@ export function IntelligenceDashboard() {
     <div className="space-y-4">
       <h2 className="text-xl font-bold">Intelligence</h2>
 
-      <div className="grid grid-cols-4 gap-1 rounded-lg bg-muted/50 p-1 sm:grid-cols-8">
+      <div className="flex flex-wrap gap-1 rounded-lg bg-muted/50 p-1">
         {MODES.map((m) => {
           const Icon = m.icon
           const isActive = m.id === mode
@@ -674,11 +752,12 @@ export function IntelligenceDashboard() {
             <button
               key={m.id}
               onClick={() => switchMode(m.id)}
-              className={`flex items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium transition-colors ${
+              title={m.label}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors ${
                 isActive ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <Icon className="h-4 w-4" />
+              <Icon className="h-4 w-4 shrink-0" />
               <span className="hidden sm:inline">{m.label}</span>
             </button>
           )
@@ -753,6 +832,7 @@ export function IntelligenceDashboard() {
       {result?.kind === 'finance' ? <FinanceView r={result.data} /> : null}
       {result?.kind === 'markets' ? <MarketsView r={result.data} /> : null}
       {result?.kind === 'procurement' ? <ProcurementView r={result.data} /> : null}
+      {result?.kind === 'ownership' ? <OwnershipView r={result.data} /> : null}
       {result?.kind === 'media' ? <MediaView r={result.data} /> : null}
 
       {aiInput && aiInput.findings.length > 0 ? (
