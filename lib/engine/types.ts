@@ -27,6 +27,7 @@ export type Capability =
   | 'fx'
   | 'procurement'
   | 'ownership'
+  | 'news'
 
 export type EntityType =
   | 'domain'

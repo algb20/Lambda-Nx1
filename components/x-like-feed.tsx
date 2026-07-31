@@ -13,6 +13,7 @@ import {
   Gavel,
   Network,
   Sparkles,
+  Newspaper,
   Search,
   ArrowRight,
   Activity,
@@ -80,6 +81,7 @@ const FAMILIES: Family[] = [
     group: 'Intelligence layer',
     blurb: 'On top of every gateway.',
     items: [
+      { icon: Newspaper, title: 'News & signals', desc: 'Top world events and topic coverage from primary sources — live, non-stop, linking to origin. We surface and grade, we don’t reprint.', status: 'Live', tab: 'intelligence', tag: 'news' },
       { icon: Sparkles, title: 'AI analyst', desc: 'Triages any report — summarizes, grades severity, suggests the next pivot. Sorts, never verifies.', status: 'Live', tab: 'intelligence', tag: 'ai' },
       { icon: Bell, title: 'Monitoring & radar', desc: 'Watch a subject and get alerted when its public footprint changes.', status: 'Live', tab: 'swarm', tag: 'radar' },
     ],

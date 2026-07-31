@@ -1,0 +1,85 @@
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { investigateNews } from './news'
+
+function res(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
+}
+
+afterEach(() => vi.unstubAllGlobals())
+
+describe('investigateNews', () => {
+  it('returns top world events (Wikipedia) when no topic is given', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((u: string) => {
+        const host = new URL(u).hostname
+        if (host === 'en.wikipedia.org')
+          return Promise.resolve(
+            res({
+              news: [
+                {
+                  story: 'A <a href="/x">major summit</a> concludes with a new accord.',
+                  links: [{ normalizedtitle: 'Summit', content_urls: { desktop: { page: 'https://en.wikipedia.org/wiki/Summit' } } }],
+                },
+              ],
+            }),
+          )
+        // GDELT must NOT be queried in the topic-less case (returns [] by guard).
+        return Promise.resolve(res({ articles: [] }))
+      }),
+    )
+    const r = await investigateNews('')
+    expect(r.topic).toBeNull()
+    expect(r.items.length).toBe(1)
+    expect(r.items[0].claim).toBe('A major summit concludes with a new accord.')
+    expect(r.items[0].sourceKey).toBe('wikipedia_itn')
+    expect(r.summary.sources).toContain('wikipedia_itn')
+  })
+
+  it('returns topic coverage (GDELT) with origin links when a topic is given', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((u: string) => {
+        const host = new URL(u).hostname
+        if (host === 'api.gdeltproject.org')
+          return Promise.resolve(
+            res({
+              articles: [
+                {
+                  url: 'https://news.example.com/a',
+                  title: 'Two firms announce a strategic partnership',
+                  seendate: '20260731T120000Z',
+                  domain: 'news.example.com',
+                  sourcecountry: 'United States',
+                  language: 'English',
+                },
+              ],
+            }),
+          )
+        return Promise.resolve(res({ news: [] })) // Wikipedia skips topic queries
+      }),
+    )
+    const r = await investigateNews('partnership')
+    expect(r.topic).toBe('partnership')
+    expect(r.items.length).toBe(1)
+    expect(r.items[0].claim).toMatch(/strategic partnership/)
+    expect(r.items[0].sourceUrl).toBe('https://news.example.com/a')
+    expect(r.items[0].retrievedAt).toBe('2026-07-31T12:00:00Z')
+    expect(r.summary.countries).toContain('United States')
+  })
+
+  it('degrades gracefully when a provider is down (stays non-empty via the other)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((u: string) => {
+        const host = new URL(u).hostname
+        if (host === 'en.wikipedia.org')
+          return Promise.resolve(res({ news: [{ story: 'Event one.', links: [] }] }))
+        return Promise.resolve(res({}, 503))
+      }),
+    )
+    const r = await investigateNews('')
+    expect(r.items.length).toBe(1)
+    expect(r.items[0].claim).toBe('Event one.')
+  })
+})

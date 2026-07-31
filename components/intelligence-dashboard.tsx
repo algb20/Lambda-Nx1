@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Globe,
   AtSign,
@@ -11,6 +11,8 @@ import {
   LineChart,
   Gavel,
   Network,
+  Newspaper,
+  Radio,
   Loader2,
   ShieldCheck,
   AlertCircle,
@@ -30,6 +32,7 @@ import type { FinanceReport } from '@/lib/modules/finance'
 import type { MarketsReport } from '@/lib/modules/markets'
 import type { ProcurementReport } from '@/lib/modules/procurement'
 import type { OwnershipReport } from '@/lib/modules/ownership'
+import type { NewsReport } from '@/lib/modules/news'
 import type { Evidence } from '@/lib/engine/types'
 import type { AnalystVerdict, Severity } from '@/lib/ai/types'
 
@@ -42,6 +45,7 @@ type Mode =
   | 'markets'
   | 'procurement'
   | 'ownership'
+  | 'news'
   | 'media'
 type Result =
   | { kind: 'domain'; data: DomainReport }
@@ -52,6 +56,7 @@ type Result =
   | { kind: 'markets'; data: MarketsReport }
   | { kind: 'procurement'; data: ProcurementReport }
   | { kind: 'ownership'; data: OwnershipReport }
+  | { kind: 'news'; data: NewsReport }
   | { kind: 'media'; data: MediaReport }
 
 const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: string }> = [
@@ -63,6 +68,7 @@ const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: s
   { id: 'markets', label: 'Markets', icon: LineChart, placeholder: 'BTC, AAPL, or USD/EUR' },
   { id: 'procurement', label: 'Contracts', icon: Gavel, placeholder: 'company, agency or project name' },
   { id: 'ownership', label: 'Ownership', icon: Network, placeholder: 'company / legal-entity name' },
+  { id: 'news', label: 'News', icon: Newspaper, placeholder: 'topic (optional) — empty = top world events' },
   { id: 'media', label: 'Media', icon: ImageIcon, placeholder: 'https://…/image.jpg' },
 ]
 
@@ -72,7 +78,11 @@ const BODY_KEY: Partial<Record<Mode, string>> = {
   markets: 'query',
   procurement: 'query',
   ownership: 'query',
+  news: 'query',
 }
+
+/** Modes where an empty query is valid (returns a top/overview result). */
+const EMPTY_OK: Partial<Record<Mode, boolean>> = { news: true }
 
 type EvidenceItem = DomainReport['sections']['dns'][number]
 
@@ -403,6 +413,94 @@ function OwnershipView({ r }: { r: OwnershipReport }) {
   )
 }
 
+function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime()
+  if (!Number.isFinite(diff)) return ''
+  const m = Math.round(diff / 60000)
+  if (m < 1) return 'just now'
+  if (m < 60) return `${m}m ago`
+  const h = Math.round(m / 60)
+  if (h < 24) return `${h}h ago`
+  return `${Math.round(h / 24)}d ago`
+}
+
+function NewsView({ r, onReload, loading }: { r: NewsReport; onReload: () => void; loading: boolean }) {
+  const [auto, setAuto] = useState(true)
+  const reloadRef = useRef(onReload)
+  reloadRef.current = onReload
+
+  // Non-stop: while auto is on, refresh every 60s (only when the tab is visible).
+  useEffect(() => {
+    if (!auto) return
+    const id = setInterval(() => {
+      if (typeof document === 'undefined' || !document.hidden) reloadRef.current()
+    }, 60000)
+    return () => clearInterval(id)
+  }, [auto])
+
+  const country = (e: EvidenceItem) => (e.data as { country?: string } | undefined)?.country
+  const domain = (e: EvidenceItem) => (e.data as { domain?: string } | undefined)?.domain
+
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 className="font-semibold">{r.topic ? `News · ${r.topic}` : 'Top world events'}</h3>
+            <p className="text-[11px] text-muted-foreground">
+              {r.summary.count} signal{r.summary.count === 1 ? '' : 's'} ·{' '}
+              {r.summary.sources.length} source{r.summary.sources.length === 1 ? '' : 's'} ·
+              updated {new Date(r.generatedAt).toLocaleTimeString()}
+            </p>
+          </div>
+          <button
+            onClick={() => setAuto((v) => !v)}
+            className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${
+              auto ? 'bg-emerald-500/10 text-emerald-500' : 'bg-muted text-muted-foreground'
+            }`}
+            title={auto ? 'Live — refreshing every 60s' : 'Auto-refresh paused'}
+          >
+            <Radio className={`h-3.5 w-3.5 ${auto && loading ? 'animate-pulse' : ''}`} />
+            {auto ? 'Live' : 'Paused'}
+          </button>
+        </div>
+      </Card>
+
+      <Card className="p-4">
+        {r.items.length === 0 ? (
+          <p className="py-2 text-sm text-muted-foreground">
+            No signals right now. Sources may be rate-limited — Live will retry.
+          </p>
+        ) : (
+          r.items.map((e, i) => (
+            <div key={i} className="border-b border-border/40 py-2.5 last:border-0">
+              <div className="flex items-start justify-between gap-3">
+                {e.sourceUrl ? (
+                  <a href={e.sourceUrl} target="_blank" rel="noreferrer" className="text-sm leading-snug hover:underline">
+                    {e.claim}
+                  </a>
+                ) : (
+                  <span className="text-sm leading-snug">{e.claim}</span>
+                )}
+                <SourceTag e={e} />
+              </div>
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-muted-foreground">
+                {domain(e) ? <span className="font-mono">{domain(e)}</span> : null}
+                {country(e) ? <span>· {country(e)}</span> : null}
+                <span>· {relativeTime(e.retrievedAt)}</span>
+              </div>
+            </div>
+          ))
+        )}
+      </Card>
+      <p className="px-1 text-[11px] text-muted-foreground">
+        Signals from primary-leaning public sources — we link to the origin, never republish.
+        Headlines are reports, not confirmed facts; corroborate before relying on them.
+      </p>
+    </div>
+  )
+}
+
 function ThreatView({ r }: { r: ThreatReport }) {
   return (
     <div className="space-y-4">
@@ -555,6 +653,12 @@ function collectFindings(result: Result): { subject: string; gateway: string; fi
         subject: result.data.resolvedEntity ?? result.data.subject,
         gateway: 'ownership',
         findings: slim(result.data.findings),
+      }
+    case 'news':
+      return {
+        subject: result.data.topic ?? 'Top world events',
+        gateway: 'news',
+        findings: slim(result.data.items),
       }
     case 'media':
       return null
@@ -721,7 +825,7 @@ export function IntelligenceDashboard() {
         }
       } else {
         const value = query.trim()
-        if (!value) throw new Error('Enter a value to investigate.')
+        if (!value && !EMPTY_OK[mode]) throw new Error('Enter a value to investigate.')
         endpoint = `/api/intelligence/${mode}`
         payload = { [BODY_KEY[mode] ?? mode]: value }
       }
@@ -807,8 +911,8 @@ export function IntelligenceDashboard() {
             spellCheck={false}
             disabled={loading}
           />
-          <Button onClick={run} disabled={loading || !query.trim()}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Investigate'}
+          <Button onClick={run} disabled={loading || (!query.trim() && !EMPTY_OK[mode])}>
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : mode === 'news' ? 'Fetch' : 'Investigate'}
           </Button>
         </div>
       )}
@@ -833,6 +937,7 @@ export function IntelligenceDashboard() {
       {result?.kind === 'markets' ? <MarketsView r={result.data} /> : null}
       {result?.kind === 'procurement' ? <ProcurementView r={result.data} /> : null}
       {result?.kind === 'ownership' ? <OwnershipView r={result.data} /> : null}
+      {result?.kind === 'news' ? <NewsView r={result.data} onReload={run} loading={loading} /> : null}
       {result?.kind === 'media' ? <MediaView r={result.data} /> : null}
 
       {aiInput && aiInput.findings.length > 0 ? (

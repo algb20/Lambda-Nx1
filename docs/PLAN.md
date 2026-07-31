@@ -67,6 +67,7 @@ sync; never skip a point or a test.
 - [x] Markets & Economy (#26): CoinGecko (crypto) + SEC EDGAR (filings) + Frankfurter/ECB (FX) → `lib/modules/markets` + `POST /api/intelligence/markets` + Markets UI mode + tests. Reports the market as it is; never predicts. See `docs/FORESIGHT.md`.
 - [x] Procurement & Public Contracts (#29): USAspending.gov + World Bank projects → `lib/modules/procurement` + `POST /api/intelligence/procurement` + Contracts UI mode + tests. "Who receives public money/contracts" from official published records. See `docs/LANDSCAPE.md`.
 - [x] Ownership & control networks (#30): GLEIF Level-2 relationships → `lib/modules/ownership` (resolves name→LEI, maps parents/ultimate/subsidiaries into a graded control graph) + `POST /api/intelligence/ownership` + Ownership UI mode (control map) + tests.
+- [x] News & Signals (#31): GDELT (topic coverage) + Wikipedia "In the news" (top events) → `lib/modules/news` + `POST /api/intelligence/news` (empty = top events) + live auto-refreshing News UI mode + tests. Signals, not reprint; links to origin; graded honestly. See `docs/NEWS.md`.
 - [ ] Geospatial / Transport + real-estate overlay (#23) — see docs/LANDSCAPE.md §3
 - [ ] Research & Tech-trend sources + Macro/Economy sources (#27) — see docs/FORESIGHT.md §4
 - [ ] Calibration ledger + forecast-tracking in the Radar sweep (#28) — see docs/FORESIGHT.md §2

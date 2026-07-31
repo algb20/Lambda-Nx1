@@ -21,6 +21,7 @@ This design is future-proof: the platform grows by *families*, not rewrites.
 | Markets & Economy | what is this asset/company/currency doing now? | CoinGecko, SEC EDGAR, Frankfurter (ECB) |
 | Procurement & Public Contracts | who receives public money / contracts? | USAspending.gov, World Bank projects |
 | Ownership & control networks | who owns / controls this entity? | GLEIF Level-2 (parents, ultimate parents, subsidiaries) |
+| News & Signals | what are the top world events / topic coverage? | GDELT, Wikipedia "In the news" (see docs/NEWS.md) |
 | AI-analyst layer | triage + summarize + suggest next pivot | Claude (Anthropic API) over our own evidence |
 
 ### ⏭️ Planned families (all lawful, free-source-first)

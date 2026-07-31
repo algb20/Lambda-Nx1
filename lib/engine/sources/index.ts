@@ -25,6 +25,8 @@ import { coingecko, edgar, frankfurter } from './markets'
 import { usaspending, worldbankProjects } from './procurement'
 // Gateway — Ownership & beneficial-control networks
 import { gleifOwnership } from './ownership'
+// Gateway — News & Signals
+import { gdeltNews, wikiInTheNews } from './news'
 
 export const moduleOneSources: Source[] = [
   cloudflareDns,
@@ -47,6 +49,8 @@ export const marketsGatewaySources: Source[] = [coingecko, edgar, frankfurter]
 export const procurementGatewaySources: Source[] = [usaspending, worldbankProjects]
 
 export const ownershipGatewaySources: Source[] = [gleifOwnership]
+
+export const newsGatewaySources: Source[] = [gdeltNews, wikiInTheNews]
 
 interface CatalogRow {
   key: string
@@ -99,6 +103,11 @@ export const ownershipGatewayCatalog: CatalogRow[] = [
   { key: 'gleif_ownership', name: 'GLEIF ownership (Level 2)', capability: 'ownership', passive: true, enabled: true },
 ]
 
+export const newsGatewayCatalog: CatalogRow[] = [
+  { key: 'gdelt', name: 'GDELT global news', capability: 'news', passive: true, enabled: true },
+  { key: 'wikipedia_itn', name: 'Wikipedia In the news', capability: 'news', passive: true, enabled: true },
+]
+
 export const allSourceCatalog: CatalogRow[] = [
   ...moduleOneSourceCatalog,
   ...moduleTwoSourceCatalog,
@@ -107,6 +116,7 @@ export const allSourceCatalog: CatalogRow[] = [
   ...marketsGatewayCatalog,
   ...procurementGatewayCatalog,
   ...ownershipGatewayCatalog,
+  ...newsGatewayCatalog,
 ]
 
 let registeredOne = false
@@ -159,6 +169,13 @@ export function registerOwnershipGateway(): void {
   registeredOwnership = true
 }
 
+let registeredNews = false
+export function registerNewsGateway(): void {
+  if (registeredNews) return
+  registry.registerAll(newsGatewaySources)
+  registeredNews = true
+}
+
 export function registerAllSources(): void {
   registerModuleOneSources()
   registerModuleTwoSources()
@@ -167,6 +184,7 @@ export function registerAllSources(): void {
   registerMarketsGateway()
   registerProcurementGateway()
   registerOwnershipGateway()
+  registerNewsGateway()
 }
 
 export {
