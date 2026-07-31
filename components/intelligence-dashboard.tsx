@@ -14,6 +14,7 @@ import {
   ExternalLink,
   MapPin,
 } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -23,6 +24,8 @@ import type { UsernameReport, EmailReport } from '@/lib/modules/identity'
 import type { MediaReport } from '@/lib/modules/media'
 import type { ThreatReport } from '@/lib/modules/threat'
 import type { FinanceReport } from '@/lib/modules/finance'
+import type { Evidence } from '@/lib/engine/types'
+import type { AnalystVerdict, Severity } from '@/lib/ai/types'
 
 type Mode = 'domain' | 'username' | 'email' | 'threat' | 'finance' | 'media'
 type Result =
@@ -338,6 +341,157 @@ function MediaView({ r }: { r: MediaReport }) {
   )
 }
 
+/**
+ * Pull the graded evidence out of any report so the AI analyst can triage it.
+ * We strip the raw `data` payload — the analyst reasons over the claims, sources
+ * and grades, not the bytes — which keeps the request lean. Media analysis is
+ * local/metadata and has no Evidence[] model, so it opts out.
+ */
+function collectFindings(result: Result): { subject: string; gateway: string; findings: Evidence[] } | null {
+  const slim = (list: Evidence[]): Evidence[] =>
+    list.map(({ claim, entity, sourceKey, sourceUrl, retrievedAt, admiralty, confidence }) => ({
+      claim,
+      entity,
+      sourceKey,
+      sourceUrl,
+      retrievedAt,
+      admiralty,
+      confidence,
+    }))
+
+  switch (result.kind) {
+    case 'domain': {
+      const findings = Object.values(result.data.sections).flat() as Evidence[]
+      return { subject: result.data.subject, gateway: 'domain', findings: slim(findings) }
+    }
+    case 'username':
+      return { subject: result.data.subject, gateway: 'username', findings: slim(result.data.found) }
+    case 'email':
+      return {
+        subject: result.data.subject,
+        gateway: 'email',
+        findings: slim([...result.data.breaches, ...result.data.profiles]),
+      }
+    case 'threat':
+      return { subject: result.data.indicator, gateway: 'threat', findings: slim(result.data.findings) }
+    case 'finance':
+      return { subject: result.data.subject, gateway: 'finance', findings: slim(result.data.findings) }
+    case 'media':
+      return null
+  }
+}
+
+const SEVERITY_STYLE: Record<Severity, string> = {
+  critical: 'border-destructive/60 text-destructive',
+  high: 'border-destructive/50 text-destructive',
+  medium: 'border-amber-500/50 text-amber-600',
+  low: 'border-border text-muted-foreground',
+  info: 'border-border text-muted-foreground',
+}
+
+function AiAnalystPanel({ subject, gateway, findings }: { subject: string; gateway: string; findings: Evidence[] }) {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [verdict, setVerdict] = useState<AnalystVerdict | null>(null)
+
+  const run = async () => {
+    if (loading) return
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/analyst', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subject, gateway, findings }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error ?? 'Analysis failed')
+      setVerdict(data as AnalystVerdict)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Analysis failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Card className="p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-primary" />
+          <h4 className="text-sm font-semibold">AI analyst</h4>
+        </div>
+        <Button size="sm" variant="outline" onClick={run} disabled={loading || findings.length === 0}>
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : verdict ? 'Re-analyze' : 'Analyze with AI'}
+        </Button>
+      </div>
+      <p className="mt-1 text-[11px] text-muted-foreground">
+        Triages the findings above — it summarizes and prioritizes, it never adds or verifies facts.
+      </p>
+
+      {error ? (
+        <div className="mt-3 flex items-center gap-2 text-sm text-destructive">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          {error}
+        </div>
+      ) : null}
+
+      {verdict ? (
+        !verdict.configured ? (
+          <p className="mt-3 text-sm text-muted-foreground">{verdict.summary}</p>
+        ) : (
+          <div className="mt-3 space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline" className={SEVERITY_STYLE[verdict.severity]}>
+                {verdict.severity.toUpperCase()}
+              </Badge>
+              {verdict.confidenceCaveat ? (
+                <Badge variant="outline" className="border-amber-500/50 text-amber-600">
+                  Low-confidence evidence
+                </Badge>
+              ) : null}
+              {verdict.model ? (
+                <span className="text-[10px] text-muted-foreground">{verdict.model}</span>
+              ) : null}
+            </div>
+            <p className="text-sm leading-relaxed">{verdict.summary}</p>
+            {verdict.keyPoints.length > 0 ? (
+              <div>
+                <p className="mb-1 text-xs font-semibold text-muted-foreground">Key points</p>
+                <ul className="list-disc space-y-1 pl-5 text-sm">
+                  {verdict.keyPoints.map((k, i) => (
+                    <li key={i}>{k}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+            {verdict.nextSteps.length > 0 ? (
+              <div>
+                <p className="mb-1 text-xs font-semibold text-muted-foreground">Suggested next pivots</p>
+                <ul className="list-disc space-y-1 pl-5 text-sm">
+                  {verdict.nextSteps.map((s, i) => (
+                    <li key={i}>{s}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+            {verdict.needsVerification.length > 0 ? (
+              <div>
+                <p className="mb-1 text-xs font-semibold text-amber-600">Needs independent verification</p>
+                <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                  {verdict.needsVerification.map((v, i) => (
+                    <li key={i}>{v}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </div>
+        )
+      ) : null}
+    </Card>
+  )
+}
+
 function readFileAsBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -357,6 +511,7 @@ export function IntelligenceDashboard() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   const active = MODES.find((m) => m.id === mode)!
+  const aiInput = result ? collectFindings(result) : null
 
   const reset = () => {
     setResult(null)
@@ -495,6 +650,15 @@ export function IntelligenceDashboard() {
       {result?.kind === 'threat' ? <ThreatView r={result.data} /> : null}
       {result?.kind === 'finance' ? <FinanceView r={result.data} /> : null}
       {result?.kind === 'media' ? <MediaView r={result.data} /> : null}
+
+      {aiInput && aiInput.findings.length > 0 ? (
+        <AiAnalystPanel
+          key={`${aiInput.gateway}:${aiInput.subject}`}
+          subject={aiInput.subject}
+          gateway={aiInput.gateway}
+          findings={aiInput.findings}
+        />
+      ) : null}
     </div>
   )
 }

@@ -18,12 +18,12 @@ This design is future-proof: the platform grows by *families*, not rewrites.
 | Monitoring / Radar | change detection | reuses Domain family |
 | Threat (CTI) | is this IP/domain/URL/hash malicious? | Feodo Tracker, URLhaus, ThreatFox (abuse.ch) |
 | Financial / Sanctions / Corporate | is this entity/wallet safe to deal with? | OpenSanctions, GLEIF, mempool.space |
+| AI-analyst layer | triage + summarize + suggest next pivot | Claude (Anthropic API) over our own evidence |
 
 ### ⏭️ Planned families (all lawful, free-source-first)
 | Gateway | What it answers | Candidate free sources | Tier |
 |---|---|---|---|
 | **Geospatial / Transport** | where/when did this happen? | OpenStreetMap/Overpass, OpenSky (flights), AIS/marine | free + paid |
-| **AI-analyst layer** | triage + summarize + suggest next pivot | Claude (Anthropic API) over our own evidence | **paid** |
 
 Each planned gateway follows the shipped pattern: `lib/engine/sources/*`, a
 `lib/modules/*` orchestrator returning a documented report, an API route, and a UI mode —

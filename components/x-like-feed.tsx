@@ -2,7 +2,7 @@
 
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Radar, Globe, AtSign, Image, Bell, ShieldCheck, ShieldAlert, Landmark } from 'lucide-react'
+import { Radar, Globe, AtSign, Image, Bell, ShieldCheck, ShieldAlert, Landmark, Sparkles } from 'lucide-react'
 
 /**
  * Home screen. The previous version rendered a fabricated social feed
@@ -45,6 +45,12 @@ const modules = [
     icon: Bell,
     title: 'Monitoring & alerts',
     desc: 'Watch a domain and get alerted when its public footprint changes.',
+    status: 'Ready',
+  },
+  {
+    icon: Sparkles,
+    title: 'AI analyst',
+    desc: 'Triages any report — summarizes, grades severity, suggests the next pivot. It sorts the evidence, it never verifies for you.',
     status: 'Ready',
   },
 ]

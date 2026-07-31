@@ -63,8 +63,8 @@ sync; never skip a point or a test.
 ### P8 — More gateways (multi-gateway vision; see docs/GATEWAYS.md)
 - [x] Threat Intelligence (CTI): Feodo/URLhaus/ThreatFox + module + API + UI mode + tests
 - [x] Financial / Sanctions / Corporate: OpenSanctions/GLEIF/mempool + module + API + UI + tests (migration 0003 adds company/person entity types)
+- [x] AI-analyst layer (#24): `lib/ai` (Claude provider behind a swappable port) + `lib/modules/analyst` + auth-gated `POST /api/analyst` + "Analyze with AI" panel over every report + tests. Sorts, never verifies; degrades gracefully with no key.
 - [ ] Geospatial / Transport (#23)
-- [ ] AI-analyst layer (#24)
 - [ ] Subscription tiers free/paid (#25)
 - Note: guardrail now allows provider POST (allowlist remains the passive guarantee).
 
