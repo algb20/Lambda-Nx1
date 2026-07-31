@@ -15,6 +15,7 @@ import {
   Radio,
   Gauge,
   ScanSearch,
+  Crosshair,
   Zap,
   Loader2,
   ShieldCheck,
@@ -38,11 +39,13 @@ import type { OwnershipReport } from '@/lib/modules/ownership'
 import type { NewsReport } from '@/lib/modules/news'
 import type { MarketsBoardReport } from '@/lib/modules/markets-board'
 import type { NexusReport } from '@/lib/modules/nexus'
+import { TargetTracker } from '@/components/target-tracker'
 import type { Evidence } from '@/lib/engine/types'
 import type { AnalystVerdict, Severity } from '@/lib/ai/types'
 
 type Mode =
   | 'nexus'
+  | 'track'
   | 'domain'
   | 'username'
   | 'email'
@@ -56,6 +59,7 @@ type Mode =
   | 'media'
 type Result =
   | { kind: 'nexus'; data: NexusReport }
+  | { kind: 'track'; data: { query: string } }
   | { kind: 'domain'; data: DomainReport }
   | { kind: 'username'; data: UsernameReport }
   | { kind: 'email'; data: EmailReport }
@@ -70,6 +74,7 @@ type Result =
 
 const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: string }> = [
   { id: 'nexus', label: 'Unified', icon: ScanSearch, placeholder: 'anything — domain, IP, email, company, wallet, hash…' },
+  { id: 'track', label: 'Track', icon: Crosshair, placeholder: 'track a target live — stock, coin, company, domain…' },
   { id: 'domain', label: 'Domain', icon: Globe, placeholder: 'example.com' },
   { id: 'username', label: 'Username', icon: AtSign, placeholder: 'octocat' },
   { id: 'email', label: 'Email', icon: Mail, placeholder: 'name@example.com' },
@@ -819,6 +824,8 @@ function collectFindings(result: Result): { subject: string; gateway: string; fi
     }))
 
   switch (result.kind) {
+    case 'track':
+      return null // the tracker streams its own signature; no static AI panel
     case 'nexus':
       return { subject: result.data.input, gateway: result.data.selectorType, findings: slim(result.data.findings) }
     case 'domain': {
@@ -1018,6 +1025,12 @@ export function IntelligenceDashboard() {
           imageBase64: file ? await readFileAsBase64(file) : undefined,
           imageUrl: query.trim() || undefined,
         }
+      } else if (mode === 'track') {
+        const value = query.trim()
+        if (!value) throw new Error('Enter a target to track.')
+        setResult({ kind: 'track', data: { query: value } })
+        setLoading(false)
+        return
       } else if (mode === 'board') {
         endpoint = '/api/intelligence/board'
         payload = {}
@@ -1116,6 +1129,8 @@ export function IntelligenceDashboard() {
               'Load'
             ) : mode === 'news' ? (
               'Fetch'
+            ) : mode === 'track' ? (
+              'Track'
             ) : (
               'Investigate'
             )}
@@ -1136,6 +1151,7 @@ export function IntelligenceDashboard() {
       ) : null}
 
       {result?.kind === 'nexus' ? <NexusView r={result.data} /> : null}
+      {result?.kind === 'track' ? <TargetTracker query={result.data.query} /> : null}
       {result?.kind === 'domain' ? <DomainView r={result.data} /> : null}
       {result?.kind === 'username' ? <UsernameView r={result.data} /> : null}
       {result?.kind === 'email' ? <EmailView r={result.data} /> : null}

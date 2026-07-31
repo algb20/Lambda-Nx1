@@ -17,6 +17,7 @@ import {
   Newspaper,
   Lightbulb,
   ScanSearch,
+  Crosshair,
   Search,
   ArrowRight,
   Activity,
@@ -60,6 +61,7 @@ const FAMILIES: Family[] = [
     blurb: 'One query, the whole picture — fast.',
     items: [
       { icon: ScanSearch, title: 'Unified investigation (Nexus)', desc: 'Type anything — domain, IP, email, company, wallet, hash. We classify it and run every relevant gateway in parallel into one graded dossier with a link graph and AI triage. Instant, auditable.', status: 'Live', tab: 'intelligence', tag: 'nexus' },
+      { icon: Crosshair, title: 'Live target tracking', desc: 'A radar per target: static identity kept apart from a live event stream (partnerships, filings, price, decisions) + published outlook + our correlation. Streamed over an always-open door — no polling.', status: 'Live', tab: 'intelligence', tag: 'track' },
     ],
   },
   {
