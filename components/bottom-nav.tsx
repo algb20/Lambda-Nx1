@@ -1,14 +1,18 @@
 "use client"
 
-import { Zap, User, Building2, Settings, Brain, Cpu } from "lucide-react"
+import { Zap, User, Building2, Settings, Brain, Cpu, Lightbulb } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useT } from "@/lib/i18n"
+
+type Tab = "feed" | "personal" | "enterprise" | "intelligence" | "swarm" | "ideas" | "preferences"
 
 interface BottomNavProps {
-  activeTab: "feed" | "personal" | "enterprise" | "intelligence" | "swarm" | "preferences"
-  setActiveTab: (tab: "feed" | "personal" | "enterprise" | "intelligence" | "swarm" | "preferences") => void
+  activeTab: Tab
+  setActiveTab: (tab: Tab) => void
 }
 
 export function BottomNav({ activeTab, setActiveTab }: BottomNavProps) {
+  const t = useT()
   return (
     <nav className="fixed bottom-0 left-0 right-0 border-t border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 z-50">
       <div className="container mx-auto px-4 max-w-2xl">
@@ -66,6 +70,17 @@ export function BottomNav({ activeTab, setActiveTab }: BottomNavProps) {
           >
             <Cpu className="h-5 w-5" />
             <span className="text-[10px] font-medium">Swarm</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("ideas")}
+            className={cn(
+              "flex flex-col items-center gap-1 transition-colors",
+              activeTab === "ideas" ? "text-primary" : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <Lightbulb className="h-5 w-5" />
+            <span className="text-[10px] font-medium">{t("nav.ideas")}</span>
           </button>
 
           <button

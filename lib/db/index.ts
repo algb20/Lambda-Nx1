@@ -27,6 +27,8 @@ export type Alert = typeof s.alerts.$inferSelect
 export type RadarFinding = typeof s.radarFindings.$inferSelect
 export type NewRadarFinding = typeof s.radarFindings.$inferInsert
 export type Source = typeof s.sources.$inferSelect
+export type Suggestion = typeof s.suggestions.$inferSelect
+export type NewSuggestion = typeof s.suggestions.$inferInsert
 
 export const repo = {
   users: {
@@ -308,6 +310,50 @@ export const repo = {
         ? await q.where(eq(s.radarFindings.kind, kind)).orderBy(desc(s.radarFindings.retrievedAt)).limit(limit)
         : await q.orderBy(desc(s.radarFindings.retrievedAt)).limit(limit)
       return rows
+    },
+  },
+
+  suggestions: {
+    async create(input: NewSuggestion): Promise<Suggestion> {
+      const db = getDb()
+      const [row] = await db.insert(s.suggestions).values(input).returning()
+      return row
+    },
+    async list(limit = 200): Promise<Suggestion[]> {
+      const db = getDb()
+      return db.select().from(s.suggestions).orderBy(desc(s.suggestions.createdAt)).limit(limit)
+    },
+    async listByUser(userId: string, limit = 100): Promise<Suggestion[]> {
+      const db = getDb()
+      return db
+        .select()
+        .from(s.suggestions)
+        .where(eq(s.suggestions.userId, userId))
+        .orderBy(desc(s.suggestions.createdAt))
+        .limit(limit)
+    },
+    async getById(id: string): Promise<Suggestion | undefined> {
+      const db = getDb()
+      const [row] = await db.select().from(s.suggestions).where(eq(s.suggestions.id, id)).limit(1)
+      return row
+    },
+    async incrementVotes(id: string): Promise<Suggestion | undefined> {
+      const db = getDb()
+      const [row] = await db
+        .update(s.suggestions)
+        .set({ votes: sql`${s.suggestions.votes} + 1` })
+        .where(eq(s.suggestions.id, id))
+        .returning()
+      return row
+    },
+    async setStatus(id: string, status: Suggestion['status']): Promise<Suggestion | undefined> {
+      const db = getDb()
+      const [row] = await db
+        .update(s.suggestions)
+        .set({ status })
+        .where(eq(s.suggestions.id, id))
+        .returning()
+      return row
     },
   },
 

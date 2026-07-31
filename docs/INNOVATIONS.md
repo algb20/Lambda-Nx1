@@ -55,7 +55,23 @@ every claim carries its source, timestamp, Admiralty rating and confidence — a
 tamper-evident hash chain. Shareability + auditability = the artifact institutions
 circulate internally. Drives organic, cross-org adoption.
 
-## 6. Agentic "explain & pivot" copilot  ⏭️ proposed
+## 6. Self-organizing community feedback loop  ✅ shipped
+
+Every user (weighted by influence — tier/usage) sends ideas in **any language**;
+each is **AI-triaged** (kind, impact, effort, sentiment, summary, tags) and
+**auto-clustered** so a hundred people asking the same thing collapse into one
+high-signal item, ranked by *impact × influence × demand*. The backlog organizes
+itself; humans decide what to build. This turns users into the roadmap and
+subscribers into a prioritized voice — a real adoption + retention driver.
+→ `lib/modules/suggestions.ts`, `lib/ai/suggestions.ts`, "Ideas" tab.
+
+## 7. Every-language by design  ✅ foundation shipped
+
+`lib/i18n` (locale + automatic RTL + fallback) means the product speaks the
+user's language — Arabic (RTL) and English today, any language by adding a
+dictionary. Input content was already language-agnostic (engine + AI + news).
+
+## 8. Agentic "explain & pivot" copilot  ⏭️ proposed
 
 The AI analyst already triages; the next step is *suggest-and-run*: it proposes the
 strongest next passive pivot and (on approval) executes it, walking the graph for

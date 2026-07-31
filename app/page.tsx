@@ -6,12 +6,13 @@ import { PersonalDashboard } from "@/components/personal-dashboard"
 import { EnterpriseDashboard } from "@/components/enterprise-dashboard"
 import { IntelligenceDashboard } from "@/components/intelligence-dashboard"
 import { AgenticSwarmDashboard } from "@/components/swarm-dashboard"
+import { SuggestionsPanel } from "@/components/suggestions-panel"
 import { UserPreferences } from "@/components/user-preferences"
 import { BottomNav } from "@/components/bottom-nav"
 import { Header } from "@/components/header"
 
 export default function HomePage() {
-  const [activeTab, setActiveTab] = useState<"feed" | "personal" | "enterprise" | "intelligence" | "swarm" | "preferences">("feed")
+  const [activeTab, setActiveTab] = useState<"feed" | "personal" | "enterprise" | "intelligence" | "swarm" | "ideas" | "preferences">("feed")
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -23,6 +24,7 @@ export default function HomePage() {
         {activeTab === "enterprise" && <EnterpriseDashboard />}
         {activeTab === "intelligence" && <IntelligenceDashboard />}
         {activeTab === "swarm" && <AgenticSwarmDashboard />}
+        {activeTab === "ideas" && <SuggestionsPanel />}
         {activeTab === "preferences" && <UserPreferences />}
       </main>
 

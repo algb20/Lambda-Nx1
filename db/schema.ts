@@ -49,6 +49,25 @@ export const confidenceEnum = pgEnum('confidence', [
   'unconfirmed',
 ])
 
+export const suggestionKindEnum = pgEnum('suggestion_kind', [
+  'feature',
+  'improvement',
+  'bug',
+  'integration',
+  'data_source',
+  'other',
+])
+export const suggestionStatusEnum = pgEnum('suggestion_status', [
+  'new',
+  'triaged',
+  'planned',
+  'in_progress',
+  'shipped',
+  'declined',
+])
+export const impactEnum = pgEnum('impact', ['low', 'medium', 'high', 'critical'])
+export const effortEnum = pgEnum('effort', ['small', 'medium', 'large'])
+
 export const scanStatusEnum = pgEnum('scan_status', ['queued', 'running', 'done', 'error'])
 export const investigationStatusEnum = pgEnum('investigation_status', ['open', 'archived'])
 export const monitorStatusEnum = pgEnum('monitor_status', ['active', 'paused'])
@@ -248,3 +267,40 @@ export const radarFindings = pgTable('radar_findings', {
   dedupeHash: text('dedupe_hash').notNull().unique(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
+
+// ── Suggestions (the community feedback loop, AI-triaged) ────────────────────
+
+export const suggestions = pgTable(
+  'suggestions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    /** Author. Null after account deletion, but the (anonymized) idea survives. */
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+    title: text('title').notNull(),
+    body: text('body').notNull(),
+    /** Preferred language of the submission (BCP-47), for i18n round-tripping. */
+    locale: text('locale'),
+    kind: suggestionKindEnum('kind').notNull().default('other'),
+    status: suggestionStatusEnum('status').notNull().default('new'),
+    // ── AI triage output ──
+    category: text('category'),
+    impact: impactEnum('impact'),
+    effort: effortEnum('effort'),
+    sentiment: text('sentiment'),
+    /** One-line neutral summary produced by the analyst. */
+    summary: text('summary'),
+    tags: jsonb('tags'),
+    /** Stable key grouping near-duplicate ideas so 100 asks become one signal. */
+    clusterKey: text('cluster_key'),
+    /** Influence weight of the submitter (tier/usage). Higher = louder signal. */
+    submitterWeight: integer('submitter_weight').notNull().default(1),
+    votes: integer('votes').notNull().default(0),
+    triagedAt: timestamp('triaged_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('suggestions_status_idx').on(t.status),
+    index('suggestions_cluster_idx').on(t.clusterKey),
+    index('suggestions_user_idx').on(t.userId),
+  ],
+)

@@ -1,12 +1,19 @@
 "use client"
 
-import { Moon, Sun, Radar, ShieldCheck, CreditCard } from "lucide-react"
+import { Moon, Sun, Radar, ShieldCheck, CreditCard, Languages } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useTheme } from "@/hooks/use-theme"
+import { useI18n, LOCALES, LOCALE_LABELS } from "@/lib/i18n"
 
 export function Header() {
   const { theme, toggleTheme } = useTheme()
+  const { locale, setLocale, t } = useI18n()
+
+  const cycleLocale = () => {
+    const i = LOCALES.indexOf(locale)
+    setLocale(LOCALES[(i + 1) % LOCALES.length])
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
@@ -19,7 +26,7 @@ export function Header() {
             </div>
             <div>
               <h1 className="text-lg font-bold leading-none tracking-tight">Lambda NX</h1>
-              <p className="text-[10px] text-muted-foreground leading-none">Intelligence platform</p>
+              <p className="text-[10px] text-muted-foreground leading-none">{t('app.tagline')}</p>
             </div>
           </div>
 
@@ -29,8 +36,18 @@ export function Header() {
               className="hidden sm:flex text-xs bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
             >
               <ShieldCheck className="h-3 w-3 mr-1" />
-              Passive · Lawful
+              {t('badge.passiveLawful')}
             </Badge>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={cycleLocale}
+              className="h-8 gap-1 px-2 text-xs"
+              title={LOCALE_LABELS[locale]}
+            >
+              <Languages className="h-4 w-4" />
+              <span className="uppercase">{locale}</span>
+            </Button>
             <Button
               variant="outline"
               size="sm"

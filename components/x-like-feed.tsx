@@ -15,6 +15,7 @@ import {
   Network,
   Sparkles,
   Newspaper,
+  Lightbulb,
   ScanSearch,
   Search,
   ArrowRight,
@@ -27,6 +28,7 @@ import {
 import type { LucideIcon } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { useT } from '@/lib/i18n'
 
 /**
  * Home — an intelligence feed (Twitter-like stream, analyst aesthetic). It is the
@@ -35,7 +37,7 @@ import { Badge } from '@/components/ui/badge'
  * card opens a real tool. Keeps the app's shadcn/Tailwind visual language.
  */
 
-type NavTab = 'intelligence' | 'swarm' | 'preferences'
+type NavTab = 'intelligence' | 'swarm' | 'ideas' | 'preferences'
 
 interface FeedItem {
   icon: LucideIcon
@@ -94,6 +96,7 @@ const FAMILIES: Family[] = [
       { icon: Newspaper, title: 'News & signals', desc: 'Top world events and topic coverage from primary sources — live, non-stop, linking to origin. We surface and grade, we don’t reprint.', status: 'Live', tab: 'intelligence', tag: 'news' },
       { icon: Sparkles, title: 'AI analyst', desc: 'Triages any report — summarizes, grades severity, suggests the next pivot. Sorts, never verifies.', status: 'Live', tab: 'intelligence', tag: 'ai' },
       { icon: Bell, title: 'Monitoring & radar', desc: 'Watch a subject and get alerted when its public footprint changes.', status: 'Live', tab: 'swarm', tag: 'radar' },
+      { icon: Lightbulb, title: 'Ideas & feedback', desc: 'Send suggestions in any language. Each is AI-triaged and clustered so the most-wanted rise to the top — the community shapes the roadmap.', status: 'Live', tab: 'ideas', tag: 'ideas' },
     ],
   },
   {
@@ -122,6 +125,7 @@ function StatusChip({ status }: { status: FeedItem['status'] }) {
 }
 
 export function XLikeFeed({ onNavigate }: { onNavigate?: (tab: NavTab) => void }) {
+  const t = useT()
   const liveCount = FAMILIES.flatMap((f) => f.items).filter((i) => i.status === 'Live').length
 
   return (
@@ -162,13 +166,11 @@ export function XLikeFeed({ onNavigate }: { onNavigate?: (tab: NavTab) => void }
             <Search className="h-4 w-4 text-primary" />
           </span>
           <span className="flex-1">
-            <span className="block text-sm text-foreground">Investigate anything — one query, full dossier</span>
-            <span className="block text-[11px] text-muted-foreground">
-              domain · IP · email · company · wallet · hash — every gateway at once, in an instant
-            </span>
+            <span className="block text-sm text-foreground">{t('feed.hero.title')}</span>
+            <span className="block text-[11px] text-muted-foreground">{t('feed.hero.sub')}</span>
           </span>
           <span className="flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">
-            Open <ArrowRight className="h-3 w-3" />
+            {t('feed.open')} <ArrowRight className="h-3 w-3" />
           </span>
         </button>
       </Card>
