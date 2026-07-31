@@ -86,6 +86,42 @@ Radar first.
 - **Firms to learn systems thinking from**: Palantir, Anduril, Scale AI, C3 AI,
   Glean, Weights & Biases, Together AI, Perplexity, Cognition, Sierra, Harvey.
 
+## From the ChatGPT research — what we took, what we left (and why)
+
+The user sent a long, **unstructured** ChatGPT conversation (it wasn't given enough
+context), with the instruction: *organize, select and apply what serves us —
+inspiration, ideas, even development — not a copy.* Here is the honest accounting.
+
+### Taken & applied (ideas → our decisions)
+- **Palantir Ontology / Foundry / AIP / Apollo thinking** → our **North Star**;
+  logged as **Adopt** → task **#37** (Ontology layer over `entities/links`).
+- **Decision Intelligence + Digital Twin** → mapped onto our confidence grading and
+  the **target tracker** (a live "lite twin"): already shipped, now named.
+- **Multi-agent / MCP / Computer-Use / Tool-Use / Reasoning** → our **agentic
+  "pivot copilot"** (planned innovation) — agent proposes & runs the next pivot.
+- **Neuro-symbolic + Causal AI** → **Trial**: guard AI output with rules; add causal
+  links to the target **signature**.
+- **Verifiable Credentials / DID** → **Assess**: natural fit with **Pi identity** +
+  our signed-dossier innovation.
+- **Event Sourcing / CQRS / Data Mesh / OpenTelemetry / Zero-Trust / Confidential /
+  Privacy-preserving AI** → mapped to our evidence archive, stream read-model,
+  multi-source design, passive guardrail and data-minimization.
+- **Source priorities** → the library above, **ranked for an intelligence platform**
+  (security + AI research + arXiv first), with ⭐ items to automate via the Radar.
+
+### Left on purpose (and why)
+- **The raw 1000+ "Black Tech Map" dump** → we don't need a name-dump; our *prioritized,
+  automated* feed is the right form. Offered, declined — by design.
+- **Autonomous-weapons / defense domains** (Anduril, Helsing, Rebellion) → study their
+  **systems thinking** only; the application is **Hold** (off-mission, unlawful for us).
+- **Generic "study these companies" lists** → kept only the *architectural patterns*
+  that change how we build; dropped the rest as noise from an under-informed chat.
+- **Marketing-grade futures** (e.g. "quantum-safe") → **Hold** (we already removed that
+  fantasy); real items like World Models / Agentic-OS stay in **Assess**.
+
+**Net:** we took *thinking and priorities*, turned them into **rings, decisions and
+tasks (#37, #27)**, and left the copy-paste. That is the instruction, applied.
+
 ## Cadence — the weekly review (the process, not a vibe)
 
 1. **Scan** the ⭐ feeds (many are automatable via the Radar module `#10/#27`; the
