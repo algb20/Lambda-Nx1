@@ -76,6 +76,25 @@ export async function resolveClaim(port: CalibrationPort, id: string, outcome: O
   await port.resolve(id, outcome, note)
 }
 
+/**
+ * Claims whose horizon has passed but are still open — i.e. ready for a human (or
+ * ground-truth) to score. We never auto-fabricate an outcome; we surface these.
+ */
+export function dueForReview(rows: CalibrationClaimRow[], now: Date = new Date()): CalibrationClaimRow[] {
+  return rows.filter((r) => r.status === 'open' && r.horizon !== null && r.horizon.getTime() <= now.getTime())
+}
+
+/** Record a target's published forward-looking items into the ledger (deduped). */
+export async function captureForecasts(
+  port: CalibrationPort,
+  subject: string,
+  horizon: Array<{ title: string; sourceKey: string; sourceUrl?: string; at: string }>,
+): Promise<number> {
+  const claims = forecastsFromHorizon(subject, horizon)
+  for (const c of claims) await recordClaim(port, c)
+  return claims.length
+}
+
 // ── Scoring (pure) ───────────────────────────────────────────────────────────
 
 const OUTCOME_WEIGHT: Record<Outcome, number> = { correct: 1, partial: 0.5, wrong: 0 }

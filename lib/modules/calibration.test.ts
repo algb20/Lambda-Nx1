@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import {
   calibrationHash,
+  captureForecasts,
+  dueForReview,
   forecastsFromHorizon,
   recordClaim,
   resolveClaim,
@@ -97,5 +99,34 @@ describe('forecastsFromHorizon', () => {
       { title: 'Acme will report Q3 earnings', sourceKey: 'gdelt', sourceUrl: 'https://n/a', at: 't' },
     ])
     expect(claims[0]).toMatchObject({ authorKind: 'external', author: 'gdelt', topic: 'Acme' })
+  })
+})
+
+describe('captureForecasts', () => {
+  it('records each horizon item as a deduped external claim', async () => {
+    const p = fakePort()
+    const n = await captureForecasts(p, 'Acme', [
+      { title: 'Acme will report Q3 earnings', sourceKey: 'gdelt', at: 't' },
+      { title: 'Acme will report Q3 earnings', sourceKey: 'gdelt', at: 't' }, // dup
+    ])
+    expect(n).toBe(2)
+    expect(p.rows).toHaveLength(1) // deduped in the store
+    expect(p.rows[0].authorKind).toBe('external')
+  })
+})
+
+describe('dueForReview', () => {
+  it('returns only open claims whose horizon has passed', () => {
+    const past = new Date(Date.now() - 86_400_000)
+    const future = new Date(Date.now() + 86_400_000)
+    const rows: CalibrationClaimRow[] = [
+      row({ status: 'open', outcome: null, horizon: past }), // due
+      row({ status: 'open', outcome: null, horizon: future }), // not yet
+      row({ status: 'open', outcome: null, horizon: null }), // no horizon
+      row({ status: 'resolved', outcome: 'correct', horizon: past }), // already done
+    ]
+    const due = dueForReview(rows)
+    expect(due).toHaveLength(1)
+    expect(due[0].horizon).toBe(past)
   })
 })

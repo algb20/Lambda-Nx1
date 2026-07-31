@@ -20,6 +20,9 @@ import { registerAllSources } from '../engine/sources'
 import { classifySelector, type SelectorType } from './nexus'
 import { getAiProvider } from '../ai'
 import type { AiProvider } from '../ai/types'
+import { isDbConfigured } from '../db'
+import { captureForecasts } from './calibration'
+import { defaultCalibrationPort } from './calibration-port'
 import type { Capability, Evidence } from '../engine/types'
 
 export type EventWhen = 'past' | 'now' | 'future'
@@ -183,6 +186,16 @@ export async function buildTargetProfile(input: string, deps: TargetDeps = {}): 
         configured: verdict.configured,
       }
     : { summary: '', correlations: [], watch: [], needsVerification: [], configured: false }
+
+  // Feed the calibration ledger: published forward-looking items become tracked
+  // claims (best-effort; only when a DB is configured; never blocks the profile).
+  if (isDbConfigured() && horizon.length > 0) {
+    try {
+      await captureForecasts(defaultCalibrationPort, raw, horizon)
+    } catch {
+      /* opportunistic — the profile stands on its own */
+    }
+  }
 
   return {
     input: raw,
