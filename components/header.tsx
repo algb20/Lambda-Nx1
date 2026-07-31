@@ -1,6 +1,6 @@
 "use client"
 
-import { Moon, Sun, Zap, Shield, CreditCard } from "lucide-react"
+import { Moon, Sun, Radar, ShieldCheck, CreditCard } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useTheme } from "@/hooks/use-theme"
@@ -14,24 +14,22 @@ export function Header() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="relative">
-              <Zap className="h-6 w-6 text-primary" fill="currentColor" />
-              <div className="absolute inset-0 animate-ping opacity-20">
-                <Zap className="h-6 w-6 text-primary" fill="currentColor" />
-              </div>
+              <Radar className="h-6 w-6 text-primary" />
+              <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-card" />
             </div>
             <div>
-              <h1 className="text-lg font-bold leading-none">AgentSwarm</h1>
-              <p className="text-[10px] text-muted-foreground leading-none">Quantum</p>
+              <h1 className="text-lg font-bold leading-none tracking-tight">Lambda NX</h1>
+              <p className="text-[10px] text-muted-foreground leading-none">Intelligence platform</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <Badge
               variant="outline"
-              className="hidden sm:flex text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+              className="hidden sm:flex text-xs bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
             >
-              <Shield className="h-3 w-3 mr-1" />
-              Quantum-Safe
+              <ShieldCheck className="h-3 w-3 mr-1" />
+              Passive · Lawful
             </Badge>
             <Button
               variant="outline"

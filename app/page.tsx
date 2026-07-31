@@ -18,7 +18,7 @@ export default function HomePage() {
       <Header />
 
       <main className="container mx-auto px-4 py-4 max-w-2xl">
-        {activeTab === "feed" && <XLikeFeed />}
+        {activeTab === "feed" && <XLikeFeed onNavigate={setActiveTab} />}
         {activeTab === "personal" && <PersonalDashboard />}
         {activeTab === "enterprise" && <EnterpriseDashboard />}
         {activeTab === "intelligence" && <IntelligenceDashboard />}

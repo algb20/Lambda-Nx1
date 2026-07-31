@@ -1,119 +1,213 @@
 'use client'
 
+import {
+  Radar,
+  Globe,
+  AtSign,
+  Image as ImageIcon,
+  Bell,
+  ShieldCheck,
+  ShieldAlert,
+  Landmark,
+  LineChart,
+  Gavel,
+  Network,
+  Sparkles,
+  Search,
+  ArrowRight,
+  Activity,
+  Microscope,
+  MapPin,
+  Boxes,
+  Building2,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Radar, Globe, AtSign, Image, Bell, ShieldCheck, ShieldAlert, Landmark, LineChart, Gavel, Network, Sparkles } from 'lucide-react'
 
 /**
- * Home screen. The previous version rendered a fabricated social feed
- * (hardcoded fake posts). Removed per charter rule #1. This is honest product
- * content — a description and the real module roadmap with live status.
+ * Home — an intelligence feed (Twitter-like stream, analyst aesthetic). It is the
+ * showcase of everything the platform now does: every live gateway, grouped by
+ * family, plus the honest roadmap of what's coming. No fabricated content; each
+ * card opens a real tool. Keeps the app's shadcn/Tailwind visual language.
  */
 
-const modules = [
+type NavTab = 'intelligence' | 'swarm' | 'preferences'
+
+interface FeedItem {
+  icon: LucideIcon
+  title: string
+  desc: string
+  status: 'Live' | 'Planned'
+  tab?: NavTab
+  tag: string
+}
+
+interface Family {
+  group: string
+  blurb: string
+  items: FeedItem[]
+}
+
+const FAMILIES: Family[] = [
   {
-    icon: Globe,
-    title: 'Domain & Infrastructure',
-    desc: 'DNS, RDAP/WHOIS, certificate-transparency subdomains, tech fingerprint, archive history, IP exposure.',
-    status: 'Ready',
+    group: 'OSINT core',
+    blurb: 'The founding discipline — public-footprint intelligence.',
+    items: [
+      { icon: Globe, title: 'Domain & infrastructure', desc: 'DNS, RDAP/WHOIS, CT-log subdomains, tech fingerprint, archive history, IP exposure.', status: 'Live', tab: 'intelligence', tag: 'domain' },
+      { icon: AtSign, title: 'Email & username footprint', desc: 'Breach-exposure checks and public-profile presence across many platforms.', status: 'Live', tab: 'intelligence', tag: 'identity' },
+      { icon: ImageIcon, title: 'Media verification', desc: 'Reverse-image links, EXIF/GPS metadata, AI-generation indicators — read locally.', status: 'Live', tab: 'intelligence', tag: 'media' },
+    ],
   },
   {
-    icon: AtSign,
-    title: 'Email & Username footprint',
-    desc: 'Breach-exposure checks and public-profile presence across many platforms.',
-    status: 'Ready',
+    group: 'Threat & risk',
+    blurb: 'Is this safe to deal with?',
+    items: [
+      { icon: ShieldAlert, title: 'Threat intelligence (CTI)', desc: 'Check an IP, domain, URL or hash against public threat feeds (abuse.ch).', status: 'Live', tab: 'intelligence', tag: 'threat' },
+      { icon: Landmark, title: 'Financial / sanctions', desc: 'Sanctions/PEP + legal-entity screening (OpenSanctions, GLEIF) and Bitcoin ledger facts.', status: 'Live', tab: 'intelligence', tag: 'finance' },
+    ],
   },
   {
-    icon: ShieldAlert,
-    title: 'Threat intelligence (CTI)',
-    desc: 'Check an IP, domain, URL or hash against public threat feeds (abuse.ch).',
-    status: 'Ready',
+    group: 'Money & power',
+    blurb: 'Follow the assets, the money, and the control.',
+    items: [
+      { icon: LineChart, title: 'Markets & economy', desc: 'Live crypto markets, public company filings (SEC EDGAR) and ECB reference FX.', status: 'Live', tab: 'intelligence', tag: 'markets' },
+      { icon: Gavel, title: 'Procurement & contracts', desc: 'Who receives public money — US federal awards and World Bank development finance.', status: 'Live', tab: 'intelligence', tag: 'contracts' },
+      { icon: Network, title: 'Ownership & control', desc: 'Parents, ultimate parents and subsidiaries mapped into a control graph (GLEIF L2).', status: 'Live', tab: 'intelligence', tag: 'ownership' },
+    ],
   },
   {
-    icon: Landmark,
-    title: 'Financial / sanctions',
-    desc: 'Sanctions/PEP + legal-entity screening (OpenSanctions, GLEIF) and Bitcoin ledger facts.',
-    status: 'Ready',
+    group: 'Intelligence layer',
+    blurb: 'On top of every gateway.',
+    items: [
+      { icon: Sparkles, title: 'AI analyst', desc: 'Triages any report — summarizes, grades severity, suggests the next pivot. Sorts, never verifies.', status: 'Live', tab: 'intelligence', tag: 'ai' },
+      { icon: Bell, title: 'Monitoring & radar', desc: 'Watch a subject and get alerted when its public footprint changes.', status: 'Live', tab: 'swarm', tag: 'radar' },
+    ],
   },
   {
-    icon: LineChart,
-    title: 'Markets & economy',
-    desc: 'Live crypto markets (CoinGecko), public company filings (SEC EDGAR) and ECB reference FX — facts with source and time. It reports the market, it never predicts it.',
-    status: 'Ready',
-  },
-  {
-    icon: Gavel,
-    title: 'Procurement & contracts',
-    desc: 'Who receives public money and contracts — US federal awards (USAspending) and World Bank development finance, from official published records.',
-    status: 'Ready',
-  },
-  {
-    icon: Network,
-    title: 'Ownership & control',
-    desc: 'Who owns and controls a company — parents, ultimate parents and subsidiaries mapped into a control graph from GLEIF Level-2 filed relationships.',
-    status: 'Ready',
-  },
-  {
-    icon: Image,
-    title: 'Media verification',
-    desc: 'Reverse-image links, EXIF metadata, AI-generated-content indicators.',
-    status: 'Ready',
-  },
-  {
-    icon: Bell,
-    title: 'Monitoring & alerts',
-    desc: 'Watch a domain and get alerted when its public footprint changes.',
-    status: 'Ready',
-  },
-  {
-    icon: Sparkles,
-    title: 'AI analyst',
-    desc: 'Triages any report — summarizes, grades severity, suggests the next pivot. It sorts the evidence, it never verifies for you.',
-    status: 'Ready',
+    group: 'Coming online',
+    blurb: 'Built the same way — passive, lawful, keyless-first. Roadmap, honestly labelled.',
+    items: [
+      { icon: MapPin, title: 'Geospatial & real estate', desc: 'Flights (OpenSky), maritime (AIS), OSM land-use, industrial & logistics assets.', status: 'Planned', tag: 'geo' },
+      { icon: Microscope, title: 'Research & tech-trend', desc: 'Papers, patents and R&D frontier signals (OpenAlex, arXiv, USPTO, GitHub/HF).', status: 'Planned', tag: 'research' },
+      { icon: Activity, title: 'Calibration ledger', desc: 'Track published forecasts vs outcomes — whose foresight proved right, including ours.', status: 'Planned', tag: 'foresight' },
+      { icon: Boxes, title: 'Supply-chain & trade', desc: 'Trade exposure and dependency mapping from public customs/trade data.', status: 'Planned', tag: 'trade' },
+    ],
   },
 ]
 
-function statusVariant(status: string) {
-  return status === 'Ready' ? 'default' : 'secondary'
+function StatusChip({ status }: { status: FeedItem['status'] }) {
+  return status === 'Live' ? (
+    <Badge className="gap-1 bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[10px]" variant="outline">
+      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+      Live
+    </Badge>
+  ) : (
+    <Badge variant="outline" className="text-[10px] text-muted-foreground">
+      Planned
+    </Badge>
+  )
 }
 
-export function XLikeFeed() {
+export function XLikeFeed({ onNavigate }: { onNavigate?: (tab: NavTab) => void }) {
+  const liveCount = FAMILIES.flatMap((f) => f.items).filter((i) => i.status === 'Live').length
+
   return (
     <div className="space-y-4">
-      <Card className="p-6">
-        <div className="flex items-center gap-2">
-          <Radar className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold">Lambda NX</h1>
+      {/* Identity / hero */}
+      <Card className="overflow-hidden">
+        <div className="border-b border-border/60 bg-gradient-to-br from-primary/10 via-transparent to-transparent p-5">
+          <div className="flex items-center gap-2">
+            <Radar className="h-6 w-6 text-primary" />
+            <h1 className="text-2xl font-bold tracking-tight">Lambda NX</h1>
+            <Badge variant="outline" className="ml-auto text-[10px] text-muted-foreground">
+              {liveCount} live gateways
+            </Badge>
+          </div>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            One engine, many gateways. Every result is built from public, lawful sources and
+            carries its source, timestamp and a confidence grade — analysis, not guesswork.
+            Runs inside Pi Network and as a standalone app.
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+              Passive — never touches a target
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Building2 className="h-3.5 w-3.5 text-primary" />
+              Public data · robots &amp; rate limits respected
+            </span>
+          </div>
         </div>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          A real, legal open-source-intelligence platform. Every result is built from
-          public, lawful sources and carries its source link, timestamp and a confidence
-          grade — analysis, not guesswork. It runs inside Pi Network and as a standalone app.
-        </p>
-        <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-          <ShieldCheck className="h-4 w-4 text-green-500" />
-          Passive only — never touches a target. Public data, respecting robots.txt and rate limits.
-        </div>
+
+        {/* Compose / search — Twitter's prompt, for intelligence */}
+        <button
+          onClick={() => onNavigate?.('intelligence')}
+          className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-muted/40"
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
+            <Search className="h-4 w-4 text-primary" />
+          </span>
+          <span className="flex-1 text-sm text-muted-foreground">
+            Investigate a domain, company, wallet, indicator…
+          </span>
+          <span className="flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">
+            Open <ArrowRight className="h-3 w-3" />
+          </span>
+        </button>
       </Card>
 
-      <div className="grid gap-3">
-        {modules.map((m) => (
-          <Card key={m.title} className="p-4">
-            <div className="flex items-start gap-3">
-              <m.icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-              <div className="flex-1 space-y-1">
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-semibold">{m.title}</h3>
-                  <Badge variant={statusVariant(m.status)} className="text-xs">
-                    {m.status}
-                  </Badge>
-                </div>
-                <p className="text-xs leading-relaxed text-muted-foreground">{m.desc}</p>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+      {/* Feed — families of gateways */}
+      {FAMILIES.map((family) => (
+        <section key={family.group} className="space-y-2">
+          <div className="flex items-baseline justify-between px-1">
+            <h2 className="text-sm font-semibold tracking-tight">{family.group}</h2>
+            <span className="text-[11px] text-muted-foreground">{family.blurb}</span>
+          </div>
+          <div className="grid gap-2">
+            {family.items.map((item) => {
+              const Icon = item.icon
+              const clickable = Boolean(item.tab)
+              return (
+                <Card
+                  key={item.title}
+                  onClick={clickable ? () => onNavigate?.(item.tab!) : undefined}
+                  className={`group p-4 transition-colors ${
+                    clickable ? 'cursor-pointer hover:border-primary/40 hover:bg-muted/30' : 'opacity-95'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted">
+                      <Icon className="h-5 w-5 text-primary" />
+                    </span>
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="font-semibold leading-tight">{item.title}</h3>
+                        <StatusChip status={item.status} />
+                      </div>
+                      <p className="text-xs leading-relaxed text-muted-foreground">{item.desc}</p>
+                      <div className="flex items-center gap-2 pt-0.5">
+                        <span className="font-mono text-[10px] text-muted-foreground/70">#{item.tag}</span>
+                        {clickable ? (
+                          <span className="ml-auto flex items-center gap-1 text-[11px] font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                            Open <ArrowRight className="h-3 w-3" />
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              )
+            })}
+          </div>
+        </section>
+      ))}
+
+      <p className="px-1 pt-1 text-center text-[11px] text-muted-foreground">
+        The AI analyst sorts evidence — it never verifies for you. Every finding is auditable
+        to its source.
+      </p>
     </div>
   )
 }
