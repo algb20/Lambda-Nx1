@@ -10,6 +10,7 @@ import {
   ShieldAlert,
   Landmark,
   LineChart,
+  Gauge,
   Gavel,
   Network,
   Sparkles,
@@ -72,7 +73,8 @@ const FAMILIES: Family[] = [
     group: 'Money & power',
     blurb: 'Follow the assets, the money, and the control.',
     items: [
-      { icon: LineChart, title: 'Markets & economy', desc: 'Live crypto markets, public company filings (SEC EDGAR) and ECB reference FX.', status: 'Live', tab: 'intelligence', tag: 'markets' },
+      { icon: Gauge, title: 'Markets board (live)', desc: 'Top prices at a glance — crypto, commodities & raw materials, stock indices and FX. Auto-refreshing, organized, from primary sources.', status: 'Live', tab: 'intelligence', tag: 'board' },
+      { icon: LineChart, title: 'Markets & economy', desc: 'Single-asset deep dive: crypto, public company filings (SEC EDGAR) and ECB reference FX.', status: 'Live', tab: 'intelligence', tag: 'markets' },
       { icon: Gavel, title: 'Procurement & contracts', desc: 'Who receives public money — US federal awards and World Bank development finance.', status: 'Live', tab: 'intelligence', tag: 'contracts' },
       { icon: Network, title: 'Ownership & control', desc: 'Parents, ultimate parents and subsidiaries mapped into a control graph (GLEIF L2).', status: 'Live', tab: 'intelligence', tag: 'ownership' },
     ],

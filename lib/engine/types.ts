@@ -28,6 +28,7 @@ export type Capability =
   | 'procurement'
   | 'ownership'
   | 'news'
+  | 'market_board'
 
 export type EntityType =
   | 'domain'

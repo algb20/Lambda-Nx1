@@ -27,6 +27,8 @@ import { usaspending, worldbankProjects } from './procurement'
 import { gleifOwnership } from './ownership'
 // Gateway — News & Signals
 import { gdeltNews, wikiInTheNews } from './news'
+// Gateway — Markets Board (live multi-class overview)
+import { coingeckoTop, stooqCommodities, stooqIndices, frankfurterBoard } from './markets-board'
 
 export const moduleOneSources: Source[] = [
   cloudflareDns,
@@ -51,6 +53,13 @@ export const procurementGatewaySources: Source[] = [usaspending, worldbankProjec
 export const ownershipGatewaySources: Source[] = [gleifOwnership]
 
 export const newsGatewaySources: Source[] = [gdeltNews, wikiInTheNews]
+
+export const marketsBoardSources: Source[] = [
+  coingeckoTop,
+  stooqCommodities,
+  stooqIndices,
+  frankfurterBoard,
+]
 
 interface CatalogRow {
   key: string
@@ -108,6 +117,13 @@ export const newsGatewayCatalog: CatalogRow[] = [
   { key: 'wikipedia_itn', name: 'Wikipedia In the news', capability: 'news', passive: true, enabled: true },
 ]
 
+export const marketsBoardCatalog: CatalogRow[] = [
+  { key: 'coingecko_board', name: 'CoinGecko top crypto', capability: 'market_board', passive: true, enabled: true },
+  { key: 'stooq_commodities', name: 'Stooq commodities', capability: 'market_board', passive: true, enabled: true },
+  { key: 'stooq_indices', name: 'Stooq stock indices', capability: 'market_board', passive: true, enabled: true },
+  { key: 'frankfurter_board', name: 'Frankfurter FX (ECB)', capability: 'market_board', passive: true, enabled: true },
+]
+
 export const allSourceCatalog: CatalogRow[] = [
   ...moduleOneSourceCatalog,
   ...moduleTwoSourceCatalog,
@@ -117,6 +133,7 @@ export const allSourceCatalog: CatalogRow[] = [
   ...procurementGatewayCatalog,
   ...ownershipGatewayCatalog,
   ...newsGatewayCatalog,
+  ...marketsBoardCatalog,
 ]
 
 let registeredOne = false
@@ -176,6 +193,13 @@ export function registerNewsGateway(): void {
   registeredNews = true
 }
 
+let registeredBoard = false
+export function registerMarketsBoard(): void {
+  if (registeredBoard) return
+  registry.registerAll(marketsBoardSources)
+  registeredBoard = true
+}
+
 export function registerAllSources(): void {
   registerModuleOneSources()
   registerModuleTwoSources()
@@ -185,6 +209,7 @@ export function registerAllSources(): void {
   registerProcurementGateway()
   registerOwnershipGateway()
   registerNewsGateway()
+  registerMarketsBoard()
 }
 
 export {
@@ -210,4 +235,10 @@ export {
   usaspending,
   worldbankProjects,
   gleifOwnership,
+  gdeltNews,
+  wikiInTheNews,
+  coingeckoTop,
+  stooqCommodities,
+  stooqIndices,
+  frankfurterBoard,
 }

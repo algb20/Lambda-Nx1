@@ -19,6 +19,7 @@ This design is future-proof: the platform grows by *families*, not rewrites.
 | Threat (CTI) | is this IP/domain/URL/hash malicious? | Feodo Tracker, URLhaus, ThreatFox (abuse.ch) |
 | Financial / Sanctions / Corporate | is this entity/wallet safe to deal with? | OpenSanctions, GLEIF, mempool.space |
 | Markets & Economy | what is this asset/company/currency doing now? | CoinGecko, SEC EDGAR, Frankfurter (ECB) |
+| Markets Board (live) | top prices across classes at a glance | CoinGecko (crypto), Stooq (commodities + indices), ECB (FX) |
 | Procurement & Public Contracts | who receives public money / contracts? | USAspending.gov, World Bank projects |
 | Ownership & control networks | who owns / controls this entity? | GLEIF Level-2 (parents, ultimate parents, subsidiaries) |
 | News & Signals | what are the top world events / topic coverage? | GDELT, Wikipedia "In the news" (see docs/NEWS.md) |

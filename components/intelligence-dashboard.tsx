@@ -13,6 +13,7 @@ import {
   Network,
   Newspaper,
   Radio,
+  Gauge,
   Loader2,
   ShieldCheck,
   AlertCircle,
@@ -33,6 +34,7 @@ import type { MarketsReport } from '@/lib/modules/markets'
 import type { ProcurementReport } from '@/lib/modules/procurement'
 import type { OwnershipReport } from '@/lib/modules/ownership'
 import type { NewsReport } from '@/lib/modules/news'
+import type { MarketsBoardReport } from '@/lib/modules/markets-board'
 import type { Evidence } from '@/lib/engine/types'
 import type { AnalystVerdict, Severity } from '@/lib/ai/types'
 
@@ -46,6 +48,7 @@ type Mode =
   | 'procurement'
   | 'ownership'
   | 'news'
+  | 'board'
   | 'media'
 type Result =
   | { kind: 'domain'; data: DomainReport }
@@ -57,6 +60,7 @@ type Result =
   | { kind: 'procurement'; data: ProcurementReport }
   | { kind: 'ownership'; data: OwnershipReport }
   | { kind: 'news'; data: NewsReport }
+  | { kind: 'board'; data: MarketsBoardReport }
   | { kind: 'media'; data: MediaReport }
 
 const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: string }> = [
@@ -65,6 +69,7 @@ const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: s
   { id: 'email', label: 'Email', icon: Mail, placeholder: 'name@example.com' },
   { id: 'threat', label: 'Threat', icon: ShieldAlert, placeholder: 'IP, domain, URL or hash' },
   { id: 'finance', label: 'Finance', icon: Landmark, placeholder: 'company name or BTC address' },
+  { id: 'board', label: 'Board', icon: Gauge, placeholder: 'live market board — press Load' },
   { id: 'markets', label: 'Markets', icon: LineChart, placeholder: 'BTC, AAPL, or USD/EUR' },
   { id: 'procurement', label: 'Contracts', icon: Gavel, placeholder: 'company, agency or project name' },
   { id: 'ownership', label: 'Ownership', icon: Network, placeholder: 'company / legal-entity name' },
@@ -82,7 +87,7 @@ const BODY_KEY: Partial<Record<Mode, string>> = {
 }
 
 /** Modes where an empty query is valid (returns a top/overview result). */
-const EMPTY_OK: Partial<Record<Mode, boolean>> = { news: true }
+const EMPTY_OK: Partial<Record<Mode, boolean>> = { news: true, board: true }
 
 type EvidenceItem = DomainReport['sections']['dns'][number]
 
@@ -501,6 +506,104 @@ function NewsView({ r, onReload, loading }: { r: NewsReport; onReload: () => voi
   )
 }
 
+function fmtBoardPrice(n: number): string {
+  if (n >= 1000) return n.toLocaleString('en-US', { maximumFractionDigits: 2 })
+  if (n >= 1) return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  return n.toPrecision(4)
+}
+
+function BoardView({ r, onReload, loading }: { r: MarketsBoardReport; onReload: () => void; loading: boolean }) {
+  const [auto, setAuto] = useState(true)
+  const reloadRef = useRef(onReload)
+  reloadRef.current = onReload
+
+  // Live: refresh every 45s while visible (markets move faster than news).
+  useEffect(() => {
+    if (!auto) return
+    const id = setInterval(() => {
+      if (typeof document === 'undefined' || !document.hidden) reloadRef.current()
+    }, 45000)
+    return () => clearInterval(id)
+  }, [auto])
+
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 className="font-semibold">Markets board</h3>
+            <p className="text-[11px] text-muted-foreground">
+              {r.summary.instruments} instruments · updated {new Date(r.generatedAt).toLocaleTimeString()}
+            </p>
+          </div>
+          <button
+            onClick={() => setAuto((v) => !v)}
+            className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${
+              auto ? 'bg-emerald-500/10 text-emerald-500' : 'bg-muted text-muted-foreground'
+            }`}
+            title={auto ? 'Live — refreshing every 45s' : 'Auto-refresh paused'}
+          >
+            <Radio className={`h-3.5 w-3.5 ${auto && loading ? 'animate-pulse' : ''}`} />
+            {auto ? 'Live' : 'Paused'}
+          </button>
+        </div>
+      </Card>
+
+      {r.sections.length === 0 ? (
+        <Card className="p-4 text-sm text-muted-foreground">
+          No quotes right now. Sources may be rate-limited — Live will retry.
+        </Card>
+      ) : (
+        r.sections.map((section) => (
+          <Card key={section.key} className="p-4">
+            <h4 className="mb-2 text-sm font-semibold">{section.title}</h4>
+            <div className="divide-y divide-border/40">
+              {section.rows.map((row) => {
+                const px = row.unit && row.unit !== '' ? '$' : ''
+                const up = row.change !== null && row.change >= 0
+                return (
+                  <div key={row.symbol} className="flex items-center justify-between gap-3 py-2">
+                    <div className="min-w-0">
+                      {row.sourceUrl ? (
+                        <a href={row.sourceUrl} target="_blank" rel="noreferrer" className="text-sm font-medium hover:underline">
+                          {row.name}
+                        </a>
+                      ) : (
+                        <span className="text-sm font-medium">{row.name}</span>
+                      )}
+                      <span className="ml-1.5 font-mono text-[10px] text-muted-foreground">{row.symbol}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-right">
+                      <span className="text-sm tabular-nums">
+                        {px}
+                        {fmtBoardPrice(row.price)}
+                      </span>
+                      {row.change !== null ? (
+                        <span
+                          className={`w-16 text-xs tabular-nums ${up ? 'text-emerald-500' : 'text-destructive'}`}
+                        >
+                          {up ? '+' : ''}
+                          {row.change.toFixed(2)}%
+                        </span>
+                      ) : (
+                        <span className="w-16 text-xs text-muted-foreground">—</span>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </Card>
+        ))
+      )}
+      <p className="px-1 text-[11px] text-muted-foreground">
+        Quotes from public sources (CoinGecko · Stooq · ECB), shown as published — never a
+        prediction. Change shown is intraday vs. session open where available.
+      </p>
+    </div>
+  )
+}
+
 function ThreatView({ r }: { r: ThreatReport }) {
   return (
     <div className="space-y-4">
@@ -660,6 +763,8 @@ function collectFindings(result: Result): { subject: string; gateway: string; fi
         gateway: 'news',
         findings: slim(result.data.items),
       }
+    case 'board':
+      return { subject: 'Markets board', gateway: 'markets', findings: slim(result.data.findings) }
     case 'media':
       return null
   }
@@ -823,6 +928,9 @@ export function IntelligenceDashboard() {
           imageBase64: file ? await readFileAsBase64(file) : undefined,
           imageUrl: query.trim() || undefined,
         }
+      } else if (mode === 'board') {
+        endpoint = '/api/intelligence/board'
+        payload = {}
       } else {
         const value = query.trim()
         if (!value && !EMPTY_OK[mode]) throw new Error('Enter a value to investigate.')
@@ -912,7 +1020,15 @@ export function IntelligenceDashboard() {
             disabled={loading}
           />
           <Button onClick={run} disabled={loading || (!query.trim() && !EMPTY_OK[mode])}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : mode === 'news' ? 'Fetch' : 'Investigate'}
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : mode === 'board' ? (
+              'Load'
+            ) : mode === 'news' ? (
+              'Fetch'
+            ) : (
+              'Investigate'
+            )}
           </Button>
         </div>
       )}
@@ -938,6 +1054,7 @@ export function IntelligenceDashboard() {
       {result?.kind === 'procurement' ? <ProcurementView r={result.data} /> : null}
       {result?.kind === 'ownership' ? <OwnershipView r={result.data} /> : null}
       {result?.kind === 'news' ? <NewsView r={result.data} onReload={run} loading={loading} /> : null}
+      {result?.kind === 'board' ? <BoardView r={result.data} onReload={run} loading={loading} /> : null}
       {result?.kind === 'media' ? <MediaView r={result.data} /> : null}
 
       {aiInput && aiInput.findings.length > 0 ? (
