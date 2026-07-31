@@ -41,6 +41,7 @@ import type { MarketsBoardReport } from '@/lib/modules/markets-board'
 import type { NexusReport } from '@/lib/modules/nexus'
 import { TargetTracker } from '@/components/target-tracker'
 import { PREDICATE_LABEL } from '@/lib/engine/ontology'
+import { proposePivots } from '@/lib/modules/copilot'
 import type { Evidence } from '@/lib/engine/types'
 import type { AnalystVerdict, Severity } from '@/lib/ai/types'
 
@@ -519,8 +520,9 @@ function NewsView({ r, onReload, loading }: { r: NewsReport; onReload: () => voi
   )
 }
 
-function NexusView({ r }: { r: NexusReport }) {
+function NexusView({ r, onPivot }: { r: NexusReport; onPivot: (selector: string) => void }) {
   const active = r.sections.filter((s) => s.findings.length > 0)
+  const pivots = proposePivots(r.ontology)
   return (
     <div className="space-y-4">
       <Card className="p-4">
@@ -610,6 +612,29 @@ function NexusView({ r }: { r: NexusReport }) {
                   {e.confidence} · {e.sources.length}×
                 </span>
               </div>
+            ))}
+          </div>
+        </Card>
+      ) : null}
+
+      {/* Pivot Copilot — executable next steps from the ontology (you approve each). */}
+      {pivots.length > 0 ? (
+        <Card className="p-4">
+          <h4 className="mb-1 text-sm font-semibold">Next pivots</h4>
+          <p className="mb-2 text-[11px] text-muted-foreground">
+            The copilot proposes the strongest passive next step — you approve each run.
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {pivots.map((p, i) => (
+              <button
+                key={i}
+                onClick={() => onPivot(p.selector)}
+                className="flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs transition-colors hover:border-primary/40 hover:bg-muted/40"
+                title={`${p.reason} · ${p.confidence}`}
+              >
+                <span className="font-medium break-all">{p.selector}</span>
+                <span className="text-[10px] text-muted-foreground">{p.reason}</span>
+              </button>
             ))}
           </div>
         </Card>
@@ -1070,6 +1095,29 @@ export function IntelligenceDashboard() {
   const active = MODES.find((m) => m.id === mode)!
   const aiInput = result ? collectFindings(result) : null
 
+  /** Copilot: run a unified investigation on a proposed pivot (user-approved). */
+  const pivotTo = async (selector: string) => {
+    setMode('nexus')
+    setQuery(selector)
+    setLoading(true)
+    setResult(null)
+    setError(null)
+    try {
+      const res = await fetch('/api/intelligence/nexus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: selector }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error ?? 'Investigation failed')
+      setResult({ kind: 'nexus', data } as Result)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Investigation failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const reset = () => {
     setResult(null)
     setError(null)
@@ -1221,7 +1269,7 @@ export function IntelligenceDashboard() {
         </Card>
       ) : null}
 
-      {result?.kind === 'nexus' ? <NexusView r={result.data} /> : null}
+      {result?.kind === 'nexus' ? <NexusView r={result.data} onPivot={pivotTo} /> : null}
       {result?.kind === 'track' ? <TargetTracker query={result.data.query} /> : null}
       {result?.kind === 'domain' ? <DomainView r={result.data} /> : null}
       {result?.kind === 'username' ? <UsernameView r={result.data} /> : null}
