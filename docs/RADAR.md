@@ -4,6 +4,10 @@ A system that continuously searches and analyzes everything relevant to our fiel
 (a) keep *us* ahead so we build our own stronger tech, and (b) power a product monitoring
 feature. Legal, public sources only.
 
+> The **human/curation layer** — which technologies & research we adopt, trial, assess or
+> hold, on a weekly cadence — lives in **`docs/TECH_RADAR.md`** (rings + per-item decisions
+> for Lambda NX + the prioritized source library). This automated Radar feeds it (`#27`).
+
 ## Two roles
 
 1. **Internal (keeps us ahead).** Watches public, lawful sources — new/updated OSINT &

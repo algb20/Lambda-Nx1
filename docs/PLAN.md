@@ -76,6 +76,9 @@ sync; never skip a point or a test.
 - [ ] Geospatial / Transport + real-estate overlay (#23) — see docs/LANDSCAPE.md §3
 - [ ] Research & Tech-trend sources + Macro/Economy sources (#27) — see docs/FORESIGHT.md §4
 - [ ] Calibration ledger + forecast-tracking in the Radar sweep (#28) — see docs/FORESIGHT.md §2
+- [x] Technology Radar (#36): `docs/TECH_RADAR.md` — adopt/trial/assess/hold rings with a per-item decision for Lambda NX, a prioritized source library, and the weekly review cadence. North Star = Palantir Ontology *thinking*.
+- [ ] Ontology layer over entities/links (#37) — Tech Radar "Adopt"; deepen pivot graph into a first-class knowledge graph
+- [ ] Point automated Radar at ⭐ security + AI-research + arXiv feeds (part of #27)
 - [ ] Subscription tiers free/paid (#25)
 - Note: guardrail now allows provider POST (allowlist remains the passive guarantee).
 
