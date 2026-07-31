@@ -43,6 +43,13 @@
       "when": 1785537905544,
       "tag": "0005_majestic_zarek",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1785538278666,
+      "tag": "0006_public_jasper_sitwell",
+      "breakpoints": true
     }
   ]
 }

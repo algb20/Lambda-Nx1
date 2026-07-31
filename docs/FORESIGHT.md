@@ -41,8 +41,15 @@ learns its own strengths and blind spots.
 
 From this we compute **hit-rate by author, by topic, by confidence band** — a public,
 honest scorecard including *our own* misses. This is the "know our positives, negatives,
-errors, gaps, strengths" the charter demands. It reuses the existing `radar_findings`
-pattern and the evidence model; it ships as its own migration + module + tests (no mock).
+errors, gaps, strengths" the charter demands.
+
+**Shipped (#28):** `calibration_claims` (migration 0006) + `repo.calibration` +
+`lib/modules/calibration` — `recordClaim` (deduped, attributed, with a horizon),
+`resolveClaim` (outcome), and a pure `scoreboard` (weighted accuracy overall / by author /
+by confidence; correct=1, partial=0.5, wrong=0). `forecastsFromHorizon` turns a target's
+published forward-looking items into external claims to track. `POST/GET /api/calibration`
++ `/resolve`. **Next:** the Radar sweep auto-captures horizons and resolves due claims; a
+public scoreboard UI.
 
 ## 3. Anti-bias protocol (enforced by method, not vibes)
 

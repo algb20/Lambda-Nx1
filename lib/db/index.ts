@@ -31,6 +31,8 @@ export type Suggestion = typeof s.suggestions.$inferSelect
 export type NewSuggestion = typeof s.suggestions.$inferInsert
 export type OntologyNode = typeof s.ontologyNodes.$inferSelect
 export type OntologyEdge = typeof s.ontologyEdges.$inferSelect
+export type CalibrationClaim = typeof s.calibrationClaims.$inferSelect
+export type NewCalibrationClaim = typeof s.calibrationClaims.$inferInsert
 
 export const repo = {
   users: {
@@ -356,6 +358,39 @@ export const repo = {
         .where(eq(s.suggestions.id, id))
         .returning()
       return row
+    },
+  },
+
+  calibration: {
+    /** Record a claim/forecast; ignore exact duplicates (same author + claim). */
+    async record(input: NewCalibrationClaim): Promise<CalibrationClaim | undefined> {
+      const db = getDb()
+      const [row] = await db
+        .insert(s.calibrationClaims)
+        .values(input)
+        .onConflictDoNothing({ target: s.calibrationClaims.dedupeHash })
+        .returning()
+      return row
+    },
+    async resolve(id: string, outcome: CalibrationClaim['outcome'], note?: string): Promise<CalibrationClaim | undefined> {
+      const db = getDb()
+      const [row] = await db
+        .update(s.calibrationClaims)
+        .set({ status: 'resolved', outcome, note: note ?? null, resolvedAt: sql`now()` })
+        .where(eq(s.calibrationClaims.id, id))
+        .returning()
+      return row
+    },
+    async list(limit = 500): Promise<CalibrationClaim[]> {
+      const db = getDb()
+      return db.select().from(s.calibrationClaims).orderBy(desc(s.calibrationClaims.assertedAt)).limit(limit)
+    },
+    async listDue(now: Date): Promise<CalibrationClaim[]> {
+      const db = getDb()
+      return db
+        .select()
+        .from(s.calibrationClaims)
+        .where(and(eq(s.calibrationClaims.status, 'open'), lte(s.calibrationClaims.horizon, now)))
     },
   },
 

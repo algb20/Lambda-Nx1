@@ -68,6 +68,10 @@ export const suggestionStatusEnum = pgEnum('suggestion_status', [
 export const impactEnum = pgEnum('impact', ['low', 'medium', 'high', 'critical'])
 export const effortEnum = pgEnum('effort', ['small', 'medium', 'large'])
 
+export const calibrationAuthorKindEnum = pgEnum('calibration_author_kind', ['us', 'external'])
+export const calibrationOutcomeEnum = pgEnum('calibration_outcome', ['correct', 'partial', 'wrong'])
+export const calibrationStatusEnum = pgEnum('calibration_status', ['open', 'resolved'])
+
 export const scanStatusEnum = pgEnum('scan_status', ['queued', 'running', 'done', 'error'])
 export const investigationStatusEnum = pgEnum('investigation_status', ['open', 'archived'])
 export const monitorStatusEnum = pgEnum('monitor_status', ['active', 'paused'])
@@ -308,6 +312,39 @@ export const ontologyEdges = pgTable(
     unique('ontology_edges_uq').on(t.fromNodeId, t.toNodeId, t.predicate),
     index('ontology_edges_from_idx').on(t.fromNodeId),
     index('ontology_edges_to_idx').on(t.toNodeId),
+  ],
+)
+
+// ── Calibration ledger (we grade our own & others' forecasts vs. outcomes) ────
+
+export const calibrationClaims = pgTable(
+  'calibration_claims',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    /** Who made the claim: 'us' (our own graded analysis) or 'external'. */
+    authorKind: calibrationAuthorKindEnum('author_kind').notNull(),
+    /** Display author — 'Lambda NX' or the external source/outlet. */
+    author: text('author').notNull(),
+    claim: text('claim').notNull(),
+    topic: text('topic'),
+    assertedAt: timestamp('asserted_at', { withTimezone: true }).notNull().defaultNow(),
+    /** When this claim should be judged. */
+    horizon: timestamp('horizon', { withTimezone: true }),
+    status: calibrationStatusEnum('status').notNull().default('open'),
+    /** Set when resolved: how it turned out. */
+    outcome: calibrationOutcomeEnum('outcome'),
+    resolvedAt: timestamp('resolved_at', { withTimezone: true }),
+    note: text('note'),
+    sourceUrl: text('source_url'),
+    confidence: confidenceEnum('confidence').notNull().default('possible'),
+    /** Stable hash (author + claim), for de-duplication. */
+    dedupeHash: text('dedupe_hash').notNull().unique(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('calibration_status_idx').on(t.status),
+    index('calibration_horizon_idx').on(t.horizon),
+    index('calibration_author_idx').on(t.author),
   ],
 )
 
