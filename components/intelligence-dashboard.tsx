@@ -544,6 +544,50 @@ function NexusView({ r }: { r: NexusReport }) {
         </div>
       </Card>
 
+      {/* Trust Lens — our visible, auditable neutrality & corroboration measure. */}
+      <Card className="p-4">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <h4 className="text-sm font-semibold">Trust Lens</h4>
+          <span className="font-mono text-[10px] text-muted-foreground" title="Tamper-evident dossier seal">
+            {r.seal}
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex-1">
+            <div className="mb-1 flex items-center justify-between text-[11px]">
+              <span className="text-muted-foreground">Neutrality</span>
+              <span className="font-semibold tabular-nums">{r.trust.neutrality}/100</span>
+            </div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className={`h-full rounded-full ${
+                  r.trust.neutrality >= 70 ? 'bg-emerald-500' : r.trust.neutrality >= 40 ? 'bg-amber-500' : 'bg-destructive'
+                }`}
+                style={{ width: `${r.trust.neutrality}%` }}
+              />
+            </div>
+          </div>
+          <Badge
+            variant="outline"
+            className={
+              r.trust.corroboration === 'strong'
+                ? 'border-emerald-500/40 text-emerald-500'
+                : r.trust.corroboration === 'single'
+                  ? 'border-destructive/40 text-destructive'
+                  : 'border-amber-500/40 text-amber-600'
+            }
+          >
+            {r.trust.corroboration}
+          </Badge>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <Stat label="Ind. sources" value={r.trust.independentSources} />
+          <Stat label="Reliable" value={r.trust.reliableSources} />
+          <Stat label="Countries" value={r.trust.sourceCountries.length} />
+          <Stat label="Corroborated" value={r.trust.corroboratedTopics} />
+        </div>
+      </Card>
+
       {/* Coverage strip — every gateway that ran, with its latency. */}
       <Card className="p-4">
         <h4 className="mb-2 text-sm font-semibold">Coverage</h4>

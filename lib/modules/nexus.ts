@@ -15,6 +15,7 @@
 import { collect } from '../engine/orchestrator'
 import { registry } from '../engine/registry'
 import { buildGraph, dedupeEvidence, type Graph } from '../engine/analysis'
+import { assessTrust, sealFindings, type TrustScore } from '../engine/trust'
 import { registerAllSources } from '../engine/sources'
 import type { Capability, EntityType, Evidence, SourceResult } from '../engine/types'
 
@@ -35,6 +36,8 @@ export interface NexusReport {
   sections: NexusSection[]
   findings: Evidence[]
   graph: Graph
+  trust: TrustScore
+  seal: string
   speed: { elapsedMs: number; capabilitiesRun: number; cacheHit: boolean; fastestMs: number | null }
   summary: { findings: number; entities: number; sourcesOk: number; sourcesFailed: number }
 }
@@ -193,6 +196,8 @@ export async function investigateNexus(input: string): Promise<NexusReport> {
     sections,
     findings: merged,
     graph,
+    trust: assessTrust(merged),
+    seal: sealFindings(merged),
     speed: {
       elapsedMs: Date.now() - started,
       capabilitiesRun: plan.length,

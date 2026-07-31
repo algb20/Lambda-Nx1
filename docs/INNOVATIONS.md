@@ -41,19 +41,21 @@ Track our own and others' *published* forecasts vs. outcomes, and publish the
 hit-rate — including our misses. An intelligence product that grades its own
 accuracy is rare and is exactly what institutions need to rely on it.
 
-## 4. Neutrality / diversity meter  ⏭️ proposed
+## 4. Trust Lens — neutrality & corroboration, as a number  ✅ shipped
 
-Per finding and per dossier, show source **diversity** — how many independent
-outlets, which countries — as a visible "corroboration & neutrality" signal. Turns
-our anti-bias rule into a number users can see. Original, and cheap to compute from
-evidence we already carry.
+Per dossier we compute and **show** a visible trust measure: independent sources,
+reliable (Admiralty A/B) sources, source-country spread, independently-corroborated
+topics, a corroboration grade (single→strong), and a **0–100 neutrality score**.
+It turns our anti-bias rule into something a user or institution can *see and audit*
+— no OSINT tool surfaces this. Reusable across every gateway.
+→ `lib/engine/trust.ts` (`assessTrust`), Trust Lens card in the Nexus dossier.
 
-## 5. Signed, shareable evidence dossiers  ⏭️ proposed
+## 5. Tamper-evident dossier seal  ✅ shipped (foundation)
 
-Export any dossier as a portable, **verifiable** report (JSON + human view) where
-every claim carries its source, timestamp, Admiralty rating and confidence — a
-tamper-evident hash chain. Shareability + auditability = the artifact institutions
-circulate internally. Drives organic, cross-org adoption.
+Every dossier carries a deterministic **seal** — a content fingerprint over its
+findings (`lnx1-…`). Same findings ⇒ same seal; any change is detectable. This is
+the provenance spine for shareable, **verifiable** reports.
+→ `lib/engine/trust.ts` (`sealFindings`). Next: full signed export (JSON + human view).
 
 ## 6. Self-organizing community feedback loop  ✅ shipped
 
