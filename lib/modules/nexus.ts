@@ -15,6 +15,7 @@
 import { collect } from '../engine/orchestrator'
 import { registry } from '../engine/registry'
 import { buildGraph, dedupeEvidence, type Graph } from '../engine/analysis'
+import { buildOntology, type Ontology } from '../engine/ontology'
 import { assessTrust, sealFindings, type TrustScore } from '../engine/trust'
 import { registerAllSources } from '../engine/sources'
 import type { Capability, EntityType, Evidence, SourceResult } from '../engine/types'
@@ -36,6 +37,7 @@ export interface NexusReport {
   sections: NexusSection[]
   findings: Evidence[]
   graph: Graph
+  ontology: Ontology
   trust: TrustScore
   seal: string
   speed: { elapsedMs: number; capabilitiesRun: number; cacheHit: boolean; fastestMs: number | null }
@@ -185,7 +187,9 @@ export async function investigateNexus(input: string): Promise<NexusReport> {
   )
 
   const merged = dedupeEvidence(sections.flatMap((s) => s.findings))
-  const graph = buildGraph({ type: ROOT_ENTITY[type], value }, merged)
+  const root = { type: ROOT_ENTITY[type], value }
+  const graph = buildGraph(root, merged)
+  const ontology = buildOntology(root, merged)
   const answered = sections.filter((s) => s.findings.length > 0).map((s) => s.ms)
 
   const allResults = sections // per-source ok/fail is summarized from section flags
@@ -196,6 +200,7 @@ export async function investigateNexus(input: string): Promise<NexusReport> {
     sections,
     findings: merged,
     graph,
+    ontology,
     trust: assessTrust(merged),
     seal: sealFindings(merged),
     speed: {

@@ -40,6 +40,7 @@ import type { NewsReport } from '@/lib/modules/news'
 import type { MarketsBoardReport } from '@/lib/modules/markets-board'
 import type { NexusReport } from '@/lib/modules/nexus'
 import { TargetTracker } from '@/components/target-tracker'
+import { PREDICATE_LABEL } from '@/lib/engine/ontology'
 import type { Evidence } from '@/lib/engine/types'
 import type { AnalystVerdict, Severity } from '@/lib/ai/types'
 
@@ -587,6 +588,32 @@ function NexusView({ r }: { r: NexusReport }) {
           <Stat label="Corroborated" value={r.trust.corroboratedTopics} />
         </div>
       </Card>
+
+      {/* Ontology — one typed model of entities & relations across gateways. */}
+      {r.ontology.edges.length > 0 ? (
+        <Card className="p-4">
+          <div className="mb-2 flex items-center justify-between">
+            <h4 className="text-sm font-semibold">Ontology</h4>
+            <span className="text-[10px] text-muted-foreground">
+              {r.ontology.stats.nodes} entities · {r.ontology.stats.edges} relations
+            </span>
+          </div>
+          <div className="space-y-1.5">
+            {r.ontology.edges.slice(0, 24).map((e, i) => (
+              <div key={i} className="flex items-center gap-2 text-sm">
+                <span className="font-medium break-all">{r.input}</span>
+                <Badge variant="outline" className="shrink-0 text-[10px]">
+                  {PREDICATE_LABEL[e.predicate]}
+                </Badge>
+                <span className="break-all text-muted-foreground">{e.to.replace(/^[^:]+:/, '')}</span>
+                <span className="ml-auto shrink-0 text-[10px] text-muted-foreground/70">
+                  {e.confidence} · {e.sources.length}×
+                </span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      ) : null}
 
       {/* Coverage strip — every gateway that ran, with its latency. */}
       <Card className="p-4">
