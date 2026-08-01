@@ -28,6 +28,7 @@ const en: Dict = {
   'feed.open': 'Open',
   'nav.ideas': 'Ideas',
   'nav.calibration': 'Score',
+  'nav.globe': 'Globe',
   'ideas.title': 'Ideas & feedback',
   'ideas.subtitle':
     'Suggest features, improvements, integrations or data sources. Every idea is auto-triaged and clustered; the most-wanted rise to the top.',
@@ -62,6 +63,7 @@ const ar: Dict = {
   'feed.open': 'افتح',
   'nav.ideas': 'أفكار',
   'nav.calibration': 'الدقّة',
+  'nav.globe': 'الكرة',
   'ideas.title': 'الأفكار والملاحظات',
   'ideas.subtitle':
     'اقترح ميزات أو تحسينات أو تكاملات أو مصادر بيانات. كل فكرة تُصنَّف وتُجمَّع تلقائيًا، والأكثر طلبًا يتصدّر.',

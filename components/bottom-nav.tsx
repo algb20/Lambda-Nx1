@@ -1,10 +1,10 @@
 "use client"
 
-import { Zap, User, Building2, Settings, Brain, Cpu, Lightbulb, Target } from "lucide-react"
+import { Zap, User, Building2, Settings, Brain, Cpu, Lightbulb, Target, Globe2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useT } from "@/lib/i18n"
 
-type Tab = "feed" | "personal" | "enterprise" | "intelligence" | "swarm" | "ideas" | "calibration" | "preferences"
+type Tab = "feed" | "globe" | "personal" | "enterprise" | "intelligence" | "swarm" | "ideas" | "calibration" | "preferences"
 
 interface BottomNavProps {
   activeTab: Tab
@@ -26,6 +26,17 @@ export function BottomNav({ activeTab, setActiveTab }: BottomNavProps) {
           >
             <Zap className="h-5 w-5" />
             <span className="text-[10px] font-medium">Feed</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("globe")}
+            className={cn(
+              "flex flex-col items-center gap-1 transition-colors",
+              activeTab === "globe" ? "text-primary" : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <Globe2 className="h-5 w-5" />
+            <span className="text-[10px] font-medium">{t("nav.globe")}</span>
           </button>
 
           <button

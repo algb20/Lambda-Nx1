@@ -18,6 +18,7 @@ import {
   Lightbulb,
   ScanSearch,
   Crosshair,
+  Globe2,
   Search,
   ArrowRight,
   Activity,
@@ -38,7 +39,7 @@ import { useT } from '@/lib/i18n'
  * card opens a real tool. Keeps the app's shadcn/Tailwind visual language.
  */
 
-type NavTab = 'intelligence' | 'swarm' | 'ideas' | 'calibration' | 'preferences'
+type NavTab = 'intelligence' | 'swarm' | 'ideas' | 'calibration' | 'globe' | 'preferences'
 
 interface FeedItem {
   icon: LucideIcon
@@ -96,6 +97,7 @@ const FAMILIES: Family[] = [
     blurb: 'On top of every gateway.',
     items: [
       { icon: Newspaper, title: 'News & signals', desc: 'Top world events and topic coverage from primary sources — live, non-stop, linking to origin. We surface and grade, we don’t reprint.', status: 'Live', tab: 'intelligence', tag: 'news' },
+      { icon: Globe2, title: 'Live world map (3D globe)', desc: 'Where today’s top events are being reported, plotted on our own 3D globe. Drag to spin; the same globe maps any geolocated signal.', status: 'Live', tab: 'globe', tag: 'globe' },
       { icon: Sparkles, title: 'AI analyst', desc: 'Triages any report — summarizes, grades severity, suggests the next pivot. Sorts, never verifies.', status: 'Live', tab: 'intelligence', tag: 'ai' },
       { icon: Bell, title: 'Monitoring & radar', desc: 'Watch a subject and get alerted when its public footprint changes.', status: 'Live', tab: 'swarm', tag: 'radar' },
       { icon: Lightbulb, title: 'Ideas & feedback', desc: 'Send suggestions in any language. Each is AI-triaged and clustered so the most-wanted rise to the top — the community shapes the roadmap.', status: 'Live', tab: 'ideas', tag: 'ideas' },
