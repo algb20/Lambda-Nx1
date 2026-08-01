@@ -23,6 +23,7 @@ import {
   AlertCircle,
   ExternalLink,
   MapPin,
+  BookOpen,
 } from 'lucide-react'
 import { Sparkles } from 'lucide-react'
 import { Card } from '@/components/ui/card'
@@ -42,6 +43,7 @@ import type { MarketsBoardReport } from '@/lib/modules/markets-board'
 import type { NexusReport } from '@/lib/modules/nexus'
 import type { GeoReport } from '@/lib/modules/geo'
 import type { ResearchReport } from '@/lib/modules/research'
+import type { ReferenceReport } from '@/lib/modules/reference'
 import { TargetTracker } from '@/components/target-tracker'
 import { DataGlobe } from '@/components/data-globe'
 import { pointsFromEvidence, type GlobePoint } from '@/lib/geo/centroids'
@@ -65,6 +67,7 @@ type Mode =
   | 'board'
   | 'geo'
   | 'research'
+  | 'reference'
   | 'media'
 type Result =
   | { kind: 'nexus'; data: NexusReport }
@@ -81,6 +84,7 @@ type Result =
   | { kind: 'board'; data: MarketsBoardReport }
   | { kind: 'geo'; data: GeoReport }
   | { kind: 'research'; data: ResearchReport }
+  | { kind: 'reference'; data: ReferenceReport }
   | { kind: 'media'; data: MediaReport }
 
 const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: string }> = [
@@ -97,6 +101,7 @@ const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: s
   { id: 'ownership', label: 'Ownership', icon: Network, placeholder: 'company / legal-entity name' },
   { id: 'geo', label: 'Geo', icon: MapPin, placeholder: 'place, "lat,lon", or aircraft ICAO24 hex' },
   { id: 'research', label: 'Research', icon: Microscope, placeholder: 'a topic, technology or research question' },
+  { id: 'reference', label: 'Facts', icon: BookOpen, placeholder: 'a company, person or place — structured facts' },
   { id: 'news', label: 'News', icon: Newspaper, placeholder: 'topic (optional) — empty = top world events' },
   { id: 'media', label: 'Media', icon: ImageIcon, placeholder: 'https://…/image.jpg' },
 ]
@@ -111,6 +116,7 @@ const BODY_KEY: Partial<Record<Mode, string>> = {
   news: 'query',
   geo: 'query',
   research: 'query',
+  reference: 'query',
 }
 
 /** Modes where an empty query is valid (returns a top/overview result). */
@@ -380,6 +386,82 @@ function ResearchView({ r }: { r: ResearchReport }) {
           ))
         )}
       </Card>
+    </div>
+  )
+}
+
+function ReferenceView({ r }: { r: ReferenceReport }) {
+  const points = pointsFromEvidence(
+    r.facts.map((e) => {
+      const d = e.data as { lat?: number; lon?: number } | undefined
+      return { lat: d?.lat, lon: d?.lon, label: r.subject }
+    }),
+  )
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 className="font-semibold break-all">{r.subject}</h3>
+            <p className="text-[11px] text-muted-foreground">
+              structured facts · {new Date(r.generatedAt).toLocaleString()}
+            </p>
+          </div>
+          <Badge variant="secondary">
+            {r.summary.facts} fact{r.summary.facts === 1 ? '' : 's'}
+          </Badge>
+        </div>
+      </Card>
+
+      {points.length > 0 ? (
+        <Card className="overflow-hidden p-0">
+          <DataGlobe points={points} height={260} focus={{ lat: points[0].lat, lon: points[0].lon }} />
+        </Card>
+      ) : null}
+
+      <Card className="p-4">
+        <h4 className="mb-1 text-sm font-semibold">Facts &amp; relations</h4>
+        {r.facts.length === 0 ? (
+          <p className="py-2 text-sm text-muted-foreground">
+            No structured match. Try the entity&apos;s common or legal name.
+          </p>
+        ) : (
+          r.facts.map((e, i) => (
+            <div key={i} className="flex items-start justify-between gap-3 border-b border-border/40 py-2 last:border-0">
+              {e.sourceUrl ? (
+                <a href={e.sourceUrl} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline">
+                  {e.claim}
+                </a>
+              ) : (
+                <span className="text-sm">{e.claim}</span>
+              )}
+              <SourceTag e={e} />
+            </div>
+          ))
+        )}
+      </Card>
+
+      {r.ontology.edges.length > 0 ? (
+        <Card className="p-4">
+          <div className="mb-2 flex items-center justify-between">
+            <h4 className="text-sm font-semibold">Ontology</h4>
+            <span className="text-[10px] text-muted-foreground">
+              {r.ontology.stats.nodes} entities · {r.ontology.stats.edges} relations
+            </span>
+          </div>
+          <div className="space-y-1">
+            {r.ontology.edges.slice(0, 24).map((e, i) => {
+              const to = r.ontology.nodes.find((n) => n.id === e.to)
+              return (
+                <div key={i} className="flex items-center gap-2 text-[12px]">
+                  <span className="text-muted-foreground">{PREDICATE_LABEL[e.predicate]}</span>
+                  <span className="font-medium">{to?.value ?? e.to}</span>
+                </div>
+              )
+            })}
+          </div>
+        </Card>
+      ) : null}
     </div>
   )
 }
@@ -1108,6 +1190,8 @@ function collectFindings(result: Result): { subject: string; gateway: string; fi
       return { subject: result.data.subject, gateway: 'geo', findings: slim(result.data.findings) }
     case 'research':
       return { subject: result.data.subject, gateway: 'research', findings: slim(result.data.findings) }
+    case 'reference':
+      return { subject: result.data.subject, gateway: 'reference', findings: slim(result.data.facts) }
     case 'media':
       return null
   }
@@ -1433,6 +1517,7 @@ export function IntelligenceDashboard() {
       {result?.kind === 'board' ? <BoardView r={result.data} onReload={run} loading={loading} /> : null}
       {result?.kind === 'geo' ? <GeoView r={result.data} /> : null}
       {result?.kind === 'research' ? <ResearchView r={result.data} /> : null}
+      {result?.kind === 'reference' ? <ReferenceView r={result.data} /> : null}
       {result?.kind === 'media' ? <MediaView r={result.data} /> : null}
 
       {aiInput && aiInput.findings.length > 0 ? (
