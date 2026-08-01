@@ -29,6 +29,7 @@ const en: Dict = {
   'nav.ideas': 'Ideas',
   'nav.calibration': 'Score',
   'nav.globe': 'Globe',
+  'nav.monitor': 'Monitor',
   'ideas.title': 'Ideas & feedback',
   'ideas.subtitle':
     'Suggest features, improvements, integrations or data sources. Every idea is auto-triaged and clustered; the most-wanted rise to the top.',
@@ -64,6 +65,7 @@ const ar: Dict = {
   'nav.ideas': 'أفكار',
   'nav.calibration': 'الدقّة',
   'nav.globe': 'الكرة',
+  'nav.monitor': 'مراقبة',
   'ideas.title': 'الأفكار والملاحظات',
   'ideas.subtitle':
     'اقترح ميزات أو تحسينات أو تكاملات أو مصادر بيانات. كل فكرة تُصنَّف وتُجمَّع تلقائيًا، والأكثر طلبًا يتصدّر.',

@@ -14,7 +14,7 @@ const INTERVALS: Array<{ label: string; minutes: number }> = [
   { label: 'Weekly', minutes: 10080 },
 ]
 
-export function AgenticSwarmDashboard() {
+export function MonitoringDashboard() {
   const [authed, setAuthed] = useState<boolean | null>(null)
   const [monitors, setMonitors] = useState<Monitor[]>([])
   const [alerts, setAlerts] = useState<Alert[]>([])

@@ -5,7 +5,7 @@ import { XLikeFeed } from "@/components/x-like-feed"
 import { PersonalDashboard } from "@/components/personal-dashboard"
 import { EnterpriseDashboard } from "@/components/enterprise-dashboard"
 import { IntelligenceDashboard } from "@/components/intelligence-dashboard"
-import { AgenticSwarmDashboard } from "@/components/swarm-dashboard"
+import { MonitoringDashboard } from "@/components/monitor-dashboard"
 import { SuggestionsPanel } from "@/components/suggestions-panel"
 import { CalibrationScoreboard } from "@/components/calibration-scoreboard"
 import { GlobeView } from "@/components/globe-view"
@@ -14,7 +14,7 @@ import { BottomNav } from "@/components/bottom-nav"
 import { Header } from "@/components/header"
 
 export default function HomePage() {
-  const [activeTab, setActiveTab] = useState<"feed" | "globe" | "personal" | "enterprise" | "intelligence" | "swarm" | "ideas" | "calibration" | "preferences">("feed")
+  const [activeTab, setActiveTab] = useState<"feed" | "globe" | "personal" | "enterprise" | "intelligence" | "monitor" | "ideas" | "calibration" | "preferences">("feed")
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -26,7 +26,7 @@ export default function HomePage() {
         {activeTab === "personal" && <PersonalDashboard />}
         {activeTab === "enterprise" && <EnterpriseDashboard />}
         {activeTab === "intelligence" && <IntelligenceDashboard />}
-        {activeTab === "swarm" && <AgenticSwarmDashboard />}
+        {activeTab === "monitor" && <MonitoringDashboard />}
         {activeTab === "ideas" && <SuggestionsPanel />}
         {activeTab === "calibration" && <CalibrationScoreboard />}
         {activeTab === "preferences" && <UserPreferences />}

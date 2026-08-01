@@ -84,7 +84,7 @@ export function buildHealthReport(deps: HealthDeps = {}): HealthReport {
     status: has(env.SESSION_SECRET) ? 'ok' : 'degraded',
     detail: has(env.SESSION_SECRET)
       ? 'configured'
-      : 'SESSION_SECRET not set — sessions fall back to an ephemeral dev key',
+      : 'SESSION_SECRET not set — session signing throws, so sign-in is unavailable',
     required: true,
   })
 
