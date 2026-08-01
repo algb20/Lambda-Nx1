@@ -52,11 +52,24 @@ describe('investigateResearch', () => {
             json({ items: [{ full_name: 'huggingface/transformers', description: 'SOTA models', stargazers_count: 120000, html_url: 'https://github.com/huggingface/transformers', language: 'Python' }] }),
           )
         if (host === 'export.arxiv.org') return Promise.resolve(text(ARXIV_ATOM))
+        if (host === 'hn.algolia.com')
+          return Promise.resolve(
+            json({
+              hits: [
+                { objectID: '42', title: 'Show HN: a transformer in 100 lines', url: '', points: 350, num_comments: 88, created_at: '2026-07-30T10:00:00Z' },
+              ],
+            }),
+          )
         return Promise.resolve(json({}, 404))
       }),
     )
     const r = await investigateResearch('transformers')
-    expect(r.summary.papers).toBe(4)
+    expect(r.summary.papers).toBe(5)
+    // HN: external url empty → links to the HN thread; points+comments in claim.
+    const hn = r.findings.find((f) => f.sourceKey === 'hackernews')
+    expect(hn).toBeDefined()
+    expect(hn!.claim).toMatch(/Discussion: Show HN: a transformer in 100 lines · 350 pts · 88 comments/)
+    expect(hn!.sourceUrl).toBe('https://news.ycombinator.com/item?id=42')
     expect(r.findings.some((f) => /Tool: huggingface\/transformers .* · 120,000★ \[Python\]/.test(f.claim))).toBe(true)
     // Most-cited first: the OpenAlex paper (100000) leads.
     expect(r.findings[0].claim).toMatch(/Attention is all you need \(2017\) — A\. Vaswani · 100000 citations/)

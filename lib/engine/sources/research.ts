@@ -210,6 +210,61 @@ export const arxiv: Source = {
   },
 }
 
+// ── Hacker News via Algolia (capability: research — industry/community signal) ─
+// Keyless search over HN stories: what practitioners are actually discussing about
+// a technology, and how strongly (points + comments). A community signal distinct
+// from papers (OpenAlex/Crossref/arXiv) and repos (GitHub); graded cautiously.
+interface HnHit {
+  objectID?: string
+  title?: string | null
+  url?: string | null
+  points?: number | null
+  num_comments?: number | null
+  author?: string | null
+  created_at?: string | null
+}
+interface HnResponse {
+  hits?: HnHit[]
+}
+
+export const hackerNews: Source = {
+  key: 'hackernews',
+  capability: 'research',
+  passive: true,
+  hosts: ['hn.algolia.com'],
+  minIntervalMs: 1000,
+  async run(input, ctx) {
+    const q = input.value.trim()
+    if (q.length < 2) return []
+    const url =
+      `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(q)}` +
+      `&tags=story&hitsPerPage=5`
+    const res = await ctx.fetch(url)
+    if (!res.ok) return []
+    const j = (await res.json().catch(() => null)) as HnResponse | null
+    const hits = j?.hits ?? []
+    return hits
+      .filter((h) => h.title && h.objectID)
+      .slice(0, 5)
+      .map<Evidence>((h) => {
+        const pts = typeof h.points === 'number' ? h.points : 0
+        const comments = typeof h.num_comments === 'number' ? h.num_comments : 0
+        // External link when present, else the HN discussion thread.
+        const origin = h.url && h.url.trim() ? h.url : `https://news.ycombinator.com/item?id=${h.objectID}`
+        return {
+          claim: `Discussion: ${h.title!.trim()} · ${pts} pts · ${comments} comments`,
+          entity: { type: 'other', value: h.title!.trim() },
+          sourceKey: 'hackernews',
+          sourceUrl: origin,
+          retrievedAt: h.created_at ?? new Date().toISOString(),
+          admiralty: { source: 'C', info: 3 },
+          confidence: 'possible',
+          data: { points: pts, comments, hnId: h.objectID },
+        }
+      })
+  },
+}
+
 export const crossref: Source = {
   key: 'crossref',
   capability: 'research',
