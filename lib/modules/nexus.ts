@@ -110,6 +110,7 @@ function planFor(type: SelectorType, value: string): Task[] {
       return [t('Threat', 'threat')]
     case 'entity':
       return [
+        t('Reference', 'reference'),
         t('Sanctions', 'sanctions'),
         t('Securities', 'securities'),
         t('Ownership', 'ownership'),

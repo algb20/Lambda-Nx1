@@ -28,6 +28,7 @@ import { usaspending, worldbankProjects } from './procurement'
 import { gleifOwnership } from './ownership'
 // Gateway — News & Signals
 import { gdeltNews, wikiInTheNews, usgsQuakes, reliefWeb } from './news'
+import { wikidata } from './reference'
 // Gateway — Markets Board (live multi-class overview)
 import { coingeckoTop, stooqCommodities, stooqIndices, frankfurterBoard } from './markets-board'
 // Gateway — Geospatial (places + flights)
@@ -69,6 +70,8 @@ export const marketsBoardSources: Source[] = [
 export const geoGatewaySources: Source[] = [nominatim, opensky]
 
 export const researchGatewaySources: Source[] = [openalex, crossref, githubTrend, arxiv, hackerNews]
+
+export const referenceGatewaySources: Source[] = [wikidata]
 
 interface CatalogRow {
   key: string
@@ -149,6 +152,10 @@ export const researchGatewayCatalog: CatalogRow[] = [
   { key: 'hackernews', name: 'Hacker News (industry signal)', capability: 'research', passive: true, enabled: true },
 ]
 
+export const referenceGatewayCatalog: CatalogRow[] = [
+  { key: 'wikidata', name: 'Wikidata (structured facts)', capability: 'reference', passive: true, enabled: true },
+]
+
 export const allSourceCatalog: CatalogRow[] = [
   ...moduleOneSourceCatalog,
   ...moduleTwoSourceCatalog,
@@ -161,6 +168,7 @@ export const allSourceCatalog: CatalogRow[] = [
   ...marketsBoardCatalog,
   ...geoGatewayCatalog,
   ...researchGatewayCatalog,
+  ...referenceGatewayCatalog,
 ]
 
 let registeredOne = false
@@ -241,6 +249,13 @@ export function registerResearchGateway(): void {
   registeredResearch = true
 }
 
+let registeredReference = false
+export function registerReferenceGateway(): void {
+  if (registeredReference) return
+  registry.registerAll(referenceGatewaySources)
+  registeredReference = true
+}
+
 export function registerAllSources(): void {
   registerModuleOneSources()
   registerModuleTwoSources()
@@ -253,6 +268,7 @@ export function registerAllSources(): void {
   registerMarketsBoard()
   registerGeoGateway()
   registerResearchGateway()
+  registerReferenceGateway()
 }
 
 export {
@@ -286,4 +302,5 @@ export {
   stooqCommodities,
   stooqIndices,
   frankfurterBoard,
+  wikidata,
 }

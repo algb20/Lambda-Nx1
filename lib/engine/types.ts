@@ -32,6 +32,7 @@ export type Capability =
   | 'geo'
   | 'research'
   | 'economy'
+  | 'reference'
 
 export type EntityType =
   | 'domain'

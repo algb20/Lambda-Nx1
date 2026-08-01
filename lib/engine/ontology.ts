@@ -27,6 +27,9 @@ export const PREDICATES = [
   'reported_by',
   'exposes',
   'priced_at',
+  'located_in',
+  'founded_by',
+  'led_by',
   'associated_with',
 ] as const
 export type Predicate = (typeof PREDICATES)[number]
@@ -46,6 +49,9 @@ export const PREDICATE_LABEL: Record<Predicate, string> = {
   reported_by: 'reported by',
   exposes: 'exposes',
   priced_at: 'priced at',
+  located_in: 'located in',
+  founded_by: 'founded by',
+  led_by: 'led by',
   associated_with: 'associated with',
 }
 
@@ -80,6 +86,9 @@ export function inferPredicate(e: Evidence): Predicate {
   if (rel === 'ultimate-parent') return 'ultimately_owned_by'
   if (rel === 'direct-child') return 'owns'
   if (rel === 'self') return 'identified_as'
+  if (rel === 'country' || rel === 'hq') return 'located_in'
+  if (rel === 'founder') return 'founded_by'
+  if (rel === 'ceo') return 'led_by'
 
   const k = e.sourceKey
   if (has(k, 'dns')) return 'resolves_to'

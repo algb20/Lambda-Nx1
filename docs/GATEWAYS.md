@@ -25,6 +25,7 @@ This design is future-proof: the platform grows by *families*, not rewrites.
 | News & Signals | what are the top world events / topic coverage? | GDELT, Wikipedia "In the news", USGS earthquakes (live, geolocated), ReliefWeb/UN OCHA (humanitarian) (see docs/NEWS.md) |
 | Geospatial / Transport | where is this? | Nominatim/OpenStreetMap (places), OpenSky (live flights) |
 | Research & Tech-trend | what's the frontier on X? | OpenAlex, Crossref (papers), arXiv (preprints), GitHub (tools), Hacker News (industry signal) |
+| Reference / knowledge base | structured facts about an entity | Wikidata (parent org, country, HQ, founder, CEO, coordinates) → feeds the ontology |
 | Macro / Economy | a country's key indicators | World Bank (GDP, population, inflation) — via Markets |
 | AI-analyst layer | triage + summarize + suggest next pivot | Claude (Anthropic API) over our own evidence |
 
