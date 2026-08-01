@@ -57,8 +57,15 @@ sync; never skip a point or a test.
 - [x] Module 3: Media/content verification (local EXIF via exifr + GPS + AI hints + reverse links + UI)
 - [x] Module 4: Monitoring & alerts — monitors CRUD API + alerts feed + radar-run (cron-guarded) + manager UI
 
-### P7 — Finalize
-- [ ] E2E tests, security review, build, deploy, Pi App Studio zip (every point verified)
+### P7 — Finalize  *(in progress)*
+- [x] Readiness probe: `lib/modules/health` (config-only, no secrets leaked) + `GET /api/health` (503 when a required check fails) + tests
+- [x] Deploy config: `netlify.toml` (Next runtime + Pi functions + Node 22 + security headers/CSP)
+- [x] Release packager: `scripts/package.mjs` (`npm run package`) — clean source zip + manifest, **hard-fails on any secret file/secret-shaped content**
+- [x] E2E smoke test: `scripts/smoke.mjs` — boots the built server, verifies shell render + health shape/code + plans + auth-gating (analyst 401) + radar guard (503). Ran green against a live instance.
+- [x] Deploy runbook: `docs/DEPLOY.md` (Supabase migrations, env matrix, Netlify Pi + standalone, Pi App Studio registration, post-deploy verify, rollback, provider swaps)
+- [x] `npm run verify` = typecheck + test + build gate
+- [ ] Security review pass (secret scan + guardrail audit) before tagging a release
+- [ ] Live deploy to Netlify + Supabase provisioning (needs user infra/credentials)
 
 ### P8 — More gateways (multi-gateway vision; see docs/GATEWAYS.md)
 - [x] Threat Intelligence (CTI): Feodo/URLhaus/ThreatFox + module + API + UI mode + tests

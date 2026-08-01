@@ -27,4 +27,6 @@ yarn-error.log*
 next-env.d.ts
 # lambda-nx local storage
 /.storage
+# release packager output
+/dist
 !.env.example

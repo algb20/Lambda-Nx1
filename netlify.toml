@@ -1,0 +1,43 @@
+# Lambda NX — Netlify deploy configuration.
+#
+# Hosting default per charter §4 (Netlify + Supabase): keeps the already-verified
+# Pi domain and the existing Pi payment functions. Swappable — moving to Vercel or
+# self-host is a config change, not an app rewrite (providers sit behind lib/*).
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+  # Pi payment endpoints (approve/complete/cancel) are classic Netlify Functions.
+  functions = "netlify/functions"
+
+[build.environment]
+  # Match the local/dev toolchain. React 19 peer ranges need legacy-peer-deps.
+  NODE_VERSION = "22"
+  NPM_FLAGS = "--legacy-peer-deps"
+  # Do not fail the build on Next telemetry / lint (tsc still gates types).
+  NEXT_TELEMETRY_DISABLED = "1"
+
+# The official Next.js runtime — SSR, route handlers, image handling on Netlify.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# ── Security headers (defense-in-depth; applied to every response) ─────────────
+# Passive-only product: we never frame third parties and are never framed.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-DNS-Prefetch-Control = "off"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=(), payment=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    # We render our own canvas globe and talk only to same-origin API routes,
+    # which fan out to public sources server-side. connect-src stays 'self'.
+    Content-Security-Policy = "default-src 'self'; img-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://sdk.minepi.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.minepi.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+
+# Never cache the readiness probe.
+[[headers]]
+  for = "/api/health"
+  [headers.values]
+    Cache-Control = "no-store"

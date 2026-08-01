@@ -12,7 +12,9 @@
     "test:watch": "vitest",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "package": "node scripts/package.mjs",
+    "verify": "npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
