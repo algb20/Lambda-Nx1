@@ -649,6 +649,15 @@ function NewsView({ r, onReload, loading }: { r: NewsReport; onReload: () => voi
 function NexusView({ r, onPivot }: { r: NexusReport; onPivot: (selector: string) => void }) {
   const active = r.sections.filter((s) => s.findings.length > 0)
   const pivots = proposePivots(r.ontology)
+  // Every geolocated signal across the dossier (Wikidata coords, USGS epicentres,
+  // geocoded places, news source countries) plotted on one globe — our signature.
+  const allFindings = r.sections.flatMap((s) => s.findings)
+  const globePoints = pointsFromEvidence(
+    allFindings.map((e) => {
+      const d = e.data as { lat?: number; lon?: number; country?: string; place?: string } | undefined
+      return { lat: d?.lat, lon: d?.lon, country: d?.country, label: d?.place ?? e.claim.slice(0, 40) }
+    }),
+  )
   return (
     <div className="space-y-4">
       <Card className="p-4">
@@ -672,6 +681,17 @@ function NexusView({ r, onPivot }: { r: NexusReport; onPivot: (selector: string)
           <Stat label="Fastest" value={r.speed.fastestMs !== null ? `${r.speed.fastestMs}ms` : '—'} />
         </div>
       </Card>
+
+      {/* Signal map — the dossier's geolocated evidence on our own globe. */}
+      {globePoints.length > 0 ? (
+        <Card className="overflow-hidden p-0">
+          <DataGlobe
+            points={globePoints}
+            height={300}
+            focus={{ lat: globePoints[0].lat, lon: globePoints[0].lon }}
+          />
+        </Card>
+      ) : null}
 
       {/* Trust Lens — our visible, auditable neutrality & corroboration measure. */}
       <Card className="p-4">
