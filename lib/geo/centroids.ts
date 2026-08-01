@@ -53,3 +53,37 @@ export function pointsFromCountries(countries: Array<string | null | undefined>)
     return { lat, lon, label: key.replace(/\b\w/g, (m) => m.toUpperCase()), weight }
   })
 }
+
+/** An item that may carry exact coordinates and/or a country for globe plotting. */
+export interface GeoLike {
+  lat?: number | null
+  lon?: number | null
+  country?: string | null
+  label?: string | null
+}
+
+/**
+ * Build globe points from evidence-like items, preferring exact coordinates when
+ * present (one precise point each) and falling back to country centroids for the
+ * rest. This lets precise sources (e.g. USGS epicentres) plot exactly while
+ * country-level signals still aggregate. Items with neither are dropped.
+ */
+export function pointsFromEvidence(items: GeoLike[]): GlobePoint[] {
+  const exact: GlobePoint[] = []
+  const countryFallback: Array<string | null | undefined> = []
+  for (const it of items) {
+    if (
+      typeof it.lat === 'number' &&
+      typeof it.lon === 'number' &&
+      Number.isFinite(it.lat) &&
+      Number.isFinite(it.lon) &&
+      Math.abs(it.lat) <= 90 &&
+      Math.abs(it.lon) <= 180
+    ) {
+      exact.push({ lat: it.lat, lon: it.lon, label: it.label?.trim() || 'Signal', weight: 1 })
+    } else if (it.country) {
+      countryFallback.push(it.country)
+    }
+  }
+  return [...exact, ...pointsFromCountries(countryFallback)]
+}

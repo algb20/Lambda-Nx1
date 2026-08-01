@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { centroidOf, pointsFromCountries } from './centroids'
+import { centroidOf, pointsFromCountries, pointsFromEvidence } from './centroids'
 
 describe('centroidOf', () => {
   it('resolves known countries (with aliases), null otherwise', () => {
@@ -18,5 +18,22 @@ describe('pointsFromCountries', () => {
     expect(us.weight).toBe(2)
     expect(us.lat).toBe(39.8)
     expect(pts.find((p) => p.label === 'France')?.weight).toBe(1)
+  })
+})
+
+describe('pointsFromEvidence', () => {
+  it('uses exact coordinates when present and country centroids otherwise', () => {
+    const pts = pointsFromEvidence([
+      { lat: 35.6, lon: 139.7, label: 'Tokyo quake' }, // exact
+      { country: 'France' }, // centroid fallback
+      { lat: 999, lon: 0, label: 'bad' }, // out-of-range → dropped
+      { label: 'no geo' }, // nothing → dropped
+    ])
+    expect(pts).toHaveLength(2)
+    const exact = pts.find((p) => p.label === 'Tokyo quake')!
+    expect(exact.lat).toBe(35.6)
+    expect(exact.lon).toBe(139.7)
+    expect(pts.find((p) => p.label === 'France')?.lat).toBe(46.2)
+    expect(pts.some((p) => p.label === 'bad')).toBe(false)
   })
 })

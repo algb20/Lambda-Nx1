@@ -68,6 +68,43 @@ describe('investigateNews', () => {
     expect(r.summary.countries).toContain('United States')
   })
 
+  it('adds geolocated USGS earthquakes (confirmed, exact coords) to top events', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((u: string) => {
+        const host = new URL(u).hostname
+        if (host === 'earthquake.usgs.gov')
+          return Promise.resolve(
+            res({
+              features: [
+                {
+                  properties: {
+                    mag: 6.4,
+                    place: '100km SW of Ndoi Island, Fiji',
+                    time: 1785600000000,
+                    url: 'https://earthquake.usgs.gov/earthquakes/eventpage/us1',
+                    title: 'M 6.4 - 100km SW of Ndoi Island, Fiji',
+                    tsunami: 1,
+                  },
+                  geometry: { coordinates: [-178.2, -21.1, 550] },
+                },
+              ],
+            }),
+          )
+        return Promise.resolve(res({ news: [] })) // Wikipedia empty this run
+      }),
+    )
+    const r = await investigateNews('')
+    const q = r.items.find((i) => i.sourceKey === 'usgs_quakes')
+    expect(q).toBeDefined()
+    expect(q!.claim).toMatch(/M 6\.4 - 100km SW of Ndoi Island, Fiji · tsunami alert/)
+    expect(q!.confidence).toBe('confirmed')
+    expect(q!.admiralty).toEqual({ source: 'A', info: 1 })
+    expect((q!.data as { lat: number; lon: number }).lat).toBe(-21.1)
+    expect((q!.data as { lat: number; lon: number }).lon).toBe(-178.2)
+    expect(q!.sourceUrl).toBe('https://earthquake.usgs.gov/earthquakes/eventpage/us1')
+  })
+
   it('degrades gracefully when a provider is down (stays non-empty via the other)', async () => {
     vi.stubGlobal(
       'fetch',

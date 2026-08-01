@@ -67,6 +67,52 @@ export const gdeltNews: Source = {
   },
 }
 
+// ── USGS earthquakes (capability: news — real-time geolocated world events) ──
+// Authoritative primary sensor data (not a claim): significant quakes in the
+// past week, with exact epicentre coordinates so they plot precisely on the
+// globe. Keyless GeoJSON feed. Served on the topic-less "top events" path.
+interface UsgsFeature {
+  properties?: { mag?: number; place?: string; time?: number; url?: string; title?: string; tsunami?: number }
+  geometry?: { coordinates?: number[] } // [lon, lat, depth]
+}
+interface UsgsResponse {
+  features?: UsgsFeature[]
+}
+
+export const usgsQuakes: Source = {
+  key: 'usgs_quakes',
+  capability: 'news',
+  passive: true,
+  hosts: ['earthquake.usgs.gov'],
+  minIntervalMs: 2000,
+  async run(input, ctx) {
+    if (input.value.trim().length > 0) return [] // topic queries go to GDELT
+    const url = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.geojson'
+    const res = await ctx.fetch(url)
+    if (!res.ok) return []
+    const j = (await res.json().catch(() => null)) as UsgsResponse | null
+    const features = j?.features ?? []
+    return features
+      .filter((f) => f.properties?.title && Array.isArray(f.geometry?.coordinates))
+      .slice(0, 12)
+      .map<Evidence>((f) => {
+        const p = f.properties!
+        const [lon, lat] = f.geometry!.coordinates as number[]
+        return {
+          claim: (p.title ?? `M ${p.mag} — ${p.place}`).trim() + (p.tsunami ? ' · tsunami alert' : ''),
+          entity: p.place ? { type: 'other', value: p.place } : undefined,
+          sourceKey: 'usgs_quakes',
+          sourceUrl: p.url,
+          retrievedAt: new Date(typeof p.time === 'number' ? p.time : Date.now()).toISOString(),
+          // Instrument-measured by an authoritative agency — reliable, confirmed.
+          admiralty: { source: 'A', info: 1 },
+          confidence: 'confirmed',
+          data: { lat, lon, magnitude: p.mag, place: p.place, kind: 'earthquake' },
+        }
+      })
+  },
+}
+
 // ── Wikipedia "In the news" (capability: news — top world events) ────────────
 interface WikiLink {
   normalizedtitle?: string

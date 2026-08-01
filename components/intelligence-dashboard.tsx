@@ -44,7 +44,7 @@ import type { GeoReport } from '@/lib/modules/geo'
 import type { ResearchReport } from '@/lib/modules/research'
 import { TargetTracker } from '@/components/target-tracker'
 import { DataGlobe } from '@/components/data-globe'
-import { pointsFromCountries, type GlobePoint } from '@/lib/geo/centroids'
+import { pointsFromEvidence, type GlobePoint } from '@/lib/geo/centroids'
 import { PREDICATE_LABEL } from '@/lib/engine/ontology'
 import { proposePivots } from '@/lib/modules/copilot'
 import type { Evidence } from '@/lib/engine/types'
@@ -571,7 +571,14 @@ function NewsView({ r, onReload, loading }: { r: NewsReport; onReload: () => voi
 
   const country = (e: EvidenceItem) => (e.data as { country?: string } | undefined)?.country
   const domain = (e: EvidenceItem) => (e.data as { domain?: string } | undefined)?.domain
-  const mapPoints = pointsFromCountries(r.items.map((e) => country(e)))
+  // Prefer exact coordinates (e.g. USGS epicentres) and fall back to country
+  // centroids for country-level signals — precise pins where we have them.
+  const mapPoints = pointsFromEvidence(
+    r.items.map((e) => {
+      const d = e.data as { lat?: number; lon?: number; country?: string; place?: string } | undefined
+      return { lat: d?.lat, lon: d?.lon, country: d?.country, label: d?.place ?? e.claim.slice(0, 40) }
+    }),
+  )
 
   return (
     <div className="space-y-4">

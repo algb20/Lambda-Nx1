@@ -27,7 +27,7 @@ import { usaspending, worldbankProjects } from './procurement'
 // Gateway — Ownership & beneficial-control networks
 import { gleifOwnership } from './ownership'
 // Gateway — News & Signals
-import { gdeltNews, wikiInTheNews } from './news'
+import { gdeltNews, wikiInTheNews, usgsQuakes } from './news'
 // Gateway — Markets Board (live multi-class overview)
 import { coingeckoTop, stooqCommodities, stooqIndices, frankfurterBoard } from './markets-board'
 // Gateway — Geospatial (places + flights)
@@ -57,7 +57,7 @@ export const procurementGatewaySources: Source[] = [usaspending, worldbankProjec
 
 export const ownershipGatewaySources: Source[] = [gleifOwnership]
 
-export const newsGatewaySources: Source[] = [gdeltNews, wikiInTheNews]
+export const newsGatewaySources: Source[] = [gdeltNews, wikiInTheNews, usgsQuakes]
 
 export const marketsBoardSources: Source[] = [
   coingeckoTop,
@@ -125,6 +125,7 @@ export const ownershipGatewayCatalog: CatalogRow[] = [
 export const newsGatewayCatalog: CatalogRow[] = [
   { key: 'gdelt', name: 'GDELT global news', capability: 'news', passive: true, enabled: true },
   { key: 'wikipedia_itn', name: 'Wikipedia In the news', capability: 'news', passive: true, enabled: true },
+  { key: 'usgs_quakes', name: 'USGS earthquakes (live, geolocated)', capability: 'news', passive: true, enabled: true },
 ]
 
 export const marketsBoardCatalog: CatalogRow[] = [
@@ -277,6 +278,7 @@ export {
   gleifOwnership,
   gdeltNews,
   wikiInTheNews,
+  usgsQuakes,
   coingeckoTop,
   stooqCommodities,
   stooqIndices,

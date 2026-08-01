@@ -21,10 +21,15 @@ Chosen for reach, neutrality and being free + always-on:
 |---|---|---|---|
 | **GDELT DOC 2.0** | topic coverage | indexes global media in ~65 languages; article **volume across outlets** is a real proxy for how widely a story is "traded" | links to the actual outlet article |
 | **Wikipedia "In the news"** | top world events | NPOV, editorially curated, each item sourced; genuinely the neutral "what matters now" | links to the sourced encyclopedia entry → primary refs |
+| **USGS earthquakes** | real-time geolocated events | authoritative instrument-measured primary data (not a media claim); significant quakes in the past week with exact epicentre coordinates | links to the USGS event page |
 
 They are **complementary by input**: GDELT needs a topic (used for topic search);
-Wikipedia serves the topic-less "top events" case. This gives coverage of both
-"most-traded on X" and "most important overall" without a single point of failure.
+Wikipedia + USGS serve the topic-less "top events" case. This gives coverage of
+"most-traded on X", "most important overall", and hard geophysical events —
+without a single point of failure. USGS is the one source here graded **A/1
+"confirmed"**: it is measured sensor data, so it also plots at exact coordinates
+on the globe (via `pointsFromEvidence`), while media items stay "possible/
+probable" until corroborated.
 
 **Roadmap (more redundancy / origin depth):** official wire & institution feeds
 (Reuters/AP/AFP where their ToS permits headlines+link, central banks, gov press
