@@ -99,7 +99,7 @@ deliberately deferred to their correct phase (dependency ordering) or to deploy.
 | Object-store storage provider | filesystem is the dev default | deploy |
 | Standalone UI shell + Stripe payments | needs provider choice | task #20 (P7) |
 | OAuth standalone provider | email/password shipped | future |
-| Next.js upgrade (CVE-2025-66478) | can break build; not exploitable pre-deploy | task #19 (P7) |
+| Next.js upgrade (CVE) | DONE — 15.2.4 → 15.5.22 (latest 15.x, patched); typecheck+build+tests green | ✅ #19 |
 
 ## Open decisions (defaults chosen; user may override)
 - Hosting: **Netlify + Supabase** (least disruption to verified Pi domain).
