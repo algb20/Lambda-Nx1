@@ -26,6 +26,8 @@ import {
 
 export const authProviderEnum = pgEnum('auth_provider', ['pi', 'standalone'])
 
+export const planEnum = pgEnum('plan', ['free', 'pro'])
+
 export const entityTypeEnum = pgEnum('entity_type', [
   'domain',
   'ip',
@@ -87,6 +89,8 @@ export const users = pgTable(
     /** Pi username, or the subject id from the standalone auth provider. */
     externalId: text('external_id').notNull(),
     displayName: text('display_name'),
+    /** Subscription tier (source of truth for pricing/features is lib/plans). */
+    plan: planEnum('plan').notNull().default('free'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [unique('users_provider_external_uq').on(t.authProvider, t.externalId)],

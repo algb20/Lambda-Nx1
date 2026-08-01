@@ -54,6 +54,16 @@ export const repo = {
       const [row] = await db.select().from(s.users).where(eq(s.users.id, id)).limit(1)
       return row
     },
+    /** A user's subscription tier (defaults to 'free' if unknown). */
+    async getPlan(id: string): Promise<'free' | 'pro'> {
+      const db = getDb()
+      const [row] = await db.select({ plan: s.users.plan }).from(s.users).where(eq(s.users.id, id)).limit(1)
+      return row?.plan ?? 'free'
+    },
+    async setPlan(id: string, plan: 'free' | 'pro'): Promise<void> {
+      const db = getDb()
+      await db.update(s.users).set({ plan }).where(eq(s.users.id, id))
+    },
   },
 
   credentials: {

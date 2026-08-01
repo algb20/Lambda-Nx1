@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { getSessionUserId } from '@/lib/auth/server'
 import { analyzeFindings } from '@/lib/modules/analyst'
 import { AnalystRefusedError } from '@/lib/ai/types'
+import { isDbConfigured, repo } from '@/lib/db'
+import { requireTier, TIERS_ENFORCED } from '@/lib/plans/plans'
 import type { Evidence } from '@/lib/engine/types'
 
 /**
@@ -18,6 +20,20 @@ export const dynamic = 'force-dynamic'
 export async function POST(request: Request) {
   const userId = await getSessionUserId()
   if (!userId) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+
+  // The AI analyst is a Pro feature. Enforcement is off until subscriptions ship
+  // (ENFORCE_TIERS); when on, a free user is asked to upgrade rather than blocked
+  // silently. Plans/pricing live in lib/plans (single source of truth).
+  if (TIERS_ENFORCED) {
+    const plan = isDbConfigured() ? await repo.users.getPlan(userId).catch(() => 'free') : 'free'
+    const check = requireTier(plan, 'ai_analyst')
+    if (!check.ok) {
+      return NextResponse.json(
+        { error: 'The AI analyst is a Pro feature.', upgradeTo: check.upgradeTo },
+        { status: 402 },
+      )
+    }
+  }
 
   let body: { subject?: unknown; gateway?: unknown; findings?: unknown; focus?: unknown }
   try {
