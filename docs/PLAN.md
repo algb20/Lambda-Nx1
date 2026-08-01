@@ -97,7 +97,7 @@ deliberately deferred to their correct phase (dependency ordering) or to deploy.
 | Identity (username/email) persistence | only domain persists today | follow-up |
 | Durable radar scheduler (pg_cron/pgmq) | needs live DB/cron; POST /api/radar/run is ready | deploy (#16) |
 | Object-store storage provider | filesystem is the dev default | deploy |
-| Standalone UI shell + Stripe payments | needs provider choice | task #20 (P7) |
+| Standalone UI shell + Stripe payments | DONE — email/password login gate (NEXT_PUBLIC_AUTH_MODE=standalone) + Stripe provider | ✅ #20 |
 | OAuth standalone provider | email/password shipped | future |
 | Next.js upgrade (CVE) | DONE — 15.2.4 → 15.5.22 (latest 15.x, patched); typecheck+build+tests green | ✅ #19 |
 
