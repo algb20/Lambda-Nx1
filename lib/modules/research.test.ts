@@ -5,10 +5,26 @@ function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
 }
 
+function text(body: string, status = 200): Response {
+  return new Response(body, { status, headers: { 'content-type': 'application/xml' } })
+}
+
+const ARXIV_ATOM = `<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <entry>
+    <id>http://arxiv.org/abs/1706.03762v5</id>
+    <published>2017-06-12T00:00:00Z</published>
+    <title>Attention Is All You Need &amp; More</title>
+    <summary>The dominant sequence transduction models...</summary>
+    <author><name>Ashish Vaswani</name></author>
+    <author><name>Noam Shazeer</name></author>
+  </entry>
+</feed>`
+
 afterEach(() => vi.unstubAllGlobals())
 
 describe('investigateResearch', () => {
-  it('gathers papers from OpenAlex + Crossref, most-cited first', async () => {
+  it('gathers papers from OpenAlex + Crossref + arXiv, most-cited first', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn((u: string) => {
@@ -35,15 +51,22 @@ describe('investigateResearch', () => {
           return Promise.resolve(
             json({ items: [{ full_name: 'huggingface/transformers', description: 'SOTA models', stargazers_count: 120000, html_url: 'https://github.com/huggingface/transformers', language: 'Python' }] }),
           )
+        if (host === 'export.arxiv.org') return Promise.resolve(text(ARXIV_ATOM))
         return Promise.resolve(json({}, 404))
       }),
     )
     const r = await investigateResearch('transformers')
-    expect(r.summary.papers).toBe(3)
+    expect(r.summary.papers).toBe(4)
     expect(r.findings.some((f) => /Tool: huggingface\/transformers .* · 120,000★ \[Python\]/.test(f.claim))).toBe(true)
     // Most-cited first: the OpenAlex paper (100000) leads.
     expect(r.findings[0].claim).toMatch(/Attention is all you need \(2017\) — A\. Vaswani · 100000 citations/)
     expect(r.findings[1].claim).toMatch(/A smaller study \(2020\)/)
+    // arXiv: XML parsed, entity decoded, marked [preprint], authors joined, year from <published>.
+    const pre = r.findings.find((f) => f.sourceKey === 'arxiv')
+    expect(pre).toBeDefined()
+    expect(pre!.claim).toMatch(/Attention Is All You Need & More \[preprint\] \(2017\) — Ashish Vaswani, Noam Shazeer/)
+    expect(pre!.sourceUrl).toBe('http://arxiv.org/abs/1706.03762v5')
+    expect((pre!.data as { preprint?: boolean }).preprint).toBe(true)
   })
 
   it('rejects too-short input', async () => {
