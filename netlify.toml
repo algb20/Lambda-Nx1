@@ -21,23 +21,7 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# ── Security headers (defense-in-depth; applied to every response) ─────────────
-# Passive-only product: we never frame third parties and are never framed.
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    X-DNS-Prefetch-Control = "off"
-    Permissions-Policy = "geolocation=(), microphone=(), camera=(), payment=()"
-    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
-    # We render our own canvas globe and talk only to same-origin API routes,
-    # which fan out to public sources server-side. connect-src stays 'self'.
-    Content-Security-Policy = "default-src 'self'; img-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://sdk.minepi.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.minepi.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
-
-# Never cache the readiness probe.
-[[headers]]
-  for = "/api/health"
-  [headers.values]
-    Cache-Control = "no-store"
+# Security headers (CSP, HSTS, X-Frame-Options, …) and the /api/health no-store
+# rule are defined portably in next.config.mjs `headers()`, so they apply
+# identically on Netlify, Vercel and self-host. Keeping them in one place avoids
+# drift and duplicate headers.

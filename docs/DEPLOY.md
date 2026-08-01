@@ -74,7 +74,8 @@ Never commit these. Rotate any key that is ever exposed.
 
 The Pi payment functions (`netlify/functions/pi-approve|complete|cancel.js`) and
 the verified Pi domain already exist; `netlify.toml` wires the Next runtime,
-functions dir, Node 22, and security headers.
+functions dir, and Node 22. Security headers (CSP, HSTS, …) are defined portably
+in `next.config.mjs` so they apply the same on every host — see `docs/SECURITY.md`.
 
 1. Connect the repo to Netlify (branch `claude/bittorent-network-app-c8j9pv` or
    your release branch).

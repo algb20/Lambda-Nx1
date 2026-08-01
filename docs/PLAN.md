@@ -64,8 +64,9 @@ sync; never skip a point or a test.
 - [x] E2E smoke test: `scripts/smoke.mjs` — boots the built server, verifies shell render + health shape/code + plans + auth-gating (analyst 401) + radar guard (503). Ran green against a live instance.
 - [x] Deploy runbook: `docs/DEPLOY.md` (Supabase migrations, env matrix, Netlify Pi + standalone, Pi App Studio registration, post-deploy verify, rollback, provider swaps)
 - [x] `npm run verify` = typecheck + test + build gate
-- [ ] Security review pass (secret scan + guardrail audit) before tagging a release
+- [x] Security review pass: secret scan (clean), guardrail audit, per-route authz audit (removed 2 dead stub routes, renamed misleading "Swarm"→"Monitor"), portable security headers in `next.config.mjs` (CSP/HSTS/XFO/… verified on live responses), full posture in `docs/SECURITY.md`
 - [ ] Live deploy to Netlify + Supabase provisioning (needs user infra/credentials)
+- [ ] Distributed rate-limiting on public routes (needs durable store at deploy; per-source guardrail already protects upstreams — see SECURITY.md §7)
 
 ### P8 — More gateways (multi-gateway vision; see docs/GATEWAYS.md)
 - [x] Threat Intelligence (CTI): Feodo/URLhaus/ThreatFox + module + API + UI mode + tests
