@@ -108,6 +108,8 @@ deliberately deferred to their correct phase (dependency ordering) or to deploy.
 | Standalone UI shell + Stripe payments | DONE — email/password login gate (NEXT_PUBLIC_AUTH_MODE=standalone) + Stripe provider | ✅ #20 |
 | OAuth standalone provider | email/password shipped | future |
 | Next.js upgrade (CVE) | DONE — 15.2.4 → 15.5.22 (latest 15.x, patched); typecheck+build+tests green | ✅ #19 |
+| Deploy readiness (#16) | DONE — /api/health probe, netlify.toml, `npm run package` (secret-guarded zip), `scripts/smoke.mjs` E2E, docs/DEPLOY.md runbook, security review + docs/SECURITY.md, portable headers | ✅ #16 |
+| Live cloud provisioning | needs the user's Netlify + Supabase + Pi Portal accounts/credentials (not code) | handoff — follow docs/DEPLOY.md |
 
 ## Open decisions (defaults chosen; user may override)
 - Hosting: **Netlify + Supabase** (least disruption to verified Pi domain).
