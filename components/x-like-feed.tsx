@@ -106,7 +106,7 @@ const FAMILIES: Family[] = [
     blurb: 'Built the same way — passive, lawful, keyless-first. Roadmap, honestly labelled.',
     items: [
       { icon: MapPin, title: 'Geospatial & transport', desc: 'Geocode a place, reverse-geocode coordinates (OpenStreetMap), or read a live public flight state (OpenSky). Maritime + real-estate overlay next.', status: 'Live', tab: 'intelligence', tag: 'geo' },
-      { icon: Microscope, title: 'Research & tech-trend', desc: 'Papers, patents and R&D frontier signals (OpenAlex, arXiv, USPTO, GitHub/HF).', status: 'Planned', tag: 'research' },
+      { icon: Microscope, title: 'Research & tech-trend', desc: 'The R&D frontier — papers and citations from open scholarship (OpenAlex, Crossref). Patents & trend signals next.', status: 'Live', tab: 'intelligence', tag: 'research' },
       { icon: Activity, title: 'Calibration scoreboard', desc: 'Track published forecasts vs outcomes — whose foresight proved right, including ours. Honest accuracy, by author and confidence.', status: 'Live', tab: 'calibration', tag: 'foresight' },
       { icon: Boxes, title: 'Supply-chain & trade', desc: 'Trade exposure and dependency mapping from public customs/trade data.', status: 'Planned', tag: 'trade' },
     ],

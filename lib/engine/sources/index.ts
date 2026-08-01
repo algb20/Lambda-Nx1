@@ -31,6 +31,8 @@ import { gdeltNews, wikiInTheNews } from './news'
 import { coingeckoTop, stooqCommodities, stooqIndices, frankfurterBoard } from './markets-board'
 // Gateway — Geospatial (places + flights)
 import { nominatim, opensky } from './geo'
+// Gateway — Research & tech-trend
+import { openalex, crossref } from './research'
 
 export const moduleOneSources: Source[] = [
   cloudflareDns,
@@ -64,6 +66,8 @@ export const marketsBoardSources: Source[] = [
 ]
 
 export const geoGatewaySources: Source[] = [nominatim, opensky]
+
+export const researchGatewaySources: Source[] = [openalex, crossref]
 
 interface CatalogRow {
   key: string
@@ -133,6 +137,11 @@ export const geoGatewayCatalog: CatalogRow[] = [
   { key: 'opensky', name: 'OpenSky Network (flights)', capability: 'geo', passive: true, enabled: true },
 ]
 
+export const researchGatewayCatalog: CatalogRow[] = [
+  { key: 'openalex', name: 'OpenAlex (scholarly works)', capability: 'research', passive: true, enabled: true },
+  { key: 'crossref', name: 'Crossref (scholarly records)', capability: 'research', passive: true, enabled: true },
+]
+
 export const allSourceCatalog: CatalogRow[] = [
   ...moduleOneSourceCatalog,
   ...moduleTwoSourceCatalog,
@@ -144,6 +153,7 @@ export const allSourceCatalog: CatalogRow[] = [
   ...newsGatewayCatalog,
   ...marketsBoardCatalog,
   ...geoGatewayCatalog,
+  ...researchGatewayCatalog,
 ]
 
 let registeredOne = false
@@ -217,6 +227,13 @@ export function registerGeoGateway(): void {
   registeredGeo = true
 }
 
+let registeredResearch = false
+export function registerResearchGateway(): void {
+  if (registeredResearch) return
+  registry.registerAll(researchGatewaySources)
+  registeredResearch = true
+}
+
 export function registerAllSources(): void {
   registerModuleOneSources()
   registerModuleTwoSources()
@@ -228,6 +245,7 @@ export function registerAllSources(): void {
   registerNewsGateway()
   registerMarketsBoard()
   registerGeoGateway()
+  registerResearchGateway()
 }
 
 export {

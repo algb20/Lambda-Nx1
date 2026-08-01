@@ -16,6 +16,7 @@ import {
   Gauge,
   ScanSearch,
   Crosshair,
+  Microscope,
   Zap,
   Loader2,
   ShieldCheck,
@@ -40,6 +41,7 @@ import type { NewsReport } from '@/lib/modules/news'
 import type { MarketsBoardReport } from '@/lib/modules/markets-board'
 import type { NexusReport } from '@/lib/modules/nexus'
 import type { GeoReport } from '@/lib/modules/geo'
+import type { ResearchReport } from '@/lib/modules/research'
 import { TargetTracker } from '@/components/target-tracker'
 import { PREDICATE_LABEL } from '@/lib/engine/ontology'
 import { proposePivots } from '@/lib/modules/copilot'
@@ -60,6 +62,7 @@ type Mode =
   | 'news'
   | 'board'
   | 'geo'
+  | 'research'
   | 'media'
 type Result =
   | { kind: 'nexus'; data: NexusReport }
@@ -75,6 +78,7 @@ type Result =
   | { kind: 'news'; data: NewsReport }
   | { kind: 'board'; data: MarketsBoardReport }
   | { kind: 'geo'; data: GeoReport }
+  | { kind: 'research'; data: ResearchReport }
   | { kind: 'media'; data: MediaReport }
 
 const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: string }> = [
@@ -90,6 +94,7 @@ const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: s
   { id: 'procurement', label: 'Contracts', icon: Gavel, placeholder: 'company, agency or project name' },
   { id: 'ownership', label: 'Ownership', icon: Network, placeholder: 'company / legal-entity name' },
   { id: 'geo', label: 'Geo', icon: MapPin, placeholder: 'place, "lat,lon", or aircraft ICAO24 hex' },
+  { id: 'research', label: 'Research', icon: Microscope, placeholder: 'a topic, technology or research question' },
   { id: 'news', label: 'News', icon: Newspaper, placeholder: 'topic (optional) — empty = top world events' },
   { id: 'media', label: 'Media', icon: ImageIcon, placeholder: 'https://…/image.jpg' },
 ]
@@ -103,6 +108,7 @@ const BODY_KEY: Partial<Record<Mode, string>> = {
   ownership: 'query',
   news: 'query',
   geo: 'query',
+  research: 'query',
 }
 
 /** Modes where an empty query is valid (returns a top/overview result). */
@@ -317,6 +323,45 @@ function MarketsView({ r }: { r: MarketsReport }) {
           <p className="py-2 text-sm text-muted-foreground">
             No public market data or filings matched. Try a ticker, coin, company name, or a
             pair like USD/EUR.
+          </p>
+        ) : (
+          r.findings.map((e, i) => (
+            <div key={i} className="flex items-start justify-between gap-3 border-b border-border/40 py-2 last:border-0">
+              {e.sourceUrl ? (
+                <a href={e.sourceUrl} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline">
+                  {e.claim}
+                </a>
+              ) : (
+                <span className="text-sm">{e.claim}</span>
+              )}
+              <SourceTag e={e} />
+            </div>
+          ))
+        )}
+      </Card>
+    </div>
+  )
+}
+
+function ResearchView({ r }: { r: ResearchReport }) {
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 className="font-semibold break-all">{r.subject}</h3>
+            <p className="text-[11px] text-muted-foreground">
+              research frontier · {new Date(r.generatedAt).toLocaleString()}
+            </p>
+          </div>
+          <Badge variant="secondary">{r.summary.papers} paper{r.summary.papers === 1 ? '' : 's'}</Badge>
+        </div>
+      </Card>
+      <Card className="p-4">
+        <h4 className="mb-1 text-sm font-semibold">Papers &amp; findings</h4>
+        {r.findings.length === 0 ? (
+          <p className="py-2 text-sm text-muted-foreground">
+            No open-scholarship match. Papers are claims — corroborate before relying on them.
           </p>
         ) : (
           r.findings.map((e, i) => (
@@ -1005,6 +1050,8 @@ function collectFindings(result: Result): { subject: string; gateway: string; fi
       return { subject: 'Markets board', gateway: 'markets', findings: slim(result.data.findings) }
     case 'geo':
       return { subject: result.data.subject, gateway: 'geo', findings: slim(result.data.findings) }
+    case 'research':
+      return { subject: result.data.subject, gateway: 'research', findings: slim(result.data.findings) }
     case 'media':
       return null
   }
@@ -1329,6 +1376,7 @@ export function IntelligenceDashboard() {
       {result?.kind === 'news' ? <NewsView r={result.data} onReload={run} loading={loading} /> : null}
       {result?.kind === 'board' ? <BoardView r={result.data} onReload={run} loading={loading} /> : null}
       {result?.kind === 'geo' ? <GeoView r={result.data} /> : null}
+      {result?.kind === 'research' ? <ResearchView r={result.data} /> : null}
       {result?.kind === 'media' ? <MediaView r={result.data} /> : null}
 
       {aiInput && aiInput.findings.length > 0 ? (
