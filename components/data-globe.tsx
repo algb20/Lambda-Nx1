@@ -1,20 +1,26 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { Plus, Minus, RotateCcw } from 'lucide-react'
 import type { GlobePoint } from '@/lib/geo/centroids'
 
 /**
- * DataGlobe — our own 3D globe (pure canvas, no heavy libraries). It projects a
- * unit sphere with yaw + tilt, draws a glowing graticule and plots weighted data
- * points on the front hemisphere. Auto-rotates, drag to spin, hover for a label.
- * Designed for the Lambda NX look: a dark "intelligence" planet with cyan grid
- * and emerald signals. Renders reliably everywhere (2D canvas).
+ * DataGlobe — our own 3D globe (pure canvas, no heavy libraries). Projects a unit
+ * sphere with yaw + tilt, draws a glowing graticule and plots weighted points on
+ * the front hemisphere. Auto-rotates, drag to spin, and **high-quality zoom**
+ * (wheel · pinch · buttons): the scene is re-drawn as vectors at every frame, so
+ * it stays razor-sharp at any zoom — no pixelation. `focus` orients the globe on
+ * a given lat/lon. Designed for the Lambda NX look.
  */
 interface Projected {
   sx: number
   sy: number
   visible: boolean
 }
+
+const MIN_ZOOM = 0.6
+const MAX_ZOOM = 8
+const clampZoom = (z: number) => Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z))
 
 function project(
   latDeg: number,
@@ -37,9 +43,28 @@ function project(
   return { sx: cx + x * R, sy: cy - y2 * R, visible: z2 > 0 }
 }
 
-export function DataGlobe({ points, height = 380 }: { points: GlobePoint[]; height?: number }) {
+export function DataGlobe({
+  points,
+  height = 380,
+  focus,
+}: {
+  points: GlobePoint[]
+  height?: number
+  focus?: { lat: number; lon: number }
+}) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const stateRef = useRef({ rotation: 0, tilt: 0.35, dragging: false, lastX: 0, lastY: 0, autospin: true })
+  const stateRef = useRef({
+    rotation: focus ? -(focus.lon * Math.PI) / 180 : 0,
+    tilt: focus ? Math.max(-1.2, Math.min(1.2, (focus.lat * Math.PI) / 180)) : 0.35,
+    zoom: focus ? 1.8 : 1,
+    dragging: false,
+    lastX: 0,
+    lastY: 0,
+    autospin: true,
+  })
+  const pointersRef = useRef<Map<number, { x: number; y: number }>>(new Map())
+  const pinchRef = useRef<number | null>(null)
+  const pointerRef = useRef<{ x: number; y: number } | null>(null)
   const [hover, setHover] = useState<{ x: number; y: number; label: string } | null>(null)
   const hoverRef = useRef(hover)
   hoverRef.current = hover
@@ -51,22 +76,28 @@ export function DataGlobe({ points, height = 380 }: { points: GlobePoint[]; heig
     if (!ctx) return
     let raf = 0
     const dpr = Math.min(2, typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1)
-
     const maxWeight = Math.max(1, ...points.map((p) => p.weight))
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault()
+      const st = stateRef.current
+      st.zoom = clampZoom(st.zoom * (1 - e.deltaY * 0.0012))
+    }
+    canvas.addEventListener('wheel', onWheel, { passive: false })
 
     const draw = () => {
       const w = canvas.clientWidth
       const h = height
-      if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
-        canvas.width = w * dpr
-        canvas.height = h * dpr
+      if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+        canvas.width = Math.round(w * dpr)
+        canvas.height = Math.round(h * dpr)
       }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       ctx.clearRect(0, 0, w, h)
       const cx = w / 2
       const cy = h / 2
-      const R = Math.min(w, h) / 2 - 18
       const st = stateRef.current
+      const R = (Math.min(w, h) / 2 - 18) * st.zoom
 
       // Atmosphere glow
       const glow = ctx.createRadialGradient(cx, cy, R * 0.8, cx, cy, R * 1.18)
@@ -86,7 +117,7 @@ export function DataGlobe({ points, height = 380 }: { points: GlobePoint[]; heig
       ctx.arc(cx, cy, R, 0, Math.PI * 2)
       ctx.fill()
 
-      // Graticule
+      // Graticule (denser when zoomed in — vectors stay crisp)
       ctx.strokeStyle = 'rgba(56,189,248,0.22)'
       ctx.lineWidth = 1
       const drawArc = (samples: Array<[number, number]>) => {
@@ -105,14 +136,16 @@ export function DataGlobe({ points, height = 380 }: { points: GlobePoint[]; heig
         }
         ctx.stroke()
       }
-      for (let lon = -180; lon < 180; lon += 30) {
+      const lonStep = st.zoom > 2.5 ? 15 : 30
+      const latStep = st.zoom > 2.5 ? 15 : 30
+      for (let lon = -180; lon < 180; lon += lonStep) {
         const s: Array<[number, number]> = []
-        for (let lat = -90; lat <= 90; lat += 4) s.push([lat, lon])
+        for (let lat = -90; lat <= 90; lat += 3) s.push([lat, lon])
         drawArc(s)
       }
-      for (let lat = -60; lat <= 60; lat += 30) {
+      for (let lat = -60; lat <= 60; lat += latStep) {
         const s: Array<[number, number]> = []
-        for (let lon = -180; lon <= 180; lon += 4) s.push([lat, lon])
+        for (let lon = -180; lon <= 180; lon += 3) s.push([lat, lon])
         drawArc(s)
       }
 
@@ -121,7 +154,7 @@ export function DataGlobe({ points, height = 380 }: { points: GlobePoint[]; heig
       for (const pt of points) {
         const p = project(pt.lat, pt.lon, st.rotation, st.tilt, R, cx, cy)
         if (!p.visible) continue
-        const size = 2.5 + (pt.weight / maxWeight) * 6
+        const size = (2.5 + (pt.weight / maxWeight) * 6) * Math.min(1.6, Math.sqrt(st.zoom))
         const halo = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, size * 3)
         halo.addColorStop(0, 'rgba(16,185,129,0.55)')
         halo.addColorStop(1, 'rgba(16,185,129,0)')
@@ -133,11 +166,10 @@ export function DataGlobe({ points, height = 380 }: { points: GlobePoint[]; heig
         ctx.beginPath()
         ctx.arc(p.sx, p.sy, size, 0, Math.PI * 2)
         ctx.fill()
-        // track for tooltip via last pointer pos
         const hp = pointerRef.current
         if (hp) {
           const d = Math.hypot(hp.x - p.sx, hp.y - p.sy)
-          if (d < 14 && (!nearest || d < nearest.d)) nearest = { x: p.sx, y: p.sy, label: `${pt.label} · ${pt.weight}`, d }
+          if (d < 16 && (!nearest || d < nearest.d)) nearest = { x: p.sx, y: p.sy, label: `${pt.label} · ${pt.weight}`, d }
         }
       }
       if (nearest) {
@@ -148,13 +180,15 @@ export function DataGlobe({ points, height = 380 }: { points: GlobePoint[]; heig
       raf = requestAnimationFrame(draw)
     }
     raf = requestAnimationFrame(draw)
-    return () => cancelAnimationFrame(raf)
+    return () => {
+      cancelAnimationFrame(raf)
+      canvas.removeEventListener('wheel', onWheel)
+    }
   }, [points, height])
 
-  // Pointer interaction
-  const pointerRef = useRef<{ x: number; y: number } | null>(null)
   const onPointerDown = (e: React.PointerEvent) => {
     const st = stateRef.current
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
     st.dragging = true
     st.autospin = false
     st.lastX = e.clientX
@@ -164,7 +198,20 @@ export function DataGlobe({ points, height = 380 }: { points: GlobePoint[]; heig
   const onPointerMove = (e: React.PointerEvent) => {
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
     pointerRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top }
+    const pts = pointersRef.current
     const st = stateRef.current
+    if (pts.has(e.pointerId)) pts.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+    if (pts.size >= 2) {
+      // Pinch-zoom from the distance between the two active pointers.
+      const [a, b] = [...pts.values()]
+      const dist = Math.hypot(a.x - b.x, a.y - b.y)
+      if (pinchRef.current != null && pinchRef.current > 0) {
+        st.zoom = clampZoom(st.zoom * (dist / pinchRef.current))
+      }
+      pinchRef.current = dist
+      return
+    }
     if (st.dragging) {
       st.rotation += (e.clientX - st.lastX) * 0.006
       st.tilt = Math.max(-1.2, Math.min(1.2, st.tilt + (e.clientY - st.lastY) * 0.006))
@@ -172,10 +219,23 @@ export function DataGlobe({ points, height = 380 }: { points: GlobePoint[]; heig
       st.lastY = e.clientY
     }
   }
-  const endDrag = () => {
-    stateRef.current.dragging = false
-    // resume gentle autospin shortly after release
-    window.setTimeout(() => (stateRef.current.autospin = true), 2500)
+  const releasePointer = (e: React.PointerEvent) => {
+    pointersRef.current.delete(e.pointerId)
+    if (pointersRef.current.size < 2) pinchRef.current = null
+    if (pointersRef.current.size === 0) {
+      stateRef.current.dragging = false
+      window.setTimeout(() => (stateRef.current.autospin = true), 2500)
+    }
+  }
+
+  const nudgeZoom = (factor: number) => {
+    stateRef.current.zoom = clampZoom(stateRef.current.zoom * factor)
+  }
+  const resetView = () => {
+    const st = stateRef.current
+    st.zoom = focus ? 1.8 : 1
+    st.tilt = focus ? Math.max(-1.2, Math.min(1.2, (focus.lat * Math.PI) / 180)) : 0.35
+    if (focus) st.rotation = -(focus.lon * Math.PI) / 180
   }
 
   return (
@@ -185,12 +245,25 @@ export function DataGlobe({ points, height = 380 }: { points: GlobePoint[]; heig
         className="h-full w-full cursor-grab touch-none active:cursor-grabbing"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
-        onPointerUp={endDrag}
-        onPointerLeave={() => {
+        onPointerUp={releasePointer}
+        onPointerCancel={releasePointer}
+        onPointerLeave={(e) => {
           pointerRef.current = null
-          endDrag()
+          releasePointer(e)
         }}
       />
+      {/* Zoom controls */}
+      <div className="absolute bottom-3 right-3 flex flex-col gap-1">
+        <button onClick={() => nudgeZoom(1.3)} className="flex h-7 w-7 items-center justify-center rounded-md bg-background/80 text-foreground ring-1 ring-border backdrop-blur hover:bg-background" title="Zoom in">
+          <Plus className="h-3.5 w-3.5" />
+        </button>
+        <button onClick={() => nudgeZoom(1 / 1.3)} className="flex h-7 w-7 items-center justify-center rounded-md bg-background/80 text-foreground ring-1 ring-border backdrop-blur hover:bg-background" title="Zoom out">
+          <Minus className="h-3.5 w-3.5" />
+        </button>
+        <button onClick={resetView} className="flex h-7 w-7 items-center justify-center rounded-md bg-background/80 text-muted-foreground ring-1 ring-border backdrop-blur hover:bg-background" title="Reset view">
+          <RotateCcw className="h-3.5 w-3.5" />
+        </button>
+      </div>
       {hover ? (
         <div
           className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-md bg-background/90 px-2 py-1 text-[11px] font-medium shadow ring-1 ring-border"

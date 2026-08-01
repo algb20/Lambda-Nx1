@@ -43,6 +43,8 @@ import type { NexusReport } from '@/lib/modules/nexus'
 import type { GeoReport } from '@/lib/modules/geo'
 import type { ResearchReport } from '@/lib/modules/research'
 import { TargetTracker } from '@/components/target-tracker'
+import { DataGlobe } from '@/components/data-globe'
+import type { GlobePoint } from '@/lib/geo/centroids'
 import { PREDICATE_LABEL } from '@/lib/engine/ontology'
 import { proposePivots } from '@/lib/modules/copilot'
 import type { Evidence } from '@/lib/engine/types'
@@ -382,7 +384,21 @@ function ResearchView({ r }: { r: ResearchReport }) {
   )
 }
 
+function geoPoints(r: GeoReport): GlobePoint[] {
+  const pts: GlobePoint[] = []
+  for (const e of r.findings) {
+    const d = (e.data ?? {}) as { lat?: number | string; lon?: number | string }
+    const lat = typeof d.lat === 'string' ? Number(d.lat) : d.lat
+    const lon = typeof d.lon === 'string' ? Number(d.lon) : d.lon
+    if (typeof lat === 'number' && typeof lon === 'number' && Number.isFinite(lat) && Number.isFinite(lon)) {
+      pts.push({ lat, lon, label: e.claim.slice(0, 60), weight: 1 })
+    }
+  }
+  return pts
+}
+
 function GeoView({ r }: { r: GeoReport }) {
+  const pts = geoPoints(r)
   return (
     <div className="space-y-4">
       <Card className="p-4">
@@ -396,6 +412,12 @@ function GeoView({ r }: { r: GeoReport }) {
           <Badge variant="secondary">{r.summary.matches} result{r.summary.matches === 1 ? '' : 's'}</Badge>
         </div>
       </Card>
+
+      {pts.length > 0 ? (
+        <Card className="overflow-hidden p-0">
+          <DataGlobe points={pts} height={300} focus={{ lat: pts[0].lat, lon: pts[0].lon }} />
+        </Card>
+      ) : null}
       <Card className="p-4">
         <h4 className="mb-1 text-sm font-semibold">Geospatial results</h4>
         {r.findings.length === 0 ? (
