@@ -44,7 +44,7 @@ import type { GeoReport } from '@/lib/modules/geo'
 import type { ResearchReport } from '@/lib/modules/research'
 import { TargetTracker } from '@/components/target-tracker'
 import { DataGlobe } from '@/components/data-globe'
-import type { GlobePoint } from '@/lib/geo/centroids'
+import { pointsFromCountries, type GlobePoint } from '@/lib/geo/centroids'
 import { PREDICATE_LABEL } from '@/lib/engine/ontology'
 import { proposePivots } from '@/lib/modules/copilot'
 import type { Evidence } from '@/lib/engine/types'
@@ -571,6 +571,7 @@ function NewsView({ r, onReload, loading }: { r: NewsReport; onReload: () => voi
 
   const country = (e: EvidenceItem) => (e.data as { country?: string } | undefined)?.country
   const domain = (e: EvidenceItem) => (e.data as { domain?: string } | undefined)?.domain
+  const mapPoints = pointsFromCountries(r.items.map((e) => country(e)))
 
   return (
     <div className="space-y-4">
@@ -596,6 +597,12 @@ function NewsView({ r, onReload, loading }: { r: NewsReport; onReload: () => voi
           </button>
         </div>
       </Card>
+
+      {mapPoints.length > 0 ? (
+        <Card className="overflow-hidden p-0">
+          <DataGlobe points={mapPoints} height={280} />
+        </Card>
+      ) : null}
 
       <Card className="p-4">
         {r.items.length === 0 ? (

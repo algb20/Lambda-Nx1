@@ -43,12 +43,47 @@ function project(
   return { sx: cx + x * R, sy: cy - y2 * R, visible: z2 > 0 }
 }
 
+export interface GlobeArc {
+  from: { lat: number; lon: number }
+  to: { lat: number; lon: number }
+}
+
+/** Convert lat/lon (deg) to a unit vector matching project()'s axes. */
+function toVec(latDeg: number, lonDeg: number): [number, number, number] {
+  const la = (latDeg * Math.PI) / 180
+  const lo = (lonDeg * Math.PI) / 180
+  return [Math.cos(la) * Math.sin(lo), Math.sin(la), Math.cos(la) * Math.cos(lo)]
+}
+
+/** Sample a great-circle arc between two points as [lat,lon] steps (slerp). */
+function greatCircle(a: GlobeArc['from'], b: GlobeArc['to'], steps = 48): Array<[number, number]> {
+  const v0 = toVec(a.lat, a.lon)
+  const v1 = toVec(b.lat, b.lon)
+  const dot = Math.max(-1, Math.min(1, v0[0] * v1[0] + v0[1] * v1[1] + v0[2] * v1[2]))
+  const omega = Math.acos(dot)
+  const out: Array<[number, number]> = []
+  if (omega < 1e-6) return [[a.lat, a.lon]]
+  const sinO = Math.sin(omega)
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps
+    const s0 = Math.sin((1 - t) * omega) / sinO
+    const s1 = Math.sin(t * omega) / sinO
+    const x = s0 * v0[0] + s1 * v1[0]
+    const y = s0 * v0[1] + s1 * v1[1]
+    const z = s0 * v0[2] + s1 * v1[2]
+    out.push([(Math.asin(Math.max(-1, Math.min(1, y))) * 180) / Math.PI, (Math.atan2(x, z) * 180) / Math.PI])
+  }
+  return out
+}
+
 export function DataGlobe({
   points,
+  arcs = [],
   height = 380,
   focus,
 }: {
   points: GlobePoint[]
+  arcs?: GlobeArc[]
   height?: number
   focus?: { lat: number; lon: number }
 }) {
@@ -77,6 +112,7 @@ export function DataGlobe({
     let raf = 0
     const dpr = Math.min(2, typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1)
     const maxWeight = Math.max(1, ...points.map((p) => p.weight))
+    const arcSamples = arcs.map((a) => greatCircle(a.from, a.to))
 
     const onWheel = (e: WheelEvent) => {
       e.preventDefault()
@@ -149,6 +185,13 @@ export function DataGlobe({
         drawArc(s)
       }
 
+      // Arcs (great-circle flows) — drawn above the grid, below the points.
+      if (arcSamples.length > 0) {
+        ctx.strokeStyle = 'rgba(52,211,153,0.5)'
+        ctx.lineWidth = 1.4
+        for (const samples of arcSamples) drawArc(samples)
+      }
+
       // Data points
       let nearest: { x: number; y: number; label: string; d: number } | null = null
       for (const pt of points) {
@@ -184,7 +227,7 @@ export function DataGlobe({
       cancelAnimationFrame(raf)
       canvas.removeEventListener('wheel', onWheel)
     }
-  }, [points, height])
+  }, [points, arcs, height])
 
   const onPointerDown = (e: React.PointerEvent) => {
     const st = stateRef.current
