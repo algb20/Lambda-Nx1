@@ -58,6 +58,28 @@ describe('investigateMarkets', () => {
     expect(r.findings[0].claim).toMatch(/1 USD = 0\.92 EUR/)
   })
 
+  it('reports World Bank macro indicators for a country', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((u: string) => {
+        const url = new URL(u)
+        if (url.hostname === 'api.worldbank.org') {
+          const ind = url.pathname.includes('NY.GDP.MKTP.CD')
+            ? { indicator: { value: 'GDP' }, country: { value: 'France' }, date: '2023', value: 3.05e12 }
+            : url.pathname.includes('SP.POP.TOTL')
+              ? { indicator: { value: 'Population' }, country: { value: 'France' }, date: '2023', value: 68_000_000 }
+              : { indicator: { value: 'Inflation' }, country: { value: 'France' }, date: '2023', value: 4.9 }
+          return Promise.resolve(res([{ page: 1 }, [ind]]))
+        }
+        return Promise.resolve(res({}, 404))
+      }),
+    )
+    const r = await investigateMarkets('France')
+    expect(r.findings.some((f) => /Economy — France GDP \(2023\): \$3\.05T/.test(f.claim))).toBe(true)
+    expect(r.findings.some((f) => /Population \(2023\): 68\.0M/.test(f.claim))).toBe(true)
+    expect(r.findings.some((f) => /Inflation \(2023\): 4\.9%/.test(f.claim))).toBe(true)
+  })
+
   it('rejects too-short input', async () => {
     await expect(investigateMarkets('x')).rejects.toThrow(/asset, company, ticker or a currency pair/)
   })

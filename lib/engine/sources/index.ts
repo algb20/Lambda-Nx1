@@ -21,6 +21,7 @@ import { feodo, urlhaus, threatfox } from './threat'
 import { opensanctions, gleif, mempool } from './finance'
 // Gateway — Markets & Economy
 import { coingecko, edgar, frankfurter } from './markets'
+import { worldbankEconomy } from './economy'
 // Gateway — Procurement & Public Contracts
 import { usaspending, worldbankProjects } from './procurement'
 // Gateway — Ownership & beneficial-control networks
@@ -50,7 +51,7 @@ export const threatGatewaySources: Source[] = [feodo, urlhaus, threatfox]
 
 export const financeGatewaySources: Source[] = [opensanctions, gleif, mempool]
 
-export const marketsGatewaySources: Source[] = [coingecko, edgar, frankfurter]
+export const marketsGatewaySources: Source[] = [coingecko, edgar, frankfurter, worldbankEconomy]
 
 export const procurementGatewaySources: Source[] = [usaspending, worldbankProjects]
 
@@ -109,6 +110,7 @@ export const marketsGatewayCatalog: CatalogRow[] = [
   { key: 'coingecko', name: 'CoinGecko (crypto markets)', capability: 'market', passive: true, enabled: true },
   { key: 'edgar', name: 'SEC EDGAR (filings)', capability: 'securities', passive: true, enabled: true },
   { key: 'frankfurter', name: 'Frankfurter (ECB FX)', capability: 'fx', passive: true, enabled: true },
+  { key: 'worldbank_economy', name: 'World Bank (macro indicators)', capability: 'economy', passive: true, enabled: true },
 ]
 
 export const procurementGatewayCatalog: CatalogRow[] = [

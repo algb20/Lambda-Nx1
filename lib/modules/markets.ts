@@ -35,8 +35,9 @@ export async function investigateMarkets(input: string): Promise<MarketsReport> 
   const kind = classifyMarket(subject)
   const generatedAt = new Date().toISOString()
 
-  // FX is one capability; an asset is screened across crypto + securities at once.
-  const capabilities: Capability[] = kind === 'fx' ? ['fx'] : ['market', 'securities']
+  // FX is one capability; anything else is screened across crypto + securities +
+  // macro-economy at once (the economy source self-filters to countries).
+  const capabilities: Capability[] = kind === 'fx' ? ['fx'] : ['market', 'securities', 'economy']
 
   const runs = await Promise.all(
     capabilities.map((capability) => collect({ capability, value: subject }, { registry, mode: 'all' })),

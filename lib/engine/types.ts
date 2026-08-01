@@ -31,6 +31,7 @@ export type Capability =
   | 'market_board'
   | 'geo'
   | 'research'
+  | 'economy'
 
 export type EntityType =
   | 'domain'
