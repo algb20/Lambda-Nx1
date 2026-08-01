@@ -31,11 +31,16 @@ describe('investigateResearch', () => {
               },
             }),
           )
+        if (host === 'api.github.com')
+          return Promise.resolve(
+            json({ items: [{ full_name: 'huggingface/transformers', description: 'SOTA models', stargazers_count: 120000, html_url: 'https://github.com/huggingface/transformers', language: 'Python' }] }),
+          )
         return Promise.resolve(json({}, 404))
       }),
     )
     const r = await investigateResearch('transformers')
-    expect(r.summary.papers).toBe(2)
+    expect(r.summary.papers).toBe(3)
+    expect(r.findings.some((f) => /Tool: huggingface\/transformers .* · 120,000★ \[Python\]/.test(f.claim))).toBe(true)
     // Most-cited first: the OpenAlex paper (100000) leads.
     expect(r.findings[0].claim).toMatch(/Attention is all you need \(2017\) — A\. Vaswani · 100000 citations/)
     expect(r.findings[1].claim).toMatch(/A smaller study \(2020\)/)

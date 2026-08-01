@@ -32,7 +32,7 @@ import { coingeckoTop, stooqCommodities, stooqIndices, frankfurterBoard } from '
 // Gateway — Geospatial (places + flights)
 import { nominatim, opensky } from './geo'
 // Gateway — Research & tech-trend
-import { openalex, crossref } from './research'
+import { openalex, crossref, githubTrend } from './research'
 
 export const moduleOneSources: Source[] = [
   cloudflareDns,
@@ -67,7 +67,7 @@ export const marketsBoardSources: Source[] = [
 
 export const geoGatewaySources: Source[] = [nominatim, opensky]
 
-export const researchGatewaySources: Source[] = [openalex, crossref]
+export const researchGatewaySources: Source[] = [openalex, crossref, githubTrend]
 
 interface CatalogRow {
   key: string
@@ -140,6 +140,7 @@ export const geoGatewayCatalog: CatalogRow[] = [
 export const researchGatewayCatalog: CatalogRow[] = [
   { key: 'openalex', name: 'OpenAlex (scholarly works)', capability: 'research', passive: true, enabled: true },
   { key: 'crossref', name: 'Crossref (scholarly records)', capability: 'research', passive: true, enabled: true },
+  { key: 'github', name: 'GitHub (tech-trend repos)', capability: 'research', passive: true, enabled: true },
 ]
 
 export const allSourceCatalog: CatalogRow[] = [
