@@ -5,6 +5,7 @@
  */
 import type { PaymentProvider } from './types'
 import { piPaymentProvider } from './pi'
+import { stripePaymentProvider } from './stripe'
 
 export * from './types'
 
@@ -13,9 +14,10 @@ export function getPaymentProvider(): PaymentProvider {
   switch (name) {
     case 'pi':
       return piPaymentProvider
+    case 'standard':
+    case 'stripe':
+      return stripePaymentProvider
     default:
-      throw new Error(
-        `PAYMENT_PROVIDER="${name}" is not configured. Available: pi (standard arrives in P12).`,
-      )
+      throw new Error(`PAYMENT_PROVIDER="${name}" is not configured. Available: pi, standard (Stripe).`)
   }
 }
