@@ -22,7 +22,7 @@ This design is future-proof: the platform grows by *families*, not rewrites.
 | Markets Board (live) | top prices across classes at a glance | CoinGecko (crypto), Stooq (commodities + indices), ECB (FX) |
 | Procurement & Public Contracts | who receives public money / contracts? | USAspending.gov, World Bank projects |
 | Ownership & control networks | who owns / controls this entity? | GLEIF Level-2 (parents, ultimate parents, subsidiaries) |
-| News & Signals | what are the top world events / topic coverage? | GDELT, Wikipedia "In the news", USGS earthquakes (live, geolocated) (see docs/NEWS.md) |
+| News & Signals | what are the top world events / topic coverage? | GDELT, Wikipedia "In the news", USGS earthquakes (live, geolocated), ReliefWeb/UN OCHA (humanitarian) (see docs/NEWS.md) |
 | Geospatial / Transport | where is this? | Nominatim/OpenStreetMap (places), OpenSky (live flights) |
 | Research & Tech-trend | what's the frontier on X? | OpenAlex, Crossref (papers), arXiv (preprints), GitHub (tools), Hacker News (industry signal) |
 | Macro / Economy | a country's key indicators | World Bank (GDP, population, inflation) — via Markets |

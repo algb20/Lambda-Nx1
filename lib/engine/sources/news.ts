@@ -113,6 +113,61 @@ export const usgsQuakes: Source = {
   },
 }
 
+// ── ReliefWeb / UN OCHA (capability: news — humanitarian world events) ───────
+// Keyless official feed of humanitarian situation reports from UN agencies, NGOs
+// and governments. Complements GDELT/Wikipedia/USGS: crises and disasters from
+// primary responders, each country-tagged (so it plots on the globe) and linked
+// to the origin report. Serves both a topic query and the topic-less "latest".
+interface ReliefWebItem {
+  fields?: {
+    title?: string
+    url?: string
+    date?: { created?: string }
+    primary_country?: { name?: string }
+  }
+}
+interface ReliefWebResponse {
+  data?: ReliefWebItem[]
+}
+
+export const reliefWeb: Source = {
+  key: 'reliefweb',
+  capability: 'news',
+  passive: true,
+  hosts: ['api.reliefweb.int'],
+  minIntervalMs: 1500,
+  async run(input, ctx) {
+    const topic = input.value.trim()
+    const params = new URLSearchParams({ appname: 'lambda-nx', limit: '10' })
+    params.append('sort[]', 'date:desc')
+    for (const f of ['title', 'url', 'date', 'primary_country']) params.append('fields[include][]', f)
+    if (topic.length >= 2) params.append('query[value]', topic)
+    const url = `https://api.reliefweb.int/v1/reports?${params.toString()}`
+    const res = await ctx.fetch(url)
+    if (!res.ok) return []
+    const j = (await res.json().catch(() => null)) as ReliefWebResponse | null
+    const items = j?.data ?? []
+    return items
+      .filter((it) => it.fields?.title && it.fields?.url)
+      .slice(0, 10)
+      .map<Evidence>((it) => {
+        const f = it.fields!
+        const country = f.primary_country?.name
+        return {
+          claim: f.title!.trim(),
+          entity: country ? { type: 'other', value: country } : undefined,
+          sourceKey: 'reliefweb',
+          sourceUrl: f.url,
+          retrievedAt: f.date?.created ?? new Date().toISOString(),
+          // Official responders, curated — stronger than a single outlet, secondary.
+          admiralty: { source: 'B', info: 2 },
+          confidence: 'probable',
+          data: { country, kind: 'humanitarian' },
+        }
+      })
+  },
+}
+
 // ── Wikipedia "In the news" (capability: news — top world events) ────────────
 interface WikiLink {
   normalizedtitle?: string

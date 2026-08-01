@@ -105,6 +105,38 @@ describe('investigateNews', () => {
     expect(q!.sourceUrl).toBe('https://earthquake.usgs.gov/earthquakes/eventpage/us1')
   })
 
+  it('includes ReliefWeb humanitarian reports (country-tagged, linked to origin)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((u: string) => {
+        const host = new URL(u).hostname
+        if (host === 'api.reliefweb.int')
+          return Promise.resolve(
+            res({
+              data: [
+                {
+                  fields: {
+                    title: 'Flooding displaces thousands in region X',
+                    url: 'https://reliefweb.int/report/x/flooding',
+                    date: { created: '2026-07-29T08:00:00Z' },
+                    primary_country: { name: 'Kenya' },
+                  },
+                },
+              ],
+            }),
+          )
+        return Promise.resolve(res({ articles: [] })) // GDELT empty for this topic
+      }),
+    )
+    const r = await investigateNews('flooding')
+    const rw = r.items.find((i) => i.sourceKey === 'reliefweb')
+    expect(rw).toBeDefined()
+    expect(rw!.claim).toBe('Flooding displaces thousands in region X')
+    expect(rw!.sourceUrl).toBe('https://reliefweb.int/report/x/flooding')
+    expect(rw!.admiralty).toEqual({ source: 'B', info: 2 })
+    expect(r.summary.countries).toContain('Kenya')
+  })
+
   it('degrades gracefully when a provider is down (stays non-empty via the other)', async () => {
     vi.stubGlobal(
       'fetch',

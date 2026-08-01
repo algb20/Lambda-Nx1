@@ -22,6 +22,7 @@ Chosen for reach, neutrality and being free + always-on:
 | **GDELT DOC 2.0** | topic coverage | indexes global media in ~65 languages; article **volume across outlets** is a real proxy for how widely a story is "traded" | links to the actual outlet article |
 | **Wikipedia "In the news"** | top world events | NPOV, editorially curated, each item sourced; genuinely the neutral "what matters now" | links to the sourced encyclopedia entry → primary refs |
 | **USGS earthquakes** | real-time geolocated events | authoritative instrument-measured primary data (not a media claim); significant quakes in the past week with exact epicentre coordinates | links to the USGS event page |
+| **ReliefWeb / UN OCHA** | humanitarian world events | official situation reports from UN agencies, NGOs and governments — crises/disasters from primary responders, each country-tagged | links to the origin report |
 
 They are **complementary by input**: GDELT needs a topic (used for topic search);
 Wikipedia + USGS serve the topic-less "top events" case. This gives coverage of
