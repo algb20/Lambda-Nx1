@@ -1,14 +1,17 @@
 # Lambda NX — Netlify deploy configuration.
 #
 # Hosting default per charter §4 (Netlify + Supabase): keeps the already-verified
-# Pi domain and the existing Pi payment functions. Swappable — moving to Vercel or
-# self-host is a config change, not an app rewrite (providers sit behind lib/*).
+# Pi domain. Swappable — moving to Vercel or self-host is a config change, not an
+# app rewrite (providers sit behind lib/*).
+#
+# No `functions` directory: Pi payments are served by the app's own route handler
+# (`app/api/payments`) over the lib/payments port, so they run identically on every
+# host. The old netlify/functions/pi-* duplicates were removed once the route
+# existed — two implementations of one flow is exactly the drift we avoid.
 
 [build]
   command = "npm run build"
   publish = ".next"
-  # Pi payment endpoints (approve/complete/cancel) are classic Netlify Functions.
-  functions = "netlify/functions"
 
 [build.environment]
   # Node version lives in .nvmrc — Netlify, Vercel and local nvm all read it, so
