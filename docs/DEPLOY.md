@@ -147,6 +147,29 @@ The app then shows the email/password login gate (`components/standalone-auth`)
 and routes payments through the Stripe provider. Deployable to Netlify, Vercel,
 or self-host — the runtime is standard Next.js 15.
 
+### Deploy — Vercel
+
+Import the repo; Vercel auto-detects Next.js, so build/output settings need no
+changes. Set the same env vars from §2 (Project Settings → Environment Variables)
+and redeploy — variables are read at build time, so adding one does not apply
+until the next deploy.
+
+Two things make the build host-agnostic, and both are deliberate:
+
+- **`.nvmrc`** pins Node 22. Netlify, Vercel and local `nvm` all read it, so the
+  version lives in one place instead of a per-host copy that drifts.
+- **No `--legacy-peer-deps` anywhere.** The dependency tree resolves under npm's
+  strict peer rules on its own. Hosts that run a plain `npm install` (Vercel does)
+  therefore succeed without vendor-specific flags. Keep it that way: reaching for
+  the flag hides the next genuine peer conflict rather than fixing it — as it did
+  for `vaul@0.9.9`, which never supported React 19 and only looked fine because
+  the flag was masking it.
+
+Note the Pi payment endpoints are Netlify Functions (`netlify/functions/*`). On
+Vercel they must be ported to route handlers under `app/api/` — straightforward,
+since they sit behind `lib/payments` — or you keep Pi mode on Netlify and use
+Vercel for standalone mode.
+
 ---
 
 ## 6. Post-deploy verification
