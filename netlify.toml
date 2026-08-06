@@ -1,0 +1,27 @@
+# Lambda NX — Netlify deploy configuration.
+#
+# Hosting default per charter §4 (Netlify + Supabase): keeps the already-verified
+# Pi domain and the existing Pi payment functions. Swappable — moving to Vercel or
+# self-host is a config change, not an app rewrite (providers sit behind lib/*).
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+  # Pi payment endpoints (approve/complete/cancel) are classic Netlify Functions.
+  functions = "netlify/functions"
+
+[build.environment]
+  # Match the local/dev toolchain. React 19 peer ranges need legacy-peer-deps.
+  NODE_VERSION = "22"
+  NPM_FLAGS = "--legacy-peer-deps"
+  # Do not fail the build on Next telemetry / lint (tsc still gates types).
+  NEXT_TELEMETRY_DISABLED = "1"
+
+# The official Next.js runtime — SSR, route handlers, image handling on Netlify.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Security headers (CSP, HSTS, X-Frame-Options, …) and the /api/health no-store
+# rule are defined portably in next.config.mjs `headers()`, so they apply
+# identically on Netlify, Vercel and self-host. Keeping them in one place avoids
+# drift and duplicate headers.

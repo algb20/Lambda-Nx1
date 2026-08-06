@@ -1,0 +1,88 @@
+# Innovations — what makes Lambda NX worth adopting globally
+
+> These are our own differentiators, not features copied from a competitor. The
+> user asked, rightly, for original ideas that drive real global adoption — not
+> just execution of requests. This is the slate, with what's shipped and what's
+> next. All obey the charter: passive, lawful, our own tech, analysis-not-relay,
+> every fact auditable.
+
+## The thesis
+
+Anyone can list "tools". Adoption comes from three things institutions actually
+pay for: **speed** (answers the instant they exist), **trust** (every claim
+auditable, graded, unbiased), and **synthesis** (one question → the whole picture,
+not ten tabs). Our innovations attack exactly those.
+
+## 1. Nexus — one query → a full-spectrum dossier  ✅ shipped
+
+Type *anything* (domain, IP, email, company, wallet, hash). The engine classifies
+it and **fans out across every relevant gateway in parallel**, fuses the evidence
+into one graded dossier with a pivot graph and AI triage. No competitor gives a
+unified *passive* dossier across OSINT + threat + finance + ownership + procurement
++ news from a single box. This is the flagship, and it is fast by construction.
+→ `lib/modules/nexus.ts`, `POST /api/intelligence/nexus`, "Unified" is the default mode.
+
+## 2. Speed layer — answers in their instant  ✅ shipped (foundation)
+
+Speed is a feature, engineered, not hoped for:
+- **Parallel fan-out** — total time ≈ the slowest single gateway, not their sum.
+- **Per-task timeout** — one slow provider can't stall the dossier; we return what
+  we have and say so.
+- **Short-TTL cache** — identical lookups return **instantly** (cache-hit shown).
+- **Latency surfaced** — every section shows how many ms it took; the dossier shows
+  elapsed + fastest. Honesty about freshness builds trust.
+- **Next:** SSE streaming ("Pulse") so board/news/monitors push updates live; a
+  stale-while-revalidate edge cache at deploy; source *racing* (render the first
+  answer, upgrade as corroboration lands).
+
+## 3. Trust & Calibration score — whose foresight is right  ⏭️ #28
+
+Track our own and others' *published* forecasts vs. outcomes, and publish the
+hit-rate — including our misses. An intelligence product that grades its own
+accuracy is rare and is exactly what institutions need to rely on it.
+
+## 4. Trust Lens — neutrality & corroboration, as a number  ✅ shipped
+
+Per dossier we compute and **show** a visible trust measure: independent sources,
+reliable (Admiralty A/B) sources, source-country spread, independently-corroborated
+topics, a corroboration grade (single→strong), and a **0–100 neutrality score**.
+It turns our anti-bias rule into something a user or institution can *see and audit*
+— no OSINT tool surfaces this. Reusable across every gateway.
+→ `lib/engine/trust.ts` (`assessTrust`), Trust Lens card in the Nexus dossier.
+
+## 5. Tamper-evident dossier seal  ✅ shipped (foundation)
+
+Every dossier carries a deterministic **seal** — a content fingerprint over its
+findings (`lnx1-…`). Same findings ⇒ same seal; any change is detectable. This is
+the provenance spine for shareable, **verifiable** reports.
+→ `lib/engine/trust.ts` (`sealFindings`). Next: full signed export (JSON + human view).
+
+## 6. Self-organizing community feedback loop  ✅ shipped
+
+Every user (weighted by influence — tier/usage) sends ideas in **any language**;
+each is **AI-triaged** (kind, impact, effort, sentiment, summary, tags) and
+**auto-clustered** so a hundred people asking the same thing collapse into one
+high-signal item, ranked by *impact × influence × demand*. The backlog organizes
+itself; humans decide what to build. This turns users into the roadmap and
+subscribers into a prioritized voice — a real adoption + retention driver.
+→ `lib/modules/suggestions.ts`, `lib/ai/suggestions.ts`, "Ideas" tab.
+
+## 7. Every-language by design  ✅ foundation shipped
+
+`lib/i18n` (locale + automatic RTL + fallback) means the product speaks the
+user's language — Arabic (RTL) and English today, any language by adding a
+dictionary. Input content was already language-agnostic (engine + AI + news).
+
+## 8. Agentic "explain & pivot" copilot  ⏭️ proposed
+
+The AI analyst already triages; the next step is *suggest-and-run*: it proposes the
+strongest next passive pivot and (on approval) executes it, walking the graph for
+you — still sorting, never verifying, always auditable.
+
+## Priority (proposed)
+
+1. Ship Nexus + speed layer (done) → it reframes the whole product.
+2. Neutrality meter (small, high-trust, original).
+3. Calibration score (#28) — the long-term trust moat.
+4. Signed dossiers + streaming Pulse — at/near deploy.
+5. Agentic copilot — once tiers/limits (#25) gate cost.
