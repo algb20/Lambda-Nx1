@@ -105,13 +105,30 @@ Pi apps are **hosted web apps** — Pi Browser loads them from your deployed URL
 
 ## 4. The Radar scheduler
 
-`POST /api/radar/run` runs one sweep over all due monitors. It is **disabled
-(503) unless `CRON_SECRET` is set**, and requires the header
-`x-cron-secret: <CRON_SECRET>`.
+`POST /api/radar/run` runs one radar pass. It is **disabled (503) unless
+`CRON_SECRET` is set**, and requires the header `x-cron-secret: <CRON_SECRET>`.
+
+A pass has two halves, and the endpoint can run either alone:
+
+| Call | Runs | Suggested cadence |
+|---|---|---|
+| `POST /api/radar/run?half=monitors` | product monitors that are due | every 15–60 min |
+| `POST /api/radar/run?half=watch` | the internal ⭐ watchlist (`docs/RADAR.md`) | daily |
+| `POST /api/radar/run` | both, independently — one half failing does not abort the other (failures come back under `errors`) | — |
+
+Schedule them separately: monitors follow each user's chosen interval, while the
+watchlist is a once-a-day read of publishers who post at most a few items a day.
+Running the watch half more often just re-reads feeds and stores nothing (it is
+de-duplicated), so it wastes provider goodwill for no gain.
 
 - **Supabase/pg_cron (durable, preferred at scale):** schedule a job that POSTs
   to the endpoint with the header.
 - **Netlify Scheduled Functions / external cron:** same call on a cron cadence.
+
+Egress note: the watch half needs outbound HTTPS to `www.cisa.gov`,
+`huggingface.co` and `export.arxiv.org`. If the host network is allowlisted,
+add them, or the sweep reports those feeds as failed (and stores nothing —
+never fabricated data).
 
 ---
 

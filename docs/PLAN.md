@@ -19,8 +19,8 @@ sync; never skip a point or a test.
 - [x] Migrate real Next.js app into repo; delete all mock (`Math.random`) engine + false ML docs (build + typecheck pass)
 - [x] Postgres schema (Drizzle migrations, `db/migrations/0000_init.sql`, 10 tables) + `lib/db` repository layer
 - [x] Adapter layers: `lib/auth`, `lib/payments`, `lib/storage`, `lib/queue` (ports + real default impls + env registry)
-- [ ] Clean fabricated status badges in `user-preferences` (task #17)
-- [ ] Upgrade Next.js off 15.2.4 (CVE) — hardening
+- [x] Clean fabricated status badges in `user-preferences` (task #17)
+- [x] Upgrade Next.js off 15.2.4 (CVE) — hardening (#19: 15.2.4 → 15.5.22)
 
 ### P2 — Core engine  *(done)*
 - [x] Source-adapter framework: `Source` port + registry + orchestrator with multi-source fallback
@@ -36,12 +36,13 @@ sync; never skip a point or a test.
 - [x] 21 tests pass (+1 live, RUN_LIVE-gated); typecheck + build clean
 - Note: live provider calls are egress-allowlisted in the build sandbox; they run at deploy time.
 
-### P4 — Radar (continuous research & monitoring)  *(engine done)*
+### P4 — Radar (continuous research & monitoring)  *(both halves built)*
 - [x] Change detection: domain fingerprint + precise diff (subdomains/IPs/nameservers/registrar)
 - [x] Scheduler: `runDueMonitors` (dependency-injected) + real wiring `runRadarSweep` over repo+engine
 - [x] Knowledge base: internal feed ingest with de-dup; product findings on change
-- [x] Queue job `radar.run` registered; 11 radar tests pass (30 total +1 live)
-- [ ] Monitor-management UI + API — depends on auth (P5); unlocks there
+- [x] Internal half now actually reads: the curated ⭐ watchlist sweep (#44, see P8)
+- [x] Queue job `radar.run` registered (runs both halves via `runFullRadar`)
+- [x] Monitor-management UI + API — shipped with #15 (monitors CRUD + alerts feed + manager UI)
 - [ ] Durable scheduler (pg_cron/pgmq) — at deploy (P7)
 
 ### P5 — Pi + standalone  *(done)*
@@ -50,7 +51,7 @@ sync; never skip a point or a test.
 - [x] Pi payments wired: `/api/payments` via lib/payments (auth-gated)
 - [x] Persistence: signed-in domain investigations archived to DB (investigation/entities/links/evidence)
 - [x] Standalone auth backend: `/api/auth/register` + `/api/auth/login` (scrypt, first-party)
-- [ ] Standalone UI shell + standard payment gateway (Stripe) — task #20 (deploy-time)
+- [x] Standalone UI shell + standard payment gateway (Stripe) — task #20
 
 ### P6 — More modules
 - [x] Module 2: Email/Username footprint (3 sources + multi-mode UI + tests)
@@ -90,8 +91,20 @@ sync; never skip a point or a test.
 - [x] Ontology layer (#37, foundation): `lib/engine/ontology.ts` — a controlled relation vocabulary (predicates) + `buildOntology` that maps evidence into typed subject→predicate→object edges, merges the same entity across gateways into ONE node, dedupes edges with accumulated provenance, and grades each by corroboration. Wired into the Nexus dossier (`ontology`) + an Ontology UI card + tests.
 - [x] Ontology persistence & query (#39): `lib/modules/ontology-store.ts` — persist an ontology to `entities/entity_links` (predicate = relation), load it back as a traversable graph, and pure `neighbors`/`subgraph` (BFS) queries. `GET /api/ontology` (auth + db-gated) reads a saved investigation's graph and traverses from a node. DI + tests.
 - [x] Global knowledge graph / memory (#40): global `ontology_nodes`/`ontology_edges` (migration 0005) deduped by (type,value)/(from,to,predicate), accumulating mentions + evidence + last-seen. `repo.ontology` + `lib/modules/ontology-global` (`mergeOntology`/`globalNeighbors`, DI). Nexus best-effort merges each run into the shared graph (when DB configured); `GET /api/ontology/global?type=&value=` reads an entity's accumulated neighborhood. Tests prove dedup + accumulation. The platform now *remembers* — foundation for self-improvement.
-- [ ] Point automated Radar at ⭐ security + AI-research + arXiv feeds (part of #27)
-- [ ] Subscription tiers free/paid (#25)
+- [x] Automated Radar over the ⭐ feeds (#44, closes the last piece of #27/#36): new `watch`
+  capability + `lib/engine/feedxml` (our own dependency-free RSS/Atom reader, now also
+  backing the arXiv research source) + four watch sources — **CISA KEV** (exploited in the
+  wild, A/1 confirmed), **CISA advisories** (A/2), **Hugging Face daily papers** and
+  **arXiv cs.CR/cs.AI/cs.LG/cs.DC** (C/3, labelled `[preprint]`). Curated watchlist with a
+  written rationale per feed (`lib/radar/watchlist.ts`, integrity-tested against the
+  registered sources), an idempotent DI sweep (`lib/radar/watch.ts`) that de-duplicates by
+  item identity and reports per-feed failures instead of aborting, `runFullRadar` +
+  `POST /api/radar/run?half=monitors|watch` (separate cadences), auth-gated
+  `GET /api/radar/findings`, and a knowledge-base panel in the Radar tab. Migration `0008`
+  adds Admiralty rating + feed provenance to `radar_findings`. 24 offline tests + a
+  RUN_LIVE end-to-end sweep. Feeds deliberately *not* automated (lab blogs, standards
+  corpora, Semantic Scholar/PwC/OpenReview) are named with reasons in `docs/RADAR.md`.
+- [x] Subscription tiers free/paid (#25) — plans + gating, with one-place price control
 - Note: guardrail now allows provider POST (allowlist remains the passive guarantee).
 
 ## Deferred ledger (intentional — nothing forgotten)

@@ -39,6 +39,19 @@ Legend: 🆓 keyless · 🔑 needs key (optional) · passive = read-only, never 
 
 OpenSanctions 🆓 · OpenCorporates 🔑 · GLEIF 🆓 · Companies House 🆓 · SEC EDGAR 🆓
 
+## Radar watch feeds (`watch` capability — internal knowledge base)
+
+Standing feeds, not subject queries: `input.value` is a feed key from the curated
+watchlist (`lib/radar/watchlist.ts`), and each source serves only the keys it owns.
+Rationale, grading and the not-yet-automated list live in `docs/RADAR.md`.
+
+| Feed | Source 🆓 | Grade |
+|---|---|---|
+| Known Exploited Vulnerabilities | CISA KEV catalogue 🆓 | A/1 · confirmed |
+| Cybersecurity advisories | CISA advisories feed 🆓 | A/2 · probable |
+| AI papers (daily, attention-weighted) | Hugging Face daily papers 🆓 | C/3 · possible |
+| Preprint frontier (cs.CR/cs.AI/cs.LG/cs.DC) | arXiv category listings 🆓 | C/3 · possible |
+
 ## Rules for adding a source
 
 1. Passive (read-only). 2. Public + lawful. 3. Respect robots/ToS/rate limits.

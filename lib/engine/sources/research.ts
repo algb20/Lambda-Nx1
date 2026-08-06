@@ -7,6 +7,7 @@
  * Papers are *claims*, not settled fact — graded accordingly.
  */
 import type { Evidence, Source } from '../types'
+import { parseFeed } from '../feedxml'
 
 const MAILTO = 'mailto=research@lambda-nx.app'
 
@@ -138,33 +139,10 @@ export const githubTrend: Source = {
 }
 
 // ── arXiv (capability: research — preprint frontier) ─────────────────────────
-// arXiv's public API is keyless and returns Atom XML (not JSON). We extract the
-// fields we need with a small, dependency-free reader over arXiv's stable format.
-// Preprints are the leading edge of a field — and were explicitly on our source
-// wishlist — but they are un-peer-reviewed claims, so we grade them cautiously.
-
-/** Decode the handful of XML entities arXiv emits in text fields. */
-function decodeXml(s: string): string {
-  return s
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&apos;/g, "'")
-    .replace(/&amp;/g, '&')
-}
-
-/** First inner text of `<tag>…</tag>` within a fragment, whitespace-collapsed. */
-function tagText(fragment: string, tag: string): string | null {
-  const m = fragment.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`))
-  return m ? decodeXml(m[1].replace(/\s+/g, ' ').trim()) : null
-}
-
-/** All `<entry>…</entry>` blocks in an arXiv Atom feed. */
-function atomEntries(xml: string): string[] {
-  return xml.match(/<entry>[\s\S]*?<\/entry>/g) ?? []
-}
-
+// arXiv's public API is keyless and returns Atom XML (not JSON); we read it with
+// the engine's shared feed reader (`lib/engine/feedxml`). Preprints are the
+// leading edge of a field — and were explicitly on our source wishlist — but
+// they are un-peer-reviewed claims, so we grade them cautiously.
 export const arxiv: Source = {
   key: 'arxiv',
   capability: 'research',
@@ -181,24 +159,17 @@ export const arxiv: Source = {
     if (!res.ok) return []
     const xml = await res.text().catch(() => '')
     if (!xml) return []
-    return atomEntries(xml)
+    return parseFeed(xml)
       .slice(0, 5)
-      .map<Evidence | null>((entry) => {
-        const title = tagText(entry, 'title')
-        if (!title) return null
-        const absUrl = tagText(entry, 'id') // arXiv <id> is the abstract URL
-        const published = tagText(entry, 'published')
-        const year = published ? Number(published.slice(0, 4)) || null : null
-        const authors = (entry.match(/<author>[\s\S]*?<\/author>/g) ?? [])
-          .map((a) => tagText(a, 'name'))
-          .filter((n): n is string => Boolean(n))
-          .slice(0, 3)
-          .join(', ')
+      .map<Evidence>((entry) => {
+        const year = entry.published ? Number(entry.published.slice(0, 4)) || null : null
+        const authors = entry.authors.slice(0, 3).join(', ')
         return {
-          claim: paperClaim(`${title} [preprint]`, year, authors, null),
-          entity: { type: 'other', value: title },
+          claim: paperClaim(`${entry.title} [preprint]`, year, authors, null),
+          entity: { type: 'other', value: entry.title },
           sourceKey: 'arxiv',
-          sourceUrl: absUrl ?? undefined,
+          // arXiv's <link rel="alternate"> and <id> are both the abstract URL.
+          sourceUrl: entry.link ?? entry.id,
           retrievedAt: new Date().toISOString(),
           // Reputable venue, but un-peer-reviewed → cautious grade.
           admiralty: { source: 'C', info: 3 },
@@ -206,7 +177,6 @@ export const arxiv: Source = {
           data: { year, preprint: true },
         }
       })
-      .filter((e): e is Evidence => e !== null)
   },
 }
 

@@ -107,6 +107,18 @@ async function main() {
     bad('POST /api/radar/run', String(e))
   }
 
+  // 6) The Radar knowledge base is signed-in surface, not a public feed.
+  try {
+    const { res } = await req('/api/radar/findings')
+    if (res.status === 401 || res.status === 403) {
+      ok('GET /api/radar/findings rejects anonymous', `HTTP ${res.status}`)
+    } else {
+      bad('GET /api/radar/findings rejects anonymous', `expected 401/403, got ${res.status}`)
+    }
+  } catch (e) {
+    bad('GET /api/radar/findings', String(e))
+  }
+
   console.log(`\n${failed === 0 ? '✓ PASS' : '✗ FAIL'} — ${passed} passed, ${failed} failed\n`)
   process.exit(failed === 0 ? 0 : 1)
 }

@@ -271,6 +271,10 @@ export const radarFindings = pgTable('radar_findings', {
   sourceUrl: text('source_url'),
   retrievedAt: timestamp('retrieved_at', { withTimezone: true }).notNull().defaultNow(),
   confidence: confidenceEnum('confidence').notNull().default('possible'),
+  /** Admiralty rating as `source/info`, e.g. "A/1" (charter §6). */
+  admiralty: text('admiralty'),
+  /** Watchlist feed key this finding was read from (internal findings). */
+  feed: text('feed'),
   /** Stable hash of the finding, for de-duplication across runs. */
   dedupeHash: text('dedupe_hash').notNull().unique(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

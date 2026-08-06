@@ -7,6 +7,7 @@
  */
 export * from './types'
 export * from './analysis'
+export * from './feedxml'
 export { Guardrail, PassiveGuardrailError } from './guardrail'
 export { Registry, registry } from './registry'
 export { collect } from './orchestrator'

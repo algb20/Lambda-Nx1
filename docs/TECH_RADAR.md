@@ -124,8 +124,11 @@ tasks (#37, #27)**, and left the copy-paste. That is the instruction, applied.
 
 ## Cadence — the weekly review (the process, not a vibe)
 
-1. **Scan** the ⭐ feeds (many are automatable via the Radar module `#10/#27`; the
-   News/GDELT gateway already ingests some).
+1. **Scan** the ⭐ feeds. This step is now **automated**: the Radar reads the watchlist
+   (CISA KEV + advisories, Hugging Face daily papers, arXiv cs.CR/cs.AI/cs.LG/cs.DC) on a
+   daily sweep and files deduped, graded findings into the knowledge base — see
+   `docs/RADAR.md` for the table, the grading rationale and the feeds we deliberately
+   have *not* automated yet. Review the Radar tab instead of opening tabs.
 2. **Shortlist** 3–5 items with real relevance to a gateway, the engine, or the UX.
 3. **Ring it** — Adopt / Trial / Assess / Hold, with a one-line rationale.
 4. **Task it** — an Adopt/Trial item becomes a task in the living list (`docs/PLAN.md`);
@@ -141,4 +144,6 @@ tasks (#37, #27)**, and left the copy-paste. That is the instruction, applied.
   target signature.
 - **Assess**: Verifiable Credentials / DID (natural fit with Pi identity).
 - **Automate**: point the Radar module at the ⭐ security + AI-research + arXiv feeds
-  so this review is fed continuously, not manually (`#27`).
+  so this review is fed continuously, not manually (`#27`). — **Done** (`#44`): the
+  `watch` capability + curated watchlist + daily sweep; step 1 of the cadence above is
+  no longer a manual task.

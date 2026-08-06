@@ -57,6 +57,13 @@
       "when": 1785585630000,
       "tag": "0007_colossal_quasimodo",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1786006679618,
+      "tag": "0008_complex_proemial_gods",
+      "breakpoints": true
     }
   ]
 }

@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { RadarKnowledgeBase } from '@/components/radar-knowledge-base'
 import type { Monitor, Alert } from '@/lib/db'
 
 const INTERVALS: Array<{ label: string; minutes: number }> = [
@@ -185,6 +186,8 @@ export function MonitoringDashboard() {
           ))
         )}
       </Card>
+
+      <RadarKnowledgeBase />
     </div>
   )
 }

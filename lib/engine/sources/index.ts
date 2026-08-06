@@ -35,6 +35,8 @@ import { coingeckoTop, stooqCommodities, stooqIndices, frankfurterBoard } from '
 import { nominatim, opensky } from './geo'
 // Gateway — Research & tech-trend
 import { openalex, crossref, githubTrend, arxiv, hackerNews } from './research'
+// Internal Radar — standing ⭐ watch feeds
+import { cisaKev, cisaAdvisories, huggingfacePapers, arxivWatch, watchSources } from './watch'
 
 export const moduleOneSources: Source[] = [
   cloudflareDns,
@@ -72,6 +74,8 @@ export const geoGatewaySources: Source[] = [nominatim, opensky]
 export const researchGatewaySources: Source[] = [openalex, crossref, githubTrend, arxiv, hackerNews]
 
 export const referenceGatewaySources: Source[] = [wikidata]
+
+export const watchFeedSources: Source[] = watchSources
 
 interface CatalogRow {
   key: string
@@ -156,6 +160,13 @@ export const referenceGatewayCatalog: CatalogRow[] = [
   { key: 'wikidata', name: 'Wikidata (structured facts)', capability: 'reference', passive: true, enabled: true },
 ]
 
+export const watchFeedCatalog: CatalogRow[] = [
+  { key: 'cisa_kev', name: 'CISA Known Exploited Vulnerabilities', capability: 'watch', passive: true, enabled: true },
+  { key: 'cisa_advisories', name: 'CISA cybersecurity advisories', capability: 'watch', passive: true, enabled: true },
+  { key: 'hf_papers', name: 'Hugging Face daily papers', capability: 'watch', passive: true, enabled: true },
+  { key: 'arxiv_watch', name: 'arXiv category frontier (cs.AI/CR/DC/LG)', capability: 'watch', passive: true, enabled: true },
+]
+
 export const allSourceCatalog: CatalogRow[] = [
   ...moduleOneSourceCatalog,
   ...moduleTwoSourceCatalog,
@@ -169,6 +180,7 @@ export const allSourceCatalog: CatalogRow[] = [
   ...geoGatewayCatalog,
   ...researchGatewayCatalog,
   ...referenceGatewayCatalog,
+  ...watchFeedCatalog,
 ]
 
 let registeredOne = false
@@ -256,6 +268,13 @@ export function registerReferenceGateway(): void {
   registeredReference = true
 }
 
+let registeredWatch = false
+export function registerWatchFeeds(): void {
+  if (registeredWatch) return
+  registry.registerAll(watchFeedSources)
+  registeredWatch = true
+}
+
 export function registerAllSources(): void {
   registerModuleOneSources()
   registerModuleTwoSources()
@@ -269,6 +288,7 @@ export function registerAllSources(): void {
   registerGeoGateway()
   registerResearchGateway()
   registerReferenceGateway()
+  registerWatchFeeds()
 }
 
 export {
@@ -303,4 +323,8 @@ export {
   stooqIndices,
   frankfurterBoard,
   wikidata,
+  cisaKev,
+  cisaAdvisories,
+  huggingfacePapers,
+  arxivWatch,
 }

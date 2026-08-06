@@ -39,8 +39,8 @@ This is covered by engine tests (`lib/engine/engine.test.ts`).
 |---|---|---|
 | `/api/auth/*` | public by nature | login/register/pi/logout/me |
 | `/api/intelligence/*` (per-gateway) | **public (free tier)** | keyless passive investigations; charter allows free core access with limits |
-| `/api/analyst`, `/api/payments`, `/api/monitors*`, `/api/alerts`, `/api/suggestions*`, `/api/calibration*`, `/api/ontology*` | **session-gated** | 401 when anonymous |
-| `/api/radar/run` | **CRON_SECRET** | 503 without the secret; 403 on wrong `x-cron-secret` |
+| `/api/analyst`, `/api/payments`, `/api/monitors*`, `/api/alerts`, `/api/suggestions*`, `/api/calibration*`, `/api/ontology*`, `/api/radar/findings` | **session-gated** | 401 when anonymous |
+| `/api/radar/run` | **CRON_SECRET** | 503 without the secret; 403 on wrong `x-cron-secret`; `?half=` only selects which half runs, it never bypasses the guard |
 | `/api/health` | public | config booleans only, **no secrets**, `no-store` |
 
 Verified end-to-end by `scripts/smoke.mjs` (analyst → 401, radar → 503).

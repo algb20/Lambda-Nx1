@@ -7,12 +7,17 @@ import { createHash } from 'node:crypto'
 import { repo, type Monitor } from '../db'
 import { getQueue, type Queue } from '../queue'
 import { investigateDomain } from '../modules/domain'
+import { collect } from '../engine'
+import { registerWatchFeeds } from '../engine/sources'
 import { runDueMonitors, type SchedulerRun } from './scheduler'
 import { summarizeChanges, type ChangeSet } from './fingerprint'
+import { runWatchSweep, type WatchSweepResult } from './watch'
 
 export * from './fingerprint'
 export * from './scheduler'
 export * from './internal'
+export * from './watchlist'
+export * from './watch'
 
 export const RADAR_JOB = 'radar.run'
 
@@ -44,12 +49,67 @@ export async function runRadarSweep(): Promise<SchedulerRun> {
 }
 
 /**
+ * Run one internal sweep of the curated ⭐ watchlist through the real engine and
+ * knowledge base. Collection goes through the registry, so the passive
+ * guardrail, host allowlist and per-source rate limits all apply.
+ */
+export async function runInternalRadarSweep(): Promise<WatchSweepResult> {
+  registerWatchFeeds()
+  return runWatchSweep({
+    collectFeed: async (feedKey) => {
+      const out = await collect({ capability: 'watch', value: feedKey })
+      // The orchestrator absorbs a failing source so siblings can still answer;
+      // for a radar sweep the failure itself is news, so pass it through rather
+      // than letting an unreachable publisher look like a quiet one.
+      const errors = out.results
+        .filter((r) => !r.ok)
+        .map((r) => `${r.sourceKey}: ${r.error ?? 'failed'}`)
+      return { evidence: out.evidence, errors }
+    },
+    upsert: (finding) => repo.radar.upsertFinding(finding),
+  })
+}
+
+export interface RadarRun {
+  monitors: SchedulerRun | null
+  watch: WatchSweepResult | null
+  /** Halves that failed outright, named so a scheduler log says which. */
+  errors: Array<{ half: 'monitors' | 'watch'; error: string }>
+}
+
+function settled<T>(
+  half: 'monitors' | 'watch',
+  result: PromiseSettledResult<T>,
+  errors: RadarRun['errors'],
+): T | null {
+  if (result.status === 'fulfilled') return result.value
+  const reason = result.reason
+  errors.push({ half, error: reason instanceof Error ? reason.message : String(reason) })
+  return null
+}
+
+/**
+ * One full radar pass: the product half (user monitors) and the internal half
+ * (the ⭐ watchlist). Both always run to completion — a failure in one is
+ * reported under `errors` rather than aborting the other.
+ */
+export async function runFullRadar(): Promise<RadarRun> {
+  const [monitors, watch] = await Promise.allSettled([runRadarSweep(), runInternalRadarSweep()])
+  const errors: RadarRun['errors'] = []
+  return {
+    monitors: settled('monitors', monitors, errors),
+    watch: settled('watch', watch, errors),
+    errors,
+  }
+}
+
+/**
  * Register the radar job on the queue. In production a durable scheduler
  * (pg_cron/pgmq) enqueues RADAR_JOB periodically; for now enqueue it to run a
  * sweep on demand.
  */
 export function registerRadarJobs(queue: Queue = getQueue()): void {
   queue.register(RADAR_JOB, async () => {
-    await runRadarSweep()
+    await runFullRadar()
   })
 }

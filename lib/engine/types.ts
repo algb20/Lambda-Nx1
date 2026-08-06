@@ -33,6 +33,7 @@ export type Capability =
   | 'research'
   | 'economy'
   | 'reference'
+  | 'watch'
 
 export type EntityType =
   | 'domain'
