@@ -1,19 +1,26 @@
 # Lambda NX — Netlify deploy configuration.
 #
 # Hosting default per charter §4 (Netlify + Supabase): keeps the already-verified
-# Pi domain and the existing Pi payment functions. Swappable — moving to Vercel or
-# self-host is a config change, not an app rewrite (providers sit behind lib/*).
+# Pi domain. Swappable — moving to Vercel or self-host is a config change, not an
+# app rewrite (providers sit behind lib/*).
+#
+# No `functions` directory: Pi payments are served by the app's own route handler
+# (`app/api/payments`) over the lib/payments port, so they run identically on every
+# host. The old netlify/functions/pi-* duplicates were removed once the route
+# existed — two implementations of one flow is exactly the drift we avoid.
 
 [build]
   command = "npm run build"
   publish = ".next"
-  # Pi payment endpoints (approve/complete/cancel) are classic Netlify Functions.
-  functions = "netlify/functions"
 
 [build.environment]
-  # Match the local/dev toolchain. React 19 peer ranges need legacy-peer-deps.
-  NODE_VERSION = "22"
-  NPM_FLAGS = "--legacy-peer-deps"
+  # Node version lives in .nvmrc — Netlify, Vercel and local nvm all read it, so
+  # there is one source of truth instead of a per-host copy that can drift.
+  #
+  # No NPM_FLAGS: the dependency tree resolves under npm's strict peer rules, so
+  # `npm install` needs no --legacy-peer-deps escape hatch. Keep it that way — the
+  # flag would silently hide the next real peer conflict instead of surfacing it.
+  #
   # Do not fail the build on Next telemetry / lint (tsc still gates types).
   NEXT_TELEMETRY_DISABLED = "1"
 

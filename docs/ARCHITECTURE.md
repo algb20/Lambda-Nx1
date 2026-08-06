@@ -60,6 +60,7 @@ Implements the intelligence-analysis method from the reference (ch. 1, 2.10, 5):
 
 One build, two runtime modes selected by environment:
 - **Pi mode:** `AuthProvider = PiAuth` (Pi SDK), `PaymentProvider = PiPayments`
-  (existing `netlify/functions/pi-*`), runs in Pi Browser.
+  (`lib/payments/pi.ts`, served by `app/api/payments` — no host-specific
+  functions, so it runs unchanged on any host), runs in Pi Browser.
 - **Standalone mode:** `AuthProvider = Email/OAuth`, `PaymentProvider = Stripe/other`.
 No screen or feature knows which mode it is in — they use the interfaces.

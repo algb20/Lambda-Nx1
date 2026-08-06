@@ -30,7 +30,7 @@ npm run package       # → dist/lambda-nx-<sha>.zip + dist/MANIFEST.json
 ## 1. Provision the database (Supabase — swappable for any Postgres)
 
 1. Create a Supabase project (or any Postgres 15+). Copy the connection string.
-2. Apply migrations (versioned SQL in `db/migrations/`, currently `0000`–`0007`):
+2. Apply migrations (versioned SQL in `db/migrations/`, currently `0000`–`0008`):
 
    ```bash
    DATABASE_URL="postgresql://…"  npm run db:migrate
@@ -72,10 +72,12 @@ Never commit these. Rotate any key that is ever exposed.
 
 ## 3. Deploy — Pi mode (charter default: Netlify)
 
-The Pi payment functions (`netlify/functions/pi-approve|complete|cancel.js`) and
-the verified Pi domain already exist; `netlify.toml` wires the Next runtime,
-functions dir, and Node 22. Security headers (CSP, HSTS, …) are defined portably
-in `next.config.mjs` so they apply the same on every host — see `docs/SECURITY.md`.
+The verified Pi domain already exists; `netlify.toml` wires the Next runtime.
+Pi payments are served by the app's own route handler (`app/api/payments`) over
+the `lib/payments` port — not by host-specific functions — so they behave the
+same on Netlify, Vercel or self-host. Node comes from `.nvmrc`, and security
+headers (CSP, HSTS, …) are defined portably in `next.config.mjs` so they apply
+the same everywhere — see `docs/SECURITY.md`.
 
 1. Connect the repo to Netlify (branch `claude/bittorent-network-app-c8j9pv` or
    your release branch).
@@ -96,8 +98,10 @@ Pi apps are **hosted web apps** — Pi Browser loads them from your deployed URL
 2. Ensure the verification files above resolve at
    `https://<your-domain>/piapp-link-verification.txt` and
    `/validation-key.txt` (they do, from `public/`).
-3. Configure the Pi payment callbacks to the Netlify functions:
-   `/.netlify/functions/pi-approve`, `/pi-complete`, `/pi-cancel`.
+3. Pi payments are handled by `POST /api/payments` with
+   `{ action: 'approve'|'complete'|'cancel', paymentId, txid? }`. It is
+   session-gated (401 when anonymous) and runs on any host — there is no
+   host-specific function to register.
 4. For handoff/archival, `npm run package` produces a clean source zip
    (`dist/lambda-nx-<sha>.zip`) with a manifest (git sha, versions, file count).
 
@@ -147,6 +151,27 @@ The app then shows the email/password login gate (`components/standalone-auth`)
 and routes payments through the Stripe provider. Deployable to Netlify, Vercel,
 or self-host — the runtime is standard Next.js 15.
 
+### Deploy — Vercel
+
+Import the repo; Vercel auto-detects Next.js, so build/output settings need no
+changes. Set the same env vars from §2 (Project Settings → Environment Variables)
+and redeploy — variables are read at build time, so adding one does not apply
+until the next deploy.
+
+Two things make the build host-agnostic, and both are deliberate:
+
+- **`.nvmrc`** pins Node 22. Netlify, Vercel and local `nvm` all read it, so the
+  version lives in one place instead of a per-host copy that drifts.
+- **No `--legacy-peer-deps` anywhere.** The dependency tree resolves under npm's
+  strict peer rules on its own. Hosts that run a plain `npm install` (Vercel does)
+  therefore succeed without vendor-specific flags. Keep it that way: reaching for
+  the flag hides the next genuine peer conflict rather than fixing it — as it did
+  for `vaul@0.9.9`, which never supported React 19 and only looked fine because
+  the flag was masking it.
+
+Nothing else is host-specific: Pi payments run through `app/api/payments` on
+Vercel exactly as on Netlify.
+
 ---
 
 ## 6. Post-deploy verification
@@ -186,7 +211,7 @@ provider is behind an isolation layer, reverting the app never strands data.
 | Swap | How |
 |---|---|
 | Database (Supabase ↔ any Postgres) | change `DATABASE_URL` |
-| Host (Netlify ↔ Vercel ↔ self-host) | Next.js 15 standard build; move env + functions |
+| Host (Netlify ↔ Vercel ↔ self-host) | Next.js 15 standard build; move env vars — no host-specific functions remain |
 | Auth (Pi ↔ standalone) | `AUTH_PROVIDER` + `NEXT_PUBLIC_AUTH_MODE` |
 | Payments (Pi ↔ Stripe) | `PAYMENT_PROVIDER` |
 | AI analyst (Claude ↔ disabled) | `AI_PROVIDER` |
