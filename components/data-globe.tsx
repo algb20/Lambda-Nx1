@@ -100,6 +100,7 @@ export function DataGlobe({
   const pointersRef = useRef<Map<number, { x: number; y: number }>>(new Map())
   const pinchRef = useRef<number | null>(null)
   const pointerRef = useRef<{ x: number; y: number } | null>(null)
+  const autospinTimerRef = useRef<number | null>(null)
   const [hover, setHover] = useState<{ x: number; y: number; label: string } | null>(null)
   const hoverRef = useRef(hover)
   hoverRef.current = hover
@@ -226,6 +227,7 @@ export function DataGlobe({
     return () => {
       cancelAnimationFrame(raf)
       canvas.removeEventListener('wheel', onWheel)
+      if (autospinTimerRef.current) window.clearTimeout(autospinTimerRef.current)
     }
   }, [points, arcs, height])
 
@@ -236,7 +238,15 @@ export function DataGlobe({
     st.autospin = false
     st.lastX = e.clientX
     st.lastY = e.clientY
-    ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+    // Pointer capture is a convenience, never a requirement: it throws
+    // NotFoundError when the pointer is already gone (routine on touch, where a
+    // tap can end before this handler runs). An uncaught throw here unmounts the
+    // React tree and blanks the page, so a failed capture must cost nothing.
+    try {
+      ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+    } catch {
+      /* dragging still works without capture */
+    }
   }
   const onPointerMove = (e: React.PointerEvent) => {
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
@@ -267,7 +277,18 @@ export function DataGlobe({
     if (pointersRef.current.size < 2) pinchRef.current = null
     if (pointersRef.current.size === 0) {
       stateRef.current.dragging = false
-      window.setTimeout(() => (stateRef.current.autospin = true), 2500)
+      // Guard the timer against a unmounted component: autospin is only a
+      // cosmetic idle behaviour and must never outlive the canvas.
+      if (autospinTimerRef.current) window.clearTimeout(autospinTimerRef.current)
+      autospinTimerRef.current = window.setTimeout(() => {
+        stateRef.current.autospin = true
+      }, 2500)
+    }
+    try {
+      const el = e.currentTarget as HTMLElement
+      if (el.hasPointerCapture?.(e.pointerId)) el.releasePointerCapture(e.pointerId)
+    } catch {
+      /* nothing to release */
     }
   }
 

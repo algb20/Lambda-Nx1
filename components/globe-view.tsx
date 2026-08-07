@@ -5,6 +5,7 @@ import { Globe2, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { DataGlobe } from '@/components/data-globe'
+import { ErrorBoundary } from '@/components/error-boundary'
 import { pointsFromEvidence, type GlobePoint } from '@/lib/geo/centroids'
 
 interface NewsItem {
@@ -83,8 +84,13 @@ export function GlobeView() {
         point for the country. Public signals only.
       </p>
 
+      {/* The canvas is the riskiest part of this page (WebGL-less 2D drawing,
+          pointer capture, animation frames). Isolate it so a failure there
+          still leaves the signal list below usable. */}
       <Card className="overflow-hidden p-0">
-        <DataGlobe points={points} height={400} />
+        <ErrorBoundary label="The 3D globe">
+          <DataGlobe points={points} height={400} />
+        </ErrorBoundary>
       </Card>
 
       {loading ? (
