@@ -39,6 +39,8 @@ import { openalex, crossref, githubTrend, arxiv, hackerNews } from './research'
 import { cisaKev, cisaAdvisories, huggingfacePapers, arxivWatch, watchSources } from './watch'
 // Gateway — Daily global trending
 import { wikipediaTrending, wikimediaPageviews, trendingSources } from './trending'
+// Gateway — Live world events (geolocated, sensor- and agency-measured)
+import { nasaEonet, usgsRecentQuakes, worldEventSources } from './world-events'
 
 export const moduleOneSources: Source[] = [
   cloudflareDns,
@@ -80,6 +82,8 @@ export const referenceGatewaySources: Source[] = [wikidata]
 export const watchFeedSources: Source[] = watchSources
 
 export const trendingGatewaySources: Source[] = trendingSources
+
+export const worldEventsGatewaySources: Source[] = worldEventSources
 
 interface CatalogRow {
   key: string
@@ -176,6 +180,11 @@ export const trendingGatewayCatalog: CatalogRow[] = [
   { key: 'wikimedia_pageviews', name: 'Wikimedia pageviews (top viewed)', capability: 'trending', passive: true, enabled: true },
 ]
 
+export const worldEventsGatewayCatalog: CatalogRow[] = [
+  { key: 'nasa_eonet', name: 'NASA EONET (natural hazards, geolocated)', capability: 'world_events', passive: true, enabled: true },
+  { key: 'usgs_recent', name: 'USGS seismic (M2.5+ past day)', capability: 'world_events', passive: true, enabled: true },
+]
+
 export const allSourceCatalog: CatalogRow[] = [
   ...moduleOneSourceCatalog,
   ...moduleTwoSourceCatalog,
@@ -191,6 +200,7 @@ export const allSourceCatalog: CatalogRow[] = [
   ...referenceGatewayCatalog,
   ...watchFeedCatalog,
   ...trendingGatewayCatalog,
+  ...worldEventsGatewayCatalog,
 ]
 
 let registeredOne = false
@@ -292,6 +302,13 @@ export function registerTrendingGateway(): void {
   registeredTrending = true
 }
 
+let registeredWorldEvents = false
+export function registerWorldEventsGateway(): void {
+  if (registeredWorldEvents) return
+  registry.registerAll(worldEventSources)
+  registeredWorldEvents = true
+}
+
 export function registerAllSources(): void {
   registerModuleOneSources()
   registerModuleTwoSources()
@@ -307,6 +324,7 @@ export function registerAllSources(): void {
   registerReferenceGateway()
   registerWatchFeeds()
   registerTrendingGateway()
+  registerWorldEventsGateway()
 }
 
 export {
@@ -345,4 +363,6 @@ export {
   cisaAdvisories,
   huggingfacePapers,
   arxivWatch,
+  nasaEonet,
+  usgsRecentQuakes,
 }
