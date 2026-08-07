@@ -171,3 +171,88 @@ describe('analysis — dedupe & pivot graph', () => {
     expect(formatAdmiralty({ source: 'A', info: 1 })).toBe('A1')
   })
 })
+
+/**
+ * Regression: the news gateway ran four sources sequentially, each preceded by
+ * its politeness delay. The total exceeded the hosting request limit, the
+ * request was killed, and the client got an HTML error page where it expected
+ * JSON — which is why the live world map rendered empty. Independent sources
+ * must run at once, and no single provider may consume the whole budget.
+ */
+describe('orchestrator — parallelism and deadlines', () => {
+  function slowSource(key: string, ms: number, claim: string): Source {
+    return {
+      key,
+      capability: 'news',
+      passive: true,
+      hosts: [`${key}.example`],
+      async run() {
+        await new Promise((r) => setTimeout(r, ms))
+        return [
+          {
+            claim,
+            sourceKey: key,
+            retrievedAt: new Date().toISOString(),
+            confidence: 'possible' as const,
+          },
+        ]
+      },
+    }
+  }
+
+  it("runs mode 'all' in parallel, not one after another", async () => {
+    const reg = new Registry()
+    reg.registerAll([
+      slowSource('a', 120, 'from a'),
+      slowSource('b', 120, 'from b'),
+      slowSource('c', 120, 'from c'),
+      slowSource('d', 120, 'from d'),
+    ])
+    const started = Date.now()
+    const out = await collect({ capability: 'news', value: '' }, { registry: reg, mode: 'all' })
+    const elapsed = Date.now() - started
+
+    expect(out.evidence).toHaveLength(4)
+    // Sequential would be ~480ms; parallel is ~120ms. The midpoint separates
+    // them without being flaky on a loaded machine.
+    expect(elapsed).toBeLessThan(300)
+  })
+
+  it('bounds each source, and keeps what the others returned', async () => {
+    const reg = new Registry()
+    reg.registerAll([
+      slowSource('fast', 10, 'arrived'),
+      // Never settles — the real-world case of a provider that stops answering.
+      {
+        key: 'hung',
+        capability: 'news',
+        passive: true,
+        hosts: ['hung.example'],
+        run: () => new Promise(() => {}),
+      } as Source,
+    ])
+    const out = await collect(
+      { capability: 'news', value: '' },
+      { registry: reg, mode: 'all', timeoutMs: 80 },
+    )
+
+    expect(out.evidence.map((e) => e.claim)).toEqual(['arrived'])
+    const hung = out.results.find((r) => r.sourceKey === 'hung')
+    expect(hung?.ok).toBe(false)
+    expect(hung?.error).toMatch(/timed out/)
+  })
+
+  it("keeps mode 'first' ordered — it is a fallback chain", async () => {
+    const reg = new Registry()
+    reg.registerAll([
+      { key: 'empty', capability: 'news', passive: true, hosts: ['e.example'], run: async () => [] } as Source,
+      slowSource('second', 5, 'from second'),
+      slowSource('third', 5, 'from third'),
+    ])
+    const out = await collect({ capability: 'news', value: '' }, { registry: reg, mode: 'first' })
+
+    expect(out.evidence.map((e) => e.claim)).toEqual(['from second'])
+    // It stopped at the first source that answered; the third never ran.
+    expect(out.results.map((r) => r.sourceKey)).toEqual(['empty', 'second'])
+  })
+})

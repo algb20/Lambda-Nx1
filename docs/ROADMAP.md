@@ -55,7 +55,7 @@ the eye.
 Telegram-grade group system:
 - Create a group; owner/admin/member roles
 - **Invite by Pi username** and by private invite link
-- Add / remove members; a real control panel
+- Add / remove members; **ban / block** a member or outside user; a real control panel
 - Shared dossiers and monitors inside a group
 - Encryption at rest for group content; access enforced server-side
 - New tables + migration; every action authorised on the server, never the client
@@ -90,6 +90,18 @@ is assembly, not acquisition — which is why it ranks high.
 
 Both need a *composition* layer above the gateways: outline → gather → order →
 grade → present.
+
+### 3.2b The world map, properly *(requested — currently thin)*
+The globe draws and plots the few located items the news feed carries. That is
+far short of what was planned. It should be a live intelligence surface:
+
+- **every gateway feeds it**, not just news — threats, contracts, ownership,
+  markets, quakes, humanitarian, flights
+- **layers** the user can toggle, each with its own legend
+- **evidence on click**: a point opens its findings with sources and grades
+- **time**: a scrubber over the last 24h / 7d / 30d, so flow is visible
+- **density and weight** encoded honestly (a big event should look big)
+- **regional focus** — tap a country to scope every gateway to it
 
 ### 3.3 Regional / country lens *(requested)*
 "Everything about this country or region": news, crises, projects, agendas,
