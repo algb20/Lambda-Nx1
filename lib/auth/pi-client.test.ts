@@ -57,16 +57,25 @@ describe('classifyPiFailure', () => {
 })
 
 describe('shouldBlockApp', () => {
-  it('blocks only while connecting', () => {
-    expect(shouldBlockApp('connecting')).toBe(true)
+  it('blocks while connecting, but only inside the grace window', () => {
+    expect(shouldBlockApp('connecting', false)).toBe(true)
+  })
+
+  it('reveals the app once the grace window closes, even mid-handshake', () => {
+    // The visitor must not wait out an answer that only Pi Browser can give.
+    expect(shouldBlockApp('connecting', true)).toBe(false)
   })
 
   it('lets the app render on every settled outcome, including failure', () => {
     // The free gateways never needed an account, so a failed sign-in must not
     // cost the visitor the whole product.
     for (const status of ['authenticated', 'unavailable', 'error'] as const) {
-      expect(shouldBlockApp(status), status).toBe(false)
+      expect(shouldBlockApp(status, false), status).toBe(false)
     }
+  })
+
+  it('defaults to the pre-grace behaviour when the flag is omitted', () => {
+    expect(shouldBlockApp('connecting')).toBe(true)
   })
 })
 
@@ -93,5 +102,12 @@ describe('PI_TIMEOUTS', () => {
       expect(ms, step).toBeGreaterThan(0)
       expect(ms, step).toBeLessThanOrEqual(30_000)
     }
+  })
+
+  it('reveals the app long before the handshake deadline', () => {
+    // The grace window is what the visitor actually waits; it must not be
+    // tied to how long Pi is allowed to take.
+    expect(PI_TIMEOUTS.grace).toBeLessThan(PI_TIMEOUTS.authenticate)
+    expect(PI_TIMEOUTS.grace).toBeLessThanOrEqual(3_000)
   })
 })
