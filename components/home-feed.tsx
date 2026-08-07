@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { Newspaper, Sparkles } from 'lucide-react'
 import { Composer } from '@/components/composer'
 import { PostCard } from '@/components/post-card'
-import { TrendingSpotlight } from '@/components/trending-spotlight'
+import { TrendingBoard } from '@/components/trending-board'
 import { XLikeFeed } from '@/components/x-like-feed'
 import type { PublicPost } from '@/lib/posts'
 
@@ -39,7 +39,7 @@ export function HomeFeed({ onNavigate }: { onNavigate: (tab: NavTab) => void }) 
     <div className="space-y-4">
       <Composer onPublished={onPublished} />
 
-      <TrendingSpotlight />
+      <TrendingBoard />
 
       {/* Published posts */}
       <section className="space-y-3">

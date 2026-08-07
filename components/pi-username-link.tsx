@@ -5,7 +5,7 @@ import { KeyRound, Loader2, ShieldCheck, AlertCircle, CheckCircle2 } from 'lucid
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { MIN_PASSWORD_LENGTH } from '@/lib/auth/standalone'
+import { MIN_PASSWORD_LENGTH } from '@/lib/auth/policy'
 
 /**
  * Link a Pi Network username for sign-in outside the Pi Browser.

@@ -41,6 +41,8 @@ import { cisaKev, cisaAdvisories, huggingfacePapers, arxivWatch, watchSources } 
 import { wikipediaTrending, wikimediaPageviews, trendingSources } from './trending'
 // Gateway — Live world events (geolocated, sensor- and agency-measured)
 import { nasaEonet, usgsRecentQuakes, worldEventSources } from './world-events'
+// Gateway — Blockchain radar (on-chain network state)
+import { mempoolNetwork, coingeckoGlobal, chainStateSources } from './chain'
 
 export const moduleOneSources: Source[] = [
   cloudflareDns,
@@ -84,6 +86,8 @@ export const watchFeedSources: Source[] = watchSources
 export const trendingGatewaySources: Source[] = trendingSources
 
 export const worldEventsGatewaySources: Source[] = worldEventSources
+
+export const chainStateGatewaySources: Source[] = chainStateSources
 
 interface CatalogRow {
   key: string
@@ -185,6 +189,11 @@ export const worldEventsGatewayCatalog: CatalogRow[] = [
   { key: 'usgs_recent', name: 'USGS seismic (M2.5+ past day)', capability: 'world_events', passive: true, enabled: true },
 ]
 
+export const chainStateGatewayCatalog: CatalogRow[] = [
+  { key: 'mempool_network', name: 'mempool.space (Bitcoin network state)', capability: 'chain_state', passive: true, enabled: true },
+  { key: 'coingecko_global', name: 'CoinGecko global (market structure)', capability: 'chain_state', passive: true, enabled: true },
+]
+
 export const allSourceCatalog: CatalogRow[] = [
   ...moduleOneSourceCatalog,
   ...moduleTwoSourceCatalog,
@@ -201,6 +210,7 @@ export const allSourceCatalog: CatalogRow[] = [
   ...watchFeedCatalog,
   ...trendingGatewayCatalog,
   ...worldEventsGatewayCatalog,
+  ...chainStateGatewayCatalog,
 ]
 
 let registeredOne = false
@@ -309,6 +319,13 @@ export function registerWorldEventsGateway(): void {
   registeredWorldEvents = true
 }
 
+let registeredChainState = false
+export function registerChainStateGateway(): void {
+  if (registeredChainState) return
+  registry.registerAll(chainStateGatewaySources)
+  registeredChainState = true
+}
+
 export function registerAllSources(): void {
   registerModuleOneSources()
   registerModuleTwoSources()
@@ -325,6 +342,7 @@ export function registerAllSources(): void {
   registerWatchFeeds()
   registerTrendingGateway()
   registerWorldEventsGateway()
+  registerChainStateGateway()
 }
 
 export {
@@ -365,4 +383,6 @@ export {
   arxivWatch,
   nasaEonet,
   usgsRecentQuakes,
+  mempoolNetwork,
+  coingeckoGlobal,
 }

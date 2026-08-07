@@ -17,6 +17,7 @@
  * Dependency-injected so all of this is testable without a database.
  */
 import { hashPassword, verifyPassword } from './password'
+import { MIN_PASSWORD_LENGTH, PI_USERNAME_RE } from './policy'
 
 export interface CredentialRecord {
   userId: string
@@ -41,11 +42,9 @@ export interface ClaimDeps {
   }) => Promise<void>
 }
 
-export const MIN_PASSWORD_LENGTH = 8
+export { MIN_PASSWORD_LENGTH } from './policy'
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
-/** Pi usernames are lowercase alphanumerics and underscores. */
-const PI_USERNAME_RE = /^[a-z0-9_]{3,30}$/
 
 export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase()
