@@ -5,10 +5,13 @@ import { Globe2, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { DataGlobe } from '@/components/data-globe'
-import { pointsFromCountries, type GlobePoint } from '@/lib/geo/centroids'
+import { pointsFromEvidence, type GlobePoint } from '@/lib/geo/centroids'
 
 interface NewsItem {
-  data?: { country?: string }
+  claim?: string
+  /** Sources tag items differently: USGS gives exact coordinates, GDELT and
+   *  ReliefWeb give a country. Both are plottable — see pointsFromEvidence. */
+  data?: { country?: string; lat?: number; lon?: number; place?: string }
 }
 
 /**
@@ -18,8 +21,9 @@ interface NewsItem {
  * geolocated signal.
  */
 export function GlobeView() {
-  const [countries, setCountries] = useState<string[]>([])
+  const [items, setItems] = useState<NewsItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [failed, setFailed] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -31,10 +35,10 @@ export function GlobeView() {
           body: JSON.stringify({ query: '' }),
         })
         const data = await res.json()
-        const items: NewsItem[] = data?.items ?? []
-        if (!cancelled) setCountries(items.map((i) => i.data?.country).filter(Boolean) as string[])
+        if (!cancelled) setItems((data?.items ?? []) as NewsItem[])
       } catch {
-        /* offline — the globe still renders */
+        // The globe still renders; the caption below says why it is empty.
+        if (!cancelled) setFailed(true)
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -45,7 +49,27 @@ export function GlobeView() {
     }
   }, [])
 
-  const points: GlobePoint[] = useMemo(() => pointsFromCountries(countries), [countries])
+  /**
+   * Plot everything the feed can place, not just country-tagged items.
+   *
+   * The topic-less feed is served by Wikipedia (no location), USGS (exact
+   * epicentres) and ReliefWeb (country) — GDELT, the only other country source,
+   * needs a topic and is skipped here. Reading `country` alone therefore left
+   * the globe permanently empty while precise coordinates sat unused in the
+   * same payload. `pointsFromEvidence` takes both.
+   */
+  const points: GlobePoint[] = useMemo(
+    () =>
+      pointsFromEvidence(
+        items.map((i) => ({
+          lat: i.data?.lat,
+          lon: i.data?.lon,
+          country: i.data?.country,
+          label: i.data?.place ?? i.data?.country ?? i.claim,
+        })),
+      ),
+    [items],
+  )
   const top = useMemo(() => [...points].sort((a, b) => b.weight - a.weight).slice(0, 8), [points])
 
   return (
@@ -72,8 +96,9 @@ export function GlobeView() {
           <h4 className="mb-2 text-sm font-semibold">Most active now</h4>
           {top.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No geolocated signals right now (sources may be rate-limited). The globe still spins —
-              live points appear as they arrive.
+              {failed
+                ? 'Could not reach the news sources just now. The globe still spins — points appear on the next refresh.'
+                : 'No placeable signals in the current feed. Not every top story carries a location; the globe plots the ones that do.'}
             </p>
           ) : (
             <div className="flex flex-wrap gap-1.5">
