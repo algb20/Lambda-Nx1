@@ -5,6 +5,7 @@ import { Bell, ShieldCheck, Info } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Slider } from '@/components/ui/slider'
+import { UpgradePanel } from '@/components/upgrade-panel'
 
 /**
  * Settings. The previous version advertised fabricated capabilities ("Quantum
@@ -18,6 +19,10 @@ export function UserPreferences() {
 
   return (
     <div className="space-y-4">
+      {/* Plan and billing first: it is the one thing on this screen a user
+          actively comes here to change. */}
+      <UpgradePanel />
+
       <div>
         <h2 className="text-xl font-bold">Settings</h2>
         <p className="text-sm text-muted-foreground">

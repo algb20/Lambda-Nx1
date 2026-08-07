@@ -13,7 +13,13 @@ interface I18nValue {
   locale: Locale
   dir: 'ltr' | 'rtl'
   setLocale: (l: Locale) => void
-  t: (key: string, fallback?: string) => string
+  /**
+   * Translate a key. The second argument is either a plain fallback string or a
+   * map of `{placeholder}` values to interpolate — a real requirement once a
+   * sentence has to carry numbers and still read naturally in every language,
+   * since word order differs and concatenation cannot express that.
+   */
+  t: (key: string, paramsOrFallback?: string | Record<string, string | number>) => string
 }
 
 const I18nContext = createContext<I18nValue | null>(null)
@@ -48,8 +54,18 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const t = useCallback(
-    (key: string, fallback?: string) =>
-      DICTIONARIES[locale]?.[key] ?? DICTIONARIES.en[key] ?? fallback ?? key,
+    (key: string, paramsOrFallback?: string | Record<string, string | number>) => {
+      const isFallback = typeof paramsOrFallback === 'string'
+      const fallback = isFallback ? paramsOrFallback : undefined
+      // English is the fallback locale: a missing translation shows real text
+      // rather than a raw key, so a half-translated locale stays usable.
+      const template = DICTIONARIES[locale]?.[key] ?? DICTIONARIES.en[key] ?? fallback ?? key
+      if (isFallback || !paramsOrFallback) return template
+      return template.replace(/\{(\w+)\}/g, (match, name: string) => {
+        const value = paramsOrFallback[name]
+        return value === undefined ? match : String(value)
+      })
+    },
     [locale],
   )
 
