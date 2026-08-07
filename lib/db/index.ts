@@ -35,6 +35,8 @@ export type CalibrationClaim = typeof s.calibrationClaims.$inferSelect
 export type NewCalibrationClaim = typeof s.calibrationClaims.$inferInsert
 export type Visitor = typeof s.visitors.$inferSelect
 export type NewVisitor = typeof s.visitors.$inferInsert
+export type Post = typeof s.posts.$inferSelect
+export type NewPost = typeof s.posts.$inferInsert
 
 export const repo = {
   users: {
@@ -540,6 +542,45 @@ export const repo = {
         .from(s.visitors)
         .groupBy(s.visitors.countryCode, s.visitors.countryName)
         .orderBy(desc(sql`sum(${s.visitors.visitCount})`))
+    },
+  },
+
+  posts: {
+    async create(input: NewPost): Promise<Post> {
+      const db = getDb()
+      const [row] = await db.insert(s.posts).values(input).returning()
+      return row
+    },
+    async getById(id: string): Promise<Post | undefined> {
+      const db = getDb()
+      const [row] = await db.select().from(s.posts).where(eq(s.posts.id, id)).limit(1)
+      return row
+    },
+    /** The public feed, newest first. Unlisted posts are reachable only by link. */
+    async listPublic(limit = 50, before?: Date): Promise<Post[]> {
+      const db = getDb()
+      const where = before
+        ? and(eq(s.posts.visibility, 'public'), lte(s.posts.createdAt, before))
+        : eq(s.posts.visibility, 'public')
+      return db.select().from(s.posts).where(where).orderBy(desc(s.posts.createdAt)).limit(limit)
+    },
+    async listByUser(userId: string, limit = 50): Promise<Post[]> {
+      const db = getDb()
+      return db
+        .select()
+        .from(s.posts)
+        .where(eq(s.posts.authorUserId, userId))
+        .orderBy(desc(s.posts.createdAt))
+        .limit(limit)
+    },
+    async like(id: string): Promise<Post | undefined> {
+      const db = getDb()
+      const [row] = await db
+        .update(s.posts)
+        .set({ likeCount: sql`${s.posts.likeCount} + 1` })
+        .where(eq(s.posts.id, id))
+        .returning()
+      return row
     },
   },
 

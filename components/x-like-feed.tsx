@@ -141,7 +141,7 @@ export function XLikeFeed({ onNavigate }: { onNavigate?: (tab: NavTab) => void }
             <Radar className="h-6 w-6 text-primary" />
             <h1 className="text-2xl font-bold tracking-tight">Lambda NX</h1>
             <Badge variant="outline" className="ml-auto text-[10px] text-muted-foreground">
-              {liveCount} live gateways
+              {liveCount} live capabilities
             </Badge>
           </div>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">

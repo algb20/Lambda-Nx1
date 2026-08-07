@@ -79,6 +79,11 @@ export const investigationStatusEnum = pgEnum('investigation_status', ['open', '
 export const monitorStatusEnum = pgEnum('monitor_status', ['active', 'paused'])
 export const radarKindEnum = pgEnum('radar_kind', ['internal', 'product'])
 
+/** A published item's kind: free-form post, a shared dossier, or a spotted signal. */
+export const postKindEnum = pgEnum('post_kind', ['post', 'research', 'signal'])
+/** Public = discoverable in the feed; unlisted = reachable only by its link. */
+export const postVisibilityEnum = pgEnum('post_visibility', ['public', 'unlisted'])
+
 // ── Identity ─────────────────────────────────────────────────────────────────
 
 export const users = pgTable(
@@ -441,5 +446,45 @@ export const visitors = pgTable(
     unique('visitors_subject_uq').on(t.subjectKey),
     index('visitors_country_idx').on(t.countryCode),
     index('visitors_last_seen_idx').on(t.lastSeenAt),
+  ],
+)
+
+// ── Publishing (the home feed: posts, shared research, spotted signals) ───────
+
+/**
+ * A published item. Publishing happens on the app itself; each post has a stable
+ * public permalink so it can be shared outside the app and drive discovery.
+ *
+ * The author's display name is snapshotted so a post keeps its byline even if the
+ * account is later deleted (the FK then nulls, the post survives — like
+ * suggestions). Evidence/dossier posts carry a source link so the claim always
+ * traces back (charter §1).
+ */
+export const posts = pgTable(
+  'posts',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    authorUserId: uuid('author_user_id').references(() => users.id, { onDelete: 'set null' }),
+    /** Byline snapshot (Pi username / email) — survives account deletion. */
+    authorName: text('author_name'),
+    kind: postKindEnum('kind').notNull().default('post'),
+    title: text('title').notNull(),
+    body: text('body').notNull(),
+    /** Origin link for research/signal posts, so every claim is traceable. */
+    sourceUrl: text('source_url'),
+    /** Optional gateway/subject this was published from (for "open in app"). */
+    refType: text('ref_type'),
+    refValue: text('ref_value'),
+    /** BCP-47 language of the post body, for i18n display. */
+    locale: text('locale'),
+    visibility: postVisibilityEnum('visibility').notNull().default('public'),
+    /** Lightweight engagement counters (reactions table lands with the social layer). */
+    likeCount: integer('like_count').notNull().default(0),
+    repostCount: integer('repost_count').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('posts_visibility_created_idx').on(t.visibility, t.createdAt),
+    index('posts_author_idx').on(t.authorUserId),
   ],
 )
