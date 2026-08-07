@@ -22,6 +22,9 @@ type Dict = Record<string, string>
 
 const en: Dict = {
   'app.tagline': 'Intelligence platform',
+  'auth.signedInAs': 'Signed in as',
+  'auth.guest': 'Guest',
+  'auth.guestHint': 'Browsing without an account — the gateways are open; monitors and saved dossiers need sign-in',
   'badge.passiveLawful': 'Passive · Lawful',
   'feed.hero.title': 'Investigate anything — one query, full dossier',
   'feed.hero.sub': 'domain · IP · email · company · wallet · hash — every gateway at once, in an instant',
@@ -58,6 +61,9 @@ const en: Dict = {
 
 const ar: Dict = {
   'app.tagline': 'منصّة استخبارات',
+  'auth.signedInAs': 'مسجَّل الدخول باسم',
+  'auth.guest': 'زائر',
+  'auth.guestHint': 'تتصفّح دون حساب — البوابات مفتوحة، أما المراقبات والملفّات المحفوظة فتحتاج تسجيل دخول',
   'badge.passiveLawful': 'سلبي · قانوني',
   'feed.hero.title': 'حقّق في أي شيء — استعلام واحد، ملفّ كامل',
   'feed.hero.sub': 'نطاق · IP · بريد · شركة · محفظة · بصمة — كل البوّابات دفعةً واحدة، في لحظة',

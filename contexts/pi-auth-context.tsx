@@ -196,3 +196,14 @@ export function usePiAuth() {
   }
   return context;
 }
+
+/**
+ * Same state, but returns null instead of throwing when there is no provider.
+ *
+ * Standalone mode mounts no PiAuthProvider, so shared chrome like the header —
+ * rendered in both modes — must be able to ask about Pi sign-in without
+ * crashing the app in the mode where Pi is not in play.
+ */
+export function usePiAuthOptional(): PiAuthContextType | null {
+  return useContext(PiAuthContext) ?? null;
+}
