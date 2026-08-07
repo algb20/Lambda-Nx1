@@ -1,5 +1,7 @@
 "use client"
 
+import { useState } from "react"
+
 import { Moon, Sun, Radar, ShieldCheck, CreditCard, Languages, UserCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -14,10 +16,7 @@ export function Header() {
   const pi = usePiAuthOptional()
   const username = pi?.userData?.username ?? null
 
-  const cycleLocale = () => {
-    const i = LOCALES.indexOf(locale)
-    setLocale(LOCALES[(i + 1) % LOCALES.length])
-  }
+  const [langOpen, setLangOpen] = useState(false)
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
@@ -62,16 +61,57 @@ export function Header() {
                 {t('auth.guest')}
               </span>
             ) : null}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={cycleLocale}
-              className="h-8 gap-1 px-2 text-xs"
-              title={LOCALE_LABELS[locale]}
-            >
-              <Languages className="h-4 w-4" />
-              <span className="uppercase">{locale}</span>
-            </Button>
+            {/* A list, not a cycle button: with seven locales, "press until
+                your language comes round" is not a way to choose one. */}
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLangOpen((v) => !v)}
+                className="h-8 gap-1 px-2 text-xs"
+                title={LOCALE_LABELS[locale]}
+                aria-haspopup="listbox"
+                aria-expanded={langOpen}
+              >
+                <Languages className="h-4 w-4" />
+                <span className="uppercase">{locale}</span>
+              </Button>
+              {langOpen ? (
+                <>
+                  {/* Tapping anywhere else closes it — essential on touch, where
+                      there is no blur to rely on. */}
+                  <button
+                    className="fixed inset-0 z-40 cursor-default"
+                    aria-hidden
+                    tabIndex={-1}
+                    onClick={() => setLangOpen(false)}
+                  />
+                  <ul
+                    role="listbox"
+                    className="absolute end-0 z-50 mt-1 min-w-[9rem] overflow-hidden rounded-md border border-border bg-card py-1 shadow-lg"
+                  >
+                    {LOCALES.map((code) => (
+                      <li key={code}>
+                        <button
+                          role="option"
+                          aria-selected={code === locale}
+                          onClick={() => {
+                            setLocale(code)
+                            setLangOpen(false)
+                          }}
+                          className={`flex w-full items-center justify-between gap-2 px-3 py-1.5 text-xs transition-colors hover:bg-muted ${
+                            code === locale ? "font-semibold text-primary" : "text-foreground"
+                          }`}
+                        >
+                          <span>{LOCALE_LABELS[code]}</span>
+                          <span className="uppercase text-muted-foreground">{code}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
+            </div>
             <Button
               variant="outline"
               size="sm"
