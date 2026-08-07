@@ -16,6 +16,8 @@ export * as schema from '@/db/schema'
 export type User = typeof s.users.$inferSelect
 export type NewUser = typeof s.users.$inferInsert
 export type Credential = typeof s.credentials.$inferSelect
+export type SocialChannel = typeof s.socialChannels.$inferSelect
+export type NewSocialChannel = typeof s.socialChannels.$inferInsert
 export type Investigation = typeof s.investigations.$inferSelect
 export type Entity = typeof s.entities.$inferSelect
 export type EntityLink = typeof s.entityLinks.$inferSelect
@@ -124,6 +126,59 @@ export const repo = {
         })
         .returning()
       return row
+    },
+  },
+
+  socialChannels: {
+    async list(): Promise<SocialChannel[]> {
+      const db = getDb()
+      return db.select().from(s.socialChannels).orderBy(s.socialChannels.createdAt)
+    },
+    async getById(id: string): Promise<SocialChannel | undefined> {
+      const db = getDb()
+      const [row] = await db
+        .select()
+        .from(s.socialChannels)
+        .where(eq(s.socialChannels.id, id))
+        .limit(1)
+      return row
+    },
+    async create(input: NewSocialChannel): Promise<SocialChannel> {
+      const db = getDb()
+      const [row] = await db.insert(s.socialChannels).values(input).returning()
+      return row
+    },
+    async update(
+      id: string,
+      patch: Partial<Pick<SocialChannel, 'label' | 'enabled' | 'autoPublish' | 'kindFilter'>>,
+    ): Promise<SocialChannel | undefined> {
+      const db = getDb()
+      const [row] = await db
+        .update(s.socialChannels)
+        .set(patch)
+        .where(eq(s.socialChannels.id, id))
+        .returning()
+      return row
+    },
+    async remove(id: string): Promise<void> {
+      const db = getDb()
+      await db.delete(s.socialChannels).where(eq(s.socialChannels.id, id))
+    },
+    /** Record a delivery outcome so a silently broken channel becomes visible. */
+    async recordDelivery(id: string, ok: boolean, error: string | null): Promise<void> {
+      const db = getDb()
+      const current = await repo.socialChannels.getById(id)
+      if (!current) return
+      await db
+        .update(s.socialChannels)
+        .set({
+          lastStatus: ok ? 'ok' : 'error',
+          lastError: ok ? null : error,
+          lastAt: new Date(),
+          deliveredCount: current.deliveredCount + (ok ? 1 : 0),
+          failedCount: current.failedCount + (ok ? 0 : 1),
+        })
+        .where(eq(s.socialChannels.id, id))
     },
   },
 

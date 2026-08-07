@@ -85,6 +85,13 @@
       "when": 1786144578769,
       "tag": "0011_tan_terror",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1786145772369,
+      "tag": "0012_broken_firebrand",
+      "breakpoints": true
     }
   ]
 }

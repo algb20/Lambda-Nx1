@@ -496,3 +496,49 @@ export const posts = pgTable(
     index('posts_author_idx').on(t.authorUserId),
   ],
 )
+
+// ── Social publishing channels ───────────────────────────────────────────────
+//
+// Where a published post can be broadcast. Only platforms we can actually
+// deliver to are represented: an outgoing webhook (which covers Discord, Slack
+// and every automation tool that accepts one) and the Telegram Bot API. The
+// networks that require an approved OAuth application are deliberately absent
+// rather than present and broken.
+
+export const socialPlatformEnum = pgEnum('social_platform', [
+  'webhook',
+  'discord',
+  'slack',
+  'telegram',
+])
+
+export const socialChannels = pgTable(
+  'social_channels',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    platform: socialPlatformEnum('platform').notNull(),
+    /** Operator-facing name, e.g. "Team Discord" or "Public announcements". */
+    label: text('label').notNull(),
+    /** Webhook URL, or the Telegram chat id to post into. */
+    target: text('target').notNull(),
+    /**
+     * AES-256-GCM ciphertext of a bot token, never the token itself. Null for
+     * channels whose target URL is the only credential (webhooks).
+     */
+    secretEnc: text('secret_enc'),
+    /** Off means nothing is ever sent here, by any path. */
+    enabled: boolean('enabled').notNull().default(true),
+    /** On means new posts are broadcast without anyone pressing a button. */
+    autoPublish: boolean('auto_publish').notNull().default(false),
+    /** Restrict auto-publishing to one post kind; null broadcasts them all. */
+    kindFilter: postKindEnum('kind_filter'),
+    /** Last delivery outcome, so a silently broken channel is visible. */
+    lastStatus: text('last_status'),
+    lastError: text('last_error'),
+    lastAt: timestamp('last_at', { withTimezone: true }),
+    deliveredCount: integer('delivered_count').notNull().default(0),
+    failedCount: integer('failed_count').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('social_channels_enabled_idx').on(t.enabled, t.autoPublish)],
+)
