@@ -1,7 +1,11 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Radio, Fingerprint, Clock, CalendarClock, IdCard, AlertCircle } from 'lucide-react'
+// `User`, not `IdCard`: IdCard is a recent lucide addition, and hosts that
+// resolve lucide-react from their own bundle (v0 / App Studio previews) may ship
+// an older build without it — which fails at import time and takes the app down.
+// Long-established icons are the safe currency here.
+import { Radio, Fingerprint, Clock, CalendarClock, User, AlertCircle } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { TargetProfile, TimelineEvent } from '@/lib/modules/target'
@@ -143,7 +147,7 @@ export function TargetTracker({ query }: { query: string }) {
       {profile && profile.identity.static.length > 0 ? (
         <Card className="p-4">
           <h4 className="mb-1 flex items-center gap-1.5 text-sm font-semibold">
-            <IdCard className="h-4 w-4 text-primary" /> Identity <span className="text-[10px] text-muted-foreground">(static)</span>
+            <User className="h-4 w-4 text-primary" /> Identity <span className="text-[10px] text-muted-foreground">(static)</span>
           </h4>
           {profile.identity.static.slice(0, 20).map((e, i) => (
             <div key={i} className="flex items-start justify-between gap-3 border-b border-border/40 py-2 last:border-0">
