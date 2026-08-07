@@ -63,10 +63,36 @@ Set these in the host dashboard (Netlify: *Site settings → Environment*). See
 | `STRIPE_SECRET_KEY` | standalone paid | Stripe dashboard. Needed for standard payments. |
 | `ANTHROPIC_API_KEY` | optional | Enables the AI analyst. Absent = graceful notice. |
 | `CRON_SECRET` | scheduler | Shared secret for `POST /api/radar/run`. |
+| `ADMIN_SECRET` | optional | Unlocks the private usage registry `GET /api/admin/visitors`. Unset ⇒ the endpoint returns 503 and no one can read it. |
 | `PRICE_PRO_PI` / `PRICE_PRO_USD` | optional | Change the Pro price in one place. |
 | `ENFORCE_TIERS` | optional | `true` turns on subscription gating. |
 
 Never commit these. Rotate any key that is ever exposed.
+
+### The private usage registry (admin-only)
+
+The app records who reaches it, for the operator's eyes only — it is **never
+shown anywhere in the product**. On open, a fire-and-forget beacon (`/api/visit`)
+lets the server note, into the `visitors` table:
+
+- **signed-in visitors** — one row each: their Pi username (or standalone email),
+  the country the edge resolved, first/last seen and a visit count;
+- **anonymous visitors** — aggregated per country only, with no per-guest
+  identifier or cookie (charter §3: data minimization, no personal tracking).
+
+**No IP address is ever stored** — the country comes from the host's edge geo
+header (`x-vercel-ip-country`, Netlify `x-nf-geo`, Cloudflare `cf-ipcountry`, …),
+read portably in `lib/geo/edge-geo.ts`, so this works unchanged on any host.
+
+Read it with the secret:
+
+```bash
+curl -H "x-admin-secret: $ADMIN_SECRET" https://<your-app>/api/admin/visitors
+curl -H "x-admin-secret: $ADMIN_SECRET" "https://<your-app>/api/admin/visitors?view=country"
+```
+
+The table is under the same RLS lockdown as every other table (RLS on, no
+policies): only the app's service connection can touch it.
 
 ---
 

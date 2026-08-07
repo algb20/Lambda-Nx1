@@ -392,3 +392,54 @@ export const suggestions = pgTable(
     index('suggestions_user_idx').on(t.userId),
   ],
 )
+
+// ── Private usage registry (admin-only; never surfaced in the product) ────────
+
+/**
+ * Who reaches the app, and from which country. This exists so the operator can
+ * answer "who is using Lambda NX, and where from" — it is deliberately NOT shown
+ * anywhere in the product (charter §3: no public exposure of internal detail).
+ *
+ * Data-minimized on purpose:
+ *  - **No IP address is ever stored.** The country is derived from the edge
+ *    provider's geo header (Vercel / Netlify / Cloudflare) and only the coarse
+ *    country (+ optional region) is kept.
+ *  - Signed-in visitors get **one row each**, keyed by their identity, so the
+ *    operator sees a real list of Pi usernames with their country and activity.
+ *  - Anonymous visitors are **aggregated per country** (subjectKey `anon:<cc>`),
+ *    never tracked individually — no per-guest identifier, no cookie for them.
+ *
+ * `subjectKey` is the collapse key: `pi:<uid>`, `user:<userId>` (standalone),
+ * or `anon:<countryCode>`. A repeat visit upserts the same row (bumps count,
+ * refreshes last-seen and country), so the table stays one-row-per-subject.
+ */
+export const visitors = pgTable(
+  'visitors',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    /** Collapse key — one row per subject. See table doc. */
+    subjectKey: text('subject_key').notNull(),
+    /** The signed-in user, when known (null for anonymous / after deletion). */
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+    /** Which auth path this subject arrived on (null for anonymous). */
+    provider: authProviderEnum('provider'),
+    /** Pi username or standalone email snapshot — the human-readable identity. */
+    displayName: text('display_name'),
+    /** ISO-3166 alpha-2, uppercase (e.g. "DE"). Null if the edge gave no geo. */
+    countryCode: char('country_code', { length: 2 }),
+    /** Full country name resolved from the code, for a readable admin list. */
+    countryName: text('country_name'),
+    /** Coarse region/subdivision when the edge provides it (never a city). */
+    region: text('region'),
+    /** How they were using it at last sight (e.g. "pi", "standalone", "guest"). */
+    lastMode: text('last_mode'),
+    visitCount: integer('visit_count').notNull().default(1),
+    firstSeenAt: timestamp('first_seen_at', { withTimezone: true }).notNull().defaultNow(),
+    lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique('visitors_subject_uq').on(t.subjectKey),
+    index('visitors_country_idx').on(t.countryCode),
+    index('visitors_last_seen_idx').on(t.lastSeenAt),
+  ],
+)

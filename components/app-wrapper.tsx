@@ -1,11 +1,12 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { PiAuthProvider, usePiAuth } from "@/contexts/pi-auth-context";
 import { I18nProvider } from "@/lib/i18n";
 import { StandaloneAuthGate } from "./standalone-auth";
 import { AuthLoadingScreen } from "./auth-loading-screen";
 import { shouldBlockApp } from "@/lib/auth/pi-client";
+import { pingVisit } from "@/lib/visit";
 
 /**
  * Pi mode shell.
@@ -21,7 +22,12 @@ import { shouldBlockApp } from "@/lib/auth/pi-client";
  * produced an endless spinner in an ordinary browser.
  */
 function AppContent({ children }: { children: ReactNode }) {
-  const { status, graceElapsed } = usePiAuth();
+  const { status, graceElapsed, userData } = usePiAuth();
+  // Re-ping once Pi sign-in lands, so the visitor's Pi identity is attached to
+  // their (now-known) country in the private registry. De-duped in pingVisit.
+  useEffect(() => {
+    if (userData) pingVisit("pi");
+  }, [userData]);
   if (shouldBlockApp(status, graceElapsed)) return <AuthLoadingScreen />;
   return <>{children}</>;
 }
@@ -37,6 +43,11 @@ function AppContent({ children }: { children: ReactNode }) {
  */
 export function AppWrapper({ children }: { children: ReactNode }) {
   const mode = process.env.NEXT_PUBLIC_AUTH_MODE ?? "pi";
+  // One beacon per open, for everyone (guest included). A signed-in re-ping
+  // happens inside AppContent / the standalone gate once identity is known.
+  useEffect(() => {
+    pingVisit(mode === "standalone" ? "standalone-open" : "open");
+  }, [mode]);
   return (
     <I18nProvider>
       {mode === "standalone" ? (
