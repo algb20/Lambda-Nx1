@@ -46,6 +46,8 @@ interface PiAuthContextType {
   isAuthenticated: boolean;
   /** How the sign-in attempt ended; drives what the shell renders. */
   status: PiAuthStatus;
+  /** True once the shell has waited long enough and should reveal the app. */
+  graceElapsed: boolean;
   authMessage: string;
   piAccessToken: string | null;
   userData: LoginDTO | null;
@@ -82,6 +84,7 @@ const loadPiSDK = (): Promise<void> => {
 
 export function PiAuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<PiAuthStatus>("connecting");
+  const [graceElapsed, setGraceElapsed] = useState(false);
   const [authMessage, setAuthMessage] = useState(piStatusMessage("connecting"));
   const [piAccessToken, setPiAccessToken] = useState<string | null>(null);
   const [userData, setUserData] = useState<LoginDTO | null>(null);
@@ -145,10 +148,15 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     initializePiAndAuthenticate();
+    // Reveal the app once the grace window closes, whatever Pi is doing. The
+    // handshake above keeps running and signs the user in if it lands later.
+    const timer = setTimeout(() => setGraceElapsed(true), PI_TIMEOUTS.grace);
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const continueAsGuest = () => {
+    setGraceElapsed(true);
     setStatus("unavailable");
     setAuthMessage(piStatusMessage("unavailable"));
   };
@@ -156,6 +164,7 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
   const value: PiAuthContextType = {
     isAuthenticated: status === "authenticated",
     status,
+    graceElapsed,
     authMessage,
     piAccessToken,
     userData,

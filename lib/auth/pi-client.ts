@@ -27,11 +27,21 @@ export class PiTimeoutError extends Error {
   }
 }
 
-/** Timeouts per step. Generous enough for a slow phone, short enough to not feel stuck. */
+/**
+ * Timeouts per step. Generous enough for a slow phone, short enough to not feel stuck.
+ *
+ * `grace` is different in kind: it is not a deadline for Pi, it is how long the
+ * shell is willing to hide the product while the handshake runs. Inside Pi
+ * Browser the handshake normally beats it, so the user never sees a flash of
+ * signed-out UI; everywhere else the app appears in well under a second rather
+ * than after a wait for an answer that is never coming. The handshake keeps
+ * running in the background either way and signs the user in whenever it lands.
+ */
 export const PI_TIMEOUTS = {
   sdk: 10_000,
   init: 8_000,
   authenticate: 15_000,
+  grace: 2_500,
 } as const
 
 /**
@@ -92,10 +102,15 @@ export function piStatusMessage(status: PiAuthStatus, detail?: string): string {
 }
 
 /**
- * Whether the app shell should wait. Only the brief connecting phase blocks;
- * every settled outcome — including failure — lets the app render, because the
- * free gateways never needed an account in the first place (charter §1).
+ * Whether the app shell should still hide the product.
+ *
+ * Only an in-flight handshake inside its grace window blocks. Once the grace
+ * window closes the app renders even though Pi has not answered — the free
+ * gateways never needed an account (charter §1), so making every visitor wait
+ * out a handshake that only Pi Browser can complete was never justified.
+ *
+ * Every settled outcome renders immediately, including failure.
  */
-export function shouldBlockApp(status: PiAuthStatus): boolean {
-  return status === 'connecting'
+export function shouldBlockApp(status: PiAuthStatus, graceElapsed = false): boolean {
+  return status === 'connecting' && !graceElapsed
 }

@@ -10,17 +10,19 @@ import { shouldBlockApp } from "@/lib/auth/pi-client";
 /**
  * Pi mode shell.
  *
- * Only the brief connecting phase blocks. Every settled outcome — signed in,
- * no Pi Browser, or an outright failure — renders the app, because the free
- * intelligence gateways never required an account (charter §1) and the
- * signed-out state is already handled by the features that do need one.
+ * The handshake gets a short grace window to finish — long enough that a Pi
+ * Browser user lands straight in a signed-in app, short enough that everyone
+ * else reaches the product almost immediately. After that the app renders
+ * regardless, while the handshake continues in the background.
  *
- * The alternative, gating the whole product behind a sign-in that cannot
- * complete outside Pi Browser, is what produced an endless spinner.
+ * The free intelligence gateways never required an account (charter §1), and
+ * the features that do need one already handle the signed-out case. Gating the
+ * whole product behind a sign-in that only Pi Browser can complete is what
+ * produced an endless spinner in an ordinary browser.
  */
 function AppContent({ children }: { children: ReactNode }) {
-  const { status } = usePiAuth();
-  if (shouldBlockApp(status)) return <AuthLoadingScreen />;
+  const { status, graceElapsed } = usePiAuth();
+  if (shouldBlockApp(status, graceElapsed)) return <AuthLoadingScreen />;
   return <>{children}</>;
 }
 
