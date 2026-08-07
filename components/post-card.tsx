@@ -1,0 +1,69 @@
+'use client'
+
+import { useState } from 'react'
+import { Heart } from 'lucide-react'
+import { Card } from '@/components/ui/card'
+import { Watermarked } from '@/components/watermark'
+import { PostShareBar } from '@/components/post-share-bar'
+import { api } from '@/lib/api'
+import type { PublicPost } from '@/lib/posts'
+
+/** One published item in the feed: content, λ watermark, like + share/copy/download. */
+export function PostCard({ post }: { post: PublicPost }) {
+  const [likes, setLikes] = useState(post.likeCount)
+  const [liked, setLiked] = useState(false)
+  const permalink = typeof window !== 'undefined' ? `${window.location.origin}/p/${post.id}` : `/p/${post.id}`
+  const date = new Date(post.createdAt).toISOString().slice(0, 10)
+
+  async function like() {
+    if (liked) return
+    setLiked(true)
+    setLikes((n) => n + 1)
+    try {
+      const { data } = await api.post<{ post: PublicPost }>(`/api/posts/${post.id}?action=like`)
+      if (data?.post) setLikes(data.post.likeCount)
+    } catch {
+      // Roll back on failure so the count stays honest.
+      setLiked(false)
+      setLikes((n) => Math.max(0, n - 1))
+    }
+  }
+
+  return (
+    <Card className="p-4">
+      <Watermarked>
+        <div className="mb-1 flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="rounded bg-muted px-1.5 py-0.5 uppercase tracking-wide">{post.kind}</span>
+          <span>{date}</span>
+          {post.author ? <span>· {post.author}</span> : null}
+        </div>
+        <a href={`/p/${post.id}`} className="block">
+          <h3 className="text-base font-semibold leading-snug hover:underline">{post.title}</h3>
+        </a>
+        <p className="mt-1.5 line-clamp-4 whitespace-pre-wrap text-sm text-foreground/85">{post.body}</p>
+        {post.sourceUrl ? (
+          <a
+            href={post.sourceUrl}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="mt-2 inline-block break-all text-xs text-primary underline"
+          >
+            {post.sourceUrl}
+          </a>
+        ) : null}
+      </Watermarked>
+
+      <div className="mt-3 flex items-center justify-between">
+        <button
+          onClick={like}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-rose-500"
+          aria-pressed={liked}
+        >
+          <Heart className={`h-4 w-4 ${liked ? 'fill-rose-500 text-rose-500' : ''}`} />
+          {likes > 0 ? likes : ''}
+        </button>
+        <PostShareBar post={post} permalink={permalink} />
+      </div>
+    </Card>
+  )
+}

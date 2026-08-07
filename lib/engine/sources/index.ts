@@ -37,6 +37,8 @@ import { nominatim, opensky } from './geo'
 import { openalex, crossref, githubTrend, arxiv, hackerNews } from './research'
 // Internal Radar — standing ⭐ watch feeds
 import { cisaKev, cisaAdvisories, huggingfacePapers, arxivWatch, watchSources } from './watch'
+// Gateway — Daily global trending
+import { wikipediaTrending, wikimediaPageviews, trendingSources } from './trending'
 
 export const moduleOneSources: Source[] = [
   cloudflareDns,
@@ -76,6 +78,8 @@ export const researchGatewaySources: Source[] = [openalex, crossref, githubTrend
 export const referenceGatewaySources: Source[] = [wikidata]
 
 export const watchFeedSources: Source[] = watchSources
+
+export const trendingGatewaySources: Source[] = trendingSources
 
 interface CatalogRow {
   key: string
@@ -167,6 +171,11 @@ export const watchFeedCatalog: CatalogRow[] = [
   { key: 'arxiv_watch', name: 'arXiv category frontier (cs.AI/CR/DC/LG)', capability: 'watch', passive: true, enabled: true },
 ]
 
+export const trendingGatewayCatalog: CatalogRow[] = [
+  { key: 'wikipedia_trending', name: 'Wikipedia most-read (daily trending)', capability: 'trending', passive: true, enabled: true },
+  { key: 'wikimedia_pageviews', name: 'Wikimedia pageviews (top viewed)', capability: 'trending', passive: true, enabled: true },
+]
+
 export const allSourceCatalog: CatalogRow[] = [
   ...moduleOneSourceCatalog,
   ...moduleTwoSourceCatalog,
@@ -181,6 +190,7 @@ export const allSourceCatalog: CatalogRow[] = [
   ...researchGatewayCatalog,
   ...referenceGatewayCatalog,
   ...watchFeedCatalog,
+  ...trendingGatewayCatalog,
 ]
 
 let registeredOne = false
@@ -275,6 +285,13 @@ export function registerWatchFeeds(): void {
   registeredWatch = true
 }
 
+let registeredTrending = false
+export function registerTrendingGateway(): void {
+  if (registeredTrending) return
+  registry.registerAll(trendingGatewaySources)
+  registeredTrending = true
+}
+
 export function registerAllSources(): void {
   registerModuleOneSources()
   registerModuleTwoSources()
@@ -289,6 +306,7 @@ export function registerAllSources(): void {
   registerResearchGateway()
   registerReferenceGateway()
   registerWatchFeeds()
+  registerTrendingGateway()
 }
 
 export {

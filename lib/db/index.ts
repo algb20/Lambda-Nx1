@@ -33,6 +33,10 @@ export type OntologyNode = typeof s.ontologyNodes.$inferSelect
 export type OntologyEdge = typeof s.ontologyEdges.$inferSelect
 export type CalibrationClaim = typeof s.calibrationClaims.$inferSelect
 export type NewCalibrationClaim = typeof s.calibrationClaims.$inferInsert
+export type Visitor = typeof s.visitors.$inferSelect
+export type NewVisitor = typeof s.visitors.$inferInsert
+export type Post = typeof s.posts.$inferSelect
+export type NewPost = typeof s.posts.$inferInsert
 
 export const repo = {
   users: {
@@ -467,6 +471,116 @@ export const repo = {
       if (ids.length === 0) return []
       const db = getDb()
       return db.select().from(s.ontologyNodes).where(inArray(s.ontologyNodes.id, ids))
+    },
+  },
+
+  visitors: {
+    /**
+     * Record one access. Upserts on subjectKey so each subject is a single row:
+     * a repeat visit bumps the count and refreshes country + last-seen. Never
+     * exposed in the product — read only through the admin API.
+     */
+    async record(input: {
+      subjectKey: string
+      userId?: string | null
+      provider?: 'pi' | 'standalone' | null
+      displayName?: string | null
+      countryCode?: string | null
+      countryName?: string | null
+      region?: string | null
+      lastMode?: string | null
+      at?: Date
+    }): Promise<void> {
+      const db = getDb()
+      const at = input.at ?? new Date()
+      await db
+        .insert(s.visitors)
+        .values({
+          subjectKey: input.subjectKey,
+          userId: input.userId ?? null,
+          provider: input.provider ?? null,
+          displayName: input.displayName ?? null,
+          countryCode: input.countryCode ?? null,
+          countryName: input.countryName ?? null,
+          region: input.region ?? null,
+          lastMode: input.lastMode ?? null,
+          firstSeenAt: at,
+          lastSeenAt: at,
+        })
+        .onConflictDoUpdate({
+          target: s.visitors.subjectKey,
+          set: {
+            visitCount: sql`${s.visitors.visitCount} + 1`,
+            lastSeenAt: at,
+            // Refresh identity/location on each visit, but never overwrite a
+            // known value with a null (a later visit missing geo shouldn't wipe it).
+            userId: sql`coalesce(excluded.user_id, ${s.visitors.userId})`,
+            provider: sql`coalesce(excluded.provider, ${s.visitors.provider})`,
+            displayName: sql`coalesce(excluded.display_name, ${s.visitors.displayName})`,
+            countryCode: sql`coalesce(excluded.country_code, ${s.visitors.countryCode})`,
+            countryName: sql`coalesce(excluded.country_name, ${s.visitors.countryName})`,
+            region: sql`coalesce(excluded.region, ${s.visitors.region})`,
+            lastMode: sql`coalesce(excluded.last_mode, ${s.visitors.lastMode})`,
+          },
+        })
+    },
+    /** The full registry for the operator, most-recently-active first. */
+    async list(limit = 1000): Promise<Visitor[]> {
+      const db = getDb()
+      return db.select().from(s.visitors).orderBy(desc(s.visitors.lastSeenAt)).limit(limit)
+    },
+    /** Visitors-per-country roll-up (identified rows + anonymous aggregates). */
+    async byCountry(): Promise<Array<{ countryCode: string | null; countryName: string | null; subjects: number; visits: number }>> {
+      const db = getDb()
+      return db
+        .select({
+          countryCode: s.visitors.countryCode,
+          countryName: s.visitors.countryName,
+          subjects: sql<number>`count(*)::int`,
+          visits: sql<number>`coalesce(sum(${s.visitors.visitCount}), 0)::int`,
+        })
+        .from(s.visitors)
+        .groupBy(s.visitors.countryCode, s.visitors.countryName)
+        .orderBy(desc(sql`sum(${s.visitors.visitCount})`))
+    },
+  },
+
+  posts: {
+    async create(input: NewPost): Promise<Post> {
+      const db = getDb()
+      const [row] = await db.insert(s.posts).values(input).returning()
+      return row
+    },
+    async getById(id: string): Promise<Post | undefined> {
+      const db = getDb()
+      const [row] = await db.select().from(s.posts).where(eq(s.posts.id, id)).limit(1)
+      return row
+    },
+    /** The public feed, newest first. Unlisted posts are reachable only by link. */
+    async listPublic(limit = 50, before?: Date): Promise<Post[]> {
+      const db = getDb()
+      const where = before
+        ? and(eq(s.posts.visibility, 'public'), lte(s.posts.createdAt, before))
+        : eq(s.posts.visibility, 'public')
+      return db.select().from(s.posts).where(where).orderBy(desc(s.posts.createdAt)).limit(limit)
+    },
+    async listByUser(userId: string, limit = 50): Promise<Post[]> {
+      const db = getDb()
+      return db
+        .select()
+        .from(s.posts)
+        .where(eq(s.posts.authorUserId, userId))
+        .orderBy(desc(s.posts.createdAt))
+        .limit(limit)
+    },
+    async like(id: string): Promise<Post | undefined> {
+      const db = getDb()
+      const [row] = await db
+        .update(s.posts)
+        .set({ likeCount: sql`${s.posts.likeCount} + 1` })
+        .where(eq(s.posts.id, id))
+        .returning()
+      return row
     },
   },
 

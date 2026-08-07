@@ -2,9 +2,10 @@
 
 import { useState } from "react"
 
-import { Moon, Sun, Radar, ShieldCheck, CreditCard, Languages, UserCircle2 } from "lucide-react"
+import { Moon, Sun, ShieldCheck, CreditCard, Languages, UserCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { BrandMark } from "@/components/brand-mark"
 import { useTheme } from "@/hooks/use-theme"
 import { useI18n, LOCALES, LOCALE_LABELS } from "@/lib/i18n"
 import { usePiAuthOptional } from "@/contexts/pi-auth-context"
@@ -24,7 +25,7 @@ export function Header() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="relative">
-              <Radar className="h-6 w-6 text-primary" />
+              <BrandMark size={24} title="Lambda NX" className="text-primary" />
               <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-card" />
             </div>
             <div>

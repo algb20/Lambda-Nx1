@@ -79,6 +79,11 @@ export const investigationStatusEnum = pgEnum('investigation_status', ['open', '
 export const monitorStatusEnum = pgEnum('monitor_status', ['active', 'paused'])
 export const radarKindEnum = pgEnum('radar_kind', ['internal', 'product'])
 
+/** A published item's kind: free-form post, a shared dossier, or a spotted signal. */
+export const postKindEnum = pgEnum('post_kind', ['post', 'research', 'signal'])
+/** Public = discoverable in the feed; unlisted = reachable only by its link. */
+export const postVisibilityEnum = pgEnum('post_visibility', ['public', 'unlisted'])
+
 // ── Identity ─────────────────────────────────────────────────────────────────
 
 export const users = pgTable(
@@ -390,5 +395,96 @@ export const suggestions = pgTable(
     index('suggestions_status_idx').on(t.status),
     index('suggestions_cluster_idx').on(t.clusterKey),
     index('suggestions_user_idx').on(t.userId),
+  ],
+)
+
+// ── Private usage registry (admin-only; never surfaced in the product) ────────
+
+/**
+ * Who reaches the app, and from which country. This exists so the operator can
+ * answer "who is using Lambda NX, and where from" — it is deliberately NOT shown
+ * anywhere in the product (charter §3: no public exposure of internal detail).
+ *
+ * Data-minimized on purpose:
+ *  - **No IP address is ever stored.** The country is derived from the edge
+ *    provider's geo header (Vercel / Netlify / Cloudflare) and only the coarse
+ *    country (+ optional region) is kept.
+ *  - Signed-in visitors get **one row each**, keyed by their identity, so the
+ *    operator sees a real list of Pi usernames with their country and activity.
+ *  - Anonymous visitors are **aggregated per country** (subjectKey `anon:<cc>`),
+ *    never tracked individually — no per-guest identifier, no cookie for them.
+ *
+ * `subjectKey` is the collapse key: `pi:<uid>`, `user:<userId>` (standalone),
+ * or `anon:<countryCode>`. A repeat visit upserts the same row (bumps count,
+ * refreshes last-seen and country), so the table stays one-row-per-subject.
+ */
+export const visitors = pgTable(
+  'visitors',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    /** Collapse key — one row per subject. See table doc. */
+    subjectKey: text('subject_key').notNull(),
+    /** The signed-in user, when known (null for anonymous / after deletion). */
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+    /** Which auth path this subject arrived on (null for anonymous). */
+    provider: authProviderEnum('provider'),
+    /** Pi username or standalone email snapshot — the human-readable identity. */
+    displayName: text('display_name'),
+    /** ISO-3166 alpha-2, uppercase (e.g. "DE"). Null if the edge gave no geo. */
+    countryCode: char('country_code', { length: 2 }),
+    /** Full country name resolved from the code, for a readable admin list. */
+    countryName: text('country_name'),
+    /** Coarse region/subdivision when the edge provides it (never a city). */
+    region: text('region'),
+    /** How they were using it at last sight (e.g. "pi", "standalone", "guest"). */
+    lastMode: text('last_mode'),
+    visitCount: integer('visit_count').notNull().default(1),
+    firstSeenAt: timestamp('first_seen_at', { withTimezone: true }).notNull().defaultNow(),
+    lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique('visitors_subject_uq').on(t.subjectKey),
+    index('visitors_country_idx').on(t.countryCode),
+    index('visitors_last_seen_idx').on(t.lastSeenAt),
+  ],
+)
+
+// ── Publishing (the home feed: posts, shared research, spotted signals) ───────
+
+/**
+ * A published item. Publishing happens on the app itself; each post has a stable
+ * public permalink so it can be shared outside the app and drive discovery.
+ *
+ * The author's display name is snapshotted so a post keeps its byline even if the
+ * account is later deleted (the FK then nulls, the post survives — like
+ * suggestions). Evidence/dossier posts carry a source link so the claim always
+ * traces back (charter §1).
+ */
+export const posts = pgTable(
+  'posts',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    authorUserId: uuid('author_user_id').references(() => users.id, { onDelete: 'set null' }),
+    /** Byline snapshot (Pi username / email) — survives account deletion. */
+    authorName: text('author_name'),
+    kind: postKindEnum('kind').notNull().default('post'),
+    title: text('title').notNull(),
+    body: text('body').notNull(),
+    /** Origin link for research/signal posts, so every claim is traceable. */
+    sourceUrl: text('source_url'),
+    /** Optional gateway/subject this was published from (for "open in app"). */
+    refType: text('ref_type'),
+    refValue: text('ref_value'),
+    /** BCP-47 language of the post body, for i18n display. */
+    locale: text('locale'),
+    visibility: postVisibilityEnum('visibility').notNull().default('public'),
+    /** Lightweight engagement counters (reactions table lands with the social layer). */
+    likeCount: integer('like_count').notNull().default(0),
+    repostCount: integer('repost_count').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('posts_visibility_created_idx').on(t.visibility, t.createdAt),
+    index('posts_author_idx').on(t.authorUserId),
   ],
 )

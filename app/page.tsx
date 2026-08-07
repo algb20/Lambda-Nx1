@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { XLikeFeed } from "@/components/x-like-feed"
+import { HomeFeed } from "@/components/home-feed"
 import { PersonalDashboard } from "@/components/personal-dashboard"
 import { EnterpriseDashboard } from "@/components/enterprise-dashboard"
 import { IntelligenceDashboard } from "@/components/intelligence-dashboard"
@@ -41,7 +41,7 @@ export default function HomePage() {
       */}
       <main className="container mx-auto px-4 py-4 max-w-2xl">
         <ErrorBoundary key={activeTab} label={TAB_LABELS[activeTab]}>
-          {activeTab === "feed" && <XLikeFeed onNavigate={setActiveTab} />}
+          {activeTab === "feed" && <HomeFeed onNavigate={setActiveTab} />}
           {activeTab === "globe" && <GlobeView />}
           {activeTab === "personal" && <PersonalDashboard />}
           {activeTab === "enterprise" && <EnterpriseDashboard />}

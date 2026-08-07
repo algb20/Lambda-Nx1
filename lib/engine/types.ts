@@ -34,6 +34,7 @@ export type Capability =
   | 'economy'
   | 'reference'
   | 'watch'
+  | 'trending'
 
 export type EntityType =
   | 'domain'
