@@ -1410,8 +1410,21 @@ export function IntelligenceDashboard() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold">Intelligence</h2>
+      <div className="flex items-baseline justify-between gap-2">
+        <h2 className="text-xl font-bold">Intelligence</h2>
+        <span className="text-[11px] text-muted-foreground">{MODES.length} gateways</span>
+      </div>
 
+      {/*
+        Every gateway is named, at every screen size.
+
+        The labels used to be `hidden sm:inline`, which on a phone — where most
+        of this app is used — collapsed sixteen gateways into sixteen unlabelled
+        icons crammed into one row. The whole product was there and unfindable:
+        News, Research, Markets and the rest were invisible unless you guessed
+        an icon. Wrapping named chips costs two extra rows and makes the range
+        of the platform legible at a glance.
+      */}
       <div className="flex flex-wrap gap-1 rounded-lg bg-muted/50 p-1">
         {MODES.map((m) => {
           const Icon = m.icon
@@ -1420,13 +1433,14 @@ export function IntelligenceDashboard() {
             <button
               key={m.id}
               onClick={() => switchMode(m.id)}
-              title={m.label}
-              className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors ${
+              title={m.placeholder}
+              aria-pressed={isActive}
+              className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors ${
                 isActive ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <Icon className="h-4 w-4 shrink-0" />
-              <span className="hidden sm:inline">{m.label}</span>
+              <span>{m.label}</span>
             </button>
           )
         })}
