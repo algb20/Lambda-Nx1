@@ -15,18 +15,46 @@
 These unlock the product for every persona in the evaluation. None needs a new
 data source.
 
+> **Decisions taken (from the operator, this cycle):**
+> - Translation: **use the free path now**, refine later. No paid Google key —
+>   our reviewed dictionaries drive the interface; a free/self-hosted engine
+>   covers only user-generated overflow; evidence text is never machine-translated.
+> - Publishing: **on the app itself**, each post shareable outside via a
+>   **copy-link**, plus copy/download of the post or research.
+> - The posts/events/news page **becomes the home page** on open.
+> - **Watermark = the lambda symbol alone (λ), no text** — the real app mark — on
+>   research, posts, images and video.
+> - Add **daily global trending / most-searched** — real, radar-driven, top 5–10.
+
+### 1.0 Private usage registry (operator-only) ✅ DONE
+One row per signed-in user (Pi username + real country + activity), anonymous
+aggregated per country, no IP stored, admin-only behind `ADMIN_SECRET`, never
+shown in the product. Live on the database. See `docs/DEPLOY.md`.
+
 ### 1.1 Finish the translation (⚠️ correcting a real gap)
 Seven dictionaries exist; **only 5 of 21 components use them**. Sixteen
 components are hardcoded English, which is why the app looks untranslated.
 
 - Wire every component through `t()`
 - Extract every hardcoded string into the dictionaries
-- **Google Translate for the long tail** — the user's explicit request. Needs a
-  decision (see *Open questions*) because it costs money and, applied naively,
-  would also translate evidence, which the charter forbids. Proposed shape: our
-  reviewed dictionaries drive the interface; Google covers user-generated and
-  overflow text only; evidence text is never machine-translated, only labelled
-  with its original language.
+- **Free translation for the long tail** (operator chose the free path): our
+  reviewed dictionaries drive the interface; a free/self-hosted engine covers
+  user-generated and overflow text only; evidence text is never
+  machine-translated, only labelled with its original language.
+
+### 1.6 Home = the publishing page *(requested)*
+The posts / events / top-news page is the first thing on open. Publishing
+happens on the app itself; each post carries a **copy-link** and can be shared
+outside the app, plus copy/download of the post or the underlying research.
+
+### 1.7 The λ watermark *(requested)*
+Our signature is the lambda symbol alone — no text — applied to exported
+research, posts, generated images and video frames.
+
+### 1.8 Daily global trending *(requested)*
+A real, radar-driven surface of what the world is searching each day: pull from
+free public signals (Google Trends daily RSS, Wikipedia pageview spikes, GDELT),
+score them, and spotlight the 5–10 that deserve it. No fabricated ranking.
 
 ### 1.2 Export & share — the adoption unlock
 - PDF dossier with our grading, sources and timestamps
@@ -145,19 +173,17 @@ autonomous. Publishing an error automatically is worse than publishing nothing.
 
 ---
 
-## Open questions — I need answers to proceed
+## Open questions
 
-1. **Google Translate API key.** Cloud Translation needs a billed key. Options:
-   (a) you provide a key, (b) I use a free self-hosted engine with lower
-   quality, (c) we expand our own reviewed dictionaries only. Which?
-2. **Social publishing accounts.** Auto-publishing needs API access for each
-   network (X, Telegram, LinkedIn…). Which do you have, and under which account
-   should we post?
-3. **Your earlier research.** It was raised in conversation and lost to
-   compaction. Please add it to `docs/RESEARCH/` in the repository — then it is
-   permanent, and I will mine it properly into this roadmap.
-4. **Priority.** Wave 1 is the highest leverage per hour. Confirm, or name a
-   different starting point.
+1. ~~**Google Translate API key.**~~ **Resolved:** use the free path now, refine
+   later — no paid key. Dictionaries drive the UI; a free engine covers only
+   user overflow; evidence is never machine-translated.
+2. **Social publishing accounts.** Auto-publishing (Wave 5) needs API access for
+   each network (X, Telegram, LinkedIn…). Which do you have, and under which
+   account should we post? *Until then, publishing is on-app + copy-link + share
+   (Wave 1.6), which needs no external account.*
+3. **Your earlier research.** Still worth adding to `docs/RESEARCH/` so it
+   survives compaction and I can mine it into this roadmap.
 
 ---
 
