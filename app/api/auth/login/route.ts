@@ -1,30 +1,46 @@
 import { NextResponse } from 'next/server'
-import { loginUser } from '@/lib/auth/standalone'
+import { classifyIdentifier, loginUser } from '@/lib/auth/standalone'
 import { defaultStandaloneDeps } from '@/lib/auth/standalone-deps'
 import { attachSession } from '@/lib/auth/cookie'
 
-/** POST /api/auth/login { email, password } — standalone (off-Pi) sign-in. */
+/**
+ * POST /api/auth/login { identifier, password } — off-Pi sign-in.
+ *
+ * `identifier` is either an email address or a Pi Network username; we work out
+ * which. A Pi username only works once its owner has claimed it from inside the
+ * Pi Browser (see /api/auth/pi/claim), so typing someone else's username gets
+ * you nowhere.
+ */
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
-  let body: { email?: unknown; password?: unknown }
+  let body: { identifier?: unknown; email?: unknown; password?: unknown }
   try {
     body = await request.json()
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
-  const email = typeof body.email === 'string' ? body.email : ''
+  const identifier =
+    typeof body.identifier === 'string'
+      ? body.identifier
+      : typeof body.email === 'string'
+        ? body.email
+        : ''
   const password = typeof body.password === 'string' ? body.password : ''
 
   try {
-    const { userId } = await loginUser(email, password, defaultStandaloneDeps)
-    const res = NextResponse.json({ id: userId, username: email.trim().toLowerCase() })
+    const { userId } = await loginUser(identifier, password, defaultStandaloneDeps)
+    const id = classifyIdentifier(identifier)
+    const res = NextResponse.json({
+      id: userId,
+      username: id.kind === 'invalid' ? identifier.trim() : id.value,
+    })
     attachSession(res, userId)
     return res
   } catch (err) {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Login failed' },
+      { error: err instanceof Error ? err.message : 'Sign-in failed' },
       { status: 401 },
     )
   }

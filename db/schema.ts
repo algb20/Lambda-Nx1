@@ -101,7 +101,13 @@ export const users = pgTable(
   (t) => [unique('users_provider_external_uq').on(t.authProvider, t.externalId)],
 )
 
-// ── Standalone credentials (email + password, off-Pi mode) ───────────────────
+// ── Password credentials (off-Pi sign-in) ────────────────────────────────────
+//
+// One row per user, reachable by either identifier. `email` belongs to accounts
+// created with email + password; `piUsername` is set only when a Pi-verified
+// user claims their own username through the Pi SDK, which is what lets them
+// sign in outside the Pi Browser without anyone being able to claim a username
+// they do not own. Both are nullable — a row needs at least one, not both.
 
 export const credentials = pgTable('credentials', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -109,7 +115,9 @@ export const credentials = pgTable('credentials', {
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' })
     .unique(),
-  email: text('email').notNull().unique(),
+  email: text('email').unique(),
+  /** Set only after Pi SDK verification proved this user owns the username. */
+  piUsername: text('pi_username').unique(),
   /** scrypt hash as "saltHex:hashHex" — never a plaintext password. */
   passwordHash: text('password_hash').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

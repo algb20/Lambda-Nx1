@@ -80,9 +80,49 @@ export const repo = {
         .limit(1)
       return row
     },
+    async getByPiUsername(piUsername: string): Promise<Credential | undefined> {
+      const db = getDb()
+      const [row] = await db
+        .select()
+        .from(s.credentials)
+        .where(eq(s.credentials.piUsername, piUsername))
+        .limit(1)
+      return row
+    },
+    async getByUserId(userId: string): Promise<Credential | undefined> {
+      const db = getDb()
+      const [row] = await db
+        .select()
+        .from(s.credentials)
+        .where(eq(s.credentials.userId, userId))
+        .limit(1)
+      return row
+    },
     async create(input: { userId: string; email: string; passwordHash: string }): Promise<Credential> {
       const db = getDb()
       const [row] = await db.insert(s.credentials).values(input).returning()
+      return row
+    },
+    /**
+     * Link a Pi username + passphrase to a user. A Pi user may have no
+     * credential row yet (they have only ever signed in through the SDK), or may
+     * be replacing the passphrase on an existing one — both are one upsert on
+     * the unique user_id.
+     */
+    async upsertPiCredential(input: {
+      userId: string
+      piUsername: string
+      passwordHash: string
+    }): Promise<Credential> {
+      const db = getDb()
+      const [row] = await db
+        .insert(s.credentials)
+        .values(input)
+        .onConflictDoUpdate({
+          target: s.credentials.userId,
+          set: { piUsername: input.piUsername, passwordHash: input.passwordHash },
+        })
+        .returning()
       return row
     },
   },

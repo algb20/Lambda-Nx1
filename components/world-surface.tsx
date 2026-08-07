@@ -49,11 +49,22 @@ const MAX_ZOOM = 8
 const clampZoom = (z: number) => Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z))
 const clampTilt = (t: number) => Math.max(-1.2, Math.min(1.2, t))
 
+/**
+ * One palette for both projections — the flat map is the globe's colour scheme
+ * on a different transform, not a second look. Deep navy ocean, land raised out
+ * of it, and coastlines lit in cyan: the point is that an operator can read
+ * shape and edge instantly at a glance, in a room that is usually dark.
+ */
 const OCEAN_INNER = '#0b1f33'
-const OCEAN_OUTER = '#050b14'
-const LAND_FILL = 'rgba(37, 82, 116, 0.85)'
-const LAND_STROKE = 'rgba(125, 211, 252, 0.55)'
-const GRATICULE = 'rgba(56, 189, 248, 0.14)'
+const OCEAN_OUTER = '#04090f'
+const LAND_TOP = '#2a608a'
+const LAND_BOTTOM = '#1a3d5c'
+/** Coastlines are drawn twice: a wide faint bloom, then a fine bright edge. */
+const COAST_GLOW = 'rgba(56, 189, 248, 0.20)'
+const COAST_EDGE = 'rgba(147, 220, 255, 0.75)'
+const GRATICULE = 'rgba(56, 189, 248, 0.10)'
+/** The equator and prime meridian carry the map's frame of reference. */
+const GRATICULE_AXIS = 'rgba(56, 189, 248, 0.30)'
 const POINT_DEFAULT = '#34d399'
 
 interface Camera {
@@ -224,47 +235,73 @@ export function WorldSurface({
       }
       const zoom = isGlobe ? cam.globe.zoom : cam.map.zoom
       const step = zoom > 2.5 ? 15 : 30
-      ctx.strokeStyle = GRATICULE
       ctx.lineWidth = 1
       for (let lon = -180; lon <= 180; lon += step) {
+        if (lon === 0) continue
         const s: Array<[number, number]> = []
         for (let lat = -90; lat <= 90; lat += 3) s.push([lat, lon])
+        ctx.strokeStyle = GRATICULE
         traceLine(s)
       }
       for (let lat = -60; lat <= 60; lat += step) {
+        if (lat === 0) continue
         const s: Array<[number, number]> = []
         for (let lon = -180; lon <= 180; lon += 3) s.push([lat, lon])
+        ctx.strokeStyle = GRATICULE
         traceLine(s)
       }
+      // The equator and the prime meridian are the frame everything else is read
+      // against, so they are drawn brighter than the rest of the grid.
+      ctx.strokeStyle = GRATICULE_AXIS
+      const equator: Array<[number, number]> = []
+      for (let lon = -180; lon <= 180; lon += 3) equator.push([0, lon])
+      traceLine(equator)
+      const meridian: Array<[number, number]> = []
+      for (let lat = -90; lat <= 90; lat += 3) meridian.push([lat, 0])
+      traceLine(meridian)
 
       // ---- Countries --------------------------------------------------------
       // Filled with the visible vertices only. On the globe a ring straddling the
       // limb therefore closes along the horizon chord, which is what the eye
       // expects; nothing is ever drawn on the hidden hemisphere.
-      ctx.lineWidth = zoom > 3 ? 1 : 0.8
-      ctx.strokeStyle = LAND_STROKE
-      ctx.fillStyle = LAND_FILL
+      //
+      // Land is collected into one path per pass so the fill and the two
+      // coastline strokes each cost a single canvas operation instead of one per
+      // country — the difference between a smooth 60fps and a stuttering globe.
+      const landPath = new Path2D()
       for (const shape of ATLAS) {
         for (const ring of shape.rings) {
-          ctx.beginPath()
           let started = false
           let drawn = 0
           for (let i = 0; i < ring.coords.length; i += 2) {
             const p = project(ring.coords[i + 1], ring.coords[i])
             if (!p.visible) continue
-            if (started) ctx.lineTo(p.x, p.y)
+            if (started) landPath.lineTo(p.x, p.y)
             else {
-              ctx.moveTo(p.x, p.y)
+              landPath.moveTo(p.x, p.y)
               started = true
             }
             drawn++
           }
-          if (drawn < 3) continue
-          ctx.closePath()
-          ctx.fill()
-          ctx.stroke()
+          if (drawn >= 3) landPath.closePath()
         }
       }
+
+      const landTop = isGlobe ? cy - R : mapFrame(cam.map, viewport).top
+      const landHeight = isGlobe ? R * 2 : mapFrame(cam.map, viewport).h
+      const landFill = ctx.createLinearGradient(0, landTop, 0, landTop + landHeight)
+      landFill.addColorStop(0, LAND_TOP)
+      landFill.addColorStop(1, LAND_BOTTOM)
+      ctx.fillStyle = landFill
+      ctx.fill(landPath)
+      // Bloom first, then the fine edge on top: coastlines read as lit rather
+      // than outlined.
+      ctx.strokeStyle = COAST_GLOW
+      ctx.lineWidth = zoom > 3 ? 4 : 2.5
+      ctx.stroke(landPath)
+      ctx.strokeStyle = COAST_EDGE
+      ctx.lineWidth = zoom > 3 ? 1.1 : 0.7
+      ctx.stroke(landPath)
 
       // ---- Arcs -------------------------------------------------------------
       if (arcSamples.length > 0) {
@@ -322,7 +359,73 @@ export function WorldSurface({
       }
       plottedRef.current = plotted
 
+      // ---- Depth pass -------------------------------------------------------
+      // Still inside the clip: a vignette sinks the edges so the eye is pulled to
+      // the centre of the surface rather than to its border.
+      if (isGlobe) {
+        const vignette = ctx.createRadialGradient(cx, cy, R * 0.55, cx, cy, R)
+        vignette.addColorStop(0, 'rgba(0,0,0,0)')
+        // Enough to round the sphere, not enough to bury a country's shape.
+        vignette.addColorStop(1, 'rgba(0,0,0,0.28)')
+        ctx.fillStyle = vignette
+        ctx.beginPath()
+        ctx.arc(cx, cy, R, 0, Math.PI * 2)
+        ctx.fill()
+      } else {
+        const frame = mapFrame(cam.map, viewport)
+        const vignette = ctx.createRadialGradient(
+          frame.left + frame.w / 2,
+          frame.top + frame.h / 2,
+          Math.min(frame.w, frame.h) * 0.35,
+          frame.left + frame.w / 2,
+          frame.top + frame.h / 2,
+          Math.max(frame.w, frame.h) * 0.75,
+        )
+        vignette.addColorStop(0, 'rgba(0,0,0,0)')
+        // Lighter than the globe's: a flat map has data all the way to its
+        // edges, and dimming the corners must not hide a signal sitting there.
+        vignette.addColorStop(1, 'rgba(0,0,0,0.3)')
+        ctx.fillStyle = vignette
+        ctx.fillRect(frame.left, frame.top, frame.w, frame.h)
+      }
+
       ctx.restore()
+
+      // ---- Instrument frame -------------------------------------------------
+      // Outside the clip, so it sits on the surface's boundary: a lit rim on the
+      // globe, a measured border on the map. This is the identity of the
+      // product — a reading instrument, not an illustration.
+      if (isGlobe) {
+        const rim = ctx.createRadialGradient(cx, cy, R * 0.96, cx, cy, R * 1.04)
+        rim.addColorStop(0, 'rgba(56,189,248,0)')
+        rim.addColorStop(0.5, 'rgba(125,211,252,0.5)')
+        rim.addColorStop(1, 'rgba(56,189,248,0)')
+        ctx.fillStyle = rim
+        ctx.beginPath()
+        ctx.arc(cx, cy, R * 1.04, 0, Math.PI * 2)
+        ctx.fill()
+      } else {
+        const frame = mapFrame(cam.map, viewport)
+        ctx.strokeStyle = 'rgba(125,211,252,0.35)'
+        ctx.lineWidth = 1
+        ctx.strokeRect(frame.left + 0.5, frame.top + 0.5, frame.w - 1, frame.h - 1)
+        // Corner ticks — the convention of a plotted chart.
+        const tick = Math.min(18, frame.w * 0.05)
+        ctx.strokeStyle = 'rgba(125,211,252,0.75)'
+        ctx.lineWidth = 1.5
+        for (const [x, y, dx, dy] of [
+          [frame.left, frame.top, 1, 1],
+          [frame.left + frame.w, frame.top, -1, 1],
+          [frame.left, frame.top + frame.h, 1, -1],
+          [frame.left + frame.w, frame.top + frame.h, -1, -1],
+        ]) {
+          ctx.beginPath()
+          ctx.moveTo(x + dx * tick, y)
+          ctx.lineTo(x, y)
+          ctx.lineTo(x, y + dy * tick)
+          ctx.stroke()
+        }
+      }
 
       if (nearest) {
         if (!hoverRef.current || hoverRef.current.label !== nearest.label) {

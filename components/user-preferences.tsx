@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Slider } from '@/components/ui/slider'
 import { UpgradePanel } from '@/components/upgrade-panel'
+import { PiUsernameLink } from '@/components/pi-username-link'
 
 /**
  * Settings. The previous version advertised fabricated capabilities ("Quantum
@@ -22,6 +23,9 @@ export function UserPreferences() {
       {/* Plan and billing first: it is the one thing on this screen a user
           actively comes here to change. */}
       <UpgradePanel />
+
+      {/* Renders only for Pi-verified accounts. */}
+      <PiUsernameLink />
 
       <div>
         <h2 className="text-xl font-bold">Settings</h2>
