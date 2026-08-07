@@ -9,6 +9,13 @@ import React, {
 } from "react";
 import { PI_NETWORK_CONFIG } from "@/lib/system-config";
 import { api, setApiAuthToken } from "@/lib/api";
+import {
+  PI_TIMEOUTS,
+  classifyPiFailure,
+  piStatusMessage,
+  withTimeout,
+  type PiAuthStatus,
+} from "@/lib/auth/pi-client";
 
 // Our own login endpoint (independent of the App Studio default backend).
 const LOGIN_URL = "/api/auth/pi";
@@ -37,48 +44,58 @@ declare global {
 
 interface PiAuthContextType {
   isAuthenticated: boolean;
+  /** How the sign-in attempt ended; drives what the shell renders. */
+  status: PiAuthStatus;
   authMessage: string;
   piAccessToken: string | null;
   userData: LoginDTO | null;
   reinitialize: () => Promise<void>;
+  /** Stop waiting and use the app without an account. */
+  continueAsGuest: () => void;
 }
 
 const PiAuthContext = createContext<PiAuthContextType | undefined>(undefined);
 
 const loadPiSDK = (): Promise<void> => {
   return new Promise((resolve, reject) => {
-    const script = document.createElement("script");
     if (!PI_NETWORK_CONFIG.SDK_URL) {
-      throw new Error("SDK URL is not set");
+      reject(new Error("SDK URL is not set"));
+      return;
     }
+    // Reuse the tag if a previous attempt already added it.
+    const existing = document.querySelector<HTMLScriptElement>(
+      `script[src="${PI_NETWORK_CONFIG.SDK_URL}"]`
+    );
+    if (existing) {
+      resolve();
+      return;
+    }
+
+    const script = document.createElement("script");
     script.src = PI_NETWORK_CONFIG.SDK_URL;
     script.async = true;
-
-    script.onload = () => {
-      console.log("✅ Pi SDK script loaded successfully");
-      resolve();
-    };
-
-    script.onerror = () => {
-      console.error("❌ Failed to load Pi SDK script");
-      reject(new Error("Failed to load Pi SDK script"));
-    };
-
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load the Pi SDK script"));
     document.head.appendChild(script);
   });
 };
 
 export function PiAuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authMessage, setAuthMessage] = useState("Initializing Pi Network...");
+  const [status, setStatus] = useState<PiAuthStatus>("connecting");
+  const [authMessage, setAuthMessage] = useState(piStatusMessage("connecting"));
   const [piAccessToken, setPiAccessToken] = useState<string | null>(null);
   const [userData, setUserData] = useState<LoginDTO | null>(null);
 
   const authenticateAndLogin = async (): Promise<void> => {
-    setAuthMessage("Authenticating with Pi Network...");
-    const piAuthResult = await window.Pi.authenticate(["username"]);
+    setAuthMessage("Waiting for Pi Browser…");
+    // The step that never settles outside Pi Browser — hence the timeout.
+    const piAuthResult = await withTimeout(
+      window.Pi.authenticate(["username"]),
+      PI_TIMEOUTS.authenticate,
+      "Pi authentication"
+    );
 
-    setAuthMessage("Logging in...");
+    setAuthMessage("Signing in…");
     const loginRes = await api.post<LoginDTO>(LOGIN_URL, {
       pi_auth_token: piAuthResult.accessToken,
     });
@@ -92,45 +109,58 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
   };
 
   const initializePiAndAuthenticate = async () => {
+    setStatus("connecting");
     try {
-      setAuthMessage("Loading Pi Network SDK...");
-
-      // Only load if not already loaded
+      setAuthMessage("Loading the Pi SDK…");
       if (typeof window.Pi === "undefined") {
-        await loadPiSDK();
+        await withTimeout(loadPiSDK(), PI_TIMEOUTS.sdk, "Pi SDK load");
+      }
+      if (typeof window.Pi === "undefined") {
+        throw new Error("Pi SDK loaded but window.Pi is missing");
       }
 
-      if (typeof window.Pi === "undefined") {
-        throw new Error("Pi object not available after script load");
-      }
-
-      setAuthMessage("Initializing Pi Network...");
-      await window.Pi.init({
-        version: "2.0",
-        sandbox: PI_NETWORK_CONFIG.SANDBOX,
-      });
+      setAuthMessage(piStatusMessage("connecting"));
+      await withTimeout(
+        window.Pi.init({ version: "2.0", sandbox: PI_NETWORK_CONFIG.SANDBOX }),
+        PI_TIMEOUTS.init,
+        "Pi init"
+      );
 
       await authenticateAndLogin();
 
-      setIsAuthenticated(true);
+      setStatus("authenticated");
+      setAuthMessage(piStatusMessage("authenticated"));
     } catch (err) {
-      console.error("❌ Pi Network initialization failed:", err);
+      // A timeout means "not inside Pi Browser" — expected, not a failure.
+      const outcome = classifyPiFailure(err);
+      if (outcome === "error") {
+        console.error("Pi Network sign-in failed:", err);
+      }
+      setStatus(outcome);
       setAuthMessage(
-        "Failed to authenticate or login. Please refresh and try again."
+        piStatusMessage(outcome, err instanceof Error ? err.message : undefined)
       );
     }
   };
 
   useEffect(() => {
     initializePiAndAuthenticate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const continueAsGuest = () => {
+    setStatus("unavailable");
+    setAuthMessage(piStatusMessage("unavailable"));
+  };
+
   const value: PiAuthContextType = {
-    isAuthenticated,
+    isAuthenticated: status === "authenticated",
+    status,
     authMessage,
     piAccessToken,
     userData,
     reinitialize: initializePiAndAuthenticate,
+    continueAsGuest,
   };
 
   return (
