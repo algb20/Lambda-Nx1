@@ -327,7 +327,7 @@ export function registerTrendingGateway(): void {
 let registeredWorldEvents = false
 export function registerWorldEventsGateway(): void {
   if (registeredWorldEvents) return
-  registry.registerAll(worldEventSources)
+  registry.registerAll(worldEventsGatewaySources)
   registeredWorldEvents = true
 }
 
