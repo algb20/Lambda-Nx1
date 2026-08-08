@@ -97,15 +97,29 @@ describe('nasaEonet', () => {
     expect(await nasaEonet.run({ capability: 'world_events', value: '' }, ctx)).toEqual([])
   })
 
-  it('returns nothing on a failed or unparseable response', async () => {
+  /**
+   * A provider we could not reach must surface as a failure, not as "no events".
+   * Swallowing it showed a green light on the Source Integrity panel for a feed
+   * that had been blind all day.
+   */
+  it('reports a failed or unparseable response instead of an empty day', async () => {
     ctx.fetch.mockResolvedValue(jsonResponse({}, false))
-    expect(await nasaEonet.run({ capability: 'world_events', value: '' }, ctx)).toEqual([])
+    await expect(nasaEonet.run({ capability: 'world_events', value: '' }, ctx)).rejects.toThrow(
+      /nasa_eonet/,
+    )
     ctx.fetch.mockResolvedValue({
       ok: true,
       json: async () => {
         throw new Error('not json')
       },
     } as unknown as Response)
+    await expect(nasaEonet.run({ capability: 'world_events', value: '' }, ctx)).rejects.toThrow(
+      /not JSON/,
+    )
+  })
+
+  it('still returns an empty list when the feed genuinely has no open events', async () => {
+    ctx.fetch.mockResolvedValue(jsonResponse({ events: [] }))
     expect(await nasaEonet.run({ capability: 'world_events', value: '' }, ctx)).toEqual([])
   })
 })

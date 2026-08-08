@@ -10,6 +10,7 @@
  * All keyless, passive, read-only public endpoints.
  */
 import type { Evidence, Source, SourceContext, SourceInput } from '../types'
+import { expectJson } from '../fetch-guard'
 
 const num = (v: unknown): number | null =>
   typeof v === 'number' && Number.isFinite(v) ? v : null
@@ -83,9 +84,7 @@ export const gdacsAlerts: Source = {
   async run(_input: SourceInput, ctx: SourceContext) {
     const url =
       'https://www.gdacs.org/gdacsapi/api/events/geteventlist/SEARCH?alertlevel=Green;Orange;Red'
-    const res = await ctx.fetch(url)
-    if (!res.ok) return []
-    const j = (await res.json().catch(() => null)) as GdacsResponse | null
+    const j = await expectJson<GdacsResponse>('gdacs', await ctx.fetch(url))
     const features = j?.features ?? []
     const out: Evidence[] = []
     for (const f of features) {
@@ -205,8 +204,7 @@ export const nwsAlerts: Source = {
         Accept: 'application/geo+json',
       },
     })
-    if (!res.ok) return []
-    const j = (await res.json().catch(() => null)) as NwsResponse | null
+    const j = await expectJson<NwsResponse>('nws_alerts', res)
     const features = j?.features ?? []
     const out: Evidence[] = []
     for (const f of features) {
@@ -264,9 +262,10 @@ export const whoOutbreaks: Source = {
   async run(_input: SourceInput, ctx: SourceContext) {
     const url =
       'https://www.who.int/api/news/diseaseoutbreaknews?$orderby=PublicationDateAndTime%20desc&$top=20'
-    const res = await ctx.fetch(url, { headers: { Accept: 'application/json' } })
-    if (!res.ok) return []
-    const j = (await res.json().catch(() => null)) as WhoResponse | null
+    const j = await expectJson<WhoResponse>(
+      'who_outbreaks',
+      await ctx.fetch(url, { headers: { Accept: 'application/json' } }),
+    )
     const items = j?.value ?? []
     return items
       .filter((it) => it.Title)
@@ -303,11 +302,12 @@ export const issPosition: Source = {
   hosts: ['api.wheretheiss.at'],
   minIntervalMs: 3000,
   async run(_input: SourceInput, ctx: SourceContext) {
-    const res = await ctx.fetch('https://api.wheretheiss.at/v1/satellites/25544')
-    if (!res.ok) return []
-    const j = (await res.json().catch(() => null)) as
-      | { latitude?: number; longitude?: number; altitude?: number; velocity?: number }
-      | null
+    const j = await expectJson<{
+      latitude?: number
+      longitude?: number
+      altitude?: number
+      velocity?: number
+    }>('iss_position', await ctx.fetch('https://api.wheretheiss.at/v1/satellites/25544'))
     const c = coord(j?.longitude, j?.latitude)
     if (!c) return []
     const altitude = num(j?.altitude)

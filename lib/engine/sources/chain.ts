@@ -10,6 +10,7 @@
  * Keyless, passive, read-only.
  */
 import type { Evidence, Source, SourceContext, SourceInput } from '../types'
+import { expectJson } from '../fetch-guard'
 
 // ── mempool.space — Bitcoin network state ────────────────────────────────────
 interface RecommendedFees {
@@ -128,9 +129,10 @@ export const coingeckoGlobal: Source = {
   hosts: ['api.coingecko.com'],
   minIntervalMs: 2000,
   async run(_input: SourceInput, ctx: SourceContext) {
-    const res = await ctx.fetch('https://api.coingecko.com/api/v3/global')
-    if (!res.ok) return []
-    const j = (await res.json().catch(() => null)) as GlobalResponse | null
+    const j = await expectJson<GlobalResponse>(
+      'coingecko_global',
+      await ctx.fetch('https://api.coingecko.com/api/v3/global'),
+    )
     const d = j?.data
     if (!d) return []
     const cap = num(d.total_market_cap?.usd)

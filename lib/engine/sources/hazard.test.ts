@@ -203,8 +203,14 @@ describe('whoOutbreaks', () => {
     expect(d.lat).toBeUndefined()
   })
 
-  it('returns nothing when the feed is unavailable', async () => {
+  /** Unreachable is a failure, not an empty day. */
+  it('reports an unavailable feed rather than reporting no outbreaks', async () => {
     const ctx = { fetch: vi.fn(async () => fail()) }
+    await expect(whoOutbreaks.run(input, ctx)).rejects.toThrow(/who_outbreaks/)
+  })
+
+  it('returns an empty list when the feed genuinely carries nothing', async () => {
+    const ctx = { fetch: vi.fn(async () => ok({ value: [] })) }
     expect(await whoOutbreaks.run(input, ctx)).toEqual([])
   })
 })

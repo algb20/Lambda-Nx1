@@ -91,7 +91,11 @@ describe('coingeckoGlobal', () => {
   it('returns nothing when the payload has no usable capitalisation', async () => {
     const ctx = { fetch: vi.fn(async () => ok({ data: { market_cap_percentage: { btc: 50 } } })) }
     expect(await coingeckoGlobal.run(input, ctx)).toEqual([])
+  })
+
+  /** A provider we could not reach is a failure, not a market worth $0. */
+  it('reports an unreachable provider', async () => {
     const bad = { fetch: vi.fn(async () => fail()) }
-    expect(await coingeckoGlobal.run(input, bad)).toEqual([])
+    await expect(coingeckoGlobal.run(input, bad)).rejects.toThrow(/coingecko_global/)
   })
 })

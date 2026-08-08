@@ -16,6 +16,7 @@
  * `chain_state` evidence the radar module consumes.
  */
 import type { Evidence, Source, SourceContext, SourceInput } from '../types'
+import { expectJson } from '../fetch-guard'
 
 const num = (v: unknown): number | null =>
   typeof v === 'number' && Number.isFinite(v) ? v : null
@@ -77,8 +78,7 @@ export const piNetworkChain: Source = {
       'https://api.mainnet.minepi.com/ledgers?order=desc&limit=1',
       { headers: { Accept: 'application/json' } },
     )
-    if (!res.ok) return []
-    const j = (await res.json().catch(() => null)) as HorizonLedgersResponse | null
+    const j = await expectJson<HorizonLedgersResponse>('pi_network', res)
     const ledger = j?._embedded?.records?.[0]
     if (!ledger || typeof ledger.sequence !== 'number') return []
 
@@ -250,9 +250,10 @@ export const exchangeVenues: Source = {
   hosts: ['api.coingecko.com'],
   minIntervalMs: 2500,
   async run(_input: SourceInput, ctx: SourceContext) {
-    const res = await ctx.fetch('https://api.coingecko.com/api/v3/exchanges?per_page=100&page=1')
-    if (!res.ok) return []
-    const rows = (await res.json().catch(() => null)) as CgExchange[] | null
+    const rows = await expectJson<CgExchange[] | null>(
+      'coingecko_exchanges',
+      await ctx.fetch('https://api.coingecko.com/api/v3/exchanges?per_page=100&page=1'),
+    )
     if (!Array.isArray(rows)) return []
     return rows
       .filter((r) => r.name && num(r.trade_volume_24h_btc) !== null)

@@ -10,6 +10,7 @@
  * Both are keyless, passive, read-only public endpoints.
  */
 import type { Evidence, Source, SourceContext, SourceInput } from '../types'
+import { expectJson } from '../fetch-guard'
 
 // ── NASA EONET v3 (natural hazards, exact coordinates) ───────────────────────
 // The Earth Observatory Natural Event Tracker: wildfires, severe storms,
@@ -101,9 +102,7 @@ export const nasaEonet: Source = {
   minIntervalMs: 1500,
   async run(_input: SourceInput, ctx: SourceContext) {
     const url = 'https://eonet.gsfc.nasa.gov/api/v3/events?status=open&days=10&limit=120'
-    const res = await ctx.fetch(url)
-    if (!res.ok) return []
-    const j = (await res.json().catch(() => null)) as EonetResponse | null
+    const j = await expectJson<EonetResponse>('nasa_eonet', await ctx.fetch(url))
     const events = j?.events ?? []
     const out: Evidence[] = []
     for (const ev of events) {
@@ -165,9 +164,7 @@ export const usgsRecentQuakes: Source = {
   minIntervalMs: 2000,
   async run(_input: SourceInput, ctx: SourceContext) {
     const url = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson'
-    const res = await ctx.fetch(url)
-    if (!res.ok) return []
-    const j = (await res.json().catch(() => null)) as UsgsResponse | null
+    const j = await expectJson<UsgsResponse>('usgs_recent', await ctx.fetch(url))
     const features = j?.features ?? []
     const out: Evidence[] = []
     for (const f of features) {
