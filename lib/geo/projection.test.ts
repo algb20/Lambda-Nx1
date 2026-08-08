@@ -5,6 +5,7 @@ import {
   mapFrame,
   projectGlobe,
   projectMap,
+  unprojectGlobe,
   unprojectMap,
 } from './projection'
 
@@ -113,5 +114,52 @@ describe('greatCircle', () => {
 
   it('collapses to a single point when both ends coincide', () => {
     expect(greatCircle({ lat: 10, lon: 10 }, { lat: 10, lon: 10 })).toHaveLength(1)
+  })
+})
+
+describe('unprojectGlobe — the coordinate under the cursor', () => {
+  const viewport = { width: 400, height: 400 }
+
+  it('round-trips a coordinate on the near hemisphere', () => {
+    for (const cam of [
+      { rotation: 0, tilt: 0, zoom: 1 },
+      { rotation: 0.7, tilt: 0.35, zoom: 1.4 },
+      { rotation: -2.1, tilt: -0.6, zoom: 2 },
+    ]) {
+      for (const [lat, lon] of [
+        [0, 0],
+        [35.6, 139.7],
+        [-33.87, 151.21],
+        [48.85, 2.35],
+      ] as Array<[number, number]>) {
+        const p = projectGlobe(lat, lon, cam, viewport)
+        if (!p.visible) continue // the far side has no cursor position to report
+        const back = unprojectGlobe(p.x, p.y, cam, viewport)!
+        expect(back, `${lat},${lon}`).not.toBeNull()
+        expect(back.lat).toBeCloseTo(lat, 4)
+        expect(back.lon).toBeCloseTo(lon, 4)
+      }
+    }
+  })
+
+  /** A readout is a real position on the planet, or nothing. */
+  it('returns null off the sphere rather than clamping to the rim', () => {
+    const cam = { rotation: 0, tilt: 0, zoom: 1 }
+    expect(unprojectGlobe(0, 0, cam, viewport)).toBeNull()
+    expect(unprojectGlobe(399, 399, cam, viewport)).toBeNull()
+    expect(unprojectGlobe(200, 200, cam, viewport)).not.toBeNull()
+  })
+
+  it('keeps longitude inside (-180, 180]', () => {
+    const cam = { rotation: 3.0, tilt: 0.2, zoom: 1 }
+    for (let x = 25; x < 375; x += 7) {
+      for (let y = 25; y < 375; y += 7) {
+        const p = unprojectGlobe(x, y, cam, viewport)
+        if (!p) continue
+        expect(p.lon).toBeGreaterThan(-180.0001)
+        expect(p.lon).toBeLessThanOrEqual(180.0001)
+        expect(Math.abs(p.lat)).toBeLessThanOrEqual(90.0001)
+      }
+    }
   })
 })

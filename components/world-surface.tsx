@@ -9,6 +9,8 @@ import {
   mapFrame,
   projectGlobe,
   projectMap,
+  unprojectGlobe,
+  unprojectMap,
   type GlobeCamera,
   type MapCamera,
   type ScreenPoint,
@@ -66,6 +68,8 @@ const GRATICULE = 'rgba(56, 189, 248, 0.10)'
 /** The equator and prime meridian carry the map's frame of reference. */
 const GRATICULE_AXIS = 'rgba(56, 189, 248, 0.30)'
 const POINT_DEFAULT = '#34d399'
+/** HUD readouts: the same cyan as the coastlines, so the instrument reads as one. */
+const HUD_TEXT = 'rgba(147, 220, 255, 0.9)'
 
 interface Camera {
   globe: GlobeCamera
@@ -391,6 +395,62 @@ export function WorldSurface({
 
       ctx.restore()
 
+      // ---- HUD --------------------------------------------------------------
+      // Readouts, not decoration: the coordinate is the real position under the
+      // pointer (inverse projection), the counts are the real plotted counts,
+      // and the clock is real UTC. An instrument that displays invented numbers
+      // is worse than one that displays none.
+      const hp = pointerRef.current
+      const cursor = hp
+        ? isGlobe
+          ? unprojectGlobe(hp.x, hp.y, cam.globe, viewport)
+          : unprojectMap(hp.x, hp.y, cam.map, viewport)
+        : null
+
+      ctx.font =
+        '10px ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace'
+      ctx.textBaseline = 'top'
+      const hud = (text: string, x: number, y: number, align: CanvasTextAlign = 'left') => {
+        ctx.textAlign = align
+        ctx.fillStyle = 'rgba(3, 10, 18, 0.55)'
+        const w = ctx.measureText(text).width
+        const bx = align === 'right' ? x - w - 4 : x - 4
+        ctx.fillRect(bx, y - 2, w + 8, 14)
+        ctx.fillStyle = HUD_TEXT
+        ctx.fillText(text, x, y)
+      }
+
+      const now = new Date()
+      const utc = `${String(now.getUTCHours()).padStart(2, '0')}:${String(now.getUTCMinutes()).padStart(2, '0')}:${String(now.getUTCSeconds()).padStart(2, '0')}Z`
+
+      hud(`${isGlobe ? 'ORTHO' : 'EQUIRECT'}  ×${zoom.toFixed(2)}`, 12, height - 34)
+      hud(
+        cursor
+          ? `${cursor.lat >= 0 ? 'N' : 'S'}${Math.abs(cursor.lat).toFixed(2)}  ${cursor.lon >= 0 ? 'E' : 'W'}${Math.abs(cursor.lon).toFixed(2)}`
+          : 'LAT ---.--  LON ---.--',
+        12,
+        height - 18,
+      )
+      hud(utc, width - 12, height - 34, 'right')
+      hud(`${plotted.length}/${current.length} PLOTTED`, width - 12, height - 18, 'right')
+
+      // A reticle at the pointer, so the coordinate readout has something to
+      // point at. Only when the pointer is genuinely over the planet.
+      if (hp && cursor) {
+        ctx.strokeStyle = 'rgba(125,211,252,0.5)'
+        ctx.lineWidth = 1
+        ctx.beginPath()
+        ctx.moveTo(hp.x - 9, hp.y)
+        ctx.lineTo(hp.x - 3, hp.y)
+        ctx.moveTo(hp.x + 3, hp.y)
+        ctx.lineTo(hp.x + 9, hp.y)
+        ctx.moveTo(hp.x, hp.y - 9)
+        ctx.lineTo(hp.x, hp.y - 3)
+        ctx.moveTo(hp.x, hp.y + 3)
+        ctx.lineTo(hp.x, hp.y + 9)
+        ctx.stroke()
+      }
+
       // ---- Instrument frame -------------------------------------------------
       // Outside the clip, so it sits on the surface's boundary: a lit rim on the
       // globe, a measured border on the map. This is the identity of the
@@ -596,7 +656,8 @@ export function WorldSurface({
         </button>
       ) : null}
 
-      <div className="absolute bottom-3 right-3 flex flex-col gap-1">
+      {/* Clear of the HUD band along the bottom edge. */}
+      <div className="absolute bottom-12 right-3 flex flex-col gap-1">
         <button
           onClick={() => nudgeZoom(1.3)}
           className="flex h-7 w-7 items-center justify-center rounded-md bg-background/80 text-foreground ring-1 ring-border backdrop-blur hover:bg-background"

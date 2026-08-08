@@ -659,6 +659,19 @@ export const repo = {
         : eq(s.posts.visibility, 'public')
       return db.select().from(s.posts).where(where).orderBy(desc(s.posts.createdAt)).limit(limit)
     },
+    /**
+     * Has an automatically-published post with this reference already gone out?
+     * The dedup check behind the scheduled publisher.
+     */
+    async existsByRef(refType: string, refValue: string): Promise<boolean> {
+      const db = getDb()
+      const [row] = await db
+        .select({ id: s.posts.id })
+        .from(s.posts)
+        .where(and(eq(s.posts.refType, refType), eq(s.posts.refValue, refValue)))
+        .limit(1)
+      return Boolean(row)
+    },
     async listByUser(userId: string, limit = 50): Promise<Post[]> {
       const db = getDb()
       return db

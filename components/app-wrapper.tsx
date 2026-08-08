@@ -6,6 +6,7 @@ import { I18nProvider } from "@/lib/i18n";
 import { StandaloneAuthGate } from "./standalone-auth";
 import { AuthLoadingScreen } from "./auth-loading-screen";
 import { FeedbackButton } from "./feedback-button";
+import { AutoTranslate } from "./auto-translate";
 import { shouldBlockApp } from "@/lib/auth/pi-client";
 import { pingVisit } from "@/lib/visit";
 
@@ -51,6 +52,9 @@ export function AppWrapper({ children }: { children: ReactNode }) {
   }, [mode]);
   return (
     <I18nProvider>
+      {/* Translates the whole rendered interface, including text the engine
+          produced at runtime, so a new screen is never English-only. */}
+      <AutoTranslate>
       {mode === "standalone" ? (
         <StandaloneAuthGate>
           {children}
@@ -66,6 +70,7 @@ export function AppWrapper({ children }: { children: ReactNode }) {
           </AppContent>
         </PiAuthProvider>
       )}
+      </AutoTranslate>
     </I18nProvider>
   );
 }

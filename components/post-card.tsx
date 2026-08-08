@@ -36,6 +36,11 @@ export function PostCard({ post }: { post: PublicPost }) {
           <span className="rounded bg-muted px-1.5 py-0.5 uppercase tracking-wide">{post.kind}</span>
           <span>{date}</span>
           {post.author ? <span>· {post.author}</span> : null}
+          {/* Readers are entitled to know when the platform wrote something
+              rather than a person. */}
+          {post.refType === 'auto' ? (
+            <span className="rounded bg-primary/10 px-1.5 py-0.5 text-primary">auto</span>
+          ) : null}
         </div>
         <a href={`/p/${post.id}`} className="block">
           <h3 className="text-base font-semibold leading-snug hover:underline">{post.title}</h3>

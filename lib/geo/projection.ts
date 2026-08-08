@@ -116,6 +116,45 @@ export function unprojectMap(
   return { lat, lon }
 }
 
+/**
+ * Screen point back to (lat, lon) on the globe — the inverse of projectGlobe.
+ *
+ * This is what lets the surface report the coordinate under the cursor. It
+ * returns null outside the sphere's disc rather than clamping to the rim, so a
+ * readout is either a real position on the planet or nothing at all.
+ */
+export function unprojectGlobe(
+  x: number,
+  y: number,
+  camera: GlobeCamera,
+  viewport: Viewport,
+): { lat: number; lon: number } | null {
+  const R = globeRadius(camera, viewport)
+  if (R <= 0) return null
+  const cx = viewport.width / 2
+  const cy = viewport.height / 2
+  const dx = (x - cx) / R
+  const dy = -(y - cy) / R
+  const r2 = dx * dx + dy * dy
+  // Outside the disc: the pointer is on the backdrop, not on the planet.
+  if (r2 > 1) return null
+
+  // Invert the projection: x and y2 are known, z2 follows from the unit sphere.
+  const z2 = Math.sqrt(Math.max(0, 1 - r2))
+  const cosT = Math.cos(camera.tilt)
+  const sinT = Math.sin(camera.tilt)
+  // Undo the tilt rotation applied in projectGlobe.
+  const yv = dy * cosT + z2 * sinT
+  const zv = -dy * sinT + z2 * cosT
+  const xv = dx
+
+  const lat = (Math.asin(Math.max(-1, Math.min(1, yv))) * 180) / Math.PI
+  let lon = ((Math.atan2(xv, zv) - camera.rotation) * 180) / Math.PI
+  // Normalise into (-180, 180].
+  lon = ((((lon + 180) % 360) + 360) % 360) - 180
+  return { lat, lon }
+}
+
 /** Convert lat/lon (deg) to the unit vector projectGlobe works in. */
 export function toVector(lat: number, lon: number): [number, number, number] {
   const la = (lat * Math.PI) / 180
