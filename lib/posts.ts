@@ -15,6 +15,8 @@ export interface PublicPost {
   title: string
   body: string
   author: string | null
+  /** The author's picture at read time, so the feed shows a face not a blank. */
+  authorAvatarUrl: string | null
   sourceUrl: string | null
   refType: string | null
   refValue: string | null
@@ -125,7 +127,7 @@ export function postToMarkdown(post: PublicPost, permalink?: string): string {
   meta.push(post.kind)
   lines.push(`*${meta.join(' · ')}*`, '', post.body, '')
   if (post.sourceUrl) lines.push('', `Source: ${post.sourceUrl}`)
-  lines.push('', '---', `${LAMBDA_GLYPH} Lambda NX${permalink ? ` · ${permalink}` : ''}`)
+  lines.push('', '---', `${LAMBDA_GLYPH} Lambda${permalink ? ` · ${permalink}` : ''}`)
   return lines.join('\n')
 }
 

@@ -11,13 +11,14 @@
   --card-foreground: oklch(0.12 0.02 240);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.12 0.02 240);
-  --primary: oklch(0.55 0.25 220);
-  --primary-foreground: oklch(0.98 0.01 240);
+  /* Signal green — the colour of a live reading on an instrument, not a pastel. */
+  --primary: oklch(0.52 0.16 152);
+  --primary-foreground: oklch(0.99 0.01 150);
   --secondary: oklch(0.92 0.02 240);
   --secondary-foreground: oklch(0.12 0.02 240);
   --muted: oklch(0.95 0.01 240);
   --muted-foreground: oklch(0.45 0.02 240);
-  --accent: oklch(0.65 0.28 190);
+  --accent: oklch(0.62 0.14 175);
   --accent-foreground: oklch(0.98 0.01 240);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.98 0.01 240);
@@ -32,7 +33,7 @@
   --radius: 0.75rem;
   --sidebar: oklch(0.98 0.01 240);
   --sidebar-foreground: oklch(0.12 0.02 240);
-  --sidebar-primary: oklch(0.55 0.25 220);
+  --sidebar-primary: oklch(0.52 0.16 152);
   --sidebar-primary-foreground: oklch(0.98 0.01 240);
   --sidebar-accent: oklch(0.92 0.02 240);
   --sidebar-accent-foreground: oklch(0.12 0.02 240);
@@ -48,8 +49,8 @@
   --card-foreground: oklch(0.95 0.01 240);
   --popover: oklch(0.1 0.02 240);
   --popover-foreground: oklch(0.95 0.01 240);
-  --primary: oklch(0.65 0.28 200);
-  --primary-foreground: oklch(0.08 0.02 240);
+  --primary: oklch(0.72 0.19 152);
+  --primary-foreground: oklch(0.14 0.03 152);
   --secondary: oklch(0.18 0.03 240);
   --secondary-foreground: oklch(0.95 0.01 240);
   --muted: oklch(0.15 0.02 240);
@@ -68,7 +69,7 @@
   --chart-5: oklch(0.48 0.18 160);
   --sidebar: oklch(0.1 0.02 240);
   --sidebar-foreground: oklch(0.95 0.01 240);
-  --sidebar-primary: oklch(0.65 0.28 200);
+  --sidebar-primary: oklch(0.72 0.19 152);
   --sidebar-primary-foreground: oklch(0.08 0.02 240);
   --sidebar-accent: oklch(0.18 0.03 240);
   --sidebar-accent-foreground: oklch(0.95 0.01 240);

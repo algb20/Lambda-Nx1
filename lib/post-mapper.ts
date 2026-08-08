@@ -6,13 +6,14 @@
 import type { Post } from '@/lib/db'
 import type { PublicPost } from '@/lib/posts'
 
-export function toPublicPost(p: Post): PublicPost {
+export function toPublicPost(p: Post, authorAvatarUrl: string | null = null): PublicPost {
   return {
     id: p.id,
     kind: p.kind,
     title: p.title,
     body: p.body,
     author: p.authorName,
+    authorAvatarUrl,
     sourceUrl: p.sourceUrl,
     refType: p.refType,
     refValue: p.refValue,

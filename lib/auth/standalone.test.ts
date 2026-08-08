@@ -1,6 +1,16 @@
 import { describe, it, expect } from 'vitest'
 import { hashPassword, verifyPassword } from './password'
-import { registerUser, loginUser, type StandaloneDeps } from './standalone'
+import {
+  claimPiUsername,
+  classifyIdentifier,
+  isValidPiUsername,
+  loginUser,
+  normalizePiUsername,
+  registerUser,
+  type ClaimDeps,
+  type CredentialRecord,
+  type StandaloneDeps,
+} from './standalone'
 
 describe('password hashing (scrypt)', () => {
   it('never stores the plaintext and verifies correctly', () => {
@@ -16,60 +26,185 @@ describe('password hashing (scrypt)', () => {
   })
 })
 
-function fakeDeps(seed: Record<string, { userId: string; passwordHash: string }> = {}): {
-  deps: StandaloneDeps
-  store: Record<string, { userId: string; passwordHash: string }>
-} {
-  const store = { ...seed }
+interface Store {
+  byEmail: Record<string, CredentialRecord>
+  byPi: Record<string, CredentialRecord>
+}
+
+function fakeDeps(seed: Partial<Store> = {}): { deps: StandaloneDeps; store: Store } {
+  const store: Store = { byEmail: { ...seed.byEmail }, byPi: { ...seed.byPi } }
   const deps: StandaloneDeps = {
-    findByEmail: async (email) => store[email],
+    findByEmail: async (email) => store.byEmail[email],
+    findByPiUsername: async (username) => store.byPi[username],
     createUserAndCredential: async (email, passwordHash) => {
-      const userId = `user-${Object.keys(store).length + 1}`
-      store[email] = { userId, passwordHash }
+      const userId = `user-${Object.keys(store.byEmail).length + 1}`
+      store.byEmail[email] = { userId, passwordHash }
       return { userId }
     },
   }
   return { deps, store }
 }
 
-describe('standalone register', () => {
+describe('classifyIdentifier', () => {
+  it('recognises an email address', () => {
+    expect(classifyIdentifier('Name@Example.com')).toEqual({
+      kind: 'email',
+      value: 'name@example.com',
+    })
+  })
+
+  it('recognises a Pi username, with or without the leading @', () => {
+    expect(classifyIdentifier('pioneer_01')).toEqual({ kind: 'pi', value: 'pioneer_01' })
+    expect(classifyIdentifier('@Pioneer_01')).toEqual({ kind: 'pi', value: 'pioneer_01' })
+    expect(classifyIdentifier('  PIONEER  ')).toEqual({ kind: 'pi', value: 'pioneer' })
+  })
+
+  it('rejects what is neither', () => {
+    expect(classifyIdentifier('').kind).toBe('invalid')
+    expect(classifyIdentifier('   ').kind).toBe('invalid')
+    expect(classifyIdentifier('no-at-sign@').kind).toBe('invalid')
+    expect(classifyIdentifier('ab').kind).toBe('invalid') // too short for a username
+    expect(classifyIdentifier('has spaces').kind).toBe('invalid')
+    expect(classifyIdentifier('bad!chars').kind).toBe('invalid')
+  })
+
+  it('validates Pi username shape', () => {
+    expect(isValidPiUsername('good_name9')).toBe(true)
+    expect(isValidPiUsername('@Good_Name9')).toBe(true)
+    expect(isValidPiUsername('no')).toBe(false)
+    expect(isValidPiUsername('way_too_long_'.repeat(4))).toBe(false)
+    expect(normalizePiUsername(' @MixedCase ')).toBe('mixedcase')
+  })
+})
+
+describe('register', () => {
   it('creates a user for a valid email + password', async () => {
     const { deps, store } = fakeDeps()
     const { userId } = await registerUser('New@Example.com', 'password123', deps)
     expect(userId).toBe('user-1')
-    expect(store['new@example.com']).toBeDefined() // normalized
+    expect(store.byEmail['new@example.com']).toBeDefined() // normalized
   })
 
-  it('rejects an invalid email', async () => {
+  it('rejects an invalid email, a short password and a duplicate', async () => {
     const { deps } = fakeDeps()
     await expect(registerUser('not-an-email', 'password123', deps)).rejects.toThrow(/Invalid email/)
-  })
-
-  it('rejects a short password', async () => {
-    const { deps } = fakeDeps()
     await expect(registerUser('a@b.com', 'short', deps)).rejects.toThrow(/at least 8/)
+    const dup = fakeDeps({ byEmail: { 'a@b.com': { userId: 'u1', passwordHash: hashPassword('x') } } })
+    await expect(registerUser('a@b.com', 'password123', dup.deps)).rejects.toThrow(
+      /already registered/,
+    )
   })
 
-  it('rejects a duplicate email', async () => {
-    const { deps } = fakeDeps({ 'a@b.com': { userId: 'u1', passwordHash: hashPassword('x') } })
-    await expect(registerUser('a@b.com', 'password123', deps)).rejects.toThrow(/already registered/)
+  /**
+   * The security property of the whole feature: registration here can never mint
+   * a Pi username credential, because nothing in this path has verified that the
+   * caller owns it. Only claimPiUsername can, and only after Pi vouched.
+   */
+  it('cannot create a Pi-username credential', async () => {
+    const { deps, store } = fakeDeps()
+    await registerUser('someone@example.com', 'password123', deps)
+    expect(Object.keys(store.byPi)).toHaveLength(0)
   })
 })
 
-describe('standalone login', () => {
-  it('logs in with correct credentials', async () => {
-    const { deps } = fakeDeps({ 'a@b.com': { userId: 'u1', passwordHash: hashPassword('password123') } })
-    const { userId } = await loginUser('A@B.com', 'password123', deps)
-    expect(userId).toBe('u1')
+describe('login with either identifier', () => {
+  const seeded = () =>
+    fakeDeps({
+      byEmail: { 'a@b.com': { userId: 'u1', passwordHash: hashPassword('password123') } },
+      byPi: { pioneer_01: { userId: 'u2', passwordHash: hashPassword('pi-passphrase') } },
+    })
+
+  it('signs in with an email address', async () => {
+    const { deps } = seeded()
+    expect(await loginUser('A@B.com', 'password123', deps)).toEqual({ userId: 'u1' })
   })
 
-  it('rejects a wrong password', async () => {
-    const { deps } = fakeDeps({ 'a@b.com': { userId: 'u1', passwordHash: hashPassword('password123') } })
-    await expect(loginUser('a@b.com', 'nope', deps)).rejects.toThrow(/Invalid email or password/)
+  it('signs in with a claimed Pi username, however it is typed', async () => {
+    const { deps } = seeded()
+    expect(await loginUser('pioneer_01', 'pi-passphrase', deps)).toEqual({ userId: 'u2' })
+    expect(await loginUser('@Pioneer_01', 'pi-passphrase', deps)).toEqual({ userId: 'u2' })
   })
 
-  it('rejects an unknown email', async () => {
-    const { deps } = fakeDeps()
-    await expect(loginUser('ghost@b.com', 'password123', deps)).rejects.toThrow(/Invalid email or password/)
+  it('refuses a Pi username that was never claimed', async () => {
+    const { deps } = seeded()
+    await expect(loginUser('some_other_pioneer', 'anything', deps)).rejects.toThrow(
+      /Invalid sign-in details/,
+    )
+  })
+
+  it('rejects a wrong password and an unknown account with the same message', async () => {
+    const { deps } = seeded()
+    const wrong = await loginUser('a@b.com', 'nope', deps).catch((e: Error) => e.message)
+    const unknown = await loginUser('ghost@b.com', 'password123', deps).catch(
+      (e: Error) => e.message,
+    )
+    const unknownPi = await loginUser('ghost_user', 'password123', deps).catch(
+      (e: Error) => e.message,
+    )
+    // Identical messages: the endpoint must not reveal which Pi usernames or
+    // emails have accounts here.
+    expect(wrong).toBe(unknown)
+    expect(unknown).toBe(unknownPi)
+  })
+
+  it('rejects a malformed identifier without touching the store', async () => {
+    const { deps } = seeded()
+    await expect(loginUser('!!', 'password123', deps)).rejects.toThrow(/Invalid sign-in details/)
+  })
+})
+
+function fakeClaimDeps(seed: Record<string, CredentialRecord> = {}): {
+  deps: ClaimDeps
+  saved: Array<{ userId: string; piUsername: string; passwordHash: string }>
+} {
+  const byPi = { ...seed }
+  const saved: Array<{ userId: string; piUsername: string; passwordHash: string }> = []
+  const deps: ClaimDeps = {
+    findByUserId: async (userId) => Object.values(byPi).find((c) => c.userId === userId),
+    findByPiUsername: async (username) => byPi[username],
+    savePiCredential: async (input) => {
+      saved.push(input)
+      byPi[input.piUsername] = { userId: input.userId, passwordHash: input.passwordHash }
+    },
+  }
+  return { deps, saved }
+}
+
+describe('claimPiUsername', () => {
+  it('links the username and stores only a hash', async () => {
+    const { deps, saved } = fakeClaimDeps()
+    await claimPiUsername({ userId: 'u1', piUsername: '@Pioneer_01', password: 'passphrase1' }, deps)
+    expect(saved).toHaveLength(1)
+    expect(saved[0].piUsername).toBe('pioneer_01') // normalized
+    expect(saved[0].passwordHash).not.toContain('passphrase1')
+    expect(verifyPassword('passphrase1', saved[0].passwordHash)).toBe(true)
+  })
+
+  it('lets the same user replace their passphrase', async () => {
+    const { deps, saved } = fakeClaimDeps({
+      pioneer_01: { userId: 'u1', passwordHash: hashPassword('old-one') },
+    })
+    await claimPiUsername({ userId: 'u1', piUsername: 'pioneer_01', password: 'new-passphrase' }, deps)
+    expect(verifyPassword('new-passphrase', saved[0].passwordHash)).toBe(true)
+  })
+
+  /** Without this, claiming an already-linked username would hand over the account. */
+  it('refuses to take a username already linked to somebody else', async () => {
+    const { deps } = fakeClaimDeps({
+      pioneer_01: { userId: 'u1', passwordHash: hashPassword('theirs') },
+    })
+    await expect(
+      claimPiUsername({ userId: 'attacker', piUsername: 'pioneer_01', password: 'passphrase1' }, deps),
+    ).rejects.toThrow(/already linked/)
+  })
+
+  it('rejects a malformed username or a weak passphrase', async () => {
+    const { deps } = fakeClaimDeps()
+    await expect(
+      claimPiUsername({ userId: 'u1', piUsername: 'no', password: 'passphrase1' }, deps),
+    ).rejects.toThrow(/Invalid Pi username/)
+    await expect(
+      claimPiUsername({ userId: 'u1', piUsername: 'pioneer_01', password: 'short' }, deps),
+    ).rejects.toThrow(/at least 8/)
   })
 })

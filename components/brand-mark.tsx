@@ -5,7 +5,7 @@ import {
 } from "@/lib/brand/mark"
 
 /**
- * The Lambda NX logo — the λ symbol alone, no text. Shares its geometry with the
+ * The Lambda logo — the λ symbol alone, no text. Shares its geometry with the
  * export watermark (`lib/brand/mark.ts`), so the on-screen mark and the stamp on
  * exported work are identical.
  *

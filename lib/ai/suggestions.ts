@@ -99,7 +99,7 @@ const TriageSchema = z.object({
 })
 
 const SYSTEM = [
-  'You triage product suggestions for Lambda NX, a lawful passive intelligence platform.',
+  'You triage product suggestions for Lambda, a lawful passive intelligence platform.',
   'Classify the suggestion accurately and neutrally. Do not invent scope the user did not ask for.',
   'kind: the best-fitting type. impact: honest user value. effort: rough build size.',
   'summary: one neutral sentence. tags: 1–4 short lowercase topic tags.',

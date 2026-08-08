@@ -35,6 +35,8 @@ export type Capability =
   | 'reference'
   | 'watch'
   | 'trending'
+  | 'world_events'
+  | 'chain_state'
 
 export type EntityType =
   | 'domain'

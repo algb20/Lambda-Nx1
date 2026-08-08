@@ -5,6 +5,8 @@ import { PiAuthProvider, usePiAuth } from "@/contexts/pi-auth-context";
 import { I18nProvider } from "@/lib/i18n";
 import { StandaloneAuthGate } from "./standalone-auth";
 import { AuthLoadingScreen } from "./auth-loading-screen";
+import { FeedbackButton } from "./feedback-button";
+import { AutoTranslate } from "./auto-translate";
 import { shouldBlockApp } from "@/lib/auth/pi-client";
 import { pingVisit } from "@/lib/visit";
 
@@ -50,13 +52,25 @@ export function AppWrapper({ children }: { children: ReactNode }) {
   }, [mode]);
   return (
     <I18nProvider>
+      {/* Translates the whole rendered interface, including text the engine
+          produced at runtime, so a new screen is never English-only. */}
+      <AutoTranslate>
       {mode === "standalone" ? (
-        <StandaloneAuthGate>{children}</StandaloneAuthGate>
+        <StandaloneAuthGate>
+          {children}
+          <FeedbackButton />
+        </StandaloneAuthGate>
       ) : (
         <PiAuthProvider>
-          <AppContent>{children}</AppContent>
+          <AppContent>
+            {children}
+            {/* Inside the shell, so every screen carries it — an idea arrives
+                while the user is looking at what prompted it. */}
+            <FeedbackButton />
+          </AppContent>
         </PiAuthProvider>
       )}
+      </AutoTranslate>
     </I18nProvider>
   );
 }

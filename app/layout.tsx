@@ -7,9 +7,19 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Lambda NX — Open-Source Intelligence",
+  title: "Lambda — Open-Source Intelligence",
   description:
     "A real, legal OSINT platform: passive, public-source intelligence with sources and confidence grades. Runs on Pi Network and standalone.",
+  // The icons existed as files but were never declared, so every page load
+  // asked for a favicon.ico that does not exist and got a 404.
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: "/apple-icon.png",
+  },
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({

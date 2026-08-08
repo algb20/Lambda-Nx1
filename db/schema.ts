@@ -94,6 +94,12 @@ export const users = pgTable(
     /** Pi username, or the subject id from the standalone auth provider. */
     externalId: text('external_id').notNull(),
     displayName: text('display_name'),
+    /**
+     * Profile picture. Stored through lib/storage (never a vendor URL), so the
+     * storage backend stays swappable; this column holds only the key we can
+     * resolve back to an image.
+     */
+    avatarUrl: text('avatar_url'),
     /** Subscription tier (source of truth for pricing/features is lib/plans). */
     plan: planEnum('plan').notNull().default('free'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -101,7 +107,13 @@ export const users = pgTable(
   (t) => [unique('users_provider_external_uq').on(t.authProvider, t.externalId)],
 )
 
-// ── Standalone credentials (email + password, off-Pi mode) ───────────────────
+// ── Password credentials (off-Pi sign-in) ────────────────────────────────────
+//
+// One row per user, reachable by either identifier. `email` belongs to accounts
+// created with email + password; `piUsername` is set only when a Pi-verified
+// user claims their own username through the Pi SDK, which is what lets them
+// sign in outside the Pi Browser without anyone being able to claim a username
+// they do not own. Both are nullable — a row needs at least one, not both.
 
 export const credentials = pgTable('credentials', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -109,7 +121,9 @@ export const credentials = pgTable('credentials', {
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' })
     .unique(),
-  email: text('email').notNull().unique(),
+  email: text('email').unique(),
+  /** Set only after Pi SDK verification proved this user owns the username. */
+  piUsername: text('pi_username').unique(),
   /** scrypt hash as "saltHex:hashHex" — never a plaintext password. */
   passwordHash: text('password_hash').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -486,5 +500,102 @@ export const posts = pgTable(
   (t) => [
     index('posts_visibility_created_idx').on(t.visibility, t.createdAt),
     index('posts_author_idx').on(t.authorUserId),
+  ],
+)
+
+// ── Social publishing channels ───────────────────────────────────────────────
+//
+// Where a published post can be broadcast. Only platforms we can actually
+// deliver to are represented: an outgoing webhook (which covers Discord, Slack
+// and every automation tool that accepts one) and the Telegram Bot API. The
+// networks that require an approved OAuth application are deliberately absent
+// rather than present and broken.
+
+export const socialPlatformEnum = pgEnum('social_platform', [
+  'webhook',
+  'discord',
+  'slack',
+  'telegram',
+])
+
+export const socialChannels = pgTable(
+  'social_channels',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    platform: socialPlatformEnum('platform').notNull(),
+    /** Operator-facing name, e.g. "Team Discord" or "Public announcements". */
+    label: text('label').notNull(),
+    /** Webhook URL, or the Telegram chat id to post into. */
+    target: text('target').notNull(),
+    /**
+     * AES-256-GCM ciphertext of a bot token, never the token itself. Null for
+     * channels whose target URL is the only credential (webhooks).
+     */
+    secretEnc: text('secret_enc'),
+    /** Off means nothing is ever sent here, by any path. */
+    enabled: boolean('enabled').notNull().default(true),
+    /** On means new posts are broadcast without anyone pressing a button. */
+    autoPublish: boolean('auto_publish').notNull().default(false),
+    /** Restrict auto-publishing to one post kind; null broadcasts them all. */
+    kindFilter: postKindEnum('kind_filter'),
+    /** Last delivery outcome, so a silently broken channel is visible. */
+    lastStatus: text('last_status'),
+    lastError: text('last_error'),
+    lastAt: timestamp('last_at', { withTimezone: true }),
+    deliveredCount: integer('delivered_count').notNull().default(0),
+    failedCount: integer('failed_count').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('social_channels_enabled_idx').on(t.enabled, t.autoPublish)],
+)
+
+// ── Groups ───────────────────────────────────────────────────────────────────
+//
+// A deliberately small social layer. The cap of two groups per owner is a
+// product rule, not a storage one, so it lives in lib/modules/groups where it
+// can be tested — but the schema records ownership so the rule has something to
+// count.
+
+export const groupRoleEnum = pgEnum('group_role', ['owner', 'admin', 'member'])
+export const groupVisibilityEnum = pgEnum('group_visibility', ['public', 'private'])
+
+export const groups = pgTable(
+  'groups',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerUserId: uuid('owner_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    description: text('description'),
+    /** URL-safe handle, unique across the platform. */
+    slug: text('slug').notNull().unique(),
+    visibility: groupVisibilityEnum('visibility').notNull().default('public'),
+    /** Random, rotatable code that lets someone join a private group. */
+    inviteCode: text('invite_code').notNull().unique(),
+    memberCount: integer('member_count').notNull().default(1),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('groups_owner_idx').on(t.ownerUserId)],
+)
+
+export const groupMembers = pgTable(
+  'group_members',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    groupId: uuid('group_id')
+      .notNull()
+      .references(() => groups.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    role: groupRoleEnum('role').notNull().default('member'),
+    /** Blocked members keep their row, so a ban cannot be undone by re-joining. */
+    blocked: boolean('blocked').notNull().default(false),
+    joinedAt: timestamp('joined_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique('group_members_group_user_uq').on(t.groupId, t.userId),
+    index('group_members_user_idx').on(t.userId),
   ],
 )

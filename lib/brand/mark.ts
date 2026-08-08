@@ -1,5 +1,5 @@
 /**
- * The Lambda NX signature — the lambda symbol (λ) alone, no text.
+ * The Lambda signature — the lambda symbol (λ) alone, no text.
  *
  * This is the single source of truth for the mark's geometry, so the on-screen
  * logo, the SVG we embed, and the watermark stamped onto exported research,

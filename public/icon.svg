@@ -1,18 +1,22 @@
 <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <style>
-    @media (prefers-color-scheme: light) {
-      .background { fill: #0a0a0a; }
-      .foreground { stroke: #ffffff; }
-    }
-    @media (prefers-color-scheme: dark) {
-      .background { fill: #ffffff; }
-      .foreground { stroke: #0a0a0a; }
-    }
-  </style>
-  <rect class="background" width="180" height="180" rx="37" />
+  <!-- The Lambda NX app icon: the λ signature in the platform's green, on the
+       deep navy the world surface is drawn on. Fixed colours in both colour
+       schemes — an app icon has to be recognisable at a glance on a home
+       screen, and one that inverts is a different icon to the eye. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0b1f33" />
+      <stop offset="1" stop-color="#04090f" />
+    </linearGradient>
+    <linearGradient id="mark" x1="30" y1="30" x2="150" y2="150" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4ade80" />
+      <stop offset="1" stop-color="#15803d" />
+    </linearGradient>
+  </defs>
+  <rect width="180" height="180" rx="37" fill="url(#bg)" />
   <!-- The λ signature — same geometry as lib/brand/mark.ts, scaled into 180×180
        (100-unit space → translate(30,30) scale(1.2)). -->
-  <g class="foreground" transform="translate(30,30) scale(1.2)" fill="none"
+  <g transform="translate(30,30) scale(1.2)" fill="none" stroke="url(#mark)"
      stroke-width="13" stroke-linecap="round" stroke-linejoin="round">
     <line x1="32" y1="16" x2="74" y2="86" />
     <line x1="53" y1="48" x2="24" y2="86" />

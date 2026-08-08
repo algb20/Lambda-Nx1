@@ -8,15 +8,21 @@ import { Input } from '@/components/ui/input'
 
 /**
  * Standalone (off-Pi) auth gate. Used when NEXT_PUBLIC_AUTH_MODE=standalone: the
- * app runs as an independent web app with email/password sign-in (our own signed
- * sessions), talking to the existing /api/auth endpoints — no Pi dependency.
+ * app runs as an independent web app with our own signed sessions, talking to
+ * the existing /api/auth endpoints — no Pi dependency.
+ *
+ * Sign-in takes one field, which accepts either an email address or a Pi Network
+ * username; the server works out which. A Pi username reaches an account only
+ * after its owner claimed it from inside the Pi Browser, so a Pi user can get to
+ * their account from an ordinary browser without anyone being able to sign in as
+ * them by typing a public username.
  */
 type Mode = 'login' | 'register'
 
 export function StandaloneAuthGate({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<{ id: string; username: string } | null | undefined>(undefined)
   const [mode, setMode] = useState<Mode>('login')
-  const [email, setEmail] = useState('')
+  const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -35,14 +41,18 @@ export function StandaloneAuthGate({ children }: { children: ReactNode }) {
   }, [])
 
   const submit = async () => {
-    if (busy || !email.trim() || !password) return
+    if (busy || !identifier.trim() || !password) return
     setBusy(true)
     setError(null)
     try {
       const res = await fetch(`/api/auth/${mode === 'login' ? 'login' : 'register'}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), password }),
+        body: JSON.stringify(
+          mode === 'login'
+            ? { identifier: identifier.trim(), password }
+            : { email: identifier.trim(), password },
+        ),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data?.error ?? 'Authentication failed')
@@ -69,7 +79,7 @@ export function StandaloneAuthGate({ children }: { children: ReactNode }) {
         <div className="mb-4 flex items-center gap-2">
           <Radar className="h-6 w-6 text-primary" />
           <div>
-            <h1 className="text-lg font-bold leading-none">Lambda NX</h1>
+            <h1 className="text-lg font-bold leading-none">Lambda</h1>
             <p className="text-[10px] text-muted-foreground">Intelligence platform</p>
           </div>
         </div>
@@ -78,10 +88,10 @@ export function StandaloneAuthGate({ children }: { children: ReactNode }) {
         </h2>
         <div className="space-y-2">
           <Input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="name@example.com"
+            type={mode === 'login' ? 'text' : 'email'}
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            placeholder={mode === 'login' ? 'Email or Pi username' : 'name@example.com'}
             autoCapitalize="none"
             autoCorrect="off"
             spellCheck={false}
@@ -91,12 +101,22 @@ export function StandaloneAuthGate({ children }: { children: ReactNode }) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && submit()}
-            placeholder="Password"
+            placeholder={mode === 'login' ? 'Password or Pi passphrase' : 'Password'}
           />
-          <Button onClick={submit} disabled={busy || !email.trim() || !password} className="w-full">
+          <Button
+            onClick={submit}
+            disabled={busy || !identifier.trim() || !password}
+            className="w-full"
+          >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : mode === 'login' ? 'Sign in' : 'Create account'}
           </Button>
         </div>
+        {mode === 'login' ? (
+          <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+            Signing in with a Pi Network username works once you have linked it from inside the Pi
+            Browser, under Preferences.
+          </p>
+        ) : null}
         {error ? (
           <p className="mt-2 flex items-center gap-1.5 text-sm text-destructive">
             <AlertCircle className="h-4 w-4" />

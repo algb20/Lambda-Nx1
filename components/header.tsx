@@ -25,11 +25,11 @@ export function Header() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="relative">
-              <BrandMark size={24} title="Lambda NX" className="text-primary" />
+              <BrandMark size={24} title="Lambda" className="text-primary" />
               <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-card" />
             </div>
             <div>
-              <h1 className="text-lg font-bold leading-none tracking-tight">Lambda NX</h1>
+              <h1 className="text-lg font-bold leading-none tracking-tight">Lambda</h1>
               <p className="text-[10px] text-muted-foreground leading-none">{t('app.tagline')}</p>
             </div>
           </div>
