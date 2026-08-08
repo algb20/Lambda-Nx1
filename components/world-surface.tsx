@@ -549,7 +549,17 @@ export function WorldSurface({
     <div className="relative w-full select-none" style={{ height }}>
       <canvas
         ref={canvasRef}
-        className={`h-full w-full touch-none ${
+        /**
+         * `touch-action: pan-y`, not `none`.
+         *
+         * The canvas fills most of a phone screen. With touch actions disabled
+         * outright it swallowed every vertical swipe, so a reader could not
+         * scroll past the globe to the events beneath it — the page looked like
+         * it contained nothing but a sphere. Keeping vertical panning with the
+         * browser costs the globe only vertical drag (tilt), which the reset
+         * button restores, and gives the page back to the reader.
+         */
+        className={`h-full w-full [touch-action:pan-y] ${
           onSelect ? 'cursor-pointer' : 'cursor-grab'
         } active:cursor-grabbing`}
         onPointerDown={onPointerDown}
@@ -566,32 +576,24 @@ export function WorldSurface({
       />
 
       {showToggle ? (
-        <div className="absolute left-3 top-3 flex overflow-hidden rounded-md ring-1 ring-border backdrop-blur">
-          <button
-            onClick={() => setMode('globe')}
-            aria-pressed={mode === 'globe'}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-medium transition-colors ${
-              mode === 'globe'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-background/80 text-muted-foreground hover:bg-background'
-            }`}
-            title="3D globe"
-          >
-            <Globe2 className="h-3.5 w-3.5" /> Globe
-          </button>
-          <button
-            onClick={() => setMode('map')}
-            aria-pressed={mode === 'map'}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-medium transition-colors ${
-              mode === 'map'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-background/80 text-muted-foreground hover:bg-background'
-            }`}
-            title="Flat world map"
-          >
-            <MapIcon className="h-3.5 w-3.5" /> Map
-          </button>
-        </div>
+        // One button, not two: there are exactly two views, so the control shows
+        // the view you would switch *to* and swaps on each press.
+        <button
+          onClick={() => setMode(mode === 'globe' ? 'map' : 'globe')}
+          className="absolute left-3 top-3 flex items-center gap-1.5 rounded-md bg-background/80 px-2.5 py-1.5 text-[11px] font-medium text-foreground ring-1 ring-border backdrop-blur transition-colors hover:bg-background"
+          title={mode === 'globe' ? 'Switch to the flat world map' : 'Switch to the 3D globe'}
+          aria-label={mode === 'globe' ? 'Switch to the flat world map' : 'Switch to the 3D globe'}
+        >
+          {mode === 'globe' ? (
+            <>
+              <MapIcon className="h-3.5 w-3.5 text-primary" /> Map
+            </>
+          ) : (
+            <>
+              <Globe2 className="h-3.5 w-3.5 text-primary" /> Globe
+            </>
+          )}
+        </button>
       ) : null}
 
       <div className="absolute bottom-3 right-3 flex flex-col gap-1">

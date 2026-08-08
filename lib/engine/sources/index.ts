@@ -43,6 +43,10 @@ import { wikipediaTrending, wikimediaPageviews, trendingSources } from './trendi
 import { nasaEonet, usgsRecentQuakes, worldEventSources } from './world-events'
 // Gateway — Blockchain radar (on-chain network state)
 import { mempoolNetwork, coingeckoGlobal, chainStateSources } from './chain'
+// Gateway — Official hazard & alert systems (geolocated, agency-assigned severity)
+import { gdacsAlerts, nwsAlerts, whoOutbreaks, issPosition, hazardSources } from './hazard'
+// Gateway — Multi-chain network state (Pi Network, Ethereum, Solana) + venues
+import { piNetworkChain, ethereumChain, solanaChain, exchangeVenues, multiChainSources } from './chains-multi'
 
 export const moduleOneSources: Source[] = [
   cloudflareDns,
@@ -85,9 +89,9 @@ export const watchFeedSources: Source[] = watchSources
 
 export const trendingGatewaySources: Source[] = trendingSources
 
-export const worldEventsGatewaySources: Source[] = worldEventSources
+export const worldEventsGatewaySources: Source[] = [...worldEventSources, ...hazardSources]
 
-export const chainStateGatewaySources: Source[] = chainStateSources
+export const chainStateGatewaySources: Source[] = [...chainStateSources, ...multiChainSources]
 
 interface CatalogRow {
   key: string
@@ -187,11 +191,19 @@ export const trendingGatewayCatalog: CatalogRow[] = [
 export const worldEventsGatewayCatalog: CatalogRow[] = [
   { key: 'nasa_eonet', name: 'NASA EONET (natural hazards, geolocated)', capability: 'world_events', passive: true, enabled: true },
   { key: 'usgs_recent', name: 'USGS seismic (M2.5+ past day)', capability: 'world_events', passive: true, enabled: true },
+  { key: 'gdacs', name: 'GDACS (UN/EC disaster alerts)', capability: 'world_events', passive: true, enabled: true },
+  { key: 'nws_alerts', name: 'NOAA/NWS active alerts (US)', capability: 'world_events', passive: true, enabled: true },
+  { key: 'who_outbreaks', name: 'WHO Disease Outbreak News', capability: 'world_events', passive: true, enabled: true },
+  { key: 'iss_position', name: 'ISS live position', capability: 'world_events', passive: true, enabled: true },
 ]
 
 export const chainStateGatewayCatalog: CatalogRow[] = [
   { key: 'mempool_network', name: 'mempool.space (Bitcoin network state)', capability: 'chain_state', passive: true, enabled: true },
   { key: 'coingecko_global', name: 'CoinGecko global (market structure)', capability: 'chain_state', passive: true, enabled: true },
+  { key: 'pi_network', name: 'Pi Network mainnet (Horizon ledgers)', capability: 'chain_state', passive: true, enabled: true },
+  { key: 'ethereum_rpc', name: 'Ethereum public JSON-RPC', capability: 'chain_state', passive: true, enabled: true },
+  { key: 'solana_rpc', name: 'Solana public JSON-RPC', capability: 'chain_state', passive: true, enabled: true },
+  { key: 'coingecko_exchanges', name: 'CoinGecko exchanges (venue volume by country)', capability: 'chain_state', passive: true, enabled: true },
 ]
 
 export const allSourceCatalog: CatalogRow[] = [
@@ -385,4 +397,12 @@ export {
   usgsRecentQuakes,
   mempoolNetwork,
   coingeckoGlobal,
+  gdacsAlerts,
+  nwsAlerts,
+  whoOutbreaks,
+  issPosition,
+  piNetworkChain,
+  ethereumChain,
+  solanaChain,
+  exchangeVenues,
 }

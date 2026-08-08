@@ -24,7 +24,9 @@ export function HomeFeed({ onNavigate }: { onNavigate: (tab: NavTab) => void }) 
     let alive = true
     fetch('/api/posts?limit=30')
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((d: { posts: PublicPost[] }) => alive && setPosts(d.posts))
+      // Defensive: a provider or proxy returning an unexpected shape must not
+      // crash the whole feed. An empty feed is a bad day; a blank page is a bug.
+      .then((d: { posts?: PublicPost[] }) => alive && setPosts(Array.isArray(d?.posts) ? d.posts : []))
       .catch(() => alive && setPosts([]))
     return () => {
       alive = false

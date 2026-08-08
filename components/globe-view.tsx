@@ -10,28 +10,44 @@ import {
   MapPin,
   Radio,
   X,
+  Activity,
+  Layers,
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ErrorBoundary } from '@/components/error-boundary'
 import { WorldSurface, type SurfacePoint } from '@/components/world-surface'
 import type { ViewMode } from '@/lib/geo/projection'
-import type { EventCategory, WorldEvent, WorldEventsReport } from '@/lib/modules/world-events'
+import type { ChainRadarReport } from '@/lib/modules/chain-radar'
+import {
+  regionOf,
+  type EventCategory,
+  type Region,
+  type WorldEvent,
+  type WorldEventsReport,
+} from '@/lib/modules/world-events-shared'
 
 /**
  * The live world surface — what is happening right now, where, and who measured
- * it. Two projections of the same data (3D globe / flat map, one click apart),
- * category filters, and a click on any dot opens the underlying evidence with a
- * link to the agency that reported it.
+ * it. Two projections of the same data one click apart, filters by category and
+ * by region, and a click on any dot opens the underlying evidence with a link to
+ * the agency that reported it.
+ *
+ * A second layer sits on the same globe: **where the world's crypto liquidity
+ * is**, by trading-venue jurisdiction. Same canvas, same projection, different
+ * question — which is the whole argument for owning the renderer.
  *
  * Refreshes on an interval, but only while the tab is visible: an intelligence
- * page left open in a background tab should not keep hitting public agencies'
+ * page left open in a background tab must not keep hitting public agencies'
  * endpoints, which is both rude and a rate-limit risk (charter §3).
  */
 
 const REFRESH_MS = 5 * 60 * 1000
 
-function timeAgo(iso: string): string {
+type Layer = 'events' | 'liquidity'
+
+function timeAgo(iso: string | null): string {
+  if (!iso) return 'unknown'
   const diff = Date.now() - Date.parse(iso)
   if (!Number.isFinite(diff) || diff < 0) return 'just now'
   const mins = Math.floor(diff / 60000)
@@ -42,14 +58,38 @@ function timeAgo(iso: string): string {
   return `${Math.floor(hours / 24)}d ago`
 }
 
+/**
+ * The canvas has to fit a phone as well as a desktop. A fixed 440px filled a
+ * small screen entirely and pushed every event below the fold.
+ */
+function useSurfaceHeight(): number {
+  const [height, setHeight] = useState(380)
+  useEffect(() => {
+    const measure = () => {
+      const w = window.innerWidth
+      const h = window.innerHeight
+      // Never more than half the viewport height, and never taller than wide.
+      setHeight(Math.round(Math.max(240, Math.min(w * 0.9, h * 0.5, 460))))
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [])
+  return height
+}
+
 export function GlobeView() {
   const [report, setReport] = useState<WorldEventsReport | null>(null)
+  const [chain, setChain] = useState<ChainRadarReport | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [mode, setMode] = useState<ViewMode>('globe')
+  const [layer, setLayer] = useState<Layer>('events')
   const [muted, setMuted] = useState<Set<EventCategory>>(new Set())
+  const [region, setRegion] = useState<Region | 'all'>('all')
   const [selected, setSelected] = useState<WorldEvent | null>(null)
+  const height = useSurfaceHeight()
 
   const load = useCallback(async (isRefresh: boolean) => {
     if (isRefresh) setRefreshing(true)
@@ -77,26 +117,62 @@ export function GlobeView() {
     return () => window.clearInterval(timer)
   }, [load])
 
+  // The liquidity layer is only fetched if someone actually asks for it.
+  useEffect(() => {
+    if (layer !== 'liquidity' || chain) return
+    let alive = true
+    fetch('/api/chain', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (alive && d && !d.error) setChain(d as ChainRadarReport)
+      })
+      .catch(() => {
+        /* the layer simply stays empty and says so */
+      })
+    return () => {
+      alive = false
+    }
+  }, [layer, chain])
+
   const visibleEvents = useMemo(
-    () => (report?.events ?? []).filter((e) => !muted.has(e.category)),
-    [report, muted],
+    () =>
+      (report?.events ?? []).filter(
+        (e) =>
+          !muted.has(e.category) &&
+          (region === 'all' || regionOf(e.lat as number, e.lon as number) === region),
+      ),
+    [report, muted, region],
   )
 
-  const points: SurfacePoint[] = useMemo(
-    () =>
-      visibleEvents.map((e) => ({
-        id: e.id,
-        lat: e.lat as number,
-        lon: e.lon as number,
-        label: e.title,
-        // Severity drives size where it was measured; everything else plots at a
-        // uniform, modest size rather than pretending to a magnitude it lacks.
-        weight: 1 + e.severity * 3,
-        color: e.color,
-        intensity: e.severity,
-      })),
-    [visibleEvents],
-  )
+  const points: SurfacePoint[] = useMemo(() => {
+    if (layer === 'liquidity') {
+      const countries = chain?.venueCountries ?? []
+      const top = countries[0]?.volumeBtc ?? 1
+      return countries
+        .filter((c) => c.lat !== null && c.lon !== null)
+        .map((c) => ({
+          id: `venue:${c.iso || c.country}`,
+          lat: c.lat,
+          lon: c.lon,
+          label: `${c.country} — ${Math.round(c.share * 100)}% of measured volume (${c.venues} venues)`,
+          // Size by share of world volume, which is what the layer is about.
+          weight: 1 + (c.volumeBtc / top) * 4,
+          color: '#facc15',
+          intensity: 0,
+        }))
+    }
+    return visibleEvents.map((e) => ({
+      id: e.id,
+      lat: e.lat as number,
+      lon: e.lon as number,
+      label: e.title,
+      // Severity drives size where it was measured; everything else plots at a
+      // uniform, modest size rather than pretending to a magnitude it lacks.
+      weight: 1 + e.severity * 3,
+      color: e.color,
+      intensity: e.severity,
+    }))
+  }, [layer, chain, visibleEvents])
 
   const toggleCategory = (category: EventCategory) => {
     setMuted((prev) => {
@@ -108,36 +184,84 @@ export function GlobeView() {
   }
 
   const onSelect = (point: SurfacePoint) => {
+    if (layer === 'liquidity') return
     setSelected(visibleEvents.find((e) => e.id === point.id) ?? null)
   }
 
+  const failedSources = report?.sourceHealth.filter((s) => !s.ok) ?? []
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
         <Globe2 className="h-5 w-5 text-primary" />
-        <h2 className="text-xl font-bold">Live world surface</h2>
+        <h2 className="text-lg font-bold">Live world surface</h2>
         {report ? (
           <Badge variant="outline" className="gap-1 text-[10px]">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            {report.summary.placed} plotted · {report.summary.total} events
+            {report.summary.placed}/{report.summary.total}
           </Badge>
         ) : null}
         <button
           onClick={() => load(true)}
           disabled={refreshing}
-          className="ml-auto flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-muted-foreground ring-1 ring-border transition-colors hover:bg-muted disabled:opacity-50"
+          className="ml-auto flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-muted-foreground ring-1 ring-border transition-colors hover:bg-muted disabled:opacity-50"
         >
-          <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-          {report ? `Updated ${timeAgo(report.generatedAt)}` : 'Refresh'}
+          <RefreshCw className={`h-3 w-3 ${refreshing ? 'animate-spin' : ''}`} />
+          {report ? timeAgo(report.generatedAt) : 'Refresh'}
         </button>
       </div>
 
-      <p className="text-sm text-muted-foreground">
-        Natural hazards and seismic events measured by NASA and USGS, plus humanitarian and world
-        events from official reporters. Drag to move, scroll to zoom, click any point for its
-        source. Switch between the globe and the flat map with one click. Public sources only —
-        nothing here touches a target.
-      </p>
+      {/* Layer + region controls, above the canvas so they are reachable on a
+          phone without scrolling past a full-height globe. */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="flex items-center overflow-hidden rounded-md ring-1 ring-border">
+          {(['events', 'liquidity'] as Layer[]).map((l) => (
+            <button
+              key={l}
+              onClick={() => setLayer(l)}
+              aria-pressed={layer === l}
+              className={`flex items-center gap-1 px-2 py-1 text-[11px] transition-colors ${
+                layer === l
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-muted'
+              }`}
+            >
+              {l === 'events' ? <Activity className="h-3 w-3" /> : <Layers className="h-3 w-3" />}
+              {l === 'events' ? 'Events' : 'Liquidity'}
+            </button>
+          ))}
+        </span>
+
+        {layer === 'events' && report && report.regions.length > 1 ? (
+          <>
+            <button
+              onClick={() => setRegion('all')}
+              aria-pressed={region === 'all'}
+              className={`rounded-full border px-2 py-0.5 text-[10px] transition-colors ${
+                region === 'all'
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border text-muted-foreground hover:bg-muted'
+              }`}
+            >
+              World
+            </button>
+            {report.regions.map((r) => (
+              <button
+                key={r.region}
+                onClick={() => setRegion(r.region)}
+                aria-pressed={region === r.region}
+                className={`rounded-full border px-2 py-0.5 text-[10px] transition-colors ${
+                  region === r.region
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border text-muted-foreground hover:bg-muted'
+                }`}
+              >
+                {r.label} <span className="text-muted-foreground">{r.count}</span>
+              </button>
+            ))}
+          </>
+        ) : null}
+      </div>
 
       <Card className="overflow-hidden p-0">
         {/* The canvas is the riskiest part of this page (2D drawing, pointer
@@ -146,36 +270,75 @@ export function GlobeView() {
         <ErrorBoundary label="The world surface">
           <WorldSurface
             points={points}
-            height={440}
+            height={height}
             mode={mode}
             onModeChange={setMode}
-            onSelect={onSelect}
+            onSelect={layer === 'events' ? onSelect : undefined}
           />
         </ErrorBoundary>
       </Card>
 
+      {layer === 'liquidity' ? (
+        <Card className="p-3">
+          <h4 className="mb-1 text-xs font-semibold">Where the liquidity sits</h4>
+          {!chain ? (
+            <p className="text-[11px] text-muted-foreground">Reading venue data…</p>
+          ) : chain.venueCountries.length === 0 ? (
+            <p className="text-[11px] text-muted-foreground">
+              No venue jurisdictions resolved from the current feed.
+            </p>
+          ) : (
+            <>
+              <ul className="space-y-1">
+                {chain.venueCountries.slice(0, 8).map((c) => (
+                  <li key={c.iso || c.country} className="flex items-center gap-2">
+                    <span className="w-28 shrink-0 truncate text-[11px]">{c.country}</span>
+                    <span className="h-1 flex-1 overflow-hidden rounded-full bg-muted">
+                      <span
+                        className="block h-full rounded-full bg-amber-400"
+                        style={{ width: `${Math.max(2, c.share * 100)}%` }}
+                      />
+                    </span>
+                    <span className="w-8 shrink-0 text-right font-mono text-[10px] tabular-nums text-muted-foreground">
+                      {Math.round(c.share * 100)}%
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-[10px] leading-relaxed text-muted-foreground">
+                Share of measured 24h volume by the jurisdiction each venue is registered in. This
+                is where trading is booked, not where any individual trader is — no public feed
+                identifies counterparties, and we do not guess at them.
+              </p>
+            </>
+          )}
+        </Card>
+      ) : null}
+
       {selected ? (
-        <Card className="border-primary/40 p-4">
+        <Card className="border-primary/40 p-3">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 space-y-1">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-1.5">
                 <span
-                  className="h-2.5 w-2.5 shrink-0 rounded-full"
+                  className="h-2 w-2 shrink-0 rounded-full"
                   style={{ backgroundColor: selected.color }}
                 />
-                <span className="text-xs font-medium">{selected.categoryLabel}</span>
+                <span className="text-[11px] font-medium">{selected.categoryLabel}</span>
+                {selected.alertLevel ? (
+                  <Badge variant="outline" className="text-[10px]">
+                    {selected.alertLevel}
+                  </Badge>
+                ) : null}
                 {selected.admiralty ? (
                   <Badge variant="outline" className="font-mono text-[10px]">
                     {selected.admiralty.source}
                     {selected.admiralty.info}
                   </Badge>
                 ) : null}
-                <Badge variant="outline" className="text-[10px] capitalize">
-                  {selected.confidence}
-                </Badge>
               </div>
-              <h3 className="font-semibold leading-tight">{selected.title}</h3>
-              <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+              <h3 className="text-sm font-semibold leading-tight">{selected.title}</h3>
+              <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
                 {selected.country ? (
                   <span className="flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
@@ -200,7 +363,7 @@ export function GlobeView() {
                   href={selected.sourceUrl}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:underline"
                 >
                   Open the source report <ExternalLink className="h-3 w-3" />
                 </a>
@@ -218,26 +381,24 @@ export function GlobeView() {
       ) : null}
 
       {loading ? (
-        <Card className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
+        <Card className="flex items-center gap-2 p-3 text-xs text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Reading the live feeds…
         </Card>
       ) : null}
 
       {error ? (
-        <Card className="flex items-start gap-2 border-amber-500/30 bg-amber-500/5 p-4 text-sm">
+        <Card className="flex items-start gap-2 border-amber-500/30 bg-amber-500/5 p-3 text-xs">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
           <span className="text-muted-foreground">
-            {report
-              ? `Showing the last good picture — the latest refresh failed: ${error}`
-              : error}
+            {report ? `Showing the last good picture — refresh failed: ${error}` : error}
           </span>
         </Card>
       ) : null}
 
-      {report && report.categories.length > 0 ? (
-        <Card className="p-4">
-          <h4 className="mb-2 text-sm font-semibold">Layers</h4>
-          <div className="flex flex-wrap gap-1.5">
+      {layer === 'events' && report && report.categories.length > 0 ? (
+        <Card className="p-3">
+          <h4 className="mb-1.5 text-xs font-semibold">Layers</h4>
+          <div className="flex flex-wrap gap-1">
             {report.categories.map((c) => {
               const on = !muted.has(c.category)
               return (
@@ -245,14 +406,14 @@ export function GlobeView() {
                   key={c.category}
                   onClick={() => toggleCategory(c.category)}
                   aria-pressed={on}
-                  className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                  className={`flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] transition-colors ${
                     on
                       ? 'border-border bg-muted/60 text-foreground'
                       : 'border-dashed border-border/60 text-muted-foreground/60'
                   }`}
                 >
                   <span
-                    className="h-2 w-2 rounded-full"
+                    className="h-1.5 w-1.5 rounded-full"
                     style={{ backgroundColor: c.color, opacity: on ? 1 : 0.35 }}
                   />
                   {c.label}
@@ -261,47 +422,33 @@ export function GlobeView() {
               )
             })}
           </div>
-          <p className="mt-2 text-[11px] text-muted-foreground">
-            A pulsing point means a measured severity — earthquake magnitude, fire area or a
-            tsunami alert. Points that were never measured do not pulse; we do not invent an
-            urgency the source did not report.
+          <p className="mt-1.5 text-[10px] leading-relaxed text-muted-foreground">
+            A pulsing point carries a real severity — a magnitude, a burnt area, or an agency&apos;s
+            own alert level. Points that were never graded do not pulse; we do not invent urgency a
+            source did not report.
           </p>
         </Card>
       ) : null}
 
-      {report && report.hotspots.length > 0 ? (
-        <Card className="p-4">
-          <h4 className="mb-2 text-sm font-semibold">Most active countries</h4>
-          <div className="flex flex-wrap gap-1.5">
-            {report.hotspots.map((h) => (
-              <Badge key={h.iso || h.country} variant="outline" className="gap-1">
-                {h.country}
-                <span className="text-muted-foreground">{h.count}</span>
-              </Badge>
-            ))}
-          </div>
-        </Card>
-      ) : null}
-
-      {report && visibleEvents.length > 0 ? (
-        <Card className="p-4">
-          <h4 className="mb-2 flex items-center gap-1.5 text-sm font-semibold">
-            <Radio className="h-3.5 w-3.5 text-primary" /> Most significant now
+      {layer === 'events' && report && visibleEvents.length > 0 ? (
+        <Card className="p-3">
+          <h4 className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold">
+            <Radio className="h-3 w-3 text-primary" /> Most significant now
           </h4>
           <ul className="divide-y divide-border/60">
-            {visibleEvents.slice(0, 12).map((e) => (
+            {visibleEvents.slice(0, 20).map((e) => (
               <li key={e.id}>
                 <button
                   onClick={() => setSelected(e)}
-                  className="flex w-full items-start gap-2 py-2 text-left transition-colors hover:bg-muted/40"
+                  className="flex w-full items-start gap-2 py-1.5 text-left transition-colors hover:bg-muted/40"
                 >
                   <span
-                    className="mt-1.5 h-2 w-2 shrink-0 rounded-full"
+                    className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full"
                     style={{ backgroundColor: e.color }}
                   />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm">{e.title}</span>
-                    <span className="block text-[11px] text-muted-foreground">
+                    <span className="block truncate text-xs">{e.title}</span>
+                    <span className="block text-[10px] text-muted-foreground">
                       {e.country ? `${e.country} · ` : ''}
                       {e.categoryLabel} · {timeAgo(e.at)}
                     </span>
@@ -313,16 +460,15 @@ export function GlobeView() {
         </Card>
       ) : null}
 
-      {report && report.unplaceable.length > 0 ? (
-        <Card className="p-4">
-          <h4 className="mb-1 text-sm font-semibold">Reported, but not placeable</h4>
-          <p className="mb-2 text-[11px] text-muted-foreground">
-            These are real events whose source gave no location. They are listed here rather than
-            plotted at a guessed position.
+      {layer === 'events' && report && report.unplaceable.length > 0 ? (
+        <Card className="p-3">
+          <h4 className="mb-0.5 text-xs font-semibold">Reported, but not placeable</h4>
+          <p className="mb-1.5 text-[10px] text-muted-foreground">
+            Real events whose source gave no location — listed here rather than plotted at a guess.
           </p>
-          <ul className="space-y-1.5">
-            {report.unplaceable.slice(0, 8).map((e) => (
-              <li key={e.id} className="text-xs">
+          <ul className="space-y-1">
+            {report.unplaceable.slice(0, 10).map((e) => (
+              <li key={e.id} className="text-[11px]">
                 {e.sourceUrl ? (
                   <a
                     href={e.sourceUrl}
@@ -342,8 +488,45 @@ export function GlobeView() {
         </Card>
       ) : null}
 
+      {/* Source integrity. A board that quietly loses a feed is a lying board. */}
+      {report ? (
+        <Card className="p-3">
+          <h4 className="mb-1.5 text-xs font-semibold">
+            Source integrity{' '}
+            <span className="font-normal text-muted-foreground">
+              {report.summary.sourcesOk}/{report.summary.sourcesOk + report.summary.sourcesFailed}{' '}
+              answering
+            </span>
+          </h4>
+          <div className="flex flex-wrap gap-1">
+            {report.sourceHealth.map((s) => (
+              <span
+                key={s.sourceKey}
+                title={s.error ?? 'Answering normally'}
+                className={`flex items-center gap-1 rounded border px-1.5 py-0.5 font-mono text-[10px] ${
+                  s.ok
+                    ? 'border-border text-muted-foreground'
+                    : 'border-destructive/40 text-destructive'
+                }`}
+              >
+                <span
+                  className={`h-1 w-1 rounded-full ${s.ok ? 'bg-emerald-500' : 'bg-destructive'}`}
+                />
+                {s.sourceKey}
+              </span>
+            ))}
+          </div>
+          {failedSources.length > 0 ? (
+            <p className="mt-1.5 text-[10px] text-muted-foreground">
+              {failedSources.length} feed{failedSources.length === 1 ? '' : 's'} did not answer, so
+              this picture is incomplete. Hover a red chip for the reason.
+            </p>
+          ) : null}
+        </Card>
+      ) : null}
+
       {report && !loading && report.summary.total === 0 ? (
-        <Card className="p-4 text-sm text-muted-foreground">
+        <Card className="p-3 text-xs text-muted-foreground">
           The feeds answered but reported no open events in the current window. The surface stays
           empty rather than showing filler.
         </Card>
