@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { buildHealthReport } from '@/lib/modules/health'
+import { buildAgeHours, getBuildInfo } from '@/lib/build-info'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -28,8 +29,11 @@ export async function GET() {
     uptimeSeconds: typeof process.uptime === 'function' ? process.uptime() : 0,
     migrationCount: countMigrations(),
   })
+  // Which commit is serving this, so "is the link current?" is answerable
+  // without a hosting dashboard.
+  const build = getBuildInfo()
   const httpStatus = report.status === 'unhealthy' ? 503 : 200
-  return NextResponse.json(report, {
+  return NextResponse.json({ ...report, build: { ...build, ageHours: buildAgeHours(build) } }, {
     status: httpStatus,
     headers: { 'cache-control': 'no-store' },
   })

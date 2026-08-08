@@ -28,6 +28,23 @@ const securityHeaders = [
 ]
 
 const nextConfig = {
+  /**
+   * Stamp the build with its own identity, so the running app can say which
+   * commit it came from and when. Answering "is the live link the latest work?"
+   * used to mean comparing git against a hosting dashboard by hand; a value
+   * baked into a build describes that build by construction and cannot go stale.
+   *
+   * Each host names its git variables differently, so all three are read and
+   * re-exported under one public name that reaches the browser bundle.
+   */
+  env: {
+    NEXT_PUBLIC_COMMIT_SHA:
+      process.env.COMMIT_REF ?? process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GITHUB_SHA ?? '',
+    NEXT_PUBLIC_COMMIT_BRANCH:
+      process.env.BRANCH ?? process.env.VERCEL_GIT_COMMIT_REF ?? '',
+    NEXT_PUBLIC_BUILT_AT: new Date().toISOString(),
+    NEXT_PUBLIC_REPO_URL: process.env.REPOSITORY_URL ?? 'https://github.com/algb20/Lambda-Nx1',
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
