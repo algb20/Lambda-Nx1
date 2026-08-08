@@ -74,6 +74,7 @@ const POST: PublicPost = {
   title: 'Gold through the ages',
   body: 'A long body. '.repeat(30),
   author: 'alice',
+  authorAvatarUrl: null,
   sourceUrl: 'https://example.com/src',
   refType: null,
   refValue: null,
@@ -90,7 +91,7 @@ describe('postToMarkdown', () => {
     expect(md).toContain('# Gold through the ages')
     expect(md).toContain('By alice')
     expect(md).toContain('Source: https://example.com/src')
-    expect(md).toContain(`${LAMBDA_GLYPH} Lambda NX · https://x.app/p/id1`)
+    expect(md).toContain(`${LAMBDA_GLYPH} Lambda · https://x.app/p/id1`)
   })
 })
 

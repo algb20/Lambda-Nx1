@@ -78,7 +78,7 @@ export function CalibrationScoreboard() {
       const res = await fetch('/api/calibration', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ claim: claimText, authorKind: 'us', author: 'Lambda NX', horizon: horizon || undefined }),
+        body: JSON.stringify({ claim: claimText, authorKind: 'us', author: 'Lambda', horizon: horizon || undefined }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data?.error ?? 'Could not record')

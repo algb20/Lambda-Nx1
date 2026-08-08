@@ -4,7 +4,7 @@
  * company filings (SEC EDGAR) and ECB reference FX (Frankfurter).
  *
  * We report the market as it *is*, with source and timestamp. We do NOT predict
- * it — foresight in Lambda NX means tracking and grading *published* forecasts
+ * it — foresight in Lambda means tracking and grading *published* forecasts
  * (see docs/FORESIGHT.md), never fabricating our own.
  */
 import { collect } from '../engine/orchestrator'

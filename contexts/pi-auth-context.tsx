@@ -37,7 +37,14 @@ declare global {
   interface Window {
     Pi: {
       init: (config: { version: string; sandbox?: boolean }) => Promise<void>;
-      authenticate: (scopes: string[]) => Promise<PiAuthResult>;
+      authenticate: (
+        scopes: string[],
+        onIncompletePaymentFound?: (payment: {
+          identifier: string
+          metadata?: unknown
+          transaction?: { txid?: string }
+        }) => void,
+      ) => Promise<PiAuthResult>;
     };
   }
 }
@@ -89,11 +96,45 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
   const [piAccessToken, setPiAccessToken] = useState<string | null>(null);
   const [userData, setUserData] = useState<LoginDTO | null>(null);
 
+  /**
+   * A payment the pioneer approved but that never completed — an app closed
+   * mid-checkout, a lost connection. Pi hands it back on the next sign-in, and
+   * it must be finished, or they have paid for something they never received.
+   */
+  const onIncompletePaymentFound = (payment: {
+    identifier: string
+    metadata?: unknown
+    transaction?: { txid?: string }
+  }): void => {
+    const txid = payment?.transaction?.txid
+    if (!payment?.identifier || !txid) return
+    void fetch("/api/payments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      // The metadata carries which plan was bought; without it the payment
+      // completes but grants nothing.
+      body: JSON.stringify({
+        action: "complete",
+        paymentId: payment.identifier,
+        txid,
+        metadata: payment.metadata,
+      }),
+    }).catch(() => {
+      /* Pi will offer it again next sign-in */
+    })
+  }
+
   const authenticateAndLogin = async (): Promise<void> => {
     setAuthMessage("Waiting for Pi Browser…");
     // The step that never settles outside Pi Browser — hence the timeout.
+    /**
+     * Scopes: `username` identifies the pioneer, `payments` is what makes
+     * `Pi.createPayment` legal to call. Without the second one the subscribe
+     * button exists and can never work — asking for it at sign-in is the only
+     * point at which it can be granted.
+     */
     const piAuthResult = await withTimeout(
-      window.Pi.authenticate(["username"]),
+      window.Pi.authenticate(["username", "payments"], onIncompletePaymentFound),
       PI_TIMEOUTS.authenticate,
       "Pi authentication"
     );

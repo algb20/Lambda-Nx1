@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
 /**
- * The web app manifest, so Lambda NX installs to a home screen as an app rather
+ * The web app manifest, so Lambda installs to a home screen as an app rather
  * than a bookmark — the green λ icon, the platform's own colours, and no browser
  * chrome. Served from a route rather than a static file so the values stay
  * beside the rest of the app's configuration.
@@ -11,8 +11,8 @@ export const runtime = 'nodejs'
 export function GET() {
   return NextResponse.json(
     {
-      name: 'Lambda NX — Open-Source Intelligence',
-      short_name: 'Lambda NX',
+      name: 'Lambda — Open-Source Intelligence',
+      short_name: 'Lambda',
       description:
         'Passive, lawful, public-source intelligence. Every finding carries its source, timestamp and confidence grade.',
       start_url: '/',

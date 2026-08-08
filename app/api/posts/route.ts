@@ -18,7 +18,13 @@ export async function GET(request: Request) {
   const beforeRaw = url.searchParams.get('before')
   const before = beforeRaw ? new Date(beforeRaw) : undefined
   const rows = await repo.posts.listPublic(limit, before && !isNaN(before.getTime()) ? before : undefined)
-  return NextResponse.json({ posts: rows.map(toPublicPost) })
+  // One lookup for every author on the page rather than one per post.
+  const avatars = await repo.users.avatarsByIds(
+    rows.map((r) => r.authorUserId).filter((id): id is string => Boolean(id)),
+  )
+  return NextResponse.json({
+    posts: rows.map((row) => toPublicPost(row, row.authorUserId ? (avatars.get(row.authorUserId) ?? null) : null)),
+  })
 }
 
 /** POST /api/posts — publish. Requires a signed-in user. */

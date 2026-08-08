@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Heart } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Watermarked } from '@/components/watermark'
+import { Avatar } from '@/components/avatar'
 import { PostShareBar } from '@/components/post-share-bar'
 import { api } from '@/lib/api'
 import type { PublicPost } from '@/lib/posts'
@@ -35,7 +36,11 @@ export function PostCard({ post }: { post: PublicPost }) {
         <div className="mb-1 flex items-center gap-2 text-xs text-muted-foreground">
           <span className="rounded bg-muted px-1.5 py-0.5 uppercase tracking-wide">{post.kind}</span>
           <span>{date}</span>
-          {post.author ? <span>· {post.author}</span> : null}
+          {post.author ? (
+            <span className="inline-flex items-center gap-1">
+              · <Avatar src={post.authorAvatarUrl} name={post.author} size={16} /> {post.author}
+            </span>
+          ) : null}
           {/* Readers are entitled to know when the platform wrote something
               rather than a person. */}
           {post.refType === 'auto' ? (

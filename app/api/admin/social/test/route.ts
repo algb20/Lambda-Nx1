@@ -36,8 +36,8 @@ export async function POST(request: Request) {
   const proto = h.get('x-forwarded-proto') ?? 'https'
 
   const result = await deliver(channel, {
-    title: 'Lambda NX — channel test',
-    body: 'If you can read this, the channel is connected and Lambda NX can publish to it.',
+    title: 'Lambda — channel test',
+    body: 'If you can read this, the channel is connected and Lambda can publish to it.',
     url: `${proto}://${host}`,
     kind: 'post',
     author: null,

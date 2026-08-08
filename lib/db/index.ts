@@ -37,6 +37,8 @@ export type CalibrationClaim = typeof s.calibrationClaims.$inferSelect
 export type NewCalibrationClaim = typeof s.calibrationClaims.$inferInsert
 export type Visitor = typeof s.visitors.$inferSelect
 export type NewVisitor = typeof s.visitors.$inferInsert
+export type Group = typeof s.groups.$inferSelect
+export type GroupMember = typeof s.groupMembers.$inferSelect
 export type Post = typeof s.posts.$inferSelect
 export type NewPost = typeof s.posts.$inferInsert
 
@@ -69,6 +71,116 @@ export const repo = {
     async setPlan(id: string, plan: 'free' | 'pro'): Promise<void> {
       const db = getDb()
       await db.update(s.users).set({ plan }).where(eq(s.users.id, id))
+    },
+    /** Avatars for a set of authors in one query, so a feed is not N+1. */
+    async avatarsByIds(ids: string[]): Promise<Map<string, string | null>> {
+      const out = new Map<string, string | null>()
+      const unique = [...new Set(ids)].filter(Boolean)
+      if (unique.length === 0) return out
+      const db = getDb()
+      const rows = await db
+        .select({ id: s.users.id, avatarUrl: s.users.avatarUrl })
+        .from(s.users)
+        .where(inArray(s.users.id, unique))
+      for (const row of rows) out.set(row.id, row.avatarUrl)
+      return out
+    },
+    async setAvatar(id: string, avatarUrl: string | null): Promise<void> {
+      const db = getDb()
+      await db.update(s.users).set({ avatarUrl }).where(eq(s.users.id, id))
+    },
+  },
+
+  groups: {
+    async countOwnedBy(userId: string): Promise<number> {
+      const db = getDb()
+      const rows = await db
+        .select({ id: s.groups.id })
+        .from(s.groups)
+        .where(eq(s.groups.ownerUserId, userId))
+      return rows.length
+    },
+    async slugExists(slug: string): Promise<boolean> {
+      const db = getDb()
+      const [row] = await db.select({ id: s.groups.id }).from(s.groups).where(eq(s.groups.slug, slug)).limit(1)
+      return Boolean(row)
+    },
+    async create(input: typeof s.groups.$inferInsert): Promise<Group> {
+      const db = getDb()
+      const [row] = await db.insert(s.groups).values(input).returning()
+      return row
+    },
+    async getById(id: string): Promise<Group | undefined> {
+      const db = getDb()
+      const [row] = await db.select().from(s.groups).where(eq(s.groups.id, id)).limit(1)
+      return row
+    },
+    async getBySlug(slug: string): Promise<Group | undefined> {
+      const db = getDb()
+      const [row] = await db.select().from(s.groups).where(eq(s.groups.slug, slug)).limit(1)
+      return row
+    },
+    /** Public groups plus every group this user belongs to. */
+    async listVisibleTo(userId: string | null, limit = 50): Promise<Group[]> {
+      const db = getDb()
+      if (!userId) {
+        return db
+          .select()
+          .from(s.groups)
+          .where(eq(s.groups.visibility, 'public'))
+          .orderBy(desc(s.groups.createdAt))
+          .limit(limit)
+      }
+      const mine = await db
+        .select({ groupId: s.groupMembers.groupId })
+        .from(s.groupMembers)
+        .where(eq(s.groupMembers.userId, userId))
+      const ids = mine.map((m) => m.groupId)
+      const where = ids.length
+        ? or(eq(s.groups.visibility, 'public'), inArray(s.groups.id, ids))
+        : eq(s.groups.visibility, 'public')
+      return db.select().from(s.groups).where(where).orderBy(desc(s.groups.createdAt)).limit(limit)
+    },
+    async remove(id: string): Promise<void> {
+      const db = getDb()
+      await db.delete(s.groups).where(eq(s.groups.id, id))
+    },
+    async getMembership(groupId: string, userId: string): Promise<GroupMember | undefined> {
+      const db = getDb()
+      const [row] = await db
+        .select()
+        .from(s.groupMembers)
+        .where(and(eq(s.groupMembers.groupId, groupId), eq(s.groupMembers.userId, userId)))
+        .limit(1)
+      return row
+    },
+    async addMember(groupId: string, userId: string, role: GroupMember['role']): Promise<void> {
+      const db = getDb()
+      await db
+        .insert(s.groupMembers)
+        .values({ groupId, userId, role })
+        .onConflictDoNothing({ target: [s.groupMembers.groupId, s.groupMembers.userId] })
+      await db
+        .update(s.groups)
+        .set({ memberCount: sql`${s.groups.memberCount} + 1` })
+        .where(eq(s.groups.id, groupId))
+    },
+    async setBlocked(groupId: string, userId: string, blocked: boolean): Promise<void> {
+      const db = getDb()
+      await db
+        .update(s.groupMembers)
+        .set({ blocked })
+        .where(and(eq(s.groupMembers.groupId, groupId), eq(s.groupMembers.userId, userId)))
+    },
+    async removeMember(groupId: string, userId: string): Promise<void> {
+      const db = getDb()
+      await db
+        .delete(s.groupMembers)
+        .where(and(eq(s.groupMembers.groupId, groupId), eq(s.groupMembers.userId, userId)))
+      await db
+        .update(s.groups)
+        .set({ memberCount: sql`GREATEST(${s.groups.memberCount} - 1, 0)` })
+        .where(eq(s.groups.id, groupId))
     },
   },
 

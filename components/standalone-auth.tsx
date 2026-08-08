@@ -79,7 +79,7 @@ export function StandaloneAuthGate({ children }: { children: ReactNode }) {
         <div className="mb-4 flex items-center gap-2">
           <Radar className="h-6 w-6 text-primary" />
           <div>
-            <h1 className="text-lg font-bold leading-none">Lambda NX</h1>
+            <h1 className="text-lg font-bold leading-none">Lambda</h1>
             <p className="text-[10px] text-muted-foreground">Intelligence platform</p>
           </div>
         </div>

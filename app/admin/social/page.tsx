@@ -7,7 +7,7 @@ import { SocialDashboard } from '@/components/social-dashboard'
  * already knows both the path and the secret.
  */
 export const metadata: Metadata = {
-  title: 'Publishing channels — Lambda NX',
+  title: 'Publishing channels — Lambda',
   robots: { index: false, follow: false },
 }
 

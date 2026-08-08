@@ -49,7 +49,7 @@ export interface AutoPublishResult {
 }
 
 /** The byline every automatic post carries. */
-export const PLATFORM_AUTHOR = 'Lambda NX'
+export const PLATFORM_AUTHOR = 'Lambda'
 /** Marks a post as machine-published, so the UI can label it honestly. */
 export const AUTO_REF_TYPE = 'auto'
 
@@ -110,7 +110,7 @@ export function eventToCandidate(event: WorldEvent): PublishCandidate | null {
       '',
       ...facts,
       '',
-      'Published automatically by Lambda NX from a graded public source. Open the link for the original report.',
+      'Published automatically by Lambda from a graded public source. Open the link for the original report.',
     ].join('\n'),
     sourceUrl: event.sourceUrl,
     refValue: refKey('event', `${event.sourceKey}-${event.title}`),
@@ -149,7 +149,7 @@ export function trendingToCandidate(
       '',
       ...lines,
       '',
-      'View counts are an interest signal, not an importance ranking. Published automatically by Lambda NX.',
+      'View counts are an interest signal, not an importance ranking. Published automatically by Lambda.',
     ].join('\n'),
     sourceUrl: solid[0]?.url ?? null,
     refValue: refKey('trending', day),
@@ -188,7 +188,7 @@ export function radarToCandidate(
       '',
       ...lines,
       '',
-      'Collected automatically from public feeds by Lambda NX. We surface and grade; we do not reprint.',
+      'Collected automatically from public feeds by Lambda. We surface and grade; we do not reprint.',
     ].join('\n'),
     sourceUrl: usable[0]?.url ?? null,
     refValue: refKey('radar', day),

@@ -94,6 +94,12 @@ export const users = pgTable(
     /** Pi username, or the subject id from the standalone auth provider. */
     externalId: text('external_id').notNull(),
     displayName: text('display_name'),
+    /**
+     * Profile picture. Stored through lib/storage (never a vendor URL), so the
+     * storage backend stays swappable; this column holds only the key we can
+     * resolve back to an image.
+     */
+    avatarUrl: text('avatar_url'),
     /** Subscription tier (source of truth for pricing/features is lib/plans). */
     plan: planEnum('plan').notNull().default('free'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -541,4 +547,55 @@ export const socialChannels = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('social_channels_enabled_idx').on(t.enabled, t.autoPublish)],
+)
+
+// ── Groups ───────────────────────────────────────────────────────────────────
+//
+// A deliberately small social layer. The cap of two groups per owner is a
+// product rule, not a storage one, so it lives in lib/modules/groups where it
+// can be tested — but the schema records ownership so the rule has something to
+// count.
+
+export const groupRoleEnum = pgEnum('group_role', ['owner', 'admin', 'member'])
+export const groupVisibilityEnum = pgEnum('group_visibility', ['public', 'private'])
+
+export const groups = pgTable(
+  'groups',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerUserId: uuid('owner_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    description: text('description'),
+    /** URL-safe handle, unique across the platform. */
+    slug: text('slug').notNull().unique(),
+    visibility: groupVisibilityEnum('visibility').notNull().default('public'),
+    /** Random, rotatable code that lets someone join a private group. */
+    inviteCode: text('invite_code').notNull().unique(),
+    memberCount: integer('member_count').notNull().default(1),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('groups_owner_idx').on(t.ownerUserId)],
+)
+
+export const groupMembers = pgTable(
+  'group_members',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    groupId: uuid('group_id')
+      .notNull()
+      .references(() => groups.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    role: groupRoleEnum('role').notNull().default('member'),
+    /** Blocked members keep their row, so a ban cannot be undone by re-joining. */
+    blocked: boolean('blocked').notNull().default(false),
+    joinedAt: timestamp('joined_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique('group_members_group_user_uq').on(t.groupId, t.userId),
+    index('group_members_user_idx').on(t.userId),
+  ],
 )

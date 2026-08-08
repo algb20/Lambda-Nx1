@@ -31,16 +31,16 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params
   const post = await loadPost(id)
-  if (!post) return { title: 'Not found — Lambda NX' }
+  if (!post) return { title: 'Not found — Lambda' }
   const description = post.body.length > 200 ? `${post.body.slice(0, 197)}…` : post.body
   return {
-    title: `${post.title} — Lambda NX`,
+    title: `${post.title} — Lambda`,
     description,
     openGraph: {
       title: post.title,
       description,
       type: 'article',
-      siteName: 'Lambda NX',
+      siteName: 'Lambda',
     },
     twitter: { card: 'summary', title: post.title, description },
   }
@@ -59,8 +59,8 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
       <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur">
         <div className="container mx-auto max-w-2xl px-4 py-3">
           <a href="/" className="inline-flex items-center gap-2 text-primary">
-            <BrandMark size={22} title="Lambda NX" />
-            <span className="text-sm font-bold tracking-tight">Lambda NX</span>
+            <BrandMark size={22} title="Lambda" />
+            <span className="text-sm font-bold tracking-tight">Lambda</span>
           </a>
         </div>
       </header>
@@ -94,7 +94,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         <PostShareBar post={post} permalink={permalink} className="mt-4" />
 
         <p className="mt-8 text-center text-xs text-muted-foreground">
-          Published on Lambda NX — passive, lawful open-source intelligence.
+          Published on Lambda — passive, lawful open-source intelligence.
         </p>
       </main>
     </div>

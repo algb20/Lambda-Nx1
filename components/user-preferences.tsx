@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge'
 import { Slider } from '@/components/ui/slider'
 import { UpgradePanel } from '@/components/upgrade-panel'
 import { PiUsernameLink } from '@/components/pi-username-link'
+import { AvatarSetting } from '@/components/avatar'
+import { GroupsPanel } from '@/components/groups-panel'
 
 /**
  * Settings. The previous version advertised fabricated capabilities ("Quantum
@@ -24,8 +26,13 @@ export function UserPreferences() {
           actively comes here to change. */}
       <UpgradePanel />
 
+      {/* Renders only for signed-in accounts. */}
+      <AvatarSetting />
+
       {/* Renders only for Pi-verified accounts. */}
       <PiUsernameLink />
+
+      <GroupsPanel />
 
       <div>
         <h2 className="text-xl font-bold">Settings</h2>
@@ -58,7 +65,7 @@ export function UserPreferences() {
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-green-500" />
-            How Lambda NX operates
+            How Lambda operates
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">

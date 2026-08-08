@@ -92,7 +92,7 @@ export function UpgradePanel() {
     piSdk.createPayment(
       {
         amount: plan.price.pi,
-        memo: `Lambda NX ${plan.name} — 1 ${plan.price.interval}`,
+        memo: `Lambda ${plan.name} — 1 ${plan.price.interval}`,
         metadata: { kind: 'subscription', plan: plan.id, interval: plan.price.interval },
       },
       {

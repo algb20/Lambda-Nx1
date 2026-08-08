@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
   const claim = typeof body.claim === 'string' ? body.claim : ''
-  const author = typeof body.author === 'string' && body.author.trim() ? body.author : 'Lambda NX'
+  const author = typeof body.author === 'string' && body.author.trim() ? body.author : 'Lambda'
   const authorKind: AuthorKind = body.authorKind === 'external' ? 'external' : 'us'
   const horizon = typeof body.horizon === 'string' ? new Date(body.horizon) : null
 

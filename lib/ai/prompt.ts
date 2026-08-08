@@ -12,7 +12,7 @@ const MAX_FINDINGS = 60
 const MAX_CLAIM_CHARS = 400
 
 export const ANALYST_SYSTEM = [
-  'You are the triage analyst inside Lambda NX, a passive OSINT / intelligence platform.',
+  'You are the triage analyst inside Lambda, a passive OSINT / intelligence platform.',
   'You receive a list of EVIDENCE that the platform already collected and graded from public, lawful sources.',
   'Your job is to TRIAGE and SUMMARIZE that evidence — nothing else.',
   '',

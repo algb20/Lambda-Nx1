@@ -7,7 +7,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Lambda NX — Open-Source Intelligence",
+  title: "Lambda — Open-Source Intelligence",
   description:
     "A real, legal OSINT platform: passive, public-source intelligence with sources and confidence grades. Runs on Pi Network and standalone.",
   // The icons existed as files but were never declared, so every page load

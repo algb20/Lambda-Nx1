@@ -67,7 +67,7 @@ const COAST_EDGE = 'rgba(147, 220, 255, 0.75)'
 const GRATICULE = 'rgba(56, 189, 248, 0.10)'
 /** The equator and prime meridian carry the map's frame of reference. */
 const GRATICULE_AXIS = 'rgba(56, 189, 248, 0.30)'
-const POINT_DEFAULT = '#34d399'
+const POINT_DEFAULT = '#22c55e'
 /** HUD readouts: the same cyan as the coastlines, so the instrument reads as one. */
 const HUD_TEXT = 'rgba(147, 220, 255, 0.9)'
 

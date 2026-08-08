@@ -477,7 +477,7 @@ export function SocialDashboard() {
       <Card className="p-4">
         <h2 className="mb-1 text-sm font-semibold">Why these platforms</h2>
         <p className="text-[11px] leading-relaxed text-muted-foreground">
-          Discord, Slack and generic webhooks accept a direct POST, so Lambda NX can publish to
+          Discord, Slack and generic webhooks accept a direct POST, so Lambda can publish to
           them on its own. X, Facebook, LinkedIn and Instagram require an approved OAuth
           application, which this deployment does not have — rather than showing buttons that
           cannot work, use a webhook into an automation tool that already holds those
