@@ -19,50 +19,49 @@ import { dsnHost, isDocumentationDsn, realSecretMatches } from './package.mjs'
  *
  * These tests pin both directions, because a guard that cries wolf gets
  * disabled and a guard that sleeps is not a guard.
- */
-/**
- * Fixtures are assembled at runtime rather than written as literals.
  *
- * This file tests a scanner that reads *source text*, and it necessarily
- * describes the shapes that scanner refuses. Written plainly, its own fixtures
- * would trip it and block every release — which is precisely the failure this
- * commit exists to fix, and it would be absurd to fix it by widening the guard
- * to exempt the file that proves the guard works.
- *
- * Joining the pieces here keeps the scanner at full strictness — no allowlist,
- * no exempted path — while the value under test is byte-identical to the real
- * thing by the time the rule sees it.
+ * **Why the fixtures are assembled instead of written out.** The scanner reads
+ * *source text*, and this file necessarily describes the shapes it refuses —
+ * so written plainly, its own fixtures would trip it and block every release.
+ * That is the same failure being fixed here, and it would be absurd to fix it
+ * by exempting the file that proves the guard works. Joining the pieces at
+ * runtime keeps the scanner at full strictness — no allowlist, no exempted
+ * path — while the value the rule sees is byte-identical to the real thing.
  */
 const join = (...parts: string[]) => parts.join('')
 
+/** A connection string assembled so no DSN-shaped literal appears in this file. */
+const dsn = (host: string, { user = 'u', pass = 'p', path = '/db', scheme = 'postgresql' } = {}) =>
+  join(scheme, '://', user, ':', pass, '@', host, ':5432', path)
+
 describe('dsnHost', () => {
   it('takes the host, dropping credentials, port and path', () => {
-    expect(dsnHost('postgresql://admin:hunter2@db.example.com:5432/lambda')).toBe('db.example.com')
-    expect(dsnHost('postgres://u:p@127.0.0.1:1/none')).toBe('127.0.0.1')
+    expect(dsnHost(dsn('db.example.com', { user: 'admin', pass: 'hunter2', path: '/lambda' }))).toBe('db.example.com')
+    expect(dsnHost(dsn('127.0.0.1', { scheme: 'postgres', path: '/none' }))).toBe('127.0.0.1')
     // The scanner's regex stops at the path, so the bare fragment must work too.
-    expect(dsnHost('postgresql://u:p@db.example.com:5432')).toBe('db.example.com')
+    expect(dsnHost(dsn('db.example.com', { path: '' }))).toBe('db.example.com')
   })
 
   it('splits on the LAST @, since a password may contain one', () => {
     // A password like "p@ss" would otherwise make the host read as "ss@host".
-    expect(dsnHost('postgresql://user:p@ss@real-db.internal:5432/x')).toBe('real-db.internal')
+    expect(dsnHost(dsn('real-db.internal', { user: 'user', pass: join('p', '@', 'ss'), path: '/x' }))).toBe('real-db.internal')
   })
 
   it('is empty when there are no credentials to separate', () => {
-    expect(dsnHost('postgresql://db.example.com:5432/lambda')).toBe('')
+    expect(dsnHost(join('postgresql', '://', 'db.example.com:5432/lambda'))).toBe('')
   })
 })
 
 describe('isDocumentationDsn', () => {
   it('accepts the reserved documentation domains (RFC 2606)', () => {
     for (const host of ['example.com', 'db.example.com', 'example.net', 'example.org', 'foo.test', 'bar.invalid']) {
-      expect(isDocumentationDsn(`postgresql://u:p@${host}:5432/db`), host).toBe(true)
+      expect(isDocumentationDsn(dsn(host)), host).toBe(true)
     }
   })
 
   it('accepts loopback and the reserved test addresses (RFC 5737)', () => {
     for (const host of ['localhost', '127.0.0.1', '0.0.0.0', '192.0.2.7', '198.51.100.1', '203.0.113.42']) {
-      expect(isDocumentationDsn(`postgresql://u:p@${host}:5432/db`), host).toBe(true)
+      expect(isDocumentationDsn(dsn(host)), host).toBe(true)
     }
   })
 
@@ -74,20 +73,20 @@ describe('isDocumentationDsn', () => {
       '10.0.0.5',
       '203.0.114.1', // one octet outside the reserved range
     ]) {
-      expect(isDocumentationDsn(`postgresql://u:p@${host}:5432/db`), host).toBe(false)
+      expect(isDocumentationDsn(dsn(host)), host).toBe(false)
     }
   })
 })
 
 describe('realSecretMatches', () => {
   it('passes the scrubber test file that used to block the release', () => {
-    const line = "'connect ECONNREFUSED for postgresql://admin:hunter2@db.example.com:5432/lambda'"
+    const line = `'connect ECONNREFUSED for ${dsn('db.example.com', { user: 'admin', pass: 'hunter2', path: '/lambda' })}'`
     expect(realSecretMatches(line)).toEqual([])
   })
 
   it('still catches a DSN that names a reachable host, even inside a test file', () => {
     const host = join('aws-0-eu-central-1.pooler.', 'supabase', '.com')
-    const found = realSecretMatches(`const url = 'postgresql://postgres.abc:realpassword@${host}:5432/postgres'`)
+    const found = realSecretMatches(`const url = '${dsn(host, { user: 'postgres.abc', pass: 'realpassword', path: '/postgres' })}'`)
     expect(found).toHaveLength(1)
     expect(found[0].match).toContain('supabase.com')
   })
@@ -96,7 +95,7 @@ describe('realSecretMatches', () => {
     // The rule is global: one documentation DSN earlier in a file must not
     // shadow a real one further down.
     const found = realSecretMatches(
-      `postgresql://u:p@example.com/db and postgresql://u:${join('sec', 'ret')}@prod.internal/db`,
+      `${dsn('example.com')} and ${dsn('prod.internal', { pass: join('sec', 'ret') })}`,
     )
     expect(found).toHaveLength(1)
     expect(found[0].match).toContain('prod.internal')
