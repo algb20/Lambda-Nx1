@@ -4,10 +4,16 @@
 # Pi domain. Swappable — moving to Vercel or self-host is a config change, not an
 # app rewrite (providers sit behind lib/*).
 #
-# No `functions` directory: Pi payments are served by the app's own route handler
-# (`app/api/payments`) over the lib/payments port, so they run identically on every
-# host. The old netlify/functions/pi-* duplicates were removed once the route
-# existed — two implementations of one flow is exactly the drift we avoid.
+# Pi payments are served by the app's own route handler (`app/api/payments`) over
+# the lib/payments port, so they run identically on every host. The old
+# netlify/functions/pi-* duplicates were removed once the route existed — two
+# implementations of one flow is exactly the drift we avoid.
+#
+# The one function that remains is a *scheduler*, not an implementation:
+# `netlify/functions/scheduled-jobs.mts` calls the same `/api/cron/<job>` routes
+# that Vercel Cron calls, so both hosts drive identical code. Without it, nothing
+# on Netlify ever published — `vercel.json` declares the schedules and Netlify
+# does not read that file.
 
 [build]
   command = "npm run build"
