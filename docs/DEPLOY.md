@@ -99,6 +99,38 @@ policies): only the app's service connection can touch it.
 
 ## 3. Deploy — Pi mode (charter default: Netlify)
 
+> ### Know which site is production, before anything else
+>
+> This account has **many** Netlify sites pointed at this repository, and they
+> are not equivalent. The distinction that matters is not the name — it is
+> whether the site is **connected to GitHub**:
+>
+> - A **connected** site rebuilds itself when `main` moves. Merging is
+>   deploying.
+> - A site created by an API/zip/drag-and-drop deploy is **not** connected. It
+>   serves whatever was last pushed to it by hand and *never* changes when you
+>   merge — which reads, from the outside, exactly like a broken application.
+>
+> Two separate days were lost to this. First a cron expression the Vercel plan
+> forbade, which failed every build (see `vercel.json.md`). Then the opposite
+> shape: builds succeeding while the URL being tested was an unconnected site
+> frozen on an old commit, with **no environment variables set at all** — no
+> `DATABASE_URL`, no `SESSION_SECRET` — so nothing could persist and nobody
+> could sign in. Both times the symptom was "I merged and nothing changed".
+>
+> **Before debugging the app, confirm the URL you are testing.** In the Netlify
+> dashboard, the production deploy of a connected site shows the commit it was
+> built from; if that commit is not the tip of `main`, the problem is the site,
+> not the code. Prefer one connected production site and delete or ignore the
+> rest — a spare site with stale code and empty configuration is not a backup,
+> it is a trap.
+>
+> Environment variables are **per site**. Setting them on one site does nothing
+> for another, and a site missing `SESSION_SECRET` cannot sign anybody in even
+> though the code is perfect. Every deployment target needs the full set from
+> §2.
+
+
 The verified Pi domain already exists; `netlify.toml` wires the Next runtime.
 Pi payments are served by the app's own route handler (`app/api/payments`) over
 the `lib/payments` port — not by host-specific functions — so they behave the
