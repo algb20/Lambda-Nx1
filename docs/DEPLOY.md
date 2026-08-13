@@ -62,8 +62,9 @@ Set these in the host dashboard (Netlify: *Site settings → Environment*). See
 | `PI_API_KEY` | Pi mode | Pi Developer Portal. Needed for Pi auth verify + payments. |
 | `STRIPE_SECRET_KEY` | standalone paid | Stripe dashboard. Needed for standard payments. |
 | `ANTHROPIC_API_KEY` | optional | Enables the AI analyst. Absent = graceful notice. |
-| `CRON_SECRET` | scheduler | Shared secret for `POST /api/radar/run`. |
-| `ADMIN_SECRET` | optional | Unlocks the private usage registry `GET /api/admin/visitors`. Unset ⇒ the endpoint returns 503 and no one can read it. |
+| `CRON_SECRET` | **for anything automatic** | Guards every scheduled job (`GET /api/cron/*`, `POST /api/radar/run`). Unset ⇒ the platform publishes nothing on its own and the Radar never sweeps. `openssl rand -base64 32`. |
+| `ADMIN_SECRET` | for the admin surface | Unlocks the social dashboard, the private usage registry (`GET /api/admin/visitors`) and the manual publish run. Unset ⇒ those endpoints return 503 and no one can read them. |
+| `SOCIAL_SECRET_KEY` | for social channels | 32-byte key that encrypts channel webhook credentials at rest (AES-256-GCM). Unset ⇒ a channel cannot be saved at all, because its credential would sit unencrypted. `openssl rand -hex 32`. |
 | `PRICE_PRO_PI` / `PRICE_PRO_USD` | optional | Change the Pro price in one place. |
 | `ENFORCE_TIERS` | optional | `true` turns on subscription gating. |
 
@@ -133,27 +134,53 @@ Pi apps are **hosted web apps** — Pi Browser loads them from your deployed URL
 
 ---
 
-## 4. The Radar scheduler
+## 4. The scheduler — everything the platform does on its own
 
-`POST /api/radar/run` runs one radar pass. It is **disabled (503) unless
-`CRON_SECRET` is set**, and requires the header `x-cron-secret: <CRON_SECRET>`.
+All scheduled work comes through **one guarded door**: `GET /api/cron/<job>`.
 
-A pass has two halves, and the endpoint can run either alone:
+It is a `GET` guarded by a bearer token because that is what hosted schedulers
+send. The earlier design — `POST` with a bespoke header — could not be driven by
+Vercel Cron at all, which meant the "automatic" publishing was automatic only
+when a human remembered to trigger it by hand.
 
-| Call | Runs | Suggested cadence |
+| Job | Does | Suggested cadence |
 |---|---|---|
-| `POST /api/radar/run?half=monitors` | product monitors that are due | every 15–60 min |
-| `POST /api/radar/run?half=watch` | the internal ⭐ watchlist (`docs/RADAR.md`) | daily |
-| `POST /api/radar/run` | both, independently — one half failing does not abort the other (failures come back under `errors`) | — |
+| `GET /api/cron/publish` | turns the strongest of today's graded findings into real posts on the front page | every 6 h |
+| `GET /api/cron/radar-monitors` | runs the product monitors that are due | every 15–60 min |
+| `GET /api/cron/radar-watch` | reads the internal ⭐ watchlist (`docs/RADAR.md`) | daily |
+| `GET /api/cron/radar` | both Radar halves; one half failing does not abort the other | — |
 
-Schedule them separately: monitors follow each user's chosen interval, while the
-watchlist is a once-a-day read of publishers who post at most a few items a day.
-Running the watch half more often just re-reads feeds and stores nothing (it is
-de-duplicated), so it wastes provider goodwill for no gain.
+Authentication — either header, both compared in constant time:
 
-- **Supabase/pg_cron (durable, preferred at scale):** schedule a job that POSTs
-  to the endpoint with the header.
-- **Netlify Scheduled Functions / external cron:** same call on a cron cadence.
+```bash
+curl -H "Authorization: Bearer $CRON_SECRET" https://<domain>/api/cron/publish
+curl -H "x-cron-secret: $CRON_SECRET"        https://<domain>/api/cron/publish
+```
+
+Without `CRON_SECRET` every job answers **503**, so an unconfigured deployment
+publishes nothing rather than exposing an open trigger. `GET /api/health` names
+this in the `cron_secret` check.
+
+Every job is idempotent: the publisher skips anything already published (each
+candidate carries a stable identity) and the Radar fingerprints its findings.
+Running a job twice costs time, never duplicates.
+
+**On Vercel**, `vercel.json` already declares the three schedules — importing the
+repo is enough, provided `CRON_SECRET` is set on the project. Vercel injects the
+bearer header itself.
+
+**On Supabase/pg_cron, Netlify Scheduled Functions or any external cron**, call
+the same URLs with either header.
+
+`POST /api/radar/run` still exists and takes the same credential, for anyone
+already scheduling it. `POST /api/publish/run` (guarded by `ADMIN_SECRET`) is the
+operator's manual handle, and `?dry=1` reports what it *would* publish without
+writing anything — the safe way to check the thresholds.
+
+Schedule the two Radar halves separately: monitors follow each user's chosen
+interval, while the watchlist is a once-a-day read of publishers who post at most
+a few items a day. Running the watch half more often re-reads feeds and stores
+nothing (it is de-duplicated), so it wastes provider goodwill for no gain.
 
 Egress note: the watch half needs outbound HTTPS to `www.cisa.gov`,
 `huggingface.co` and `export.arxiv.org`. If the host network is allowlisted,
@@ -181,8 +208,23 @@ or self-host — the runtime is standard Next.js 15.
 
 Import the repo; Vercel auto-detects Next.js, so build/output settings need no
 changes. Set the same env vars from §2 (Project Settings → Environment Variables)
-and redeploy — variables are read at build time, so adding one does not apply
-until the next deploy.
+and redeploy — **variables are read at build time, so adding one does not apply
+until the next deploy.** This is the single most common cause of "I set it and
+nothing changed".
+
+`vercel.json` in the repo root carries two things so the platform behaves without
+dashboard clicking:
+
+- **`crons`** — the three schedules from §4. They fire only on the production
+  deployment, and only if `CRON_SECRET` is set.
+- **`functions`** — a 60-second ceiling for the routes that fan out to several
+  public providers. Vercel's default (10 s) kills those mid-request and returns
+  an HTML error page where the client expects JSON, which is precisely how the
+  world map ends up empty.
+
+The **Content Security Policy** widens for `vercel.live` only when the build runs
+on Vercel (`lib/security/csp.mjs`), so the Vercel toolbar loads without console
+violations while a Netlify or self-hosted deploy keeps the tighter policy.
 
 Two things make the build host-agnostic, and both are deliberate:
 
@@ -212,7 +254,44 @@ Vercel exactly as on Netlify.
    optional provider is off (e.g. no AI key); `"unhealthy"` (HTTP 503) = a
    required check failed (fix `SESSION_SECRET`).
 
-2. **End-to-end smoke test** — probes a live instance (no DB/egress needed):
+   It also reports which commit is serving the page, under `build` — so "is the
+   live link the latest work?" is answerable without a hosting dashboard.
+
+2. **Is it actually wired to the database?** — `?deep=1` stops asking the
+   environment and asks Postgres:
+
+   ```bash
+   curl -s "https://<your-domain>/api/health?deep=1" | jq .database
+   ```
+
+   ```json
+   {
+     "reachable": true,
+     "latencyMs": 34,
+     "serverVersion": "PostgreSQL 15.8",
+     "appliedMigrations": 14,
+     "expectedMigrations": 14,
+     "missingTables": [],
+     "error": null
+   }
+   ```
+
+   This is the check that matters, because a set `DATABASE_URL` is **not** a
+   working connection. Read it as:
+
+   | Symptom | Meaning | Fix |
+   |---|---|---|
+   | `reachable: false` | wrong credentials, paused project, or the pooler refused | check the connection string in the host dashboard; use the **session pooler** DSN for a serverless host |
+   | `missingTables` non-empty | connected, but the schema was never migrated | `DATABASE_URL=… npm run db:migrate` |
+   | `appliedMigrations < expectedMigrations` | the deployment ships migrations the database has not applied | same — migrate |
+   | all clean | genuinely wired | — |
+
+   Kept opt-in so an uptime monitor hitting `/api/health` every thirty seconds
+   does not open a database connection each time. Never leaks a credential: the
+   connection string is absent from the output and driver errors are scrubbed
+   before they are returned.
+
+3. **End-to-end smoke test** — probes a live instance (no DB/egress needed):
 
    ```bash
    node scripts/smoke.mjs https://<your-domain>

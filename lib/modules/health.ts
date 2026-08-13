@@ -52,6 +52,12 @@ export interface HealthDeps {
   uptimeSeconds?: number
   /** Number of migrations shipped in the build. */
   migrationCount?: number
+  /**
+   * The result of actually querying the database, when the caller ran the probe.
+   * Supplying it upgrades the `database` check from "a variable is set" to "the
+   * database answered", which is the only version of that check worth trusting.
+   */
+  liveDatabase?: { status: CheckStatus; detail: string }
   /** Clock (default: Date.now), for deterministic tests. */
   now?: () => number
 }
@@ -90,13 +96,19 @@ export function buildHealthReport(deps: HealthDeps = {}): HealthReport {
 
   // Database — required for persistence (archive, monitors, ontology memory,
   // calibration, tiers). The app still serves keyless investigations without it.
+  //
+  // When the caller probed the live database we report what the database said;
+  // otherwise we can only report that a connection string exists, and we say so
+  // in those words rather than implying a working connection.
   const dbOn = has(env.DATABASE_URL)
   checks.push({
     name: 'database',
-    status: dbOn ? 'ok' : 'degraded',
-    detail: dbOn
-      ? 'DATABASE_URL configured'
-      : 'no DATABASE_URL — persistence-backed features are disabled (keyless intel still works)',
+    status: deps.liveDatabase ? deps.liveDatabase.status : dbOn ? 'ok' : 'degraded',
+    detail:
+      deps.liveDatabase?.detail ??
+      (dbOn
+        ? 'DATABASE_URL is set (not verified — call /api/health?deep=1 to query the database)'
+        : 'no DATABASE_URL — persistence-backed features are disabled (keyless intel still works)'),
     required: false,
   })
 
@@ -136,13 +148,37 @@ export function buildHealthReport(deps: HealthDeps = {}): HealthReport {
     })
   }
 
-  // Radar cron guard — the scheduled sweep endpoint is disabled without it.
+  // Scheduler guard — every scheduled job (the Radar sweep and the automatic
+  // publisher) refuses to run without it, so an unset value means the platform
+  // silently stops publishing anything of its own.
   checks.push({
-    name: 'radar_cron_secret',
+    name: 'cron_secret',
     status: has(env.CRON_SECRET) ? 'ok' : 'off',
     detail: has(env.CRON_SECRET)
+      ? 'configured — scheduled Radar sweeps and auto-publishing can run'
+      : 'CRON_SECRET not set — /api/cron/* and POST /api/radar/run are disabled (503), so nothing publishes on a schedule',
+    required: false,
+  })
+
+  // Operator credential — the admin routes (social channels, the private usage
+  // registry, a manual publish run) all answer 503 without it.
+  checks.push({
+    name: 'admin_secret',
+    status: has(env.ADMIN_SECRET) ? 'ok' : 'off',
+    detail: has(env.ADMIN_SECRET)
       ? 'configured'
-      : 'CRON_SECRET not set — POST /api/radar/run is disabled (503) until set',
+      : 'ADMIN_SECRET not set — the admin routes (social dashboard, usage registry, manual publish) return 503',
+    required: false,
+  })
+
+  // Encryption key for stored channel credentials. Without it a webhook secret
+  // cannot be sealed, so the social dashboard refuses to store one at all.
+  checks.push({
+    name: 'social_secret_key',
+    status: has(env.SOCIAL_SECRET_KEY) ? 'ok' : 'off',
+    detail: has(env.SOCIAL_SECRET_KEY)
+      ? 'configured — channel credentials are encrypted at rest'
+      : 'SOCIAL_SECRET_KEY not set — social channels cannot be saved (their credentials would be unencrypted)',
     required: false,
   })
 

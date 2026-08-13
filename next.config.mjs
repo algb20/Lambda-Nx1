@@ -1,31 +1,16 @@
 /** @type {import('next').NextConfig} */
+import { securityHeaders } from './lib/security/csp.mjs'
 
-// Security headers applied to every response, on every host (Netlify, Vercel,
-// self-host) — portable defense-in-depth, not tied to one platform's config.
-// Passive-only product: we never frame third parties and are never framed; the
-// browser talks only to our own origin (API routes fan out to sources
-// server-side) plus the Pi SDK/API when running inside Pi Browser.
-const securityHeaders = [
-  { key: 'X-Frame-Options', value: 'DENY' },
-  { key: 'X-Content-Type-Options', value: 'nosniff' },
-  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-  { key: 'X-DNS-Prefetch-Control', value: 'off' },
-  { key: 'Permissions-Policy', value: 'geolocation=(), microphone=(), camera=(), payment=()' },
-  { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
-  {
-    key: 'Content-Security-Policy',
-    value: [
-      "default-src 'self'",
-      "img-src 'self' data: blob:",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://sdk.minepi.com",
-      "style-src 'self' 'unsafe-inline'",
-      "connect-src 'self' https://api.minepi.com",
-      "frame-ancestors 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-    ].join('; '),
-  },
-]
+/**
+ * The policy itself lives in `lib/security/csp.mjs` so it can be imported and
+ * asserted by a test. A CSP is product behaviour — it decides whether the Pi SDK
+ * loads and whether a translated page keeps its styling — and behaviour that
+ * only exists as a string in a config file is behaviour nothing can verify.
+ *
+ * The toolbar allowance is widened only when the build runs on Vercel, so a
+ * Netlify or self-hosted deploy keeps the tighter policy.
+ */
+const headerSet = securityHeaders({ onVercel: Boolean(process.env.VERCEL) })
 
 const nextConfig = {
   /**
@@ -57,7 +42,7 @@ const nextConfig = {
   },
   async headers() {
     return [
-      { source: '/:path*', headers: securityHeaders },
+      { source: '/:path*', headers: headerSet },
       // The readiness probe must never be cached by a CDN or browser.
       { source: '/api/health', headers: [{ key: 'Cache-Control', value: 'no-store' }] },
     ]
