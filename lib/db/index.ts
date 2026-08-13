@@ -89,6 +89,29 @@ export const repo = {
       const db = getDb()
       await db.update(s.users).set({ avatarUrl }).where(eq(s.users.id, id))
     },
+    /**
+     * Erase an account and everything that belongs to it (GDPR art. 17).
+     *
+     * The deletion is one statement because the schema does the work: rows that
+     * *are* the person — credentials, investigations, monitors, their groups and
+     * memberships — carry `on delete cascade`, so they go with the user inside
+     * the same transaction and cannot be half-removed. Rows that merely *were
+     * authored by* them — published posts, submitted suggestions, the country
+     * counters in the visitor registry — carry `on delete set null`, so the
+     * public record survives with the person detached from it. That distinction
+     * is deliberate: deleting an account must not silently retract things other
+     * people are reading, and keeping a name attached to them would defeat the
+     * deletion.
+     *
+     * Returns the row that was removed so the caller can clean up what the
+     * database cannot reach (the avatar in object storage), or undefined if the
+     * account was already gone — which makes a repeated request harmless.
+     */
+    async remove(id: string): Promise<User | undefined> {
+      const db = getDb()
+      const [row] = await db.delete(s.users).where(eq(s.users.id, id)).returning()
+      return row
+    },
   },
 
   groups: {

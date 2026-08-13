@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Slider } from '@/components/ui/slider'
 import { UpgradePanel } from '@/components/upgrade-panel'
+import { AccountPanel } from '@/components/account-panel'
 import { PiUsernameLink } from '@/components/pi-username-link'
 import { AvatarSetting } from '@/components/avatar'
 import { GroupsPanel } from '@/components/groups-panel'
@@ -23,8 +24,14 @@ export function UserPreferences() {
 
   return (
     <div className="space-y-4">
-      {/* Plan and billing first: it is the one thing on this screen a user
-          actively comes here to change. */}
+      {/* Account first, because for a signed-out visitor it is the only thing on
+          this screen that does anything — and in Pi mode it used to be missing
+          entirely, which is why nobody could create an account outside the Pi
+          Browser. */}
+      <AccountPanel />
+
+      {/* Plan and billing next: the one thing a signed-in user actively comes
+          here to change. */}
       <UpgradePanel />
 
       {/* Renders only for signed-in accounts. */}
@@ -81,11 +88,23 @@ export function UserPreferences() {
         <CardContent className="flex items-start gap-3 p-4 text-sm text-muted-foreground">
           <Info className="mt-0.5 h-4 w-4 shrink-0" />
           <p>
-            Account, saved investigations and persisted preferences appear once authentication
-            and the first modules are connected. Nothing here is simulated.
+            Nothing on this screen is simulated. Every control here changes real behaviour, and
+            anything not yet wired is absent rather than shown as a placeholder.
           </p>
         </CardContent>
       </Card>
+
+      {/* Reachable from inside the app, not only from a footer nobody scrolls
+          to. Both pages describe what the code actually does. */}
+      <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+        <a href="/privacy" className="hover:text-foreground hover:underline">
+          Privacy
+        </a>
+        <span>·</span>
+        <a href="/terms" className="hover:text-foreground hover:underline">
+          Terms of use
+        </a>
+      </p>
       {/* Which build is serving this page — settles "am I looking at the
           latest work?" without a hosting dashboard. */}
       <BuildStamp className="justify-center pt-1" />
