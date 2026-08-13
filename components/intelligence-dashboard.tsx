@@ -46,6 +46,7 @@ import type { ResearchReport } from '@/lib/modules/research'
 import type { ReferenceReport } from '@/lib/modules/reference'
 import { TargetTracker } from '@/components/target-tracker'
 import { DataGlobe } from '@/components/data-globe'
+import { ExportDossier } from '@/components/export-dossier'
 import { pointsFromEvidence, type GlobePoint } from '@/lib/geo/centroids'
 import { PREDICATE_LABEL } from '@/lib/engine/ontology'
 import { proposePivots } from '@/lib/modules/copilot'
@@ -1539,6 +1540,17 @@ export function IntelligenceDashboard() {
           key={`${aiInput.gateway}:${aiInput.subject}`}
           subject={aiInput.subject}
           gateway={aiInput.gateway}
+          findings={aiInput.findings}
+        />
+      ) : null}
+
+      {/* The investigation leaves as a document — numbered against its sources,
+          so the person receiving it can check every claim. */}
+      {aiInput && aiInput.findings.length > 0 ? (
+        <ExportDossier
+          key={`export:${aiInput.gateway}:${aiInput.subject}`}
+          subject={aiInput.subject}
+          kind={aiInput.gateway}
           findings={aiInput.findings}
         />
       ) : null}
