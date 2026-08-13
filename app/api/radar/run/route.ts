@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { runFullRadar, runRadarSweep, runInternalRadarSweep } from '@/lib/radar'
+import { cronGate } from '@/lib/cron/auth'
 
 /**
  * POST /api/radar/run — runs one radar pass: the product half (due monitors)
@@ -23,13 +24,10 @@ export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 
 export async function POST(request: Request) {
-  const secret = process.env.CRON_SECRET
-  if (!secret) {
-    return NextResponse.json({ error: 'CRON_SECRET is not configured' }, { status: 503 })
-  }
-  if (request.headers.get('x-cron-secret') !== secret) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  // Same gate as every other scheduled route, so the credential is compared in
+  // one place and in constant time.
+  const denied = cronGate(request)
+  if (denied) return denied
 
   const half = new URL(request.url).searchParams.get('half')
   if (half === 'monitors') return NextResponse.json({ monitors: await runRadarSweep() })

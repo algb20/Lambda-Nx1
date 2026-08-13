@@ -19,6 +19,8 @@ describe('buildHealthReport', () => {
         AI_PROVIDER: 'claude',
         ANTHROPIC_API_KEY: 'sk-ant-x',
         CRON_SECRET: 'c',
+        ADMIN_SECRET: 'a',
+        SOCIAL_SECRET_KEY: 'k'.repeat(32),
       },
     })
     expect(r.status).toBe('healthy')
@@ -72,5 +74,62 @@ describe('buildHealthReport', () => {
     })
     const blob = JSON.stringify(r)
     expect(blob).not.toContain(secret)
+  })
+
+  /**
+   * The two credentials whose absence stops the platform doing its own work.
+   * Both were unset in production for weeks and nothing said so: auto-publishing
+   * and the social dashboard simply answered 503 to a caller nobody was watching.
+   */
+  it('names the operator credentials that silently disable whole features', () => {
+    const r = buildHealthReport({ now: fixedNow, env: { SESSION_SECRET: 's'.repeat(32) } })
+
+    const admin = r.checks.find((c) => c.name === 'admin_secret')
+    expect(admin?.status).toBe('off')
+    expect(admin?.detail).toContain('503')
+
+    const social = r.checks.find((c) => c.name === 'social_secret_key')
+    expect(social?.status).toBe('off')
+
+    const cron = r.checks.find((c) => c.name === 'cron_secret')
+    expect(cron?.status).toBe('off')
+    expect(cron?.detail).toContain('nothing publishes on a schedule')
+  })
+
+  describe('the database check', () => {
+    /**
+     * The distinction this whole probe exists for. A set variable is not a
+     * working connection, and the shallow check must not imply that it is.
+     */
+    it('does not claim a connection it has not made', () => {
+      const r = buildHealthReport({
+        now: fixedNow,
+        env: { SESSION_SECRET: 's'.repeat(32), DATABASE_URL: 'postgres://x' },
+      })
+      const db = r.checks.find((c) => c.name === 'database')
+      expect(db?.detail).toContain('not verified')
+      expect(db?.detail).toContain('deep=1')
+    })
+
+    it('reports what the database said when the caller probed it', () => {
+      const r = buildHealthReport({
+        now: fixedNow,
+        env: { SESSION_SECRET: 's'.repeat(32), DATABASE_URL: 'postgres://x' },
+        liveDatabase: { status: 'ok', detail: 'connected to PostgreSQL 15.8 in 11ms' },
+      })
+      expect(r.checks.find((c) => c.name === 'database')?.status).toBe('ok')
+      expect(r.checks.find((c) => c.name === 'database')?.detail).toContain('PostgreSQL 15.8')
+    })
+
+    /** A configured-but-unreachable database must not read as healthy. */
+    it('lets a live failure override a present variable', () => {
+      const r = buildHealthReport({
+        now: fixedNow,
+        env: { SESSION_SECRET: 's'.repeat(32), DATABASE_URL: 'postgres://x' },
+        liveDatabase: { status: 'off', detail: 'database did not answer within 5000ms' },
+      })
+      expect(r.checks.find((c) => c.name === 'database')?.status).toBe('off')
+      expect(r.status).toBe('degraded')
+    })
   })
 })

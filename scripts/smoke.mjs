@@ -107,7 +107,51 @@ async function main() {
     bad('POST /api/radar/run', String(e))
   }
 
-  // 6) The Radar knowledge base is signed-in surface, not a public feed.
+  // 6) Every scheduled job refuses an unauthenticated caller. These are public
+  //    URLs that write to the live feed, so an open one is the whole product.
+  for (const job of ['publish', 'radar', 'radar-monitors', 'radar-watch']) {
+    try {
+      const { res } = await req(`/api/cron/${job}`)
+      if ([401, 403, 503].includes(res.status)) {
+        ok(`GET /api/cron/${job} is guarded`, `HTTP ${res.status}`)
+      } else {
+        bad(`GET /api/cron/${job} is guarded`, `expected 401/403/503, got ${res.status}`)
+      }
+    } catch (e) {
+      bad(`GET /api/cron/${job}`, String(e))
+    }
+  }
+
+  // 7) An unknown job is a 404, not a 200 — the route must not silently accept
+  //    whatever path a misconfigured scheduler was pointed at.
+  try {
+    const { res } = await req('/api/cron/not-a-job')
+    if ([403, 404, 503].includes(res.status)) {
+      ok('GET /api/cron/<unknown> is refused', `HTTP ${res.status}`)
+    } else {
+      bad('GET /api/cron/<unknown> is refused', `expected 403/404/503, got ${res.status}`)
+    }
+  } catch (e) {
+    bad('GET /api/cron/<unknown>', String(e))
+  }
+
+  // 8) The Content Security Policy has to permit what the product loads, or the
+  //    Pi SDK and page translation die silently in the browser.
+  try {
+    const res = await fetch(base, { redirect: 'manual' })
+    const csp = res.headers.get('content-security-policy') ?? ''
+    const missing = ['https://sdk.minepi.com', 'https://api.minepi.com', 'https://www.gstatic.com']
+      .filter((host) => !csp.includes(host))
+    if (csp && missing.length === 0 && csp.includes("frame-ancestors 'none'")) {
+      ok('CSP permits the Pi SDK and translation, and refuses framing')
+    } else {
+      bad('CSP', csp ? `missing: ${missing.join(', ') || 'frame-ancestors'}` : 'header absent')
+    }
+  } catch (e) {
+    bad('CSP header', String(e))
+  }
+
+  // 9) The Radar knowledge base is signed-in surface, not a public feed.
   try {
     const { res } = await req('/api/radar/findings')
     if (res.status === 401 || res.status === 403) {

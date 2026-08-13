@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "crons": [
+    { "path": "/api/cron/publish", "schedule": "0 */6 * * *" },
+    { "path": "/api/cron/radar-watch", "schedule": "30 5 * * *" },
+    { "path": "/api/cron/radar-monitors", "schedule": "15 * * * *" }
+  ],
+  "functions": {
+    "app/api/cron/[job]/route.ts": { "maxDuration": 60 },
+    "app/api/publish/run/route.ts": { "maxDuration": 60 },
+    "app/api/radar/run/route.ts": { "maxDuration": 60 },
+    "app/api/world/route.ts": { "maxDuration": 60 },
+    "app/api/chain/route.ts": { "maxDuration": 60 },
+    "app/api/trending/route.ts": { "maxDuration": 60 }
+  }
+}

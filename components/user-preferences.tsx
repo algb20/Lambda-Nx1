@@ -9,6 +9,7 @@ import { UpgradePanel } from '@/components/upgrade-panel'
 import { PiUsernameLink } from '@/components/pi-username-link'
 import { AvatarSetting } from '@/components/avatar'
 import { GroupsPanel } from '@/components/groups-panel'
+import { BuildStamp } from '@/components/build-stamp'
 
 /**
  * Settings. The previous version advertised fabricated capabilities ("Quantum
@@ -85,6 +86,10 @@ export function UserPreferences() {
           </p>
         </CardContent>
       </Card>
+      {/* Which build is serving this page — settles "am I looking at the
+          latest work?" without a hosting dashboard. */}
+      <BuildStamp className="justify-center pt-1" />
+
     </div>
   )
 }
