@@ -1,68 +1,34 @@
 'use client'
 
-import { useEffect, useState, type ReactNode } from 'react'
-import { Radar, Loader2, ShieldCheck, AlertCircle } from 'lucide-react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import { Radar, Loader2, ShieldCheck } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { AuthForm, type AuthedUser } from '@/components/auth-form'
 
 /**
  * Standalone (off-Pi) auth gate. Used when NEXT_PUBLIC_AUTH_MODE=standalone: the
  * app runs as an independent web app with our own signed sessions, talking to
  * the existing /api/auth endpoints — no Pi dependency.
  *
- * Sign-in takes one field, which accepts either an email address or a Pi Network
- * username; the server works out which. A Pi username reaches an account only
- * after its owner claimed it from inside the Pi Browser, so a Pi user can get to
- * their account from an ordinary browser without anyone being able to sign in as
- * them by typing a public username.
+ * The form itself lives in `auth-form.tsx`, shared with the account panel in
+ * Preferences, so there is exactly one sign-in implementation to keep correct.
  */
-type Mode = 'login' | 'register'
-
 export function StandaloneAuthGate({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<{ id: string; username: string } | null | undefined>(undefined)
-  const [mode, setMode] = useState<Mode>('login')
-  const [identifier, setIdentifier] = useState('')
-  const [password, setPassword] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [user, setUser] = useState<AuthedUser | null | undefined>(undefined)
 
-  const loadMe = async () => {
+  const loadMe = useCallback(async () => {
     try {
       const res = await fetch('/api/auth/me')
-      const data = await res.json()
+      const data = (await res.json()) as { user?: AuthedUser | null }
       setUser(data.user ?? null)
     } catch {
       setUser(null)
     }
-  }
-  useEffect(() => {
-    loadMe()
   }, [])
 
-  const submit = async () => {
-    if (busy || !identifier.trim() || !password) return
-    setBusy(true)
-    setError(null)
-    try {
-      const res = await fetch(`/api/auth/${mode === 'login' ? 'login' : 'register'}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(
-          mode === 'login'
-            ? { identifier: identifier.trim(), password }
-            : { email: identifier.trim(), password },
-        ),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data?.error ?? 'Authentication failed')
-      await loadMe()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Authentication failed')
-    } finally {
-      setBusy(false)
-    }
-  }
+  useEffect(() => {
+    void loadMe()
+  }, [loadMe])
 
   if (user === undefined) {
     return (
@@ -83,55 +49,10 @@ export function StandaloneAuthGate({ children }: { children: ReactNode }) {
             <p className="text-[10px] text-muted-foreground">Intelligence platform</p>
           </div>
         </div>
-        <h2 className="mb-3 text-sm font-semibold">
-          {mode === 'login' ? 'Sign in' : 'Create your account'}
-        </h2>
-        <div className="space-y-2">
-          <Input
-            type={mode === 'login' ? 'text' : 'email'}
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
-            placeholder={mode === 'login' ? 'Email or Pi username' : 'name@example.com'}
-            autoCapitalize="none"
-            autoCorrect="off"
-            spellCheck={false}
-          />
-          <Input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && submit()}
-            placeholder={mode === 'login' ? 'Password or Pi passphrase' : 'Password'}
-          />
-          <Button
-            onClick={submit}
-            disabled={busy || !identifier.trim() || !password}
-            className="w-full"
-          >
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : mode === 'login' ? 'Sign in' : 'Create account'}
-          </Button>
-        </div>
-        {mode === 'login' ? (
-          <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
-            Signing in with a Pi Network username works once you have linked it from inside the Pi
-            Browser, under Preferences.
-          </p>
-        ) : null}
-        {error ? (
-          <p className="mt-2 flex items-center gap-1.5 text-sm text-destructive">
-            <AlertCircle className="h-4 w-4" />
-            {error}
-          </p>
-        ) : null}
-        <button
-          onClick={() => {
-            setMode(mode === 'login' ? 'register' : 'login')
-            setError(null)
-          }}
-          className="mt-3 text-xs text-primary hover:underline"
-        >
-          {mode === 'login' ? 'New here? Create an account' : 'Have an account? Sign in'}
-        </button>
+        <h2 className="mb-3 text-sm font-semibold">Sign in or create an account</h2>
+
+        <AuthForm onAuthenticated={loadMe} />
+
         <p className="mt-4 flex items-center gap-1.5 text-[11px] text-muted-foreground">
           <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
           Our own signed sessions — passwords hashed, never stored in plain text.
