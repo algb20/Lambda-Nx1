@@ -51,6 +51,7 @@ import { LeadFinding } from '@/components/lead-finding'
 import { GatewayEmpty } from '@/components/gateway-empty'
 import { GATEWAY_FAMILIES, GATEWAY_GUIDANCE, type Mode } from '@/lib/gateways'
 import { HistoryPanel } from '@/components/history-panel'
+import { Onboarding } from '@/components/onboarding'
 import { pointsFromEvidence, type GlobePoint } from '@/lib/geo/centroids'
 import { PREDICATE_LABEL } from '@/lib/engine/ontology'
 import { proposePivots } from '@/lib/modules/copilot'
@@ -1531,6 +1532,19 @@ export function IntelligenceDashboard() {
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
         </Card>
+      ) : null}
+
+      {/* First run: one press investigates a real subject through a real
+          gateway, because sixteen gateways and an empty box demonstrate
+          nothing. Shown only while there is no result on screen. */}
+      {!result && !loading ? (
+        <Onboarding
+          onRunExample={(gateway, subject) => {
+            switchMode(gateway)
+            setQuery(subject)
+            run(subject, gateway)
+          }}
+        />
       ) : null}
 
       {/* An empty gateway used to be an empty box, which reads as "broken". It
