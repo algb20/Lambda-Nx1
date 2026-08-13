@@ -69,7 +69,12 @@ const has = (v: string | undefined): boolean => typeof v === 'string' && v.trim(
  */
 export function buildHealthReport(deps: HealthDeps = {}): HealthReport {
   const env = deps.env ?? process.env
-  const version = deps.version ?? env.npm_package_version ?? '0.0.0'
+  // `npm_package_version` is set by npm for a script it is *running*, and a
+  // production server started by a host is not that — so the probe whose job is
+  // to report the truth about the deployment reported `0.0.0` forever. The
+  // build bakes the real version in; the npm variable stays as a dev fallback.
+  const version =
+    deps.version ?? env.NEXT_PUBLIC_APP_VERSION ?? env.npm_package_version ?? '0.0.0'
   const now = deps.now ?? Date.now
   const uptimeSeconds = Math.max(0, Math.floor(deps.uptimeSeconds ?? 0))
 
