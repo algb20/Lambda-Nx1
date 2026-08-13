@@ -5,7 +5,7 @@ import {
   renderDossier,
   type ExportFormat,
 } from '@/lib/export/dossier'
-import type { Evidence } from '@/lib/engine/types'
+import { MAX_FINDINGS, TooManyFindingsError, toEvidenceList } from '@/lib/export/payload'
 
 /**
  * POST /api/export — turn a set of findings into a document.
@@ -41,55 +41,11 @@ const FORMATS: readonly ExportFormat[] = [
   'html',
 ] as const
 
-/** A document nobody would read, and a cheap way to spend our CPU. */
-const MAX_FINDINGS = 5_000
 const MAX_TEXT = 4_000
+const str = (v: unknown, max = MAX_TEXT): string => (typeof v === 'string' ? v.slice(0, max) : '')
 
 const isFormat = (v: unknown): v is ExportFormat =>
   typeof v === 'string' && (FORMATS as readonly string[]).includes(v)
-
-const str = (v: unknown, max = MAX_TEXT): string =>
-  typeof v === 'string' ? v.slice(0, max) : ''
-
-/**
- * Accept only the fields a dossier uses, in the shapes it expects. The payload
- * arrives from a browser and is rendered into a document handed to someone else,
- * so nothing is passed through unexamined.
- */
-function toEvidence(raw: unknown): Evidence | null {
-  if (!raw || typeof raw !== 'object') return null
-  const r = raw as Record<string, unknown>
-  const claim = str(r.claim)
-  const sourceKey = str(r.sourceKey, 120)
-  if (!claim.trim() || !sourceKey.trim()) return null
-
-  const entity =
-    r.entity && typeof r.entity === 'object'
-      ? {
-          type: str((r.entity as Record<string, unknown>).type, 40),
-          value: str((r.entity as Record<string, unknown>).value, 300),
-        }
-      : undefined
-
-  const admiraltyRaw = r.admiralty as Record<string, unknown> | undefined
-  const admiralty =
-    admiraltyRaw && typeof admiraltyRaw.source === 'string' && typeof admiraltyRaw.info === 'number'
-      ? { source: admiraltyRaw.source, info: admiraltyRaw.info }
-      : undefined
-
-  const retrievedAt = str(r.retrievedAt, 40)
-  return {
-    claim,
-    sourceKey,
-    sourceUrl: str(r.sourceUrl, 2000) || undefined,
-    // An unparseable timestamp would corrupt every "retrieved" date in the
-    // citations, so fall back to now rather than print a lie.
-    retrievedAt: Number.isFinite(Date.parse(retrievedAt)) ? retrievedAt : new Date().toISOString(),
-    confidence: str(r.confidence, 20) || 'unconfirmed',
-    ...(entity?.value ? { entity } : {}),
-    ...(admiralty ? { admiralty } : {}),
-  } as Evidence
-}
 
 export async function POST(request: Request) {
   let payload: unknown
@@ -105,17 +61,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unsupported format', formats: FORMATS }, { status: 400 })
   }
 
-  const rawEvidence = Array.isArray(body.evidence) ? body.evidence : []
-  if (rawEvidence.length > MAX_FINDINGS) {
-    return NextResponse.json(
-      { error: `Too many findings — the limit is ${MAX_FINDINGS}` },
-      { status: 413 },
-    )
+  let evidence
+  try {
+    evidence = toEvidenceList(body.evidence)
+  } catch (err) {
+    if (err instanceof TooManyFindingsError) {
+      return NextResponse.json({ error: err.message, limit: MAX_FINDINGS }, { status: 413 })
+    }
+    throw err
   }
-
-  const evidence = rawEvidence
-    .map(toEvidence)
-    .filter((e): e is Evidence => e !== null)
 
   try {
     const dossier = buildDossier({

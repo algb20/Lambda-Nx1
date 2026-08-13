@@ -826,13 +826,21 @@ export const repo = {
      * The dedup check behind the scheduled publisher.
      */
     async existsByRef(refType: string, refValue: string): Promise<boolean> {
+      return Boolean(await repo.posts.findByRef(refType, refValue))
+    },
+    /**
+     * The post behind a reference, if one exists. Sharing a dossier keys on its
+     * seal, so re-sharing the same findings has to return the link that already
+     * exists rather than minting a second one for identical content.
+     */
+    async findByRef(refType: string, refValue: string): Promise<Post | undefined> {
       const db = getDb()
       const [row] = await db
-        .select({ id: s.posts.id })
+        .select()
         .from(s.posts)
         .where(and(eq(s.posts.refType, refType), eq(s.posts.refValue, refValue)))
         .limit(1)
-      return Boolean(row)
+      return row
     },
     async listByUser(userId: string, limit = 50): Promise<Post[]> {
       const db = getDb()

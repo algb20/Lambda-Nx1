@@ -2,7 +2,9 @@
 
 import { useState } from 'react'
 import {
+  Check,
   Download,
+  Link2,
   FileJson,
   FileSpreadsheet,
   FileText,
@@ -65,9 +67,11 @@ export function ExportDossier({
   note?: string | null
   author?: string | null
 }) {
-  const [busy, setBusy] = useState<FormatId | null>(null)
+  const [busy, setBusy] = useState<FormatId | 'share' | null>(null)
   const [seal, setSeal] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [shared, setShared] = useState<{ url: string; reused: boolean } | null>(null)
+  const [copied, setCopied] = useState(false)
 
   if (findings.length === 0) return null
 
@@ -96,6 +100,32 @@ export function ExportDossier({
       else downloadText(text, filename, res.headers.get('content-type') ?? 'text/plain')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Export failed')
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  /**
+   * Give the dossier a public address. Separate from `run` because publishing
+   * is a different act from downloading: it puts content at a URL under the
+   * account's byline, and it is never something the user gets by accident.
+   */
+  const share = async () => {
+    if (busy) return
+    setBusy('share')
+    setError(null)
+    try {
+      const res = await fetch('/api/export/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subject, kind, evidence: findings, note }),
+      })
+      const data = await res.json().catch(() => null)
+      if (!res.ok) throw new Error(data?.error ?? `Could not publish (${res.status})`)
+      setShared({ url: data.url, reused: Boolean(data.reused) })
+      setSeal(data.seal ?? null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not publish')
     } finally {
       setBusy(null)
     }
@@ -136,6 +166,56 @@ export function ExportDossier({
       </div>
 
       {error ? <p className="mt-2 text-[11px] text-destructive">{error}</p> : null}
+
+      {/* Publishing is never a side effect of exporting: downloading keeps the
+          work private, and only this button gives it a public address. */}
+      <div className="mt-2 border-t border-border/50 pt-2">
+        {shared ? (
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Check className="h-3.5 w-3.5 shrink-0 text-primary" />
+            <a
+              href={shared.url}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="min-w-0 flex-1 truncate text-[11px] text-primary hover:underline"
+            >
+              {shared.url}
+            </a>
+            <button
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(shared.url)
+                  setCopied(true)
+                  window.setTimeout(() => setCopied(false), 2000)
+                } catch {
+                  /* clipboard refused; the link is on screen and selectable */
+                }
+              }}
+              className="shrink-0 rounded px-1.5 py-0.5 text-[10px] ring-1 ring-border transition-colors hover:bg-muted"
+            >
+              {copied ? 'Copied' : 'Copy'}
+            </button>
+            {shared.reused ? (
+              <span className="w-full text-[10px] text-muted-foreground">
+                These exact findings were already published — this is the same page, not a second one.
+              </span>
+            ) : null}
+          </div>
+        ) : (
+          <button
+            onClick={share}
+            disabled={busy !== null}
+            className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[11px] ring-1 ring-border transition-colors hover:bg-muted disabled:opacity-50"
+          >
+            {busy === 'share' ? (
+              <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin" />
+            ) : (
+              <Link2 className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            )}
+            Publish a public link
+          </button>
+        )}
+      </div>
 
       {seal ? (
         <p className="mt-2 flex items-center gap-1.5 text-[10px] text-muted-foreground">
