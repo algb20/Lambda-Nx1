@@ -31,7 +31,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <Header />
+      <Header onNavigate={setActiveTab} />
 
       {/*
         Each tab is isolated. A throw inside one used to unmount the whole tree

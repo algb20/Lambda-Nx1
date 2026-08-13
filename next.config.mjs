@@ -1,5 +1,18 @@
 /** @type {import('next').NextConfig} */
+import { readFileSync } from 'node:fs'
 import { securityHeaders } from './lib/security/csp.mjs'
+
+/**
+ * The app's own version, read from package.json at build time.
+ *
+ * The health report used to fall back to `0.0.0`, because it read
+ * `npm_package_version` — a variable npm sets for a script it is *running*, and
+ * a production server started by a host is not that. So the readiness probe,
+ * whose entire job is to report the truth about the deployment, reported a
+ * version that never existed. Baking it in makes it correct by construction.
+ */
+const packageVersion = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'))
+  .version
 
 /**
  * The policy itself lives in `lib/security/csp.mjs` so it can be imported and
@@ -28,6 +41,7 @@ const nextConfig = {
     NEXT_PUBLIC_COMMIT_BRANCH:
       process.env.BRANCH ?? process.env.VERCEL_GIT_COMMIT_REF ?? '',
     NEXT_PUBLIC_BUILT_AT: new Date().toISOString(),
+    NEXT_PUBLIC_APP_VERSION: packageVersion,
     NEXT_PUBLIC_REPO_URL: process.env.REPOSITORY_URL ?? 'https://github.com/algb20/Lambda-Nx1',
   },
   eslint: {

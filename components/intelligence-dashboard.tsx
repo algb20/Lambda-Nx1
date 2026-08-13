@@ -46,29 +46,18 @@ import type { ResearchReport } from '@/lib/modules/research'
 import type { ReferenceReport } from '@/lib/modules/reference'
 import { TargetTracker } from '@/components/target-tracker'
 import { DataGlobe } from '@/components/data-globe'
+import { ExportDossier } from '@/components/export-dossier'
+import { LeadFinding } from '@/components/lead-finding'
+import { GatewayEmpty } from '@/components/gateway-empty'
+import { GATEWAY_FAMILIES, GATEWAY_GUIDANCE, type Mode } from '@/lib/gateways'
+import { HistoryPanel } from '@/components/history-panel'
+import { Onboarding } from '@/components/onboarding'
 import { pointsFromEvidence, type GlobePoint } from '@/lib/geo/centroids'
 import { PREDICATE_LABEL } from '@/lib/engine/ontology'
 import { proposePivots } from '@/lib/modules/copilot'
 import type { Evidence } from '@/lib/engine/types'
 import type { AnalystVerdict, Severity } from '@/lib/ai/types'
 
-type Mode =
-  | 'nexus'
-  | 'track'
-  | 'domain'
-  | 'username'
-  | 'email'
-  | 'threat'
-  | 'finance'
-  | 'markets'
-  | 'procurement'
-  | 'ownership'
-  | 'news'
-  | 'board'
-  | 'geo'
-  | 'research'
-  | 'reference'
-  | 'media'
 type Result =
   | { kind: 'nexus'; data: NexusReport }
   | { kind: 'track'; data: { query: string } }
@@ -1237,7 +1226,7 @@ function AiAnalystPanel({ subject, gateway, findings }: { subject: string; gatew
           <Sparkles className="h-4 w-4 text-primary" />
           <h4 className="text-sm font-semibold">AI analyst</h4>
         </div>
-        <Button size="sm" variant="outline" onClick={run} disabled={loading || findings.length === 0}>
+        <Button size="sm" variant="outline" onClick={() => run()} disabled={loading || findings.length === 0}>
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : verdict ? 'Re-analyze' : 'Analyze with AI'}
         </Button>
       </div>
@@ -1318,7 +1307,10 @@ function readFileAsBase64(file: File): Promise<string> {
 }
 
 export function IntelligenceDashboard() {
-  const [mode, setMode] = useState<Mode>('nexus')
+  const [modeState, setMode] = useState<Mode>('nexus')
+  /** What the interface is showing. `run` shadows this when reopening a
+   *  history entry, which switches gateway and runs in one gesture. */
+  const mode = modeState
   const [query, setQuery] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
@@ -1364,34 +1356,43 @@ export function IntelligenceDashboard() {
     reset()
   }
 
-  const run = async () => {
+  /**
+   * `override` lets the empty state run its own worked example immediately.
+   * Without it the call would read the `query` state that `setQuery` has only
+   * just scheduled, and the first press would investigate the previous value —
+   * or nothing at all.
+   */
+  const run = async (override?: string, modeOverride?: Mode) => {
     if (loading) return
+    const typed = (override ?? query).trim()
+    // Reopening from history switches gateway and runs in the same gesture, and
+    // `setMode` has not landed yet at that point — reading `mode` here would
+    // investigate the *previous* gateway with the new subject.
+    const mode = modeOverride ?? modeState
     setLoading(true)
     reset()
     try {
       let endpoint: string
       let payload: Record<string, unknown>
       if (mode === 'media') {
-        if (!file && !query.trim()) throw new Error('Choose an image or paste an image URL.')
+        if (!file && !typed) throw new Error('Choose an image or paste an image URL.')
         endpoint = '/api/intelligence/media'
         payload = {
           imageBase64: file ? await readFileAsBase64(file) : undefined,
-          imageUrl: query.trim() || undefined,
+          imageUrl: typed || undefined,
         }
       } else if (mode === 'track') {
-        const value = query.trim()
-        if (!value) throw new Error('Enter a target to track.')
-        setResult({ kind: 'track', data: { query: value } })
+        if (!typed) throw new Error('Enter a target to track.')
+        setResult({ kind: 'track', data: { query: typed } })
         setLoading(false)
         return
       } else if (mode === 'board') {
         endpoint = '/api/intelligence/board'
         payload = {}
       } else {
-        const value = query.trim()
-        if (!value && !EMPTY_OK[mode]) throw new Error('Enter a value to investigate.')
+        if (!typed && !EMPTY_OK[mode]) throw new Error('Enter a value to investigate.')
         endpoint = `/api/intelligence/${mode}`
-        payload = { [BODY_KEY[mode] ?? mode]: value }
+        payload = { [BODY_KEY[mode] ?? mode]: typed }
       }
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -1416,34 +1417,50 @@ export function IntelligenceDashboard() {
       </div>
 
       {/*
-        Every gateway is named, at every screen size.
+        Every gateway is named, at every screen size — and grouped by what it
+        investigates.
 
-        The labels used to be `hidden sm:inline`, which on a phone — where most
-        of this app is used — collapsed sixteen gateways into sixteen unlabelled
-        icons crammed into one row. The whole product was there and unfindable:
-        News, Research, Markets and the rest were invisible unless you guessed
-        an icon. Wrapping named chips costs two extra rows and makes the range
-        of the platform legible at a glance.
+        Two problems, one row. The labels used to be `hidden sm:inline`, which on
+        a phone collapsed sixteen gateways into sixteen unlabelled icons: the
+        whole product present and unfindable. Naming them fixed that but left the
+        second problem — sixteen equal chips in one undifferentiated block, where
+        the user has to read all sixteen to find the one they want.
+
+        Families give the eye somewhere to land. "I want the company's owners"
+        goes to Money & entities without reading Infrastructure at all.
       */}
-      <div className="flex flex-wrap gap-1 rounded-lg bg-muted/50 p-1">
-        {MODES.map((m) => {
-          const Icon = m.icon
-          const isActive = m.id === mode
-          return (
-            <button
-              key={m.id}
-              onClick={() => switchMode(m.id)}
-              title={m.placeholder}
-              aria-pressed={isActive}
-              className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors ${
-                isActive ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <Icon className="h-4 w-4 shrink-0" />
-              <span>{m.label}</span>
-            </button>
-          )
-        })}
+      <div className="space-y-2 rounded-lg bg-muted/50 p-2">
+        {GATEWAY_FAMILIES.map((family) => (
+          <div key={family.label}>
+            <p className="mb-1 px-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+              {family.label}
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {family.modes.map((id) => {
+                const m = MODES.find((x) => x.id === id)
+                if (!m) return null
+                const Icon = m.icon
+                const isActive = m.id === mode
+                return (
+                  <button
+                    key={m.id}
+                    onClick={() => switchMode(m.id)}
+                    title={m.placeholder}
+                    aria-pressed={isActive}
+                    className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-background text-foreground shadow-sm ring-1 ring-primary/40'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span>{m.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
       {mode === 'media' ? (
@@ -1471,7 +1488,7 @@ export function IntelligenceDashboard() {
               spellCheck={false}
               disabled={loading}
             />
-            <Button onClick={run} disabled={loading || (!file && !query.trim())}>
+            <Button onClick={() => run()} disabled={loading || (!file && !query.trim())}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Analyze'}
             </Button>
           </div>
@@ -1489,7 +1506,7 @@ export function IntelligenceDashboard() {
             spellCheck={false}
             disabled={loading}
           />
-          <Button onClick={run} disabled={loading || (!query.trim() && !EMPTY_OK[mode])}>
+          <Button onClick={() => run()} disabled={loading || (!query.trim() && !EMPTY_OK[mode])}>
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : mode === 'board' ? (
@@ -1517,6 +1534,55 @@ export function IntelligenceDashboard() {
         </Card>
       ) : null}
 
+      {/* First run: one press investigates a real subject through a real
+          gateway, because sixteen gateways and an empty box demonstrate
+          nothing. Shown only while there is no result on screen. */}
+      {!result && !loading ? (
+        <Onboarding
+          onRunExample={(gateway, subject) => {
+            switchMode(gateway)
+            setQuery(subject)
+            run(subject, gateway)
+          }}
+        />
+      ) : null}
+
+      {/* An empty gateway used to be an empty box, which reads as "broken". It
+          now says what it answers, offers a working example, and states its
+          limits before the user spends an afternoon expecting a port scan. */}
+      {!result && !loading && !error && GATEWAY_GUIDANCE[mode] ? (
+        <GatewayEmpty
+          guidance={GATEWAY_GUIDANCE[mode]}
+          onTry={
+            mode === 'media' || mode === 'board' || mode === 'news'
+              ? undefined
+              : (example) => {
+                  setQuery(example)
+                  run(example)
+                }
+          }
+        />
+      ) : null}
+
+      {/* History belongs where an empty gateway is: the moment you have nothing
+          on screen is the moment a previous run is what you want. */}
+      {!result && !loading ? (
+        <HistoryPanel
+          onReopen={(gateway, subject) => {
+            switchMode(gateway)
+            setQuery(subject)
+            // The gateway is passed explicitly: `setMode` above has not landed
+            // yet, so without it this would run the previous gateway.
+            run(subject, gateway)
+          }}
+        />
+      ) : null}
+
+      {/* What to look at first, when one finding genuinely stands out. */}
+      {aiInput && aiInput.findings.length > 1 ? (
+        <LeadFinding findings={aiInput.findings} />
+      ) : null}
+
       {result?.kind === 'nexus' ? <NexusView r={result.data} onPivot={pivotTo} /> : null}
       {result?.kind === 'track' ? <TargetTracker query={result.data.query} /> : null}
       {result?.kind === 'domain' ? <DomainView r={result.data} /> : null}
@@ -1539,6 +1605,17 @@ export function IntelligenceDashboard() {
           key={`${aiInput.gateway}:${aiInput.subject}`}
           subject={aiInput.subject}
           gateway={aiInput.gateway}
+          findings={aiInput.findings}
+        />
+      ) : null}
+
+      {/* The investigation leaves as a document — numbered against its sources,
+          so the person receiving it can check every claim. */}
+      {aiInput && aiInput.findings.length > 0 ? (
+        <ExportDossier
+          key={`export:${aiInput.gateway}:${aiInput.subject}`}
+          subject={aiInput.subject}
+          kind={aiInput.gateway}
           findings={aiInput.findings}
         />
       ) : null}

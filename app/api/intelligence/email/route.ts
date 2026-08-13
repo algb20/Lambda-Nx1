@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { getSessionUserId } from '@/lib/auth/server'
+import { recordRunSafely } from '@/lib/modules/history'
 import { investigateEmail } from '@/lib/modules/identity'
 
 export const runtime = 'nodejs'
@@ -23,7 +25,13 @@ export async function POST(request: Request) {
   if (!email) return NextResponse.json({ error: 'Provide an "email".' }, { status: 400 })
 
   try {
-    return NextResponse.json(await investigateEmail(email))
+    const report = await investigateEmail(email)
+    // Best-effort history: a failed archive must never cost the result.
+    const userId = await getSessionUserId().catch(() => null)
+    if (userId) {
+      await recordRunSafely({ userId, gateway: 'email', subject: String(email), report })
+    }
+    return NextResponse.json(report)
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Investigation failed' },

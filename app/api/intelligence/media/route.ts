@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { getSessionUserId } from '@/lib/auth/server'
+import { recordRunSafely } from '@/lib/modules/history'
 import { analyzeMedia } from '@/lib/modules/media'
 
 /**
@@ -43,7 +45,13 @@ export async function POST(request: Request) {
   }
 
   try {
-    return NextResponse.json(await analyzeMedia({ bytes, imageUrl }))
+    const report = await analyzeMedia({ bytes, imageUrl })
+    // Best-effort history: a failed archive must never cost the result.
+    const userId = await getSessionUserId().catch(() => null)
+    if (userId) {
+      await recordRunSafely({ userId, gateway: 'media', subject: String(imageUrl), report })
+    }
+    return NextResponse.json(report)
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Analysis failed' },

@@ -10,7 +10,14 @@ import { useTheme } from "@/hooks/use-theme"
 import { useI18n, LOCALES, LOCALE_LABELS } from "@/lib/i18n"
 import { usePiAuthOptional } from "@/contexts/pi-auth-context"
 
-export function Header() {
+/**
+ * `onNavigate` exists for one reason: the "Pay with π" button used to do
+ * nothing at all. It looked like the way to subscribe, and pressing it was a
+ * dead end — the real checkout has always lived in Preferences. A control that
+ * does nothing is worse than no control, because it teaches the user the app is
+ * broken. Now it takes them where the payment actually happens.
+ */
+export function Header({ onNavigate }: { onNavigate?: (tab: 'preferences') => void } = {}) {
   const { theme, toggleTheme } = useTheme()
   const { locale, setLocale, t } = useI18n()
   // Optional: standalone mode mounts no Pi provider, and the header is shared.
@@ -113,14 +120,18 @@ export function Header() {
                 </>
               ) : null}
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 text-xs bg-accent/10 border-accent/20 hover:bg-accent/20"
-            >
-              <CreditCard className="h-3 w-3 mr-1" />
-              <span className="hidden sm:inline">Pay with</span> π
-            </Button>
+            {onNavigate ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onNavigate('preferences')}
+                title={t('header.pay.title')}
+                className="h-7 text-xs bg-accent/10 border-accent/20 hover:bg-accent/20"
+              >
+                <CreditCard className="h-3 w-3 mr-1" />
+                <span className="hidden sm:inline">{t('header.pay')}</span> π
+              </Button>
+            ) : null}
             <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8">
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>

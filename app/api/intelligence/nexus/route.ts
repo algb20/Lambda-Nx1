@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { getSessionUserId } from '@/lib/auth/server'
+import { recordRunSafely } from '@/lib/modules/history'
 import { investigateNexus } from '@/lib/modules/nexus'
 
 export const runtime = 'nodejs'
@@ -28,7 +30,13 @@ export async function POST(request: Request) {
   if (!query) return NextResponse.json({ error: 'Provide a "query".' }, { status: 400 })
 
   try {
-    return NextResponse.json(await investigateNexus(query))
+    const report = await investigateNexus(query)
+    // Best-effort history: a failed archive must never cost the result.
+    const userId = await getSessionUserId().catch(() => null)
+    if (userId) {
+      await recordRunSafely({ userId, gateway: 'nexus', subject: String(query), report })
+    }
+    return NextResponse.json(report)
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Investigation failed' },

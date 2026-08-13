@@ -27,6 +27,8 @@ type Dict = Record<string, string>
 
 const en: Dict = {
   'app.tagline': 'Intelligence platform',
+  'header.pay': 'Pay with',
+  'header.pay.title': 'Open your plan and subscribe with Pi',
   'upgrade.title': 'Your plan',
   'upgrade.current': 'Current',
   'upgrade.buy': 'Subscribe with',
@@ -80,6 +82,8 @@ const en: Dict = {
 
 const ar: Dict = {
   'app.tagline': 'منصّة استخبارات',
+  'header.pay': 'ادفع بـ',
+  'header.pay.title': 'افتح خطتك واشترك عبر Pi',
   'upgrade.title': 'خطّتك',
   'upgrade.current': 'الحالية',
   'upgrade.buy': 'اشترك بـ',
@@ -133,6 +137,8 @@ const ar: Dict = {
 
 const es: Dict = {
   'app.tagline': 'Plataforma de inteligencia',
+  'header.pay': 'Pagar con',
+  'header.pay.title': 'Abre tu plan y suscríbete con Pi',
   'upgrade.title': 'Tu plan',
   'upgrade.current': 'Actual',
   'upgrade.buy': 'Suscríbete con',
@@ -185,6 +191,8 @@ const es: Dict = {
 
 const fr: Dict = {
   'app.tagline': 'Plateforme de renseignement',
+  'header.pay': 'Payer avec',
+  'header.pay.title': 'Ouvrez votre offre et abonnez-vous avec Pi',
   'upgrade.title': 'Votre offre',
   'upgrade.current': 'Actuelle',
   'upgrade.buy': 'S’abonner avec',
@@ -237,6 +245,8 @@ const fr: Dict = {
 
 const zh: Dict = {
   'app.tagline': '情报平台',
+  'header.pay': '支付',
+  'header.pay.title': '打开你的方案并使用 Pi 订阅',
   'upgrade.title': '你的方案',
   'upgrade.current': '当前',
   'upgrade.buy': '订阅，使用',
@@ -289,6 +299,8 @@ const zh: Dict = {
 
 const hi: Dict = {
   'app.tagline': 'इंटेलिजेंस प्लेटफ़ॉर्म',
+  'header.pay': 'भुगतान करें',
+  'header.pay.title': 'अपना प्लान खोलें और Pi से सदस्यता लें',
   'upgrade.title': 'आपका प्लान',
   'upgrade.current': 'मौजूदा',
   'upgrade.buy': 'सदस्यता लें —',
@@ -341,6 +353,8 @@ const hi: Dict = {
 
 const id: Dict = {
   'app.tagline': 'Platform intelijen',
+  'header.pay': 'Bayar dengan',
+  'header.pay.title': 'Buka paket Anda dan berlangganan dengan Pi',
   'upgrade.title': 'Paket Anda',
   'upgrade.current': 'Saat ini',
   'upgrade.buy': 'Berlangganan dengan',

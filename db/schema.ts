@@ -152,6 +152,16 @@ export const investigations = pgTable('investigations', {
   targetType: entityTypeEnum('target_type').notNull(),
   targetValue: text('target_value').notNull(),
   status: investigationStatusEnum('status').notNull().default('open'),
+  /**
+   * Which gateway produced this run. Nullable because rows written before
+   * history existed are still real history and must not be thrown away.
+   */
+  gateway: text('gateway'),
+  /**
+   * How many findings the run produced, stored so a history list can say
+   * "12 findings" without loading every finding to count them.
+   */
+  findingCount: integer('finding_count').notNull().default(0),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 

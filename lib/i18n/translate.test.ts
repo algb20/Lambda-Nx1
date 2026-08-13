@@ -60,6 +60,44 @@ describe('isTranslatable — what must never be sent', () => {
     expect(isTranslatable('A1')).toBe(false)
     expect(isTranslatable('35.60, 139.70')).toBe(false)
   })
+
+  /*
+   * These have no separator for the identifier rule to catch, so they read as
+   * ordinary words to a translator and come back altered. Every one is a value
+   * the user is expected to copy, paste or compare — and an altered one is worse
+   * than an untranslated one: a mangled wallet address sends money nowhere and a
+   * mangled hash matches nothing.
+   */
+  it('refuses an email address', () => {
+    expect(isTranslatable('name@example.com')).toBe(false)
+    expect(isTranslatable('a.b+c@sub.example.co.uk')).toBe(false)
+  })
+
+  it('refuses a hex digest — a hash, a commit, a fingerprint', () => {
+    expect(isTranslatable('e632fd2')).toBe(false)
+    expect(isTranslatable('0xdeadbeefcafe')).toBe(false)
+    expect(
+      isTranslatable('da39a3ee5e6b4b0d3255bfef95601890afd80709'),
+    ).toBe(false)
+  })
+
+  it('refuses a wallet address', () => {
+    expect(isTranslatable('1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa')).toBe(false)
+    expect(isTranslatable('bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq')).toBe(false)
+  })
+
+  it('refuses an ISO timestamp', () => {
+    expect(isTranslatable('2026-08-13T02:07:38Z')).toBe(false)
+    expect(isTranslatable('2026-08-13')).toBe(false)
+    expect(isTranslatable('2026-08-13T02:07:38+03:00')).toBe(false)
+  })
+
+  /** The hardening must not start refusing ordinary sentences. */
+  it('still accepts prose that merely contains such a value', () => {
+    expect(isTranslatable('Reported at 2026-08-13T02:07:38Z by USGS')).toBe(true)
+    expect(isTranslatable('Sent to name@example.com')).toBe(true)
+    expect(isTranslatable('The seal is a fingerprint of the findings')).toBe(true)
+  })
 })
 
 describe('TranslationCache', () => {
