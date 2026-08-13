@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { getSessionUserId } from '@/lib/auth/server'
+import { recordRunSafely } from '@/lib/modules/history'
 import { investigateGeo } from '@/lib/modules/geo'
 
 export const runtime = 'nodejs'
@@ -23,7 +25,13 @@ export async function POST(request: Request) {
   if (!query) return NextResponse.json({ error: 'Provide a "query".' }, { status: 400 })
 
   try {
-    return NextResponse.json(await investigateGeo(query))
+    const report = await investigateGeo(query)
+    // Best-effort history: a failed archive must never cost the result.
+    const userId = await getSessionUserId().catch(() => null)
+    if (userId) {
+      await recordRunSafely({ userId, gateway: 'geo', subject: String(query), report })
+    }
+    return NextResponse.json(report)
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Investigation failed' },

@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { getSessionUserId } from '@/lib/auth/server'
+import { recordRunSafely } from '@/lib/modules/history'
 import { investigateNews } from '@/lib/modules/news'
 
 export const runtime = 'nodejs'
@@ -26,7 +28,13 @@ export async function POST(request: Request) {
   const query = typeof body.query === 'string' ? body.query.trim() : ''
 
   try {
-    return NextResponse.json(await investigateNews(query))
+    const report = await investigateNews(query)
+    // Best-effort history: a failed archive must never cost the result.
+    const userId = await getSessionUserId().catch(() => null)
+    if (userId) {
+      await recordRunSafely({ userId, gateway: 'news', subject: String(""), report })
+    }
+    return NextResponse.json(report)
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'News fetch failed' },

@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { getSessionUserId } from '@/lib/auth/server'
+import { recordRunSafely } from '@/lib/modules/history'
 import { investigateThreat } from '@/lib/modules/threat'
 
 export const runtime = 'nodejs'
@@ -23,7 +25,13 @@ export async function POST(request: Request) {
   if (!indicator) return NextResponse.json({ error: 'Provide an "indicator".' }, { status: 400 })
 
   try {
-    return NextResponse.json(await investigateThreat(indicator))
+    const report = await investigateThreat(indicator)
+    // Best-effort history: a failed archive must never cost the result.
+    const userId = await getSessionUserId().catch(() => null)
+    if (userId) {
+      await recordRunSafely({ userId, gateway: 'threat', subject: String(indicator), report })
+    }
+    return NextResponse.json(report)
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Investigation failed' },

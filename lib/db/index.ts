@@ -300,6 +300,8 @@ export const repo = {
       title: string
       targetType: Entity['type']
       targetValue: string
+      gateway?: string
+      findingCount?: number
     }): Promise<Investigation> {
       const db = getDb()
       const [row] = await db.insert(s.investigations).values(input).returning()
@@ -321,6 +323,54 @@ export const repo = {
         .from(s.investigations)
         .where(eq(s.investigations.userId, userId))
         .orderBy(desc(s.investigations.createdAt))
+    },
+
+    /**
+     * The history list: this user's runs, newest first, optionally narrowed by
+     * a text match on the subject or by gateway.
+     *
+     * The search is a case-insensitive substring on the target value, which is
+     * what a person actually remembers ("that nestle one"). `%` and `_` in the
+     * query are escaped — otherwise a user typing an underscore silently gets a
+     * wildcard and wonders why unrelated rows appear.
+     */
+    async search(
+      userId: string,
+      options: { q?: string; gateway?: string; limit?: number; offset?: number } = {},
+    ): Promise<Investigation[]> {
+      const db = getDb()
+      const limit = Math.min(Math.max(options.limit ?? 30, 1), 100)
+      const offset = Math.max(options.offset ?? 0, 0)
+
+      const filters = [eq(s.investigations.userId, userId)]
+      const q = options.q?.trim()
+      if (q) {
+        const escaped = q.replace(/[\\%_]/g, (c) => `\\${c}`)
+        filters.push(sql`${s.investigations.targetValue} ILIKE ${'%' + escaped + '%'} ESCAPE '\\'`)
+      }
+      if (options.gateway) filters.push(eq(s.investigations.gateway, options.gateway))
+
+      return db
+        .select()
+        .from(s.investigations)
+        .where(and(...filters))
+        .orderBy(desc(s.investigations.createdAt))
+        .limit(limit)
+        .offset(offset)
+    },
+
+    /**
+     * Delete one entry. Scoped by user id in the same statement as the row id,
+     * so a caller cannot delete another account's history by guessing a uuid —
+     * authorisation is in the query, not in a check the caller might skip.
+     */
+    async remove(userId: string, id: string): Promise<boolean> {
+      const db = getDb()
+      const rows = await db
+        .delete(s.investigations)
+        .where(and(eq(s.investigations.id, id), eq(s.investigations.userId, userId)))
+        .returning({ id: s.investigations.id })
+      return rows.length > 0
     },
   },
 

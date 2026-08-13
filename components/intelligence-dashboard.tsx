@@ -50,6 +50,7 @@ import { ExportDossier } from '@/components/export-dossier'
 import { LeadFinding } from '@/components/lead-finding'
 import { GatewayEmpty } from '@/components/gateway-empty'
 import { GATEWAY_FAMILIES, GATEWAY_GUIDANCE, type Mode } from '@/lib/gateways'
+import { HistoryPanel } from '@/components/history-panel'
 import { pointsFromEvidence, type GlobePoint } from '@/lib/geo/centroids'
 import { PREDICATE_LABEL } from '@/lib/engine/ontology'
 import { proposePivots } from '@/lib/modules/copilot'
@@ -1305,7 +1306,10 @@ function readFileAsBase64(file: File): Promise<string> {
 }
 
 export function IntelligenceDashboard() {
-  const [mode, setMode] = useState<Mode>('nexus')
+  const [modeState, setMode] = useState<Mode>('nexus')
+  /** What the interface is showing. `run` shadows this when reopening a
+   *  history entry, which switches gateway and runs in one gesture. */
+  const mode = modeState
   const [query, setQuery] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
@@ -1357,9 +1361,13 @@ export function IntelligenceDashboard() {
    * just scheduled, and the first press would investigate the previous value —
    * or nothing at all.
    */
-  const run = async (override?: string) => {
+  const run = async (override?: string, modeOverride?: Mode) => {
     if (loading) return
     const typed = (override ?? query).trim()
+    // Reopening from history switches gateway and runs in the same gesture, and
+    // `setMode` has not landed yet at that point — reading `mode` here would
+    // investigate the *previous* gateway with the new subject.
+    const mode = modeOverride ?? modeState
     setLoading(true)
     reset()
     try {
@@ -1539,6 +1547,20 @@ export function IntelligenceDashboard() {
                   run(example)
                 }
           }
+        />
+      ) : null}
+
+      {/* History belongs where an empty gateway is: the moment you have nothing
+          on screen is the moment a previous run is what you want. */}
+      {!result && !loading ? (
+        <HistoryPanel
+          onReopen={(gateway, subject) => {
+            switchMode(gateway)
+            setQuery(subject)
+            // The gateway is passed explicitly: `setMode` above has not landed
+            // yet, so without it this would run the previous gateway.
+            run(subject, gateway)
+          }}
         />
       ) : null}
 

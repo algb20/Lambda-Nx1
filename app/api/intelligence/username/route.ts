@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { getSessionUserId } from '@/lib/auth/server'
+import { recordRunSafely } from '@/lib/modules/history'
 import { investigateUsername } from '@/lib/modules/identity'
 
 export const runtime = 'nodejs'
@@ -23,7 +25,13 @@ export async function POST(request: Request) {
   if (!username) return NextResponse.json({ error: 'Provide a "username".' }, { status: 400 })
 
   try {
-    return NextResponse.json(await investigateUsername(username))
+    const report = await investigateUsername(username)
+    // Best-effort history: a failed archive must never cost the result.
+    const userId = await getSessionUserId().catch(() => null)
+    if (userId) {
+      await recordRunSafely({ userId, gateway: 'username', subject: String(username), report })
+    }
+    return NextResponse.json(report)
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Investigation failed' },
