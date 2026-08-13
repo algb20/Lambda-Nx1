@@ -20,6 +20,21 @@ import { dsnHost, isDocumentationDsn, realSecretMatches } from './package.mjs'
  * These tests pin both directions, because a guard that cries wolf gets
  * disabled and a guard that sleeps is not a guard.
  */
+/**
+ * Fixtures are assembled at runtime rather than written as literals.
+ *
+ * This file tests a scanner that reads *source text*, and it necessarily
+ * describes the shapes that scanner refuses. Written plainly, its own fixtures
+ * would trip it and block every release — which is precisely the failure this
+ * commit exists to fix, and it would be absurd to fix it by widening the guard
+ * to exempt the file that proves the guard works.
+ *
+ * Joining the pieces here keeps the scanner at full strictness — no allowlist,
+ * no exempted path — while the value under test is byte-identical to the real
+ * thing by the time the rule sees it.
+ */
+const join = (...parts: string[]) => parts.join('')
+
 describe('dsnHost', () => {
   it('takes the host, dropping credentials, port and path', () => {
     expect(dsnHost('postgresql://admin:hunter2@db.example.com:5432/lambda')).toBe('db.example.com')
@@ -71,9 +86,8 @@ describe('realSecretMatches', () => {
   })
 
   it('still catches a DSN that names a reachable host, even inside a test file', () => {
-    const found = realSecretMatches(
-      "const url = 'postgresql://postgres.abc:realpassword@aws-0-eu-central-1.pooler.supabase.com:5432/postgres'",
-    )
+    const host = join('aws-0-eu-central-1.pooler.', 'supabase', '.com')
+    const found = realSecretMatches(`const url = 'postgresql://postgres.abc:realpassword@${host}:5432/postgres'`)
     expect(found).toHaveLength(1)
     expect(found[0].match).toContain('supabase.com')
   })
@@ -82,15 +96,15 @@ describe('realSecretMatches', () => {
     // The rule is global: one documentation DSN earlier in a file must not
     // shadow a real one further down.
     const found = realSecretMatches(
-      'postgresql://u:p@example.com/db and postgresql://u:secret@prod.internal/db',
+      `postgresql://u:p@example.com/db and postgresql://u:${join('sec', 'ret')}@prod.internal/db`,
     )
     expect(found).toHaveLength(1)
     expect(found[0].match).toContain('prod.internal')
   })
 
   it('catches provider keys regardless of host reasoning', () => {
-    expect(realSecretMatches('sk_live_0123456789abcdefghij')).toHaveLength(1)
-    expect(realSecretMatches('sk-ant-0123456789abcdefghijklmn')).toHaveLength(1)
+    expect(realSecretMatches(join('sk_live', '_', '0123456789abcdefghij'))).toHaveLength(1)
+    expect(realSecretMatches(join('sk-ant', '-', '0123456789abcdefghijklmn'))).toHaveLength(1)
   })
 
   it('says nothing about ordinary source', () => {
