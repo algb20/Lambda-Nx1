@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { classifyIdentifier, loginUser } from '@/lib/auth/standalone'
 import { defaultStandaloneDeps } from '@/lib/auth/standalone-deps'
 import { attachSession } from '@/lib/auth/cookie'
+import { canIssueSessions } from '@/lib/auth/session'
+import { isDbConfigured } from '@/lib/db'
 
 /**
  * POST /api/auth/login { identifier, password } — off-Pi sign-in.
@@ -15,6 +17,16 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
+  if (!isDbConfigured() || !canIssueSessions()) {
+    console.error(
+      `[auth/login] refusing sign-in — db configured: ${isDbConfigured()}, session secret usable: ${canIssueSessions()}`,
+    )
+    return NextResponse.json(
+      { error: 'Sign-in is temporarily unavailable on this deployment. Try again later.' },
+      { status: 503 },
+    )
+  }
+
   let body: { identifier?: unknown; email?: unknown; password?: unknown }
   try {
     body = await request.json()

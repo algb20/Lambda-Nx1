@@ -12,12 +12,29 @@ interface SessionPayload {
   exp: number // unix seconds
 }
 
+/** The shortest secret we will sign with. Below this, HMAC is theatre. */
+export const MIN_SESSION_SECRET_LENGTH = 16
+
 function secret(): string {
   const s = process.env.SESSION_SECRET
-  if (!s || s.length < 16) {
+  if (!s || s.length < MIN_SESSION_SECRET_LENGTH) {
     throw new Error('SESSION_SECRET is not set (needs a strong random string, 16+ chars).')
   }
   return s
+}
+
+/**
+ * Whether this deployment can issue sessions at all.
+ *
+ * Sign-up and sign-in have to ask *before* they do any work. Without it,
+ * registration creates the user row, then throws while attaching the cookie —
+ * so the account exists, the person is not signed in, and trying again tells
+ * them the email is already taken. A misconfigured deployment must fail before
+ * it writes, not after.
+ */
+export function canIssueSessions(): boolean {
+  const s = process.env.SESSION_SECRET
+  return typeof s === 'string' && s.length >= MIN_SESSION_SECRET_LENGTH
 }
 
 function sign(payload: string): string {
