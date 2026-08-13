@@ -160,6 +160,39 @@ sync; never skip a point or a test.
   both colour schemes, plus the icon/manifest declarations that were missing
   entirely (every page load was taking a favicon 404).
 
+## Launch readiness (#70)
+
+The audit before launch found four gaps. All four are closed.
+
+- [x] **Anyone can create an account.** The app ships in Pi mode, where becoming
+  a user required the Pi SDK handshake — which completes *only* inside the Pi
+  Browser. In an ordinary browser the product worked (gateways are open, charter
+  §1) but no path to an account existed anywhere in the interface: registration
+  was an API route and a gate that mode never renders. **That, and not lack of
+  interest, is why the `users` table was empty.** The form now lives in
+  Preferences → Account in both modes, blocking nothing, and moved to
+  `components/auth-form.tsx` so the gate and the panel share one implementation
+  rather than two that drift — and the one that drifts is a security control.
+- [x] **Account deletion (GDPR art. 17).** `DELETE /api/account`, immediate, no
+  soft delete. Rows that *are* the person cascade; rows merely *authored by*
+  them (posts, suggestions, country counters) detach with `set null`, so a
+  deletion neither retracts what others are reading nor leaves a name on it. The
+  avatar leaves object storage first, since storage has no foreign keys and the
+  row about to be deleted is its only handle.
+- [x] **Privacy and terms** (`/privacy`, `/terms`), written from the code: one
+  cookie, no IP stored, no third-party analytics, passive-only collection, EU
+  storage, self-service erasure — and the honest limit that a finding is a lead
+  with an evidence trail, not a verdict.
+- [x] **Rate limit on the open API**, as middleware rather than the same guard
+  copied into twenty routes, so a gateway added later is covered the day it is
+  written. It protects the *providers'* goodwill — NASA, USGS, Wikipedia, CISA
+  rate-limit Lambda, not the visitor, so one looping client empties the map for
+  everyone. Cron, auth, the visit beacon and the health check are exempt for
+  stated reasons, and `middleware.test.ts` re-parses the matcher so a pattern
+  that stops covering a route fails the build instead of the provider
+  relationship. Its known ceiling is stated in the module: in-memory, therefore
+  per instance.
+
 ## Deferred ledger (intentional — nothing forgotten)
 
 Everything marked "done" is real and tested for its layer. These are the pieces
