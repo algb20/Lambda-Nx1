@@ -32,10 +32,74 @@ const SECRET_FILES = /(^|\/)(\.env(\.(?!example$).*)?|.*\.pem|.*\.key|id_rsa.*|.
 const SECRET_CONTENT = [
   /sk_live_[0-9a-zA-Z]{16,}/, // Stripe live secret
   /sk-ant-[0-9A-Za-z_-]{20,}/, // Anthropic key
-  /postgres(ql)?:\/\/[^:\s]+:[^@\s]+@[^/\s]+/, // DSN with real password
+  /postgres(ql)?:\/\/[^:\s]+:[^@\s]+@[^/\s]+/g, // DSN with a password
 ]
 // Files allowed to contain secret-shaped strings (documentation of placeholders).
 const CONTENT_ALLOWLIST = new Set(['.env.example', 'scripts/package.mjs'])
+
+/**
+ * Hosts that cannot be a real database, so a DSN pointing at one cannot be a
+ * real credential.
+ *
+ * This exists because the DSN rule fired on `lib/db/probe.test.ts` — a test
+ * whose entire purpose is to prove the error scrubber strips connection
+ * strings, and which therefore *must* contain one. Blocking the release over it
+ * was wrong; so would be the obvious escape hatch of allowlisting the file, or
+ * test files generally, because a real secret pasted into a `.test.ts` would
+ * then ship.
+ *
+ * The distinction that actually matters is the host. RFC 2606 reserves
+ * `example.com/.net/.org` and `.test`/`.invalid`/`.example` precisely so
+ * documentation can name a host that can never exist; RFC 5737 does the same
+ * for `192.0.2.0/24`, `198.51.100.0/24` and `203.0.113.0/24`; and loopback is
+ * nobody's production database. A DSN aimed at any of them is a worked example
+ * by construction. Everything else — including anything in a test file — is
+ * still refused.
+ */
+const UNREACHABLE_HOST =
+  /^(localhost|127(\.\d{1,3}){3}|\[?::1\]?|0\.0\.0\.0|192\.0\.2\.\d{1,3}|198\.51\.100\.\d{1,3}|203\.0\.113\.\d{1,3}|([a-z0-9-]+\.)*example\.(com|net|org)|([a-z0-9-]+\.)*(test|invalid|example|localhost))$/i
+
+/**
+ * The host of a `scheme://user:pass@host[:port][/path]` string, lowercased.
+ *
+ * Splits on the **last** `@`, because a password may legitimately contain one
+ * and splitting on the first would read the tail of the password as the host —
+ * turning `p@ss@real-db.internal` into the harmless-looking `ss@real-db`. The
+ * path and port are dropped so this works on a full DSN as well as on the bare
+ * `scheme://user:pass@host` fragment the scanner's regex captures.
+ */
+export function dsnHost(dsn) {
+  const at = dsn.lastIndexOf('@')
+  if (at < 0) return ''
+  return dsn
+    .slice(at + 1)
+    .split(/[/?#]/)[0]
+    .replace(/:\d+$/, '')
+    .toLowerCase()
+}
+
+/** True when this DSN names a host reserved for documentation or loopback. */
+export function isDocumentationDsn(dsn) {
+  return UNREACHABLE_HOST.test(dsnHost(dsn))
+}
+
+/**
+ * The secret-shaped strings in `text` that could plausibly be real.
+ *
+ * Returns the offending matches rather than a boolean, so the failure message
+ * can name what it found instead of only which rule fired.
+ */
+export function realSecretMatches(text) {
+  const found = []
+  for (const re of SECRET_CONTENT) {
+    const matches = re.global ? [...text.matchAll(re)].map((m) => m[0]) : text.match(re) ? [text.match(re)[0]] : []
+    for (const match of matches) {
+      if (match.startsWith('postgres') && isDocumentationDsn(match)) continue
+      found.push({ rule: re.source, match })
+    }
+  }
+  return found
+}
 
 function sh(cmd) {
   return execSync(cmd, { cwd: ROOT, encoding: 'utf8' }).trim()
@@ -74,11 +138,12 @@ function assertNoSecrets(files) {
     } catch {
       continue // binary / unreadable — skip content scan
     }
-    for (const re of SECRET_CONTENT) {
-      if (re.test(text)) {
-        offenders.push(`${f} (matches ${re})`)
-        break
-      }
+    const found = realSecretMatches(text)
+    // Name what was found, redacted after the scheme — an operator has to be
+    // able to tell a leaked credential from a false positive without opening
+    // the file, and printing the secret to fix a secret leak is absurd.
+    if (found.length) {
+      offenders.push(`${f} (matches /${found[0].rule}/ → ${found[0].match.slice(0, 18)}…)`)
     }
   }
   if (offenders.length) {
@@ -138,9 +203,13 @@ function main() {
   console.log(`  manifest → dist/MANIFEST.json`)
 }
 
-try {
-  main()
-} catch (err) {
-  console.error(`\n✗ Packaging aborted: ${err instanceof Error ? err.message : err}\n`)
-  process.exit(1)
+// Only package when run as a command. The secret rules above are exported so
+// they can be tested, and importing this file must not build a release.
+if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
+  try {
+    main()
+  } catch (err) {
+    console.error(`\n✗ Packaging aborted: ${err instanceof Error ? err.message : err}\n`)
+    process.exit(1)
+  }
 }
