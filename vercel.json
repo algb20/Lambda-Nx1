@@ -2,9 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "crons": [
-    { "path": "/api/cron/publish", "schedule": "0 */6 * * *" },
-    { "path": "/api/cron/radar-watch", "schedule": "30 5 * * *" },
-    { "path": "/api/cron/radar-monitors", "schedule": "15 * * * *" }
+    { "path": "/api/cron/publish", "schedule": "0 6 * * *" },
+    { "path": "/api/cron/radar", "schedule": "0 7 * * *" }
   ],
   "functions": {
     "app/api/cron/[job]/route.ts": { "maxDuration": 60 },
