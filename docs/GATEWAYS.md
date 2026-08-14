@@ -24,10 +24,31 @@ This design is future-proof: the platform grows by *families*, not rewrites.
 | Ownership & control networks | who owns / controls this entity? | GLEIF Level-2 (parents, ultimate parents, subsidiaries) |
 | News & Signals | what are the top world events / topic coverage? | GDELT, Wikipedia "In the news", USGS earthquakes (live, geolocated), ReliefWeb/UN OCHA (humanitarian) (see docs/NEWS.md) |
 | Geospatial / Transport | where is this? | Nominatim/OpenStreetMap (places), OpenSky (live flights) |
-| Research & Tech-trend | what's the frontier on X? | OpenAlex, Crossref (papers), arXiv (preprints), GitHub (tools), Hacker News (industry signal) |
+| Research & Tech-trend | what's the frontier on X? | OpenAlex, Crossref (papers), PubMed/NLM (biomedical), arXiv (preprints), GitHub (tools), Hacker News (industry signal) |
 | Reference / knowledge base | structured facts about an entity | Wikidata (parent org, country, HQ, founder, CEO, coordinates) → feeds the ontology |
 | Macro / Economy | a country's key indicators | World Bank (GDP, population, inflation) — via Markets |
+| Open government data | which state holds a record of this? | The CKAN federation — every national/municipal open-data catalogue at once (see below) |
 | AI-analyst layer | triage + summarize + suggest next pivot | Claude (Anthropic API) over our own evidence |
+
+#### The CKAN federation (`lib/engine/registries/ckan`)
+
+The only place in the platform where the source population grows by **data**
+rather than by engineering. A large share of the world's government catalogues
+run CKAN and expose an identical Action API, so one client reaches all of them
+and adding a country is adding a row to `portals.ts`.
+
+Three things it does that no comparable platform does:
+
+- **It counts publishers, not datasets.** A portal is not a publisher; the
+  publishers are the ministries and agencies *inside* it (`organization_list`).
+  Correcting this dropped our own claimed reach for this family from 250,000 to
+  20,000 — see `lib/engine/catalog/families.ts`.
+- **It collapses harvested copies.** `data.europa.eu` republishes the national
+  catalogues; a dataset found in both is one origin, not two. The `harvests`
+  field records the relationship and the origin's record wins.
+- **It says what an empty result means.** "No state holds such a record" and
+  "we could not reach the catalogues that would know" are different answers, and
+  the report carries per-catalogue health so they never render the same.
 
 ### ⏭️ Planned families (all lawful, free-source-first)
 | Gateway | What it answers | Candidate free sources | Tier |

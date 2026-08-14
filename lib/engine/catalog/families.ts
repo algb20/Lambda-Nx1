@@ -113,8 +113,8 @@ export const SOURCE_FAMILIES: SourceFamily[] = [
     basis: 'GLEIF publishes the full LEI population, which passed 2.6 million issued identifiers.',
     licence: ccBy('GLEIF', 'https://www.gleif.org/en/meta/legal'),
     keyless: true,
-    status: 'planned',
-    note: 'Every entity that has ever needed to be identifiable in a financial transaction.',
+    status: 'live',
+    note: 'Every entity that has ever needed to be identifiable in a financial transaction. Wired twice: `gleif` resolves an entity, `gleif_ownership` walks the Level 2 parent/child relationships.',
   },
   {
     key: 'opencorporates',
@@ -170,7 +170,8 @@ export const SOURCE_FAMILIES: SourceFamily[] = [
     basis: 'OpenAlex documents an index of over 250 million scholarly works across 250,000+ sources.',
     licence: CC0_ATTRIB,
     keyless: true,
-    status: 'planned',
+    status: 'live',
+    note: 'Wired as `openalex` under the research capability.',
   },
   {
     key: 'crossref_dois',
@@ -183,7 +184,8 @@ export const SOURCE_FAMILIES: SourceFamily[] = [
     basis: 'Crossref reports over 150 million registered content items.',
     licence: CC0_ATTRIB,
     keyless: true,
-    status: 'planned',
+    status: 'live',
+    note: 'Wired as `crossref` under the research capability.',
   },
   {
     key: 'pubmed',
@@ -196,7 +198,8 @@ export const SOURCE_FAMILIES: SourceFamily[] = [
     basis: 'PubMed states it comprises more than 37 million citations.',
     licence: PUBLIC_DOMAIN,
     keyless: true,
-    status: 'planned',
+    status: 'live',
+    note: 'Wired as `pubmed` under the research capability. Where a health signal is written down before it becomes a news story — and written from the country it happened in, which is where our coverage map is thinnest.',
   },
 
   // ── Infrastructure at internet scale ─────────────────────────────────────
@@ -245,17 +248,21 @@ export const SOURCE_FAMILIES: SourceFamily[] = [
   // ── Government publication at national scale ─────────────────────────────
   {
     key: 'data_gov_catalogs',
-    name: 'National open-data catalogues (CKAN/DCAT)',
+    name: 'National open-data catalogues (CKAN)',
     publisher: 'National and municipal open-data portals',
-    endpoint: 'https://ckan.org/',
+    endpoint: 'https://catalog.data.gov/api/3/action/package_search',
     discipline: 'osint',
     topics: ['official', 'economy'],
-    publishers: 250_000,
-    basis: 'The global CKAN/DCAT portal network exposes hundreds of thousands of datasets across 100+ national and municipal catalogues.',
+    // Reduced from a previously claimed 250,000, which counted *datasets*.
+    // A dataset is a work, not a publisher; the publishers are the ministries,
+    // agencies and municipalities that own them — CKAN's `organization_list`.
+    // Correcting our own headline downwards is the point of this file.
+    publishers: 20_000,
+    basis: 'Publishers are the organizations inside each portal, not its datasets. Data.gov alone lists thousands; 20,000 is a conservative floor across the portals enumerated in lib/engine/registries/ckan/portals.ts, and `measureFederation()` replaces the estimate with each portal’s own count.',
     licence: PUBLIC_DOMAIN,
     keyless: true,
-    status: 'planned',
-    note: 'One protocol, every portal that speaks it — the cheapest reach in the catalogue.',
+    status: 'live',
+    note: 'One protocol, every portal that speaks it — the only place in the platform where source population grows by data rather than by engineering. Wired as `ckan_federation`.',
   },
 ]
 
