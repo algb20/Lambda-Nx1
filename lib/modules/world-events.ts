@@ -66,6 +66,7 @@ interface RawData {
   magnitudeUnit?: unknown
   tsunami?: unknown
   kind?: unknown
+  topics?: unknown
   assignedSeverity?: unknown
   alertLevel?: unknown
   observedAt?: unknown
@@ -80,19 +81,90 @@ function str(value: unknown): string | null {
   return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null
 }
 
+/**
+ * A catalogue topic, as an event category.
+ *
+ * Only the topics that name a *kind of event* appear here. `official`, `news`
+ * and `technology` describe where a report came from rather than what happened,
+ * and mapping them onto a category would put a central-bank statement and a
+ * volcanic eruption in the same bucket — which is roughly what the board was
+ * doing before this table existed.
+ */
+const TOPIC_CATEGORY: Partial<Record<string, EventCategory>> = {
+  earthquake: 'seismic',
+  volcano: 'volcano',
+  wildfire: 'wildfire',
+  flood: 'flood',
+  storm: 'storm',
+  tsunami: 'tsunami',
+  drought: 'drought',
+  weather: 'storm',
+  'air-quality': 'health',
+  'space-weather': 'space',
+  space: 'space',
+  health: 'health',
+  displacement: 'humanitarian',
+  humanitarian: 'humanitarian',
+  conflict: 'manmade',
+  'cyber-advisory': 'manmade',
+  vulnerability: 'manmade',
+  malware: 'manmade',
+  energy: 'manmade',
+  connectivity: 'manmade',
+  aviation: 'manmade',
+  maritime: 'water',
+}
+
+/**
+ * What kind of event this is.
+ *
+ * ## The bug this replaces
+ *
+ * The category used to come from `data.category` alone, and almost no source
+ * sets it — so **2744 of 2850 events on the live board were filed as `world`**,
+ * 96% of everything. The wildfires, the health alerts and the floods were all
+ * in there too, invisible behind a single grey bucket, and the board looked
+ * like a product that had one category and a rounding error.
+ *
+ * The information was never missing. Every catalogue record declares its
+ * `topics`, and the adapter has been carrying them through in `data.topics` the
+ * whole time. Nothing read them.
+ *
+ * ## Why the *first* matching topic wins
+ *
+ * A source can declare several — a hazard feed is plausibly `flood`, `storm`
+ * and `weather` at once — and the records are written most-specific-first,
+ * because that is the order a person naturally lists them in. Taking the first
+ * match therefore prefers `flood` over the `weather` that follows it, which is
+ * what a reader wants. Sorting or scoring them would be a worse answer arrived
+ * at more expensively.
+ */
+function categorize(e: Evidence, data: RawData): EventCategory {
+  const declared = str(data.category)
+  if (declared && declared in CATEGORY_META) return declared as EventCategory
+
+  const topics = Array.isArray(data.topics) ? (data.topics as unknown[]) : []
+  for (const topic of topics) {
+    const mapped = typeof topic === 'string' ? TOPIC_CATEGORY[topic] : undefined
+    if (mapped) return mapped
+  }
+
+  // Kept because these two predate the catalogue and carry no topics at all.
+  if (e.sourceKey === 'reliefweb') return 'humanitarian'
+  if (e.sourceKey.includes('quake')) return 'seismic'
+
+  // Genuinely unclassifiable: a general news item from a general feed. It is a
+  // real category, not a failure — but it must be the exception, not 96%.
+  return 'world'
+}
+
 /** Map a source's evidence onto our event shape without inventing anything. */
 function toEvent(e: Evidence, index: number): WorldEvent | null {
   const title = e.claim?.trim()
   if (!title) return null
   const data = (e.data ?? {}) as RawData
 
-  const rawCategory = str(data.category)
-  const category: EventCategory =
-    rawCategory && rawCategory in CATEGORY_META
-      ? (rawCategory as EventCategory)
-      : e.sourceKey === 'reliefweb'
-        ? 'humanitarian'
-        : 'world'
+  const category = categorize(e, data)
 
   const lat = num(data.lat)
   const lon = num(data.lon)

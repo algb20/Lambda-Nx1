@@ -3,7 +3,7 @@ import { independenceGroup, sourceHost } from './types'
 import { HAZARD_SOURCES } from './feeds/hazards'
 import { OFFICIAL_SOURCES } from './feeds/official'
 import { CYBER_SOURCES } from './feeds/cyber'
-import { NEWS_SOURCES, RESEARCH_SOURCES } from './feeds/news'
+import { NEWS_SOURCES, RESEARCH_SOURCES, VERIFIED_NEWS_SOURCES } from './feeds/news'
 import { INFRASTRUCTURE_SOURCES } from './feeds/infrastructure'
 import { REGIONAL_SOURCES } from './feeds/regional'
 import { REGIONAL_EXTRA_SOURCES } from './feeds/regional-extra'
@@ -12,10 +12,12 @@ import { SCIENCE_SOURCES } from './feeds/science'
 import { MARKET_SOURCES } from './feeds/markets'
 import { partitionByLicence, requiredAttributions, LAMBDA_USAGE, type UsageContext } from './licence'
 import { SOURCE_FAMILIES, livePublisherReach, plannedPublisherReach } from './families'
+import { isQuarantined } from './quarantine'
 
 export * from './types'
 export * from './licence'
 export * from './families'
+export * from './quarantine'
 
 /**
  * The whole catalogue.
@@ -35,6 +37,7 @@ export const CATALOG: CatalogSource[] = [
   ...CYBER_SOURCES,
   ...RESEARCH_SOURCES,
   ...NEWS_SOURCES,
+  ...VERIFIED_NEWS_SOURCES,
   ...REGIONAL_SOURCES,
   ...REGIONAL_EXTRA_SOURCES,
 ]
@@ -59,7 +62,14 @@ export function usableCatalog(usage: UsageContext = LAMBDA_USAGE) {
  */
 export function activeSources(usage: UsageContext = LAMBDA_USAGE): CatalogSource[] {
   return usableCatalog(usage).usable.filter(
-    (s) => s.enabled !== false && (s.keyless || (s.keyEnv ? Boolean(process.env[s.keyEnv]) : false)),
+    (s) =>
+      s.enabled !== false &&
+      // Withheld because it was *observed* to be broken, not because anyone
+      // decided against it. The record stays intact and the observation lives
+      // in `quarantine.ts` with its date and status — see the note there on
+      // why those are two different facts worth keeping apart.
+      !isQuarantined(s.key) &&
+      (s.keyless || (s.keyEnv ? Boolean(process.env[s.keyEnv]) : false)),
   )
 }
 
@@ -140,6 +150,8 @@ export function catalogSummary(usage: UsageContext = LAMBDA_USAGE) {
       usable: usable.length,
       active: active.length,
       excludedByLicence: excluded.length,
+      /** Observed broken on the last probe. See `quarantine.ts`. */
+      quarantined: CATALOG.filter((x) => isQuarantined(x.key)).length,
       keyless: CATALOG.filter((s) => s.keyless).length,
       hosts: catalogHosts().length,
     },

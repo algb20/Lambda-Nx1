@@ -1,5 +1,5 @@
 import type { CatalogSource } from '../types'
-import { publicFeed } from '../licence'
+import { ccBy, publicFeed } from '../licence'
 
 /**
  * News and reporting.
@@ -287,5 +287,77 @@ export const RESEARCH_SOURCES: CatalogSource[] = [
     licence: publicFeed('RFC Editor', 'https://www.rfc-editor.org/'),
     minIntervalSec: 86400,
     keyless: true,
+  },
+]
+
+/**
+ * Replacements for sources the 2026-08-14 probe found broken.
+ *
+ * Every URL here was requested with the engine's own agent and answered `200`
+ * before the record was written — the first sources in this catalogue verified
+ * against the live provider rather than against documentation. The others were
+ * written from what a provider *says* it publishes, which is how a third of the
+ * catalogue came to be pointing at addresses that had moved.
+ *
+ * What is deliberately absent is as important. Reuters withdrew its public feed
+ * and several others sit behind bot challenges; the obvious workaround is to
+ * pull those same mastheads out of a news aggregator. That is refused on two
+ * grounds, and the second is the one that matters here: it would be one origin
+ * wearing twenty names, and a corroboration count built on it would be a lie of
+ * exactly the kind this catalogue exists to refuse. Where a publisher will not
+ * be read directly, the gap is left open and the blind-spot map reports it.
+ */
+export const VERIFIED_NEWS_SOURCES: CatalogSource[] = [
+  {
+    key: 'aljazeera_all',
+    name: 'Al Jazeera English — all news',
+    publisher: 'Al Jazeera Media Network',
+    url: 'https://www.aljazeera.com/xml/rss/all.xml',
+    kind: 'rss',
+    discipline: 'osint',
+    topics: ['news', 'conflict', 'humanitarian'],
+    coverage: 'global',
+    // A newsroom with its own correspondents rather than a wire subscriber,
+    // which is what separates a C from the D a rewrite desk earns.
+    admiralty: 'C',
+    independence: 'aljazeera',
+    licence: publicFeed('Al Jazeera', 'https://www.aljazeera.com/terms-and-conditions'),
+    minIntervalSec: 900,
+    keyless: true,
+    note: 'Verified answering 2026-08-14. Reports the Middle East, Africa and South Asia at a depth the Anglophone wires do not.',
+  },
+  {
+    key: 'un_news',
+    name: 'UN News — all',
+    publisher: 'United Nations',
+    url: 'https://news.un.org/feed/subscribe/en/news/all/rss.xml',
+    kind: 'rss',
+    discipline: 'humint',
+    topics: ['humanitarian', 'official', 'displacement', 'health'],
+    coverage: 'global',
+    // The UN reporting on its own operations is the record of those
+    // operations, which is a different thing from reporting on a member state.
+    admiralty: 'B',
+    independence: 'un-news',
+    licence: publicFeed('United Nations', 'https://www.un.org/en/about-us/terms-of-use'),
+    minIntervalSec: 1800,
+    keyless: true,
+    note: 'Verified answering 2026-08-14. Replaces the ReliefWeb feeds, whose v1 API was retired.',
+  },
+  {
+    key: 'paho_news',
+    name: 'PAHO — Pan American Health Organization',
+    publisher: 'Pan American Health Organization',
+    url: 'https://www.paho.org/en/rss.xml',
+    kind: 'rss',
+    discipline: 'humint',
+    topics: ['health', 'official'],
+    coverage: 'global',
+    admiralty: 'A',
+    independence: 'paho',
+    licence: publicFeed('PAHO/WHO', 'https://www.paho.org/en/terms-use'),
+    minIntervalSec: 7200,
+    keyless: true,
+    note: 'Verified answering 2026-08-14. Replaces paho_alerts, whose URL returned 404.',
   },
 ]
