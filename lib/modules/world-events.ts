@@ -23,7 +23,11 @@
  *     any dot on the map can be audited back to the agency that measured it.
  */
 import { collect } from '../engine/orchestrator'
-import { registerNewsGateway, registerWorldEventsGateway } from '../engine/sources'
+import {
+  registerCatalogSources,
+  registerNewsGateway,
+  registerWorldEventsGateway,
+} from '../engine/sources'
 import type { Evidence } from '../engine/types'
 import { countryAt, findCountry } from '../geo/atlas'
 import {
@@ -134,6 +138,9 @@ function toEvent(e: Evidence, index: number): WorldEvent | null {
 export async function getWorldEvents(): Promise<WorldEventsReport> {
   registerWorldEventsGateway()
   registerNewsGateway()
+  // The declarative catalogue: dozens of official hazard, health and advisory
+  // feeds that would otherwise each need a module of their own.
+  registerCatalogSources()
 
   // Two capabilities, run concurrently: a slow news provider must not delay the
   // measured-events layer that the map mainly depends on.
