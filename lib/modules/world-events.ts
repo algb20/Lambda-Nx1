@@ -30,6 +30,7 @@ import {
 } from '../engine/sources'
 import type { Evidence } from '../engine/types'
 import { countryAt, findCountry } from '../geo/atlas'
+import { fuseEvents, fusionSummary, type Signal } from '../analysis/fusion'
 import {
   CATEGORY_META,
   REGION_LABEL,
@@ -63,6 +64,8 @@ interface RawData {
   kind?: unknown
   assignedSeverity?: unknown
   alertLevel?: unknown
+  observedAt?: unknown
+  independence?: unknown
 }
 
 function num(value: unknown): number | null {
@@ -127,10 +130,38 @@ function toEvent(e: Evidence, index: number): WorldEvent | null {
     severity,
     alertLevel: str(data.alertLevel),
     at: e.retrievedAt,
+    // Never defaulted to the retrieval time: a feed that published no date
+    // yields an event we cannot age, and saying so is the honest answer.
+    observedAt: str(data.observedAt),
     sourceKey: e.sourceKey,
     sourceUrl: e.sourceUrl ?? null,
+    independence: str(data.independence),
     admiralty: e.admiralty ?? null,
     confidence: e.confidence,
+  }
+}
+
+/**
+ * A world event as a fusion signal.
+ *
+ * The independence group is what fusion counts, and it travels on the evidence
+ * from the catalogue record. Falling back to the source key is correct rather
+ * than lossy: a source that declares no group **is** its own group.
+ */
+function toSignal(event: WorldEvent): Signal {
+  return {
+    id: event.id,
+    title: event.title,
+    independence: event.independence ?? event.sourceKey,
+    sourceKey: event.sourceKey,
+    sourceUrl: event.sourceUrl,
+    admiralty: event.admiralty,
+    lat: event.lat,
+    lon: event.lon,
+    observedAt: event.observedAt ?? null,
+    receivedAt: event.at,
+    magnitude: event.magnitude,
+    topic: event.category,
   }
 }
 
@@ -154,7 +185,21 @@ export async function getWorldEvents(): Promise<WorldEventsReport> {
     .map(toEvent)
     .filter((e): e is WorldEvent => e !== null)
 
+  /**
+   * Fusion, then deduplication.
+   *
+   * `dedupeEvents` removes byte-identical repeats — the same feed read twice.
+   * Fusion does the harder thing: it recognises that a USGS solution, an EMSC
+   * solution and three wire stories describe **one** earthquake, and presents
+   * them as one event carrying five pieces of evidence.
+   *
+   * The order matters. Fusing first would waste work on exact duplicates;
+   * deduplicating first leaves fusion the real question — which distinct
+   * reports are the same event.
+   */
   const deduped = dedupeEvents(all)
+  const fused = fuseEvents(deduped.map(toSignal))
+  const fusion = fusionSummary(deduped.map(toSignal), fused)
   const events = deduped.filter((e) => e.lat !== null && e.lon !== null).sort(operationalOrder)
   const unplaceable = deduped.filter((e) => e.lat === null || e.lon === null).sort(operationalOrder)
 
@@ -240,6 +285,16 @@ export async function getWorldEvents(): Promise<WorldEventsReport> {
     regions,
     hotspots,
     sourceHealth,
+    /**
+     * The fused picture: distinct events rather than distinct reports.
+     *
+     * Reported alongside the raw events rather than replacing them, because a
+     * reader auditing a claim needs the individual reports, and an operator
+     * reading the map needs the events. Both are true; they answer different
+     * questions.
+     */
+    fused,
+    fusion,
     summary: {
       total: deduped.length,
       placed: events.length,

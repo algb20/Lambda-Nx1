@@ -489,6 +489,58 @@ export function GlobeView() {
         </Card>
       ) : null}
 
+      {/*
+        Fusion. The number competitors never show.
+
+        "142 reports → 38 events" tells a reader the screen summarises more work
+        than it displays — and it is the honest way to present a count that
+        would otherwise look like *less* coverage than a rival showing every
+        duplicate as a separate line. The contested count is the one that
+        matters most: sources disagreeing is a finding, not an error to hide.
+      */}
+      {report?.fusion && report.fusion.signals > 0 ? (
+        <Card className="p-3">
+          <h4 className="mb-1.5 text-xs font-semibold">
+            Event fusion{' '}
+            <span className="font-normal text-muted-foreground">
+              {report.fusion.signals} reports → {report.fusion.events} events
+            </span>
+          </h4>
+          <div className="flex flex-wrap gap-3 text-[11px] text-muted-foreground">
+            <span>
+              <span className="font-medium text-foreground">{report.fusion.corroborated}</span>{' '}
+              corroborated by more than one origin
+            </span>
+            {report.fusion.contested > 0 ? (
+              <span className="text-amber-600 dark:text-amber-500">
+                <span className="font-medium">{report.fusion.contested}</span> contested — sources
+                disagree
+              </span>
+            ) : null}
+            {report.fusion.duplicatesRemoved > 0 ? (
+              <span>
+                <span className="font-medium text-foreground">
+                  {report.fusion.duplicatesRemoved}
+                </span>{' '}
+                duplicate reports absorbed
+              </span>
+            ) : null}
+          </div>
+
+          {/* The contested events themselves, named. */}
+          {report.fused?.filter((f) => f.contradictions.length > 0).slice(0, 3).map((f) => (
+            <div key={f.id} className="mt-2 rounded border border-amber-500/30 p-2">
+              <p className="text-[11px] font-medium">{f.title}</p>
+              {f.contradictions.map((c, i) => (
+                <p key={i} className="text-[10px] leading-relaxed text-muted-foreground">
+                  ⚠ {c.detail} — {c.between.join(' vs ')}
+                </p>
+              ))}
+            </div>
+          ))}
+        </Card>
+      ) : null}
+
       {/* Source integrity. A board that quietly loses a feed is a lying board. */}
       {report ? (
         <Card className="p-3">

@@ -25,6 +25,8 @@ function event(over: Partial<WorldEvent> = {}): WorldEvent {
     severity: 0,
     alertLevel: null,
     at: '2026-08-07T00:00:00Z',
+    observedAt: null,
+    independence: null,
     sourceKey: 'usgs_recent',
     sourceUrl: null,
     admiralty: { source: 'A', info: 1 },
