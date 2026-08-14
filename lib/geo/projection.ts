@@ -155,6 +155,70 @@ export function unprojectGlobe(
   return { lat, lon }
 }
 
+/**
+ * How far the globe may be pitched, in radians.
+ *
+ * Short of a pole: tilted all the way over, the sphere's own rotation stops
+ * corresponding to horizontal drag and the surface becomes impossible to steer.
+ * Exported so the renderer and anything that moves the camera for the user
+ * (zoom-to-cluster) clamp to the same limit rather than each inventing one.
+ */
+export const MAX_TILT = 1.2
+
+export const clampTilt = (tilt: number) => Math.max(-MAX_TILT, Math.min(MAX_TILT, tilt))
+
+/**
+ * The globe camera that puts a coordinate in the middle of the view.
+ *
+ * The inverse of `projectGlobe` at the centre pixel: spin the sphere until the
+ * longitude faces us, pitch it until the latitude is level with the equator of
+ * the screen. Used to fly to a cluster the reader tapped, which is the only way
+ * a merged mark can be taken apart on a touch screen.
+ */
+export function globeCameraOn(lat: number, lon: number, zoom: number): GlobeCamera {
+  return {
+    rotation: -(lon * Math.PI) / 180,
+    tilt: clampTilt((lat * Math.PI) / 180),
+    zoom,
+  }
+}
+
+/**
+ * The map camera that puts a coordinate in the middle of the view.
+ *
+ * Solved rather than nudged: `mapFrame` is computed at the target zoom with no
+ * pan, and the offset is whatever moves that point to the centre pixel. Nudging
+ * a pan by a guessed amount would land somewhere near it at one zoom and far
+ * from it at another.
+ */
+export function mapCameraOn(
+  lat: number,
+  lon: number,
+  zoom: number,
+  viewport: Viewport,
+): MapCamera {
+  const base = mapFrame({ zoom, offsetX: 0, offsetY: 0 }, viewport)
+  return {
+    zoom,
+    offsetX: viewport.width / 2 - (base.left + ((lon + 180) / 360) * base.w),
+    offsetY: viewport.height / 2 - (base.top + ((90 - lat) / 180) * base.h),
+  }
+}
+
+/**
+ * The shortest signed rotation from one angle to another, in radians.
+ *
+ * A camera animating from 3.0 rad to -3.0 rad must travel 0.28 rad across the
+ * antimeridian, not 6.0 rad the long way round: the globe would spin almost a
+ * full turn to reach a point that was already nearly in front of the reader.
+ */
+export function shortestAngle(from: number, to: number): number {
+  const delta = (to - from) % (Math.PI * 2)
+  if (delta > Math.PI) return delta - Math.PI * 2
+  if (delta < -Math.PI) return delta + Math.PI * 2
+  return delta
+}
+
 /** Convert lat/lon (deg) to the unit vector projectGlobe works in. */
 export function toVector(lat: number, lon: number): [number, number, number] {
   const la = (lat * Math.PI) / 180
