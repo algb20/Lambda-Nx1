@@ -153,9 +153,21 @@ describe('the licence registry refuses what it must', () => {
     }
     const { usable, excluded } = partitionByLicence([...CATALOG, blocked])
     expect(usable.find((s) => s.key === 'blocked_example')).toBeUndefined()
-    expect(excluded).toHaveLength(1)
-    expect(excluded[0].reason).toContain('commercial')
-    expect(excluded[0].reason).toContain('example.org/terms')
+
+    const reason = excluded.find((e) => e.source.key === 'blocked_example')?.reason
+    expect(reason).toContain('commercial')
+    // The terms URL travels with the refusal, so the remedy is one click away.
+    expect(reason).toContain('example.org/terms')
+  })
+
+  it('actually excludes a real source whose terms we do not satisfy', () => {
+    // OpenSky is genuinely useful aviation data and its terms require a prior
+    // agreement for commercial REST use. It stays in the catalogue so the gap
+    // and its remedy are both recorded — and it stays out of the build.
+    const { usable, excluded } = usableCatalog()
+    expect(usable.find((s) => s.key === 'opensky_states')).toBeUndefined()
+    const opensky = excluded.find((e) => e.source.key === 'opensky_states')
+    expect(opensky?.reason).toContain('opensky-network.org')
   })
 
   it('lets nothing unusable into the active set', () => {

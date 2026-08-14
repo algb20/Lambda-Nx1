@@ -4,6 +4,8 @@ import { HAZARD_SOURCES } from './feeds/hazards'
 import { OFFICIAL_SOURCES } from './feeds/official'
 import { CYBER_SOURCES } from './feeds/cyber'
 import { NEWS_SOURCES, RESEARCH_SOURCES } from './feeds/news'
+import { INFRASTRUCTURE_SOURCES } from './feeds/infrastructure'
+import { REGIONAL_SOURCES } from './feeds/regional'
 import { partitionByLicence, requiredAttributions, LAMBDA_USAGE, type UsageContext } from './licence'
 import { SOURCE_FAMILIES, livePublisherReach, plannedPublisherReach } from './families'
 
@@ -21,10 +23,12 @@ export * from './families'
  */
 export const CATALOG: CatalogSource[] = [
   ...HAZARD_SOURCES,
+  ...INFRASTRUCTURE_SOURCES,
   ...OFFICIAL_SOURCES,
   ...CYBER_SOURCES,
   ...RESEARCH_SOURCES,
   ...NEWS_SOURCES,
+  ...REGIONAL_SOURCES,
 ]
 
 /** Sources this deployment may lawfully use, and the ones it may not. */
