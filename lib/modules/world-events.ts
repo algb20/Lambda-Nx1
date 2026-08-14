@@ -42,6 +42,7 @@ import {
   severityOf,
   type EventCategory,
   type Region,
+  type FusedEventSummary,
   type SourceHealth,
   type WorldEvent,
   type WorldEventsReport,
@@ -200,8 +201,45 @@ export async function getWorldEvents(): Promise<WorldEventsReport> {
    * reports are the same event.
    */
   const deduped = dedupeEvents(all)
-  const fused = fuseEvents(deduped.map(toSignal))
-  const fusion = fusionSummary(deduped.map(toSignal), fused)
+  const signals = deduped.map(toSignal)
+  const fused = fuseEvents(signals)
+  const fusion = fusionSummary(signals, fused)
+
+  /**
+   * The fused picture as the browser receives it.
+   *
+   * Mapped field by field rather than passed straight through, so the wire
+   * contract is a decision rather than an accident of the engine's internals.
+   * What travels is exactly what an audit needs: who reported it, which
+   * independence group they belong to, how they are rated, and both times. What
+   * does not travel is the engine's own working — per-signal coordinates and
+   * topics that the interface never reads and that would double the payload of
+   * the busiest response the app makes.
+   */
+  const fusedSummaries: FusedEventSummary[] = fused.map((f) => ({
+    id: f.id,
+    title: f.title,
+    lat: f.lat,
+    lon: f.lon,
+    observedAt: f.observedAt,
+    lastReceivedAt: f.lastReceivedAt,
+    magnitude: f.magnitude,
+    independentSources: f.independentSources,
+    origins: f.origins,
+    contradictions: f.contradictions,
+    signals: f.signals.map((s) => ({
+      id: s.id,
+      title: s.title,
+      sourceKey: s.sourceKey,
+      sourceUrl: s.sourceUrl ?? null,
+      independence: s.independence,
+      admiralty: s.admiralty ?? null,
+      observedAt: s.observedAt ?? null,
+      receivedAt: s.receivedAt,
+      magnitude: s.magnitude ?? null,
+    })),
+    basis: f.basis,
+  }))
 
   /**
    * Where we cannot see.
@@ -313,7 +351,7 @@ export async function getWorldEvents(): Promise<WorldEventsReport> {
      * reading the map needs the events. Both are true; they answer different
      * questions.
      */
-    fused,
+    fused: fusedSummaries,
     fusion,
     coverage,
     coverageSummary: coverageSummary(coverage),
