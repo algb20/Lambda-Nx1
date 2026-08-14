@@ -5,9 +5,11 @@ import { OFFICIAL_SOURCES } from './feeds/official'
 import { CYBER_SOURCES } from './feeds/cyber'
 import { NEWS_SOURCES, RESEARCH_SOURCES } from './feeds/news'
 import { partitionByLicence, requiredAttributions, LAMBDA_USAGE, type UsageContext } from './licence'
+import { SOURCE_FAMILIES, livePublisherReach, plannedPublisherReach } from './families'
 
 export * from './types'
 export * from './licence'
+export * from './families'
 
 /**
  * The whole catalogue.
@@ -108,18 +110,38 @@ export function catalogAttributions(usage: UsageContext = LAMBDA_USAGE): string[
   return requiredAttributions(usableCatalog(usage).usable)
 }
 
-/** Headline numbers, for the source dossier and the about page. */
+/**
+ * Headline numbers, with the three quantities kept apart.
+ *
+ * Competitors quote "one million sources" and mean publishers reached. Quoting
+ * that as integrations would be the exact inflation this platform exists to be
+ * the opposite of, so the shape of this object makes the conflation impossible:
+ * there is no field called `sources`.
+ */
 export function catalogSummary(usage: UsageContext = LAMBDA_USAGE) {
   const { usable, excluded } = usableCatalog(usage)
   const active = activeSources(usage)
   return {
-    total: CATALOG.length,
-    usable: usable.length,
-    active: active.length,
-    excludedByLicence: excluded.length,
-    keyless: CATALOG.filter((s) => s.keyless).length,
-    independentGroups: new Set(CATALOG.map(independenceGroup)).size,
-    hosts: catalogHosts().length,
+    /** Providers we call and parse. The number that reflects engineering. */
+    integrations: {
+      total: CATALOG.length,
+      usable: usable.length,
+      active: active.length,
+      excludedByLicence: excluded.length,
+      keyless: CATALOG.filter((s) => s.keyless).length,
+      hosts: catalogHosts().length,
+    },
+    /** Publishers reachable *through* those integrations. Reach, not effort. */
+    reach: {
+      live: livePublisherReach(),
+      planned: plannedPublisherReach(),
+      families: SOURCE_FAMILIES.length,
+    },
+    /**
+     * Origins that are not copies of one another — the only figure that may
+     * enter a confidence score, and always the smallest of the three.
+     */
+    independentOrigins: new Set(CATALOG.map(independenceGroup)).size,
     disciplines: new Set(CATALOG.map((s) => s.discipline)).size,
     topics: new Set(CATALOG.flatMap((s) => s.topics)).size,
   }

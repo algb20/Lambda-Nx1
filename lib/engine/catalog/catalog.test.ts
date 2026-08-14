@@ -8,6 +8,9 @@ import {
   independentCoverage,
   usableCatalog,
   catalogAttributions,
+  SOURCE_FAMILIES,
+  livePublisherReach,
+  plannedPublisherReach,
 } from './index'
 import { independenceGroup, sourceHost } from './types'
 import { licenceProblem, partitionByLicence, LAMBDA_USAGE, nonCommercial, needsAgreement, PUBLIC_DOMAIN } from './licence'
@@ -210,10 +213,64 @@ describe('catalogue scale', () => {
 
   it('summarises itself honestly', () => {
     const s = catalogSummary()
-    expect(s.total).toBe(CATALOG.length)
-    expect(s.active).toBeLessThanOrEqual(s.usable)
-    expect(s.usable).toBeLessThanOrEqual(s.total)
-    expect(s.independentGroups).toBeLessThanOrEqual(s.total)
+    expect(s.integrations.total).toBe(CATALOG.length)
+    expect(s.integrations.active).toBeLessThanOrEqual(s.integrations.usable)
+    expect(s.integrations.usable).toBeLessThanOrEqual(s.integrations.total)
+    expect(s.independentOrigins).toBeLessThanOrEqual(s.integrations.total)
     expect(s.disciplines).toBeGreaterThanOrEqual(5)
+  })
+
+  it('never exposes one field that conflates integrations with reach', () => {
+    // The whole point of the shape: a caller cannot accidentally print
+    // "1,000,000 sources" from a number that counts providers we built.
+    const s = catalogSummary() as Record<string, unknown>
+    expect(s.sources).toBeUndefined()
+    expect(s.total).toBeUndefined()
+  })
+
+  it('keeps reach far above integrations and origins far below', () => {
+    const s = catalogSummary()
+    expect(s.reach.live).toBeGreaterThan(s.integrations.total)
+    expect(s.independentOrigins).toBeLessThanOrEqual(s.integrations.total)
+  })
+})
+
+/**
+ * Source families are where a competitor's "one million sources" figure comes
+ * from, and where ours does too. The difference has to be that ours is
+ * auditable: every reach estimate names the provider's own published basis, so
+ * a reader can check it instead of believing it.
+ */
+describe('source families', () => {
+  it('gives every family an auditable basis for its reach', () => {
+    for (const f of SOURCE_FAMILIES) {
+      expect(f.publishers, f.key).toBeGreaterThan(0)
+      // A reach number nobody can check is marketing.
+      expect(f.basis.length, f.key).toBeGreaterThan(40)
+      expect(f.endpoint.startsWith('https://'), f.key).toBe(true)
+    }
+  })
+
+  it('marks each family live or planned, and never overstates the live reach', () => {
+    const live = SOURCE_FAMILIES.filter((f) => f.status === 'live')
+    expect(live.length).toBeGreaterThan(0)
+    expect(livePublisherReach()).toBeLessThan(plannedPublisherReach())
+  })
+
+  it('reaches beyond a million publishers once the planned families land', () => {
+    // The standing target. Stated as reach, which is what it is.
+    expect(plannedPublisherReach()).toBeGreaterThan(1_000_000)
+  })
+
+  it('carries a licence on every family, checked by the same registry', () => {
+    // A family is a source too: reach does not exempt it from the terms.
+    for (const f of SOURCE_FAMILIES) expect(f.licence.id.length, f.key).toBeGreaterThan(0)
+  })
+
+  it('flags share-alike families, which carry obligations onto derived data', () => {
+    // ODbL and CC-BY-SA are usable but not free of consequence, and a note is
+    // what stops that consequence being discovered after shipping.
+    const shareAlike = SOURCE_FAMILIES.filter((f) => f.licence.id.includes('SA') || f.licence.id.includes('ODbL'))
+    for (const f of shareAlike) expect(f.note, f.key).toBeTruthy()
   })
 })
