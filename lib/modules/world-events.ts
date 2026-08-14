@@ -35,9 +35,13 @@ import {
   severityOf,
   type EventCategory,
   type Region,
+  type SourceHealth,
   type WorldEvent,
   type WorldEventsReport,
 } from './world-events-shared'
+
+/** Worst first, so the states an operator must act on sort to the top. */
+const STATUS_ORDER = { failed: 0, empty: 1, ok: 2 } as const
 
 // Re-exported so existing importers keep one obvious entry point.
 export * from './world-events-shared'
@@ -186,9 +190,34 @@ export async function getWorldEvents(): Promise<WorldEventsReport> {
 
   // Per-source health. A board that quietly loses a feed is worse than one that
   // says it lost it — an operator has to know the map is incomplete.
-  const sourceHealth = results
-    .map((r) => ({ sourceKey: r.sourceKey, ok: r.ok, error: r.error ?? null }))
-    .sort((a, b) => Number(a.ok) - Number(b.ok) || a.sourceKey.localeCompare(b.sourceKey))
+  //
+  // The count is what makes this honest. `r.ok` only means the adapter did not
+  // throw, so a provider answering 200 with an empty result set used to report
+  // green while contributing nothing: the globe drew a bare sphere with every
+  // source healthy and no explanation on screen. Answering and contributing are
+  // different facts and are now reported as different states.
+  const contributed = new Map<string, number>()
+  for (const r of results) contributed.set(r.sourceKey, 0)
+  for (const e of [...events, ...unplaceable]) {
+    contributed.set(e.sourceKey, (contributed.get(e.sourceKey) ?? 0) + 1)
+  }
+  const sourceHealth: SourceHealth[] = results
+    .map((r) => {
+      const count = contributed.get(r.sourceKey) ?? 0
+      return {
+        sourceKey: r.sourceKey,
+        status: !r.ok ? ('failed' as const) : count > 0 ? ('ok' as const) : ('empty' as const),
+        count,
+        error: r.error ?? null,
+        ok: r.ok,
+      }
+    })
+    // Worst first: failures need attention, then the quiet feeds, then the
+    // healthy ones nobody has to look at.
+    .sort(
+      (a, b) =>
+        STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || a.sourceKey.localeCompare(b.sourceKey),
+    )
 
   const newestAt = deduped.reduce<string | null>((newest, e) => {
     const t = Date.parse(e.at)
@@ -210,8 +239,12 @@ export async function getWorldEvents(): Promise<WorldEventsReport> {
       /** The most recent event we hold — the honest answer to "is this live?". */
       newestAt,
       sources: results.map((r) => r.sourceKey),
-      sourcesOk: results.filter((r) => r.ok).length,
-      sourcesFailed: results.filter((r) => !r.ok).length,
+      // Counted from the graded health, so "ok" means contributed — not merely
+      // "did not throw". A summary that counts empty feeds as healthy is how an
+      // empty map ends up reporting that everything is fine.
+      sourcesOk: sourceHealth.filter((s) => s.status === 'ok').length,
+      sourcesEmpty: sourceHealth.filter((s) => s.status === 'empty').length,
+      sourcesFailed: sourceHealth.filter((s) => s.status === 'failed').length,
     },
   }
 }

@@ -11,6 +11,7 @@
 import {
   pgTable,
   pgEnum,
+  customType,
   uuid,
   text,
   char,
@@ -21,6 +22,17 @@ import {
   unique,
   index,
 } from 'drizzle-orm/pg-core'
+
+/**
+ * Raw bytes. Drizzle has no first-class `bytea`, and the alternative — base64
+ * in a text column — would inflate every stored image by a third and make the
+ * column a lie about what it holds.
+ */
+const bytea = customType<{ data: Uint8Array; driverData: Buffer }>({
+  dataType: () => 'bytea',
+  toDriver: (value) => Buffer.from(value),
+  fromDriver: (value) => new Uint8Array(value),
+})
 
 // ── Enums ────────────────────────────────────────────────────────────────────
 
@@ -95,6 +107,23 @@ export const users = pgTable(
     externalId: text('external_id').notNull(),
     displayName: text('display_name'),
     /**
+     * The public handle, unique across **all** accounts however they signed up.
+     *
+     * One namespace on purpose. A Pi pioneer arrives with a handle Pi already
+     * assigned them; someone signing up off-Pi chooses one. Two namespaces
+     * would let an off-Pi account register a name that reads as a Pi user's
+     * identity, which is exactly the impersonation a handle is supposed to
+     * prevent.
+     *
+     * Stored lowercase (see `normalizeUsername`) so uniqueness is
+     * case-insensitive without a functional index: `Lambda` and `lambda` must
+     * not be two people.
+     *
+     * Nullable only for accounts created before handles existed — every new
+     * account gets one at sign-up.
+     */
+    username: text('username'),
+    /**
      * Profile picture. Stored through lib/storage (never a vendor URL), so the
      * storage backend stays swappable; this column holds only the key we can
      * resolve back to an image.
@@ -104,7 +133,10 @@ export const users = pgTable(
     plan: planEnum('plan').notNull().default('free'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [unique('users_provider_external_uq').on(t.authProvider, t.externalId)],
+  (t) => [
+    unique('users_provider_external_uq').on(t.authProvider, t.externalId),
+    unique('users_username_uq').on(t.username),
+  ],
 )
 
 // ── Password credentials (off-Pi sign-in) ────────────────────────────────────
@@ -608,4 +640,34 @@ export const groupMembers = pgTable(
     unique('group_members_group_user_uq').on(t.groupId, t.userId),
     index('group_members_user_idx').on(t.userId),
   ],
+)
+
+
+// ── Blobs (durable object storage) ───────────────────────────────────────────
+//
+// The storage port defaulted to the filesystem, which is right for a
+// self-hosted box and silently wrong everywhere this app actually runs: on
+// Netlify and Vercel the function filesystem is ephemeral, so a profile picture
+// written during one request was gone by the next deploy. The upload reported
+// success, the users row kept a URL pointing at nothing, and the picture
+// quietly reverted to initials with no error anywhere.
+//
+// Blobs therefore live in the database — the one component here that is already
+// durable, backed up and shared by every instance. For avatar-sized objects
+// (capped at 2 MB) that beats adding a vendor: no new key to leak, nothing new
+// to be locked into, identical behaviour on every host. The storage port is
+// unchanged, so moving to S3 later stays a provider switch (charter §4).
+
+export const blobs = pgTable(
+  'blobs',
+  {
+    /** Storage key, e.g. `avatars/<user-id>/<version>.png`. */
+    key: text('key').primaryKey(),
+    contentType: text('content_type'),
+    bytes: bytea('bytes').notNull(),
+    /** Denormalised so a size query never has to read the payload. */
+    size: integer('size').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('blobs_key_prefix_idx').on(t.key)],
 )

@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Loader2, AlertCircle } from 'lucide-react'
+import { Loader2, AlertCircle, AtSign } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { normalizeUsername, usernameError, usernameProblem } from '@/lib/auth/policy'
 
 /**
  * The one sign-in / sign-up form.
@@ -24,7 +25,13 @@ export type AuthMode = 'login' | 'register'
 
 export interface AuthedUser {
   id: string
+  /** What to show. Falls back to older fields for pre-handle accounts. */
   username: string
+  /** The handle proper, or null if this account predates handles. */
+  handle?: string | null
+  plan?: 'free' | 'pro'
+  avatarUrl?: string | null
+  provider?: string
 }
 
 export function AuthForm({
@@ -38,12 +45,22 @@ export function AuthForm({
 }) {
   const [mode, setMode] = useState<AuthMode>('login')
   const [identifier, setIdentifier] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Validated in the browser with the *same* rules the server enforces, so the
+  // form can say what to fix before a round trip. The server still checks — a
+  // client-side rule is a courtesy, never a control.
+  const handleProblem = mode === 'register' && username ? usernameProblem(username) : null
+  const canSubmit =
+    Boolean(identifier.trim()) &&
+    Boolean(password) &&
+    (mode === 'login' || (Boolean(username.trim()) && !handleProblem))
+
   const submit = async () => {
-    if (busy || !identifier.trim() || !password) return
+    if (busy || !canSubmit) return
     setBusy(true)
     setError(null)
     try {
@@ -53,7 +70,7 @@ export function AuthForm({
         body: JSON.stringify(
           mode === 'login'
             ? { identifier: identifier.trim(), password }
-            : { email: identifier.trim(), password },
+            : { email: identifier.trim(), password, username: normalizeUsername(username) },
         ),
       })
       const data = (await res.json()) as { error?: string }
@@ -80,6 +97,32 @@ export function AuthForm({
         spellCheck={false}
         autoComplete={mode === 'login' ? 'username' : 'email'}
       />
+      {mode === 'register' ? (
+        <div className="space-y-1">
+          <div className="relative">
+            <AtSign className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              className="pl-8"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              autoComplete="off"
+              maxLength={30}
+            />
+          </div>
+          {handleProblem ? (
+            <p className="text-[11px] text-destructive">{usernameError(handleProblem)}</p>
+          ) : (
+            <p className="text-[11px] text-muted-foreground">
+              This is how other people see you. Lowercase letters, numbers and underscores.
+            </p>
+          )}
+        </div>
+      ) : null}
+
       <Input
         type="password"
         value={password}
@@ -88,7 +131,7 @@ export function AuthForm({
         placeholder={mode === 'login' ? 'Password or Pi passphrase' : 'Password (8+ characters)'}
         autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
       />
-      <Button onClick={submit} disabled={busy || !identifier.trim() || !password} className="w-full">
+      <Button onClick={submit} disabled={busy || !canSubmit} className="w-full">
         {busy ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : mode === 'login' ? (
@@ -105,8 +148,8 @@ export function AuthForm({
         </p>
       ) : (
         <p className="text-[11px] leading-relaxed text-muted-foreground">
-          We store your email address and a hash of your password — nothing else is required. See
-          the{' '}
+          We store your username, your email address and a hash of your password — nothing else is
+          required. See the{' '}
           <a href="/privacy" className="text-primary hover:underline">
             privacy notice
           </a>
@@ -125,6 +168,7 @@ export function AuthForm({
         onClick={() => {
           setMode(mode === 'login' ? 'register' : 'login')
           setError(null)
+          setUsername('')
         }}
         className="text-xs text-primary hover:underline"
       >

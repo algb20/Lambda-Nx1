@@ -52,10 +52,37 @@ export const repo = {
         .values(input)
         .onConflictDoUpdate({
           target: [s.users.authProvider, s.users.externalId],
-          set: { displayName: input.displayName ?? null },
+          // The handle is only ever *filled in*, never overwritten with null:
+          // a returning user whose row already carries a username must keep it,
+          // and a sign-in that arrives without one must not erase it.
+          set: {
+            displayName: input.displayName ?? null,
+            ...(input.username ? { username: input.username } : {}),
+          },
         })
         .returning()
       return row
+    },
+    /** Look a user up by their public handle. Handles are stored lowercase. */
+    async getByUsername(username: string): Promise<User | undefined> {
+      const db = getDb()
+      const [row] = await db
+        .select()
+        .from(s.users)
+        .where(eq(s.users.username, username.trim().toLowerCase()))
+        .limit(1)
+      return row
+    },
+    /**
+     * Whether this handle is free.
+     *
+     * Advisory only — two sign-ups racing on the same name would both be told
+     * yes. The unique constraint is what actually decides, and the caller must
+     * still handle its violation; this exists so the form can say "taken"
+     * before someone fills in a password.
+     */
+    async usernameAvailable(username: string): Promise<boolean> {
+      return (await repo.users.getByUsername(username)) === undefined
     },
     async getById(id: string): Promise<User | undefined> {
       const db = getDb()

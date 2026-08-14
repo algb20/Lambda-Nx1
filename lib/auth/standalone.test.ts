@@ -29,16 +29,27 @@ describe('password hashing (scrypt)', () => {
 interface Store {
   byEmail: Record<string, CredentialRecord>
   byPi: Record<string, CredentialRecord>
+  /** Our own handles — a different namespace slot from a claimed Pi username. */
+  byHandle: Record<string, CredentialRecord>
 }
 
 function fakeDeps(seed: Partial<Store> = {}): { deps: StandaloneDeps; store: Store } {
-  const store: Store = { byEmail: { ...seed.byEmail }, byPi: { ...seed.byPi } }
+  const store: Store = {
+    byEmail: { ...seed.byEmail },
+    byPi: { ...seed.byPi },
+    byHandle: { ...seed.byHandle },
+  }
   const deps: StandaloneDeps = {
     findByEmail: async (email) => store.byEmail[email],
     findByPiUsername: async (username) => store.byPi[username],
-    createUserAndCredential: async (email, passwordHash) => {
+    findByUsername: async (username) => store.byHandle[username],
+    usernameTaken: async (username) =>
+      username in store.byHandle || username in store.byPi,
+    createUserAndCredential: async (email, passwordHash, username) => {
       const userId = `user-${Object.keys(store.byEmail).length + 1}`
-      store.byEmail[email] = { userId, passwordHash }
+      const record = { userId, passwordHash }
+      store.byEmail[email] = record
+      store.byHandle[username] = record
       return { userId }
     },
   }
@@ -78,20 +89,49 @@ describe('classifyIdentifier', () => {
 })
 
 describe('register', () => {
-  it('creates a user for a valid email + password', async () => {
+  it('creates a user for a valid email + password + handle', async () => {
     const { deps, store } = fakeDeps()
-    const { userId } = await registerUser('New@Example.com', 'password123', deps)
+    const { userId } = await registerUser('New@Example.com', 'password123', 'Newcomer', deps)
     expect(userId).toBe('user-1')
     expect(store.byEmail['new@example.com']).toBeDefined() // normalized
+    // The handle is normalised too, so it cannot be claimed twice by casing.
+    expect(store.byHandle['newcomer']).toBeDefined()
   })
 
   it('rejects an invalid email, a short password and a duplicate', async () => {
     const { deps } = fakeDeps()
-    await expect(registerUser('not-an-email', 'password123', deps)).rejects.toThrow(/Invalid email/)
-    await expect(registerUser('a@b.com', 'short', deps)).rejects.toThrow(/at least 8/)
+    await expect(registerUser('not-an-email', 'password123', 'someone', deps)).rejects.toThrow(
+      /Invalid email/,
+    )
+    await expect(registerUser('a@b.com', 'short', 'someone', deps)).rejects.toThrow(/at least 8/)
     const dup = fakeDeps({ byEmail: { 'a@b.com': { userId: 'u1', passwordHash: hashPassword('x') } } })
-    await expect(registerUser('a@b.com', 'password123', dup.deps)).rejects.toThrow(
+    await expect(registerUser('a@b.com', 'password123', 'someone', dup.deps)).rejects.toThrow(
       /already registered/,
+    )
+  })
+
+  it('rejects a handle that breaks the rules, before writing anything', async () => {
+    const { deps, store } = fakeDeps()
+    await expect(registerUser('a@b.com', 'password123', 'ab', deps)).rejects.toThrow(/at least 3/)
+    await expect(registerUser('a@b.com', 'password123', 'has space', deps)).rejects.toThrow(
+      /lowercase letters/,
+    )
+    await expect(registerUser('a@b.com', 'password123', 'admin', deps)).rejects.toThrow(/reserved/)
+    // Nothing was created by any of the three attempts.
+    expect(Object.keys(store.byEmail)).toHaveLength(0)
+  })
+
+  it('refuses a handle already held, including one claimed by a Pi user', async () => {
+    const taken = fakeDeps({ byHandle: { pioneer: { userId: 'u1', passwordHash: 'x' } } })
+    await expect(
+      registerUser('a@b.com', 'password123', 'Pioneer', taken.deps),
+    ).rejects.toThrow(/taken/)
+
+    // One namespace: an off-Pi sign-up must not be able to take a name a Pi
+    // pioneer already holds, or it could pass as them.
+    const piHeld = fakeDeps({ byPi: { kamel: { userId: 'u2', passwordHash: 'x' } } })
+    await expect(registerUser('a@b.com', 'password123', 'kamel', piHeld.deps)).rejects.toThrow(
+      /taken/,
     )
   })
 
@@ -102,7 +142,7 @@ describe('register', () => {
    */
   it('cannot create a Pi-username credential', async () => {
     const { deps, store } = fakeDeps()
-    await registerUser('someone@example.com', 'password123', deps)
+    await registerUser('someone@example.com', 'password123', 'someone', deps)
     expect(Object.keys(store.byPi)).toHaveLength(0)
   })
 })
@@ -130,6 +170,27 @@ describe('login with either identifier', () => {
     await expect(loginUser('some_other_pioneer', 'anything', deps)).rejects.toThrow(
       /Invalid sign-in details/,
     )
+  })
+
+  it('signs in with the handle chosen at sign-up, not only the email', async () => {
+    const { deps } = fakeDeps()
+    await registerUser('new@example.com', 'password123', 'analyst_7', deps)
+    expect(await loginUser('analyst_7', 'password123', deps)).toEqual({ userId: 'user-1' })
+    expect(await loginUser('@Analyst_7', 'password123', deps)).toEqual({ userId: 'user-1' })
+    // And the email still works — one account, two ways in.
+    expect(await loginUser('new@example.com', 'password123', deps)).toEqual({ userId: 'user-1' })
+  })
+
+  it('prefers the Pi claim when a handle exists in both places', async () => {
+    // Should be unreachable, since registration refuses a name a Pi user holds.
+    // If it ever happens, the externally-verified claim must win rather than
+    // the local column — otherwise a collision hands away a pioneer's account.
+    const { deps } = fakeDeps({
+      byPi: { shared: { userId: 'pi-user', passwordHash: hashPassword('pw-pi') } },
+      byHandle: { shared: { userId: 'local-user', passwordHash: hashPassword('pw-local') } },
+    })
+    expect(await loginUser('shared', 'pw-pi', deps)).toEqual({ userId: 'pi-user' })
+    await expect(loginUser('shared', 'pw-local', deps)).rejects.toThrow(/Invalid sign-in details/)
   })
 
   it('rejects a wrong password and an unknown account with the same message', async () => {

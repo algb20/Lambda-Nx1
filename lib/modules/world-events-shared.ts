@@ -77,6 +77,43 @@ export interface WorldEvent {
   confidence: Confidence
 }
 
+/**
+ * What a feed actually did on this run.
+ *
+ * The distinction between the three states is the entire point, and getting it
+ * wrong produced the worst bug this board has had: an `ok` flag that only meant
+ * "the adapter did not throw". A provider that answered `200` with an empty
+ * result set therefore showed **green** while contributing nothing — so the
+ * globe rendered a bare sphere with every source reporting healthy and no
+ * explanation anywhere on screen. The map looked broken and the diagnostics
+ * insisted it was fine.
+ *
+ *  - `ok`      — answered, and gave us events. The only state that earns green.
+ *  - `empty`   — answered, gave us nothing. Not a failure (a quiet hour is real)
+ *                but not health either: it means this feed is contributing
+ *                **no coverage right now**, and the operator must be told.
+ *  - `failed`  — did not answer, or answered with an error.
+ *
+ * `empty` is the state that keeps us honest about blind spots: the absence of
+ * events is never evidence that nothing happened.
+ */
+export type SourceStatus = 'ok' | 'empty' | 'failed'
+
+export interface SourceHealth {
+  sourceKey: string
+  status: SourceStatus
+  /** How many events this feed contributed before deduplication. */
+  count: number
+  error: string | null
+  /**
+   * Kept for callers written against the old shape. It is deliberately *not*
+   * the same as `status === 'ok'`: a feed that answered empty reports
+   * `ok: true` here (it did answer) and `status: 'empty'` there (it gave
+   * nothing). New code should read `status`.
+   */
+  ok: boolean
+}
+
 export interface WorldEventsReport {
   generatedAt: string
   /** Events with a coordinate — these are what the map draws. */
@@ -89,14 +126,17 @@ export interface WorldEventsReport {
   /** Countries with the most activity right now. */
   hotspots: Array<{ country: string; iso: string; count: number; lat: number; lon: number }>
   /** Per-feed health — a board that quietly loses a source is a lying board. */
-  sourceHealth: Array<{ sourceKey: string; ok: boolean; error: string | null }>
+  sourceHealth: SourceHealth[]
   summary: {
     total: number
     placed: number
     /** Timestamp of the newest event held, or null. Answers "is this live?". */
     newestAt: string | null
     sources: string[]
+    /** Feeds that answered **and contributed** events. */
     sourcesOk: number
+    /** Feeds that answered but contributed nothing — coverage gaps, not health. */
+    sourcesEmpty: number
     sourcesFailed: number
   }
 }

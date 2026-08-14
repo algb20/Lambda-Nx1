@@ -3,6 +3,7 @@ import { registerUser } from '@/lib/auth/standalone'
 import { defaultStandaloneDeps } from '@/lib/auth/standalone-deps'
 import { attachSession } from '@/lib/auth/cookie'
 import { canIssueSessions } from '@/lib/auth/session'
+import { normalizeUsername } from '@/lib/auth/policy'
 import { isDbConfigured } from '@/lib/db'
 
 /**
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
     )
   }
 
-  let body: { email?: unknown; password?: unknown }
+  let body: { email?: unknown; password?: unknown; username?: unknown }
   try {
     body = await request.json()
   } catch {
@@ -38,16 +39,22 @@ export async function POST(request: Request) {
   }
   const email = typeof body.email === 'string' ? body.email : ''
   const password = typeof body.password === 'string' ? body.password : ''
+  const username = typeof body.username === 'string' ? body.username : ''
 
   try {
-    const { userId } = await registerUser(email, password, defaultStandaloneDeps)
-    const res = NextResponse.json({ id: userId, username: email.trim().toLowerCase() })
+    const { userId } = await registerUser(email, password, username, defaultStandaloneDeps)
+    const res = NextResponse.json({ id: userId, username: normalizeUsername(username) })
     attachSession(res, userId)
     return res
   } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Registration failed' },
-      { status: 400 },
-    )
+    const message = err instanceof Error ? err.message : 'Registration failed'
+    // The unique constraint is the real arbiter of a free handle: the
+    // availability check before it is advisory, so two sign-ups racing on one
+    // name both pass it and one loses here. Translate that into the same
+    // sentence the check would have given rather than a database error.
+    if (/users_username_uq/i.test(message)) {
+      return NextResponse.json({ error: 'That username is taken' }, { status: 409 })
+    }
+    return NextResponse.json({ error: message }, { status: 400 })
   }
 }

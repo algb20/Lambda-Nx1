@@ -10,6 +10,7 @@ import { AccountPanel } from '@/components/account-panel'
 import { PiUsernameLink } from '@/components/pi-username-link'
 import { AvatarSetting } from '@/components/avatar'
 import { GroupsPanel } from '@/components/groups-panel'
+import { SuggestionsPanel } from '@/components/suggestions-panel'
 import { BuildStamp } from '@/components/build-stamp'
 
 /**
@@ -41,6 +42,14 @@ export function UserPreferences() {
       <PiUsernameLink />
 
       <GroupsPanel />
+
+      {/*
+        Ideas used to be its own tab, next to a floating feedback button that is
+        already on every screen — two doors onto one room, one of them costing a
+        permanent slot in the navigation bar. The panel keeps everything it did;
+        it simply no longer spends a tab to do it.
+      */}
+      <SuggestionsPanel />
 
       <div>
         <h2 className="text-xl font-bold">Settings</h2>

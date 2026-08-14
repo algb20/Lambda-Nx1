@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getSessionUserId } from '@/lib/auth/server'
 import { SESSION_COOKIE } from '@/lib/auth/session'
 import { isDbConfigured, repo } from '@/lib/db'
-import { getStorageProvider } from '@/lib/storage'
+import { getStorageProvider, deleteByPrefix } from '@/lib/storage'
 import { keyFromAvatarPath } from '@/lib/modules/avatar'
 
 /**
@@ -61,6 +61,22 @@ export async function DELETE(request: Request) {
     return clearedResponse({ deleted: false })
   }
 
+  // Every version, not just the current one. Avatar keys carry a version
+  // segment so a replaced picture gets a fresh URL past every cache — which
+  // means a user who changed their picture five times owns five objects.
+  // Deleting only the one the `users` row points at would leave the rest
+  // behind forever: orphaned images of somebody who asked to be erased.
+  try {
+    const removed = await deleteByPrefix(`avatars/${userId}/`)
+    if (removed > 0) console.info(`[account] removed ${removed} stored image(s)`)
+  } catch (err) {
+    // A stale image is a smaller harm than an account nobody can get rid of,
+    // so this is logged and the deletion continues.
+    console.error('[account] image cleanup failed, continuing with account deletion:', err)
+  }
+
+  // Older accounts may hold an avatar written before blobs moved into the
+  // database; that one lives under a key the prefix sweep does not reach.
   if (user.avatarUrl) {
     const key = keyFromAvatarPath(user.avatarUrl.replace(/^\/api\/avatar\//, ''))
     if (key) {

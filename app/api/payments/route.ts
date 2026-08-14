@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getPaymentProvider } from '@/lib/payments'
+import { piPaymentsConfigured } from '@/lib/payments/pi'
 import { decideGrant } from '@/lib/payments/checkout'
 import { getSessionUserId } from '@/lib/auth/server'
 import { isDbConfigured, repo } from '@/lib/db'
@@ -33,6 +34,20 @@ export async function POST(request: Request) {
   if (!paymentId) return NextResponse.json({ error: 'Missing paymentId' }, { status: 400 })
 
   const payments = getPaymentProvider()
+
+  // Refuse before the charge, not during it. Reaching Pi's API without a key
+  // used to surface as a 500 carrying the sentence "PI_API_KEY is not set" —
+  // which both tells a stranger exactly how this deployment is misconfigured
+  // and reads, to the user, as though their payment broke. Which environment
+  // variable is missing is an operator's business.
+  if (payments.name === 'pi' && !piPaymentsConfigured()) {
+    console.error('[payments] PI_API_KEY is not set — Pi payments are unavailable')
+    return NextResponse.json(
+      { error: 'Payments are temporarily unavailable. Nothing has been charged.' },
+      { status: 503 },
+    )
+  }
+
   try {
     switch (body.action) {
       case 'approve':
@@ -62,9 +77,13 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Unknown action' }, { status: 400 })
     }
   } catch (err) {
+    // The detail goes to the logs; the user gets a sentence that does not
+    // describe our infrastructure and does not leave them wondering whether
+    // they were charged.
+    console.error('[payments] provider call failed:', err)
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Payment error' },
-      { status: 500 },
+      { error: 'The payment could not be processed. If Pi was deducted, it will be returned by the network.' },
+      { status: 502 },
     )
   }
 }

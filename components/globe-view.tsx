@@ -188,7 +188,8 @@ export function GlobeView() {
     setSelected(visibleEvents.find((e) => e.id === point.id) ?? null)
   }
 
-  const failedSources = report?.sourceHealth.filter((s) => !s.ok) ?? []
+  const failedSources = report?.sourceHealth.filter((s) => s.status === 'failed') ?? []
+  const emptySources = report?.sourceHealth.filter((s) => s.status === 'empty') ?? []
 
   return (
     <div className="space-y-3">
@@ -494,41 +495,115 @@ export function GlobeView() {
           <h4 className="mb-1.5 text-xs font-semibold">
             Source integrity{' '}
             <span className="font-normal text-muted-foreground">
-              {report.summary.sourcesOk}/{report.summary.sourcesOk + report.summary.sourcesFailed}{' '}
-              answering
+              {report.summary.sourcesOk} of {report.sourceHealth.length} contributing
             </span>
           </h4>
           <div className="flex flex-wrap gap-1">
             {report.sourceHealth.map((s) => (
               <span
                 key={s.sourceKey}
-                title={s.error ?? 'Answering normally'}
+                title={
+                  s.status === 'failed'
+                    ? (s.error ?? 'Did not answer')
+                    : s.status === 'empty'
+                      ? 'Answered, but reported nothing in this window'
+                      : `${s.count} event${s.count === 1 ? '' : 's'}`
+                }
                 className={`flex items-center gap-1 rounded border px-1.5 py-0.5 font-mono text-[10px] ${
-                  s.ok
-                    ? 'border-border text-muted-foreground'
-                    : 'border-destructive/40 text-destructive'
+                  s.status === 'failed'
+                    ? 'border-destructive/40 text-destructive'
+                    : s.status === 'empty'
+                      ? 'border-amber-500/40 text-amber-600 dark:text-amber-500'
+                      : 'border-border text-muted-foreground'
                 }`}
               >
                 <span
-                  className={`h-1 w-1 rounded-full ${s.ok ? 'bg-emerald-500' : 'bg-destructive'}`}
+                  className={`h-1 w-1 rounded-full ${
+                    s.status === 'failed'
+                      ? 'bg-destructive'
+                      : s.status === 'empty'
+                        ? 'bg-amber-500'
+                        : 'bg-emerald-500'
+                  }`}
                 />
                 {s.sourceKey}
+                {s.status === 'ok' ? (
+                  <span className="opacity-60">{s.count}</span>
+                ) : null}
               </span>
             ))}
           </div>
-          {failedSources.length > 0 ? (
-            <p className="mt-1.5 text-[10px] text-muted-foreground">
-              {failedSources.length} feed{failedSources.length === 1 ? '' : 's'} did not answer, so
-              this picture is incomplete. Hover a red chip for the reason.
+          {failedSources.length > 0 || emptySources.length > 0 ? (
+            <p className="mt-1.5 text-[10px] leading-relaxed text-muted-foreground">
+              {failedSources.length > 0
+                ? `${failedSources.length} feed${failedSources.length === 1 ? '' : 's'} did not answer. `
+                : ''}
+              {emptySources.length > 0
+                ? `${emptySources.length} answered but reported nothing. `
+                : ''}
+              This picture is therefore incomplete — hover a chip for the reason.
             </p>
           ) : null}
         </Card>
       ) : null}
 
-      {report && !loading && report.summary.total === 0 ? (
-        <Card className="p-3 text-xs text-muted-foreground">
-          The feeds answered but reported no open events in the current window. The surface stays
-          empty rather than showing filler.
+      {/*
+        Why the surface is bare.
+
+        An empty globe with every source reporting healthy is the worst state
+        this screen can be in: it looks broken and the diagnostics insist it is
+        fine. Whenever there is nothing to draw, the reason is stated here in
+        the order that actually explains it — feeds that failed first, then
+        feeds that answered with nothing, then the genuinely quiet case.
+      */}
+      {report && !loading && report.events.length === 0 ? (
+        <Card className="space-y-2 border-amber-500/30 p-3 text-xs">
+          <p className="flex items-center gap-1.5 font-semibold">
+            <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
+            Nothing is plotted right now — here is why
+          </p>
+
+          {failedSources.length > 0 ? (
+            <div className="space-y-1 text-muted-foreground">
+              <p className="font-medium text-foreground">
+                {failedSources.length} feed{failedSources.length === 1 ? '' : 's'} could not be
+                reached:
+              </p>
+              <ul className="space-y-0.5">
+                {failedSources.map((s) => (
+                  <li key={s.sourceKey} className="font-mono text-[10px]">
+                    {s.sourceKey} — {s.error ?? 'no answer'}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {emptySources.length > 0 ? (
+            <p className="text-muted-foreground">
+              <span className="font-medium text-foreground">
+                {emptySources.length} feed{emptySources.length === 1 ? '' : 's'} answered but
+                reported nothing
+              </span>{' '}
+              ({emptySources.map((s) => s.sourceKey).join(', ')}). An absence of reports is not
+              evidence that nothing happened — it means these feeds are giving us no coverage of
+              this window.
+            </p>
+          ) : null}
+
+          {failedSources.length === 0 && emptySources.length === 0 ? (
+            <p className="text-muted-foreground">
+              Every feed answered and none reported an open event in the current window. The
+              surface stays empty rather than showing filler.
+            </p>
+          ) : null}
+
+          {report.unplaceable.length > 0 ? (
+            <p className="text-muted-foreground">
+              {report.unplaceable.length} event{report.unplaceable.length === 1 ? '' : 's'} arrived
+              without a location and are listed above rather than plotted at a guess.
+            </p>
+          ) : null}
         </Card>
       ) : null}
     </div>
