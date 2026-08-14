@@ -151,6 +151,23 @@ export interface FusedEventSummary {
   signals: Array<{ sourceKey: string; sourceUrl?: string | null; independence: string }>
 }
 
+/**
+ * A region's coverage as the browser sees it. Declared here rather than
+ * imported so a client component can read a report without pulling the
+ * analysis modules into the bundle.
+ */
+export interface RegionCoverageSummary {
+  region: string
+  label: string
+  lat: number
+  lon: number
+  declared: number
+  observed: number
+  reports: number
+  status: 'dark' | 'thin' | 'quiet' | 'active'
+  explanation: string
+}
+
 export interface WorldEventsReport {
   generatedAt: string
   /** Events with a coordinate — these are what the map draws. */
@@ -180,6 +197,24 @@ export interface WorldEventsReport {
     corroborated: number
     contested: number
     duplicatesRemoved: number
+  }
+  /**
+   * Where we cannot see — the layer no comparable platform draws.
+   *
+   * A region with no events may be quiet (covered, reporting nothing) or dark
+   * (nothing covers it, so nothing could be reported). Every other map renders
+   * those identically, which is misleading in the most consequential
+   * direction: the thinnest coverage is where international attention is
+   * scarcest, which is disproportionately where a warning matters most.
+   */
+  coverage: RegionCoverageSummary[]
+  coverageSummary: {
+    dark: number
+    thin: number
+    quiet: number
+    active: number
+    trustworthyRegions: number
+    totalRegions: number
   }
   summary: {
     total: number

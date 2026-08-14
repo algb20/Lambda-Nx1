@@ -31,6 +31,8 @@ import {
 import type { Evidence } from '../engine/types'
 import { countryAt, findCountry } from '../geo/atlas'
 import { fuseEvents, fusionSummary, type Signal } from '../analysis/fusion'
+import { coverageMap, coverageSummary } from '../analysis/blindspots'
+import { activeSources } from '../engine/catalog'
 import {
   CATEGORY_META,
   REGION_LABEL,
@@ -200,6 +202,24 @@ export async function getWorldEvents(): Promise<WorldEventsReport> {
   const deduped = dedupeEvents(all)
   const fused = fuseEvents(deduped.map(toSignal))
   const fusion = fusionSummary(deduped.map(toSignal), fused)
+
+  /**
+   * Where we cannot see.
+   *
+   * Built from the catalogue's declared coverage and this run's observations
+   * together, because neither alone is enough: declared coverage would call a
+   * region covered while every source in it silently failed, and observed
+   * coverage could not tell a quiet hour from a permanent hole.
+   */
+  const coverage = coverageMap(
+    activeSources(),
+    deduped.map((e) => ({
+      lat: e.lat,
+      lon: e.lon,
+      independence: e.independence,
+      sourceKey: e.sourceKey,
+    })),
+  )
   const events = deduped.filter((e) => e.lat !== null && e.lon !== null).sort(operationalOrder)
   const unplaceable = deduped.filter((e) => e.lat === null || e.lon === null).sort(operationalOrder)
 
@@ -295,6 +315,8 @@ export async function getWorldEvents(): Promise<WorldEventsReport> {
      */
     fused,
     fusion,
+    coverage,
+    coverageSummary: coverageSummary(coverage),
     summary: {
       total: deduped.length,
       placed: events.length,

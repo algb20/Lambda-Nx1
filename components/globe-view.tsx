@@ -12,6 +12,7 @@ import {
   X,
   Activity,
   Layers,
+  EyeOff,
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -44,7 +45,7 @@ import {
 
 const REFRESH_MS = 5 * 60 * 1000
 
-type Layer = 'events' | 'liquidity'
+type Layer = 'events' | 'liquidity' | 'coverage'
 
 function timeAgo(iso: string | null): string {
   if (!iso) return 'unknown'
@@ -145,6 +146,34 @@ export function GlobeView() {
   )
 
   const points: SurfacePoint[] = useMemo(() => {
+    if (layer === 'coverage') {
+      /**
+       * The layer nobody else draws.
+       *
+       * Dark regions are plotted **large and red** precisely because there is
+       * nothing there. Every other map in this field leaves them blank, which
+       * makes a blind spot look like a calm region — and the thinnest coverage
+       * is where international attention is scarcest, which is
+       * disproportionately where a warning would matter most.
+       */
+      return (report?.coverage ?? []).map((r) => ({
+        id: `coverage:${r.region}`,
+        lat: r.lat,
+        lon: r.lon,
+        label: r.explanation,
+        // Inverted on purpose: the *less* we can see, the larger the mark.
+        weight: r.status === 'dark' ? 5 : r.status === 'thin' ? 4 : 2,
+        color:
+          r.status === 'dark'
+            ? '#ef4444'
+            : r.status === 'thin'
+              ? '#f59e0b'
+              : r.status === 'quiet'
+                ? '#64748b'
+                : '#22c55e',
+        intensity: r.status === 'dark' ? 1 : r.status === 'thin' ? 0.6 : 0,
+      }))
+    }
     if (layer === 'liquidity') {
       const countries = chain?.venueCountries ?? []
       const top = countries[0]?.volumeBtc ?? 1
@@ -184,7 +213,7 @@ export function GlobeView() {
   }
 
   const onSelect = (point: SurfacePoint) => {
-    if (layer === 'liquidity') return
+    if (layer !== 'events') return
     setSelected(visibleEvents.find((e) => e.id === point.id) ?? null)
   }
 
@@ -216,7 +245,7 @@ export function GlobeView() {
           phone without scrolling past a full-height globe. */}
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="flex items-center overflow-hidden rounded-md ring-1 ring-border">
-          {(['events', 'liquidity'] as Layer[]).map((l) => (
+          {(['events', 'coverage', 'liquidity'] as Layer[]).map((l) => (
             <button
               key={l}
               onClick={() => setLayer(l)}
@@ -227,8 +256,14 @@ export function GlobeView() {
                   : 'text-muted-foreground hover:bg-muted'
               }`}
             >
-              {l === 'events' ? <Activity className="h-3 w-3" /> : <Layers className="h-3 w-3" />}
-              {l === 'events' ? 'Events' : 'Liquidity'}
+              {l === 'events' ? (
+                <Activity className="h-3 w-3" />
+              ) : l === 'coverage' ? (
+                <EyeOff className="h-3 w-3" />
+              ) : (
+                <Layers className="h-3 w-3" />
+              )}
+              {l === 'events' ? 'Events' : l === 'coverage' ? 'Blind spots' : 'Liquidity'}
             </button>
           ))}
         </span>
@@ -486,6 +521,52 @@ export function GlobeView() {
               </li>
             ))}
           </ul>
+        </Card>
+      ) : null}
+
+      {/*
+        The blind-spot panel.
+
+        Shown only on its own layer, because it answers a different question
+        from the events layer and mixing the two would let a reader take a
+        coverage warning for a hazard.
+      */}
+      {layer === 'coverage' && report?.coverage ? (
+        <Card className="space-y-2 p-3">
+          <h4 className="flex items-center gap-1.5 text-xs font-semibold">
+            <EyeOff className="h-3.5 w-3.5" />
+            Where we cannot see
+            <span className="font-normal text-muted-foreground">
+              {report.coverageSummary.trustworthyRegions} of{' '}
+              {report.coverageSummary.totalRegions} regions we can speak about
+            </span>
+          </h4>
+          <p className="text-[11px] leading-relaxed text-muted-foreground">
+            A region with no events may be <strong>quiet</strong> — covered, reporting nothing —
+            or <strong>dark</strong>, meaning nothing covers it and silence tells you nothing.
+            Every comparable map draws those the same way. This one does not.
+          </p>
+          <div className="space-y-1">
+            {report.coverage.map((r) => (
+              <div key={r.region} className="flex items-start gap-2 text-[11px]">
+                <span
+                  className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${
+                    r.status === 'dark'
+                      ? 'bg-destructive'
+                      : r.status === 'thin'
+                        ? 'bg-amber-500'
+                        : r.status === 'quiet'
+                          ? 'bg-slate-400'
+                          : 'bg-emerald-500'
+                  }`}
+                />
+                <span className="min-w-0">
+                  <span className="font-medium">{r.label}</span>{' '}
+                  <span className="text-muted-foreground">{r.explanation}</span>
+                </span>
+              </div>
+            ))}
+          </div>
         </Card>
       ) : null}
 
