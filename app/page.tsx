@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { HomeFeed } from "@/components/home-feed"
 import { IntelligenceDashboard } from "@/components/intelligence-dashboard"
 import { MonitoringDashboard } from "@/components/monitor-dashboard"
@@ -25,6 +25,19 @@ import { resolveTab, tabDef, type Tab } from "@/lib/navigation"
  * reasoning lives with the list in `lib/navigation.ts`, and old ids still
  * resolve so no saved link lands on a blank screen.
  *
+ * **Every tab has a URL.** The shell used to keep the active tab in component
+ * state and nothing else, which meant the entire product lived at one address.
+ * Nothing could be linked to, the browser's back button did nothing, a refresh
+ * threw the user back to the feed, and a crawler saw a single page whose only
+ * visible text was the sign-in screen. The tab now lives in the URL — the
+ * address bar is the state — so `/globe` is a place, back and forward work,
+ * and a reload lands where the user was.
+ *
+ * `history.pushState` rather than the router, deliberately: this is one page
+ * swapping panels, not five documents. Asking Next.js to route between them
+ * would re-run the shell each time and throw away the panel state a user is
+ * mid-way through, to produce a navigation the user cannot tell apart.
+ *
  * **It is a site on a desktop and an app on a phone.** The single centred
  * 672px column with a bottom bar was a phone layout wearing a browser: correct
  * below `lg`, and on a wide screen it left most of the display empty while the
@@ -32,7 +45,26 @@ import { resolveTab, tabDef, type Tab } from "@/lib/navigation"
  * takes over and the content gets real width; below it, nothing changed.
  */
 export default function HomePage() {
-  const [activeTab, setActiveTab] = useState<Tab>("feed")
+  // Read once, synchronously, so a deep link paints the right tab on the first
+  // frame instead of showing the feed and then jumping.
+  const [activeTab, setTab] = useState<Tab>(() =>
+    typeof window === 'undefined' ? 'feed' : resolveTab(window.location.pathname.slice(1)),
+  )
+
+  const setActiveTab = useCallback((id: Tab) => {
+    setTab(id)
+    if (typeof window === 'undefined') return
+    const path = id === 'feed' ? '/' : `/${id}`
+    if (window.location.pathname !== path) window.history.pushState({ tab: id }, '', path)
+  }, [])
+
+  // The back button must work. Without this the URL changes and the panel does
+  // not, which is worse than having no URLs at all.
+  useEffect(() => {
+    const onPop = () => setTab(resolveTab(window.location.pathname.slice(1)))
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
 
   const navigate = (id: string) => setActiveTab(resolveTab(id))
 
