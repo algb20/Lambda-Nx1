@@ -56,6 +56,41 @@ families **extend, never replace** this method. Family roadmap: `docs/GATEWAYS.m
    passive-only and legal guardrails (§3) apply to every family, always.
 7. **Preserve the design.** Keep the existing shell and visual language; realize fake as
    real without redesigning (see §1).
+8. **Beat the field, permanently.** This is a standing instruction, not a one-off task,
+   and it must never need repeating:
+   - **Source population is a headline target: one million and rising.** Counted
+     honestly — see §2a. Never report a source number that mixes integrations with
+     indexed publishers.
+   - **Study the field continuously.** Track at least **30** comparable platforms:
+     their products, their repositories, their architecture documents, their
+     environment files, and everything they integrate with. `docs/COMPETITORS.md` is
+     the living record.
+   - **Every capability they have, we have — and better.** Layers, widgets,
+     alerting, streaming, exports, briefs, every client (web, PWA, desktop, mobile).
+     Their weaknesses are our specification: fix in ours what is broken in theirs.
+   - **Never copy their code.** Most are proprietary; World Monitor is AGPL-3.0,
+     which would force our whole product open. Study the architecture, build our own.
+   - Do all of this **without being asked again**.
+
+## 2a. How sources are counted (no inflated numbers)
+
+Competitors quote figures — "one million sources", "536 providers", "200,000
+sources" — that mix three different things. We separate them, always, and any
+number we publish says which it is:
+
+- **Integrations** — distinct providers we call and parse. Each is a catalogue
+  record or a coded module. Quality is high, count is low.
+- **Publishers** — the outlets and registries reachable *through* an integration.
+  One GDELT integration indexes ~100,000 outlets; one national registry covers
+  every company in that country. This is where population reaches millions, and
+  it is legitimate as long as it is labelled.
+- **Independent origins** — how many of those are genuinely *not* copies of one
+  another. This is the only number that belongs in a confidence score, and it is
+  always far smaller than the other two. See the independence groups in
+  `lib/engine/catalog`.
+
+A platform advertising a million "sources" is quoting publishers. Quoting that
+figure as integrations would be the exact dishonesty this project exists to avoid.
 
 ## 3. Hard legal & ethical guardrails (enforced in code)
 

@@ -3,6 +3,7 @@
  * default registry under its capability, with fallback siblings where available.
  */
 import { registry } from '../registry'
+import { registerCatalog } from '../catalog/register'
 import type { Source } from '../types'
 // Module 1 — Domain / Infrastructure
 import { cloudflareDns, googleDns } from './dns'
@@ -338,6 +339,19 @@ export function registerChainStateGateway(): void {
   registeredChainState = true
 }
 
+/**
+ * The declarative catalogue, registered alongside the hand-written sources.
+ *
+ * Both kinds are real sources to the engine; they differ only in how they are
+ * written. A source with logic — a WHOIS pivot, a certificate-log query — is a
+ * module. A source that is a URL returning a shape we already parse is a record
+ * in `lib/engine/catalog`, which is what lets the source count grow past what
+ * anyone would hand-write.
+ */
+export function registerCatalogSources(): void {
+  registerCatalog()
+}
+
 export function registerAllSources(): void {
   registerModuleOneSources()
   registerModuleTwoSources()
@@ -355,6 +369,7 @@ export function registerAllSources(): void {
   registerTrendingGateway()
   registerWorldEventsGateway()
   registerChainStateGateway()
+  registerCatalogSources()
 }
 
 export {

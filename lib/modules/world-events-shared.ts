@@ -70,9 +70,25 @@ export interface WorldEvent {
   severity: number
   /** The issuing agency's alert wording, where there was one ("Red", "Severe"). */
   alertLevel: string | null
+  /** When we received it. Always known. */
   at: string
+  /**
+   * When the world event happened, if the source said so.
+   *
+   * Separate from `at` because they answer different questions and collapsing
+   * them is how late detection in a thin region comes to look like a
+   * fast-moving situation. Null means the source published no time — never
+   * "now".
+   */
+  observedAt: string | null
   sourceKey: string
   sourceUrl: string | null
+  /**
+   * The independence group this source belongs to. Fusion counts groups, not
+   * sources, so a story carried by twenty outlets from one wire is one
+   * confirmation. Null for sources that predate the catalogue.
+   */
+  independence: string | null
   admiralty: Admiralty | null
   confidence: Confidence
 }
@@ -114,6 +130,44 @@ export interface SourceHealth {
   ok: boolean
 }
 
+/**
+ * A fused event as the browser sees it.
+ *
+ * Structurally the subset of `FusedEvent` the interface renders. Declared here
+ * rather than imported so a client component can read a report without pulling
+ * the fusion engine — and therefore `node:crypto` — into the bundle.
+ */
+export interface FusedEventSummary {
+  id: string
+  title: string
+  lat: number | null
+  lon: number | null
+  observedAt: string | null
+  lastReceivedAt: string
+  magnitude: number | null
+  independentSources: number
+  origins: string[]
+  contradictions: Array<{ field: string; detail: string; between: string[] }>
+  signals: Array<{ sourceKey: string; sourceUrl?: string | null; independence: string }>
+}
+
+/**
+ * A region's coverage as the browser sees it. Declared here rather than
+ * imported so a client component can read a report without pulling the
+ * analysis modules into the bundle.
+ */
+export interface RegionCoverageSummary {
+  region: string
+  label: string
+  lat: number
+  lon: number
+  declared: number
+  observed: number
+  reports: number
+  status: 'dark' | 'thin' | 'quiet' | 'active'
+  explanation: string
+}
+
 export interface WorldEventsReport {
   generatedAt: string
   /** Events with a coordinate — these are what the map draws. */
@@ -127,6 +181,41 @@ export interface WorldEventsReport {
   hotspots: Array<{ country: string; iso: string; count: number; lat: number; lon: number }>
   /** Per-feed health — a board that quietly loses a source is a lying board. */
   sourceHealth: SourceHealth[]
+  /**
+   * The fused picture: distinct **events**, each carrying every report of it.
+   *
+   * Alongside `events` rather than replacing it, because the two answer
+   * different questions. An operator reading the map wants events; a reader
+   * auditing a claim wants the individual reports behind one. Typed loosely
+   * here so the browser bundle does not have to import the fusion engine to
+   * read a report — see `lib/analysis/fusion.ts` for the real shape.
+   */
+  fused: FusedEventSummary[]
+  fusion: {
+    signals: number
+    events: number
+    corroborated: number
+    contested: number
+    duplicatesRemoved: number
+  }
+  /**
+   * Where we cannot see — the layer no comparable platform draws.
+   *
+   * A region with no events may be quiet (covered, reporting nothing) or dark
+   * (nothing covers it, so nothing could be reported). Every other map renders
+   * those identically, which is misleading in the most consequential
+   * direction: the thinnest coverage is where international attention is
+   * scarcest, which is disproportionately where a warning matters most.
+   */
+  coverage: RegionCoverageSummary[]
+  coverageSummary: {
+    dark: number
+    thin: number
+    quiet: number
+    active: number
+    trustworthyRegions: number
+    totalRegions: number
+  }
   summary: {
     total: number
     placed: number

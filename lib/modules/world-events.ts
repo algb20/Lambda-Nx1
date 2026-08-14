@@ -23,9 +23,16 @@
  *     any dot on the map can be audited back to the agency that measured it.
  */
 import { collect } from '../engine/orchestrator'
-import { registerNewsGateway, registerWorldEventsGateway } from '../engine/sources'
+import {
+  registerCatalogSources,
+  registerNewsGateway,
+  registerWorldEventsGateway,
+} from '../engine/sources'
 import type { Evidence } from '../engine/types'
 import { countryAt, findCountry } from '../geo/atlas'
+import { fuseEvents, fusionSummary, type Signal } from '../analysis/fusion'
+import { coverageMap, coverageSummary } from '../analysis/blindspots'
+import { activeSources } from '../engine/catalog'
 import {
   CATEGORY_META,
   REGION_LABEL,
@@ -59,6 +66,8 @@ interface RawData {
   kind?: unknown
   assignedSeverity?: unknown
   alertLevel?: unknown
+  observedAt?: unknown
+  independence?: unknown
 }
 
 function num(value: unknown): number | null {
@@ -123,10 +132,38 @@ function toEvent(e: Evidence, index: number): WorldEvent | null {
     severity,
     alertLevel: str(data.alertLevel),
     at: e.retrievedAt,
+    // Never defaulted to the retrieval time: a feed that published no date
+    // yields an event we cannot age, and saying so is the honest answer.
+    observedAt: str(data.observedAt),
     sourceKey: e.sourceKey,
     sourceUrl: e.sourceUrl ?? null,
+    independence: str(data.independence),
     admiralty: e.admiralty ?? null,
     confidence: e.confidence,
+  }
+}
+
+/**
+ * A world event as a fusion signal.
+ *
+ * The independence group is what fusion counts, and it travels on the evidence
+ * from the catalogue record. Falling back to the source key is correct rather
+ * than lossy: a source that declares no group **is** its own group.
+ */
+function toSignal(event: WorldEvent): Signal {
+  return {
+    id: event.id,
+    title: event.title,
+    independence: event.independence ?? event.sourceKey,
+    sourceKey: event.sourceKey,
+    sourceUrl: event.sourceUrl,
+    admiralty: event.admiralty,
+    lat: event.lat,
+    lon: event.lon,
+    observedAt: event.observedAt ?? null,
+    receivedAt: event.at,
+    magnitude: event.magnitude,
+    topic: event.category,
   }
 }
 
@@ -134,6 +171,9 @@ function toEvent(e: Evidence, index: number): WorldEvent | null {
 export async function getWorldEvents(): Promise<WorldEventsReport> {
   registerWorldEventsGateway()
   registerNewsGateway()
+  // The declarative catalogue: dozens of official hazard, health and advisory
+  // feeds that would otherwise each need a module of their own.
+  registerCatalogSources()
 
   // Two capabilities, run concurrently: a slow news provider must not delay the
   // measured-events layer that the map mainly depends on.
@@ -147,7 +187,39 @@ export async function getWorldEvents(): Promise<WorldEventsReport> {
     .map(toEvent)
     .filter((e): e is WorldEvent => e !== null)
 
+  /**
+   * Fusion, then deduplication.
+   *
+   * `dedupeEvents` removes byte-identical repeats — the same feed read twice.
+   * Fusion does the harder thing: it recognises that a USGS solution, an EMSC
+   * solution and three wire stories describe **one** earthquake, and presents
+   * them as one event carrying five pieces of evidence.
+   *
+   * The order matters. Fusing first would waste work on exact duplicates;
+   * deduplicating first leaves fusion the real question — which distinct
+   * reports are the same event.
+   */
   const deduped = dedupeEvents(all)
+  const fused = fuseEvents(deduped.map(toSignal))
+  const fusion = fusionSummary(deduped.map(toSignal), fused)
+
+  /**
+   * Where we cannot see.
+   *
+   * Built from the catalogue's declared coverage and this run's observations
+   * together, because neither alone is enough: declared coverage would call a
+   * region covered while every source in it silently failed, and observed
+   * coverage could not tell a quiet hour from a permanent hole.
+   */
+  const coverage = coverageMap(
+    activeSources(),
+    deduped.map((e) => ({
+      lat: e.lat,
+      lon: e.lon,
+      independence: e.independence,
+      sourceKey: e.sourceKey,
+    })),
+  )
   const events = deduped.filter((e) => e.lat !== null && e.lon !== null).sort(operationalOrder)
   const unplaceable = deduped.filter((e) => e.lat === null || e.lon === null).sort(operationalOrder)
 
@@ -233,6 +305,18 @@ export async function getWorldEvents(): Promise<WorldEventsReport> {
     regions,
     hotspots,
     sourceHealth,
+    /**
+     * The fused picture: distinct events rather than distinct reports.
+     *
+     * Reported alongside the raw events rather than replacing them, because a
+     * reader auditing a claim needs the individual reports, and an operator
+     * reading the map needs the events. Both are true; they answer different
+     * questions.
+     */
+    fused,
+    fusion,
+    coverage,
+    coverageSummary: coverageSummary(coverage),
     summary: {
       total: deduped.length,
       placed: events.length,
