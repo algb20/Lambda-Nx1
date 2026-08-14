@@ -77,7 +77,7 @@ describe('findSecrets', () => {
       ['github-token', join_('ghp', '_', 'abcdefghijklmnopqrstuvwxyz0123456789')],
       ['slack-token', join_('xoxb', '-', '123456789012-abcdefghijkl')],
       ['google-api-key', join_('AIza', 'Sy', 'A'.repeat(33))],
-      ['private-key-block', '-----BEGIN RSA PRIVATE KEY-----'],
+      ['private-key-block', join_('-----', 'BEGIN RSA PRIVATE KEY', '-----')],
     ]
     for (const [rule, value] of cases) {
       const found = findSecrets(`const x = "${value}"`)
