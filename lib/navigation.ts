@@ -54,7 +54,7 @@ export const TAB_DEFS: readonly TabDef[] = [
     id: 'globe',
     short: 'World',
     label: 'The world map',
-    description: 'Live events on the globe, with the agency that measured each',
+    description: 'The standing brief, and live events on the globe with the agency that measured each',
     i18nKey: 'nav.globe',
   },
   {
