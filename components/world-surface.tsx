@@ -3,12 +3,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Plus, Minus, RotateCcw, Globe2, Map as MapIcon } from 'lucide-react'
 import { ATLAS } from '@/lib/geo/atlas'
+import { clusterByScreenDistance, meanCoordinate, type ScreenCluster } from '@/lib/geo/cluster'
 import {
+  clampTilt,
   greatCircle,
+  globeCameraOn,
   globeRadius,
+  mapCameraOn,
   mapFrame,
   projectGlobe,
   projectMap,
+  shortestAngle,
   unprojectGlobe,
   unprojectMap,
   type GlobeCamera,
@@ -49,7 +54,19 @@ export interface SurfaceArc {
 const MIN_ZOOM = 0.6
 const MAX_ZOOM = 8
 const clampZoom = (z: number) => Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z))
-const clampTilt = (t: number) => Math.max(-1.2, Math.min(1.2, t))
+
+/**
+ * How far one tap into a cluster takes the reader.
+ *
+ * Enough that a merged mark visibly comes apart, little enough that the
+ * surrounding country is still on screen. A jump straight to maximum zoom would
+ * split the cluster and lose every landmark that told the reader where they
+ * were.
+ */
+const CLUSTER_ZOOM_STEP = 2.2
+
+/** Camera easing per frame. Fast enough to feel immediate, slow enough to follow. */
+const TWEEN_RATE = 0.16
 
 /**
  * One palette for both projections — the flat map is the globe's colour scheme
@@ -85,6 +102,7 @@ export function WorldSurface({
   onModeChange,
   showToggle = true,
   onSelect,
+  clusterRadius = 0,
 }: {
   points: SurfacePoint[]
   arcs?: SurfaceArc[]
@@ -94,6 +112,12 @@ export function WorldSurface({
   onModeChange?: (mode: ViewMode) => void
   showToggle?: boolean
   onSelect?: (point: SurfacePoint) => void
+  /**
+   * Merge marks closer than this many pixels into one that carries a count.
+   * 0 draws every point separately — right for a layer of a dozen region marks,
+   * wrong for a layer of hundreds of events. See `lib/geo/cluster.ts`.
+   */
+  clusterRadius?: number
 }) {
   const [internalMode, setInternalMode] = useState<ViewMode>(modeProp ?? 'globe')
   const mode = modeProp ?? internalMode
@@ -123,11 +147,21 @@ export function WorldSurface({
   const pointersRef = useRef<Map<number, { x: number; y: number }>>(new Map())
   const pinchRef = useRef<number | null>(null)
   const pointerRef = useRef<{ x: number; y: number } | null>(null)
-  /** Screen positions of the last frame's points — click uses these, so hit
-   *  testing always matches exactly what the user can see. */
-  const plottedRef = useRef<Array<{ x: number; y: number; point: SurfacePoint }>>([])
+  /** Screen positions and radii of the last frame's marks — click uses these, so
+   *  hit testing always matches exactly what the user can see. */
+  const plottedRef = useRef<
+    Array<{ x: number; y: number; r: number; cluster: ScreenCluster<SurfacePoint> }>
+  >([])
   const pointsRef = useRef(points)
   pointsRef.current = points
+  const clusterRadiusRef = useRef(clusterRadius)
+  clusterRadiusRef.current = clusterRadius
+  /**
+   * Where the camera is being flown to, or null when it is where the reader put
+   * it. Held in a ref rather than state so a flight costs no React renders — the
+   * draw loop is already running every frame.
+   */
+  const tweenRef = useRef<{ globe?: GlobeCamera; map?: MapCamera } | null>(null)
 
   const [hover, setHover] = useState<{ x: number; y: number; label: string } | null>(null)
   const hoverRef = useRef(hover)
@@ -150,6 +184,7 @@ export function WorldSurface({
 
     const onWheel = (e: WheelEvent) => {
       e.preventDefault()
+      tweenRef.current = null
       const cam = cameraRef.current
       const factor = 1 - e.deltaY * 0.0012
       if (modeRef.current === 'globe') cam.globe.zoom = clampZoom(cam.globe.zoom * factor)
@@ -169,6 +204,37 @@ export function WorldSurface({
 
       const cam = cameraRef.current
       const isGlobe = modeRef.current === 'globe'
+
+      // ---- Camera flight ----------------------------------------------------
+      // Eased rather than jumped: a reader who taps a cluster has to be able to
+      // follow where the surface took them, or the new view is a different map
+      // rather than a closer look at the one they were reading.
+      const tween = tweenRef.current
+      if (tween) {
+        let settled = true
+        if (tween.globe) {
+          const dRot = shortestAngle(cam.globe.rotation, tween.globe.rotation)
+          const dTilt = tween.globe.tilt - cam.globe.tilt
+          const dZoom = tween.globe.zoom - cam.globe.zoom
+          cam.globe.rotation += dRot * TWEEN_RATE
+          cam.globe.tilt += dTilt * TWEEN_RATE
+          cam.globe.zoom += dZoom * TWEEN_RATE
+          settled = Math.abs(dRot) < 0.002 && Math.abs(dTilt) < 0.002 && Math.abs(dZoom) < 0.01
+          if (settled) cam.globe = { ...tween.globe }
+        }
+        if (tween.map) {
+          const dx = tween.map.offsetX - cam.map.offsetX
+          const dy = tween.map.offsetY - cam.map.offsetY
+          const dZoom = tween.map.zoom - cam.map.zoom
+          cam.map.offsetX += dx * TWEEN_RATE
+          cam.map.offsetY += dy * TWEEN_RATE
+          cam.map.zoom += dZoom * TWEEN_RATE
+          settled = Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5 && Math.abs(dZoom) < 0.01
+          if (settled) cam.map = { ...tween.map }
+        }
+        if (settled) tweenRef.current = null
+      }
+
       const project = (lat: number, lon: number): ScreenPoint =>
         isGlobe
           ? projectGlobe(lat, lon, cam.globe, viewport)
@@ -315,18 +381,41 @@ export function WorldSurface({
       }
 
       // ---- Signals ----------------------------------------------------------
+      // Project first, then merge what overlaps, then draw. Clustering after
+      // projection is what makes it correct at every latitude: the question is
+      // whether two marks collide on the reader's screen, and only the screen
+      // can answer that.
       const current = pointsRef.current
       const maxWeight = Math.max(1, ...current.map((p) => p.weight))
       const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 420)
-      const plotted: Array<{ x: number; y: number; point: SurfacePoint }> = []
-      let nearest: { x: number; y: number; label: string; d: number } | null = null
-
+      const visible: Array<{ x: number; y: number; item: SurfacePoint }> = []
       for (const pt of current) {
         const p = project(pt.lat, pt.lon)
-        if (!p.visible) continue
+        if (p.visible) visible.push({ x: p.x, y: p.y, item: pt })
+      }
+      const marks = clusterByScreenDistance(visible, clusterRadiusRef.current)
+
+      const plotted: Array<{
+        x: number
+        y: number
+        r: number
+        cluster: ScreenCluster<SurfacePoint>
+      }> = []
+      let nearest: { x: number; y: number; label: string; d: number } | null = null
+
+      for (const mark of marks) {
+        // The lead is the cluster's highest-ranked member, so a merged mark is
+        // never coloured or named after the least important thing inside it.
+        const pt = mark.lead
+        const count = mark.items.length
         const color = pt.color ?? POINT_DEFAULT
-        const size = (2.5 + (pt.weight / maxWeight) * 6) * Math.min(1.6, Math.sqrt(zoom))
-        const intensity = pt.intensity ?? 0
+        const intensity = Math.max(...mark.items.map((i) => i.intensity ?? 0))
+        // A cluster grows with the log of its count: a mark for 200 events must
+        // read as bigger than one for 20 without swallowing the continent.
+        const size =
+          count > 1
+            ? (7 + Math.min(9, Math.log2(count) * 2.6)) * Math.min(1.35, Math.sqrt(zoom))
+            : (2.5 + (pt.weight / maxWeight) * 6) * Math.min(1.6, Math.sqrt(zoom))
 
         if (intensity > 0.45) {
           // A live ring that grows and fades — only for genuinely urgent signals.
@@ -334,30 +423,51 @@ export function WorldSurface({
           ctx.globalAlpha = (1 - pulse) * 0.6 * intensity
           ctx.lineWidth = 1.5
           ctx.beginPath()
-          ctx.arc(p.x, p.y, size * (1.5 + pulse * 2.5), 0, Math.PI * 2)
+          ctx.arc(mark.x, mark.y, size * (1.5 + pulse * 2.5), 0, Math.PI * 2)
           ctx.stroke()
           ctx.globalAlpha = 1
         }
 
-        const halo = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, size * 3)
+        const halo = ctx.createRadialGradient(mark.x, mark.y, 0, mark.x, mark.y, size * 3)
         halo.addColorStop(0, withAlpha(color, 0.55))
         halo.addColorStop(1, withAlpha(color, 0))
         ctx.fillStyle = halo
         ctx.beginPath()
-        ctx.arc(p.x, p.y, size * 3, 0, Math.PI * 2)
+        ctx.arc(mark.x, mark.y, size * 3, 0, Math.PI * 2)
         ctx.fill()
 
         ctx.fillStyle = color
         ctx.beginPath()
-        ctx.arc(p.x, p.y, size, 0, Math.PI * 2)
+        ctx.arc(mark.x, mark.y, size, 0, Math.PI * 2)
         ctx.fill()
 
-        plotted.push({ x: p.x, y: p.y, point: pt })
+        if (count > 1) {
+          // The count is the whole point of merging: a mark that hides how much
+          // it stands for is worse than the overlap it replaced. Dark ink on the
+          // category colour, which is always a light saturated tone here.
+          ctx.strokeStyle = 'rgba(3, 10, 18, 0.55)'
+          ctx.lineWidth = 1
+          ctx.beginPath()
+          ctx.arc(mark.x, mark.y, size, 0, Math.PI * 2)
+          ctx.stroke()
+          ctx.fillStyle = '#04090f'
+          ctx.font = `600 ${Math.max(9, Math.round(size * 0.95))}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`
+          ctx.textAlign = 'center'
+          ctx.textBaseline = 'middle'
+          ctx.fillText(count > 999 ? '999+' : String(count), mark.x, mark.y)
+        }
+
+        plotted.push({ x: mark.x, y: mark.y, r: size, cluster: mark })
         const hp = pointerRef.current
         if (hp) {
-          const d = Math.hypot(hp.x - p.x, hp.y - p.y)
-          if (d < 16 && (!nearest || d < nearest.d)) {
-            nearest = { x: p.x, y: p.y, label: pt.label, d }
+          const d = Math.hypot(hp.x - mark.x, hp.y - mark.y)
+          if (d < Math.max(16, size + 6) && (!nearest || d < nearest.d)) {
+            nearest = {
+              x: mark.x,
+              y: mark.y,
+              label: count > 1 ? `${count} events here · ${pt.label}` : pt.label,
+              d,
+            }
           }
         }
       }
@@ -432,7 +542,17 @@ export function WorldSurface({
         height - 18,
       )
       hud(utc, width - 12, height - 34, 'right')
-      hud(`${plotted.length}/${current.length} PLOTTED`, width - 12, height - 18, 'right')
+      // Marks and points are different counts once clustering is on, and showing
+      // only the first would understate the picture by the exact amount the
+      // merging saved.
+      hud(
+        marks.length < visible.length
+          ? `${marks.length} MARKS · ${visible.length}/${current.length} PLOTTED`
+          : `${visible.length}/${current.length} PLOTTED`,
+        width - 12,
+        height - 18,
+        'right',
+      )
 
       // A reticle at the pointer, so the coordinate readout has something to
       // point at. Only when the pointer is genuinely over the planet.
@@ -511,6 +631,9 @@ export function WorldSurface({
     pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
     dragRef.current = { active: true, lastX: e.clientX, lastY: e.clientY, moved: 0 }
     autospinRef.current = false
+    // A hand on the surface cancels any flight in progress. A tap that turns out
+    // to be a cluster starts a new one on release.
+    tweenRef.current = null
     // Pointer capture is a convenience, never a requirement: it throws when the
     // pointer is already gone (routine on touch), and an uncaught throw here
     // would unmount the tree and blank the page.
@@ -562,9 +685,11 @@ export function WorldSurface({
     if (pointersRef.current.size === 0) {
       dragRef.current.active = false
       if (autospinTimerRef.current) window.clearTimeout(autospinTimerRef.current)
-      // Only a cosmetic idle behaviour — it must never outlive the canvas.
+      // Only a cosmetic idle behaviour — it must never outlive the canvas, and
+      // it must never resume while the reader is zoomed into something: at that
+      // point the spin would carry their subject off the visible hemisphere.
       autospinTimerRef.current = window.setTimeout(() => {
-        autospinRef.current = true
+        if (cameraRef.current.globe.zoom <= 1.2) autospinRef.current = true
       }, 2500)
     }
     try {
@@ -576,26 +701,68 @@ export function WorldSurface({
   }
 
   const onClick = (e: React.PointerEvent) => {
-    // A drag that ended over a point is a pan, not a selection.
-    if (!onSelect || dragRef.current.moved > 6) return
+    // A drag that ended over a mark is a pan, not a selection.
+    if (dragRef.current.moved > 6) return
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
-    let best: { d: number; point: SurfacePoint } | null = null
+    let best: { d: number; cluster: ScreenCluster<SurfacePoint> } | null = null
     for (const p of plottedRef.current) {
       const d = Math.hypot(p.x - x, p.y - y)
-      if (d < 18 && (!best || d < best.d)) best = { d, point: p.point }
+      // Generous around a small dot, exact around a large cluster mark.
+      if (d < Math.max(18, p.r + 6) && (!best || d < best.d)) best = { d, cluster: p.cluster }
     }
-    if (best) onSelect(best.point)
+    if (!best) return
+
+    if (best.cluster.items.length === 1) {
+      onSelect?.(best.cluster.lead)
+      return
+    }
+
+    /**
+     * A merged mark opens by flying into it, not by listing its contents.
+     *
+     * Splitting a cluster is a spatial question — *which* of these are where —
+     * and a list answers a different one. Zooming is also the only gesture that
+     * works identically on a phone and a desktop, where hovering to disambiguate
+     * a stack of dots does not exist at all.
+     */
+    const centre = meanCoordinate(best.cluster.items)
+    if (!centre) return
+    const cam = cameraRef.current
+    // Stop the idle spin: a reader who just asked to look at something specific
+    // must not have it rotate out of view a moment later.
+    autospinRef.current = false
+    if (autospinTimerRef.current) window.clearTimeout(autospinTimerRef.current)
+    if (mode === 'globe') {
+      tweenRef.current = {
+        globe: globeCameraOn(
+          centre.lat,
+          centre.lon,
+          clampZoom(cam.globe.zoom * CLUSTER_ZOOM_STEP),
+        ),
+      }
+    } else {
+      const canvas = canvasRef.current
+      tweenRef.current = {
+        map: mapCameraOn(centre.lat, centre.lon, clampZoom(cam.map.zoom * CLUSTER_ZOOM_STEP), {
+          width: canvas?.clientWidth ?? rect.width,
+          height,
+        }),
+      }
+    }
   }
 
   const nudgeZoom = (factor: number) => {
+    // Any manual control cancels a flight in progress; the reader's hand wins.
+    tweenRef.current = null
     const cam = cameraRef.current
     if (mode === 'globe') cam.globe.zoom = clampZoom(cam.globe.zoom * factor)
     else cam.map.zoom = clampZoom(cam.map.zoom * factor)
   }
 
   const resetView = () => {
+    tweenRef.current = null
     const cam = cameraRef.current
     cam.map = { zoom: 1, offsetX: 0, offsetY: 0 }
     cam.globe = {

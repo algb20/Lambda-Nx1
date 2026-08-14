@@ -40,6 +40,7 @@ import type { MarketsReport } from '@/lib/modules/markets'
 import type { ProcurementReport } from '@/lib/modules/procurement'
 import type { OwnershipReport } from '@/lib/modules/ownership'
 import type { NewsReport } from '@/lib/modules/news'
+import type { Story, StoryGrade } from '@/lib/analysis/stories'
 import type { MarketsBoardReport } from '@/lib/modules/markets-board'
 import type { NexusReport } from '@/lib/modules/nexus'
 import type { GeoReport } from '@/lib/modules/geo'
@@ -740,6 +741,127 @@ function relativeTime(iso: string): string {
   return `${Math.round(h / 24)}d ago`
 }
 
+/**
+ * How a story is graded, said in the fewest words that stay honest.
+ *
+ * The colour carries the same meaning as the word, so the badge is readable at
+ * a glance and still readable to anyone who cannot distinguish the colours.
+ */
+const STORY_GRADE: Record<
+  StoryGrade,
+  { label: string; className: string }
+> = {
+  confirmed: { label: 'Confirmed', className: 'bg-emerald-500/10 text-emerald-500' },
+  corroborated: { label: 'Corroborated', className: 'bg-sky-500/10 text-sky-500' },
+  'single-source': { label: 'Single source', className: 'bg-amber-500/10 text-amber-500' },
+  unverified: { label: 'Unverified', className: 'bg-rose-500/10 text-rose-500' },
+}
+
+/**
+ * One story: the headline somebody published, what backs it, and when.
+ *
+ * Collapsed by default and expandable to the individual reports, because the
+ * reports are the evidence — a reader checking a claim needs to see every
+ * source behind it, and a reader scanning the board does not.
+ */
+function StoryRow({ story }: { story: Story }) {
+  const [open, setOpen] = useState(false)
+  const grade = STORY_GRADE[story.grade]
+  const lead = story.reports[0]
+
+  return (
+    <div className="border-b border-border/40 py-2.5 last:border-0">
+      <div className="flex items-start justify-between gap-3">
+        {lead?.sourceUrl ? (
+          <a
+            href={lead.sourceUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="text-sm leading-snug hover:underline"
+          >
+            {story.headline}
+          </a>
+        ) : (
+          <span className="text-sm leading-snug">{story.headline}</span>
+        )}
+        <span
+          className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${grade.className}`}
+          title={story.gradeReason}
+        >
+          {grade.label}
+        </span>
+      </div>
+
+      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-muted-foreground">
+        {/*
+          The date the board never had. `lastReportedAt` is the source's own
+          publication time; when no source stated one we say so rather than
+          showing the moment we happened to fetch it, which would make every
+          undated item look like it just broke.
+        */}
+        <span>
+          {story.lastReportedAt ? relativeTime(story.lastReportedAt) : 'no date stated'}
+        </span>
+        {story.firstReportedAt &&
+        story.lastReportedAt &&
+        story.firstReportedAt !== story.lastReportedAt ? (
+          <span title={`First reported ${new Date(story.firstReportedAt).toLocaleString()}`}>
+            · developing since {relativeTime(story.firstReportedAt)}
+          </span>
+        ) : null}
+        <span>
+          · {story.independentOrigins} independent{' '}
+          {story.independentOrigins === 1 ? 'origin' : 'origins'}
+        </span>
+        {/*
+          Outlets are shown next to origins, never instead of them. Twenty
+          mastheads carrying one wire is one confirmation, and a board that
+          prints only the larger number is inflating its own evidence.
+        */}
+        {story.outlets > story.independentOrigins ? (
+          <span>· {story.outlets} outlets</span>
+        ) : null}
+        {story.countries.length > 0 ? <span>· {story.countries.join(', ')}</span> : null}
+        {story.reports.length > 1 ? (
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="text-primary hover:underline"
+          >
+            · {open ? 'hide' : `${story.reports.length} reports`}
+          </button>
+        ) : null}
+      </div>
+
+      {open ? (
+        <div className="mt-2 space-y-1.5 border-l-2 border-border/60 pl-3">
+          <p className="text-[10px] italic text-muted-foreground">{story.gradeReason}</p>
+          {story.reports.map((rep, i) => (
+            <div key={`${rep.sourceKey}:${i}`} className="text-[11px]">
+              {rep.sourceUrl ? (
+                <a
+                  href={rep.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:underline"
+                >
+                  {rep.claim}
+                </a>
+              ) : (
+                <span>{rep.claim}</span>
+              )}
+              <span className="ml-1.5 text-[10px] text-muted-foreground">
+                — {rep.outlet ?? rep.origin}
+                {rep.admiralty ? ` · ${rep.admiralty.source}${rep.admiralty.info}` : ''}
+                {rep.publishedAt ? ` · ${relativeTime(rep.publishedAt)}` : ' · undated'}
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 function NewsView({ r, onReload, loading }: { r: NewsReport; onReload: () => void; loading: boolean }) {
   const [auto, setAuto] = useState(true)
   const reloadRef = useRef(onReload)
@@ -754,8 +876,6 @@ function NewsView({ r, onReload, loading }: { r: NewsReport; onReload: () => voi
     return () => clearInterval(id)
   }, [auto])
 
-  const country = (e: EvidenceItem) => (e.data as { country?: string } | undefined)?.country
-  const domain = (e: EvidenceItem) => (e.data as { domain?: string } | undefined)?.domain
   // Prefer exact coordinates (e.g. USGS epicentres) and fall back to country
   // centroids for country-level signals — precise pins where we have them.
   const mapPoints = pointsFromEvidence(
@@ -769,11 +889,11 @@ function NewsView({ r, onReload, loading }: { r: NewsReport; onReload: () => voi
     <div className="space-y-4">
       <Card className="p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div>
+          <div className="min-w-0">
             <h3 className="font-semibold">{r.topic ? `News · ${r.topic}` : 'Top world events'}</h3>
             <p className="text-[11px] text-muted-foreground">
-              {r.summary.count} signal{r.summary.count === 1 ? '' : 's'} ·{' '}
-              {r.summary.sources.length} source{r.summary.sources.length === 1 ? '' : 's'} ·
+              {r.analysis.stories} {r.analysis.stories === 1 ? 'story' : 'stories'} ·{' '}
+              {r.analysis.origins} independent {r.analysis.origins === 1 ? 'origin' : 'origins'} ·
               updated {new Date(r.generatedAt).toLocaleTimeString()}
             </p>
           </div>
@@ -788,6 +908,15 @@ function NewsView({ r, onReload, loading }: { r: NewsReport; onReload: () => voi
             {auto ? 'Live' : 'Paused'}
           </button>
         </div>
+        {/*
+          The board's reading of itself: how much repetition was removed, how
+          much rests on one origin, how much is undated. No comparable feed
+          states any of that, and without it a reader cannot tell a corroborated
+          picture from a loud one.
+        */}
+        {r.analysis.stories > 0 ? (
+          <p className="mt-2 text-xs text-muted-foreground">{r.analysis.headline}</p>
+        ) : null}
       </Card>
 
       {mapPoints.length > 0 ? (
@@ -797,35 +926,18 @@ function NewsView({ r, onReload, loading }: { r: NewsReport; onReload: () => voi
       ) : null}
 
       <Card className="p-4">
-        {r.items.length === 0 ? (
+        {r.stories.length === 0 ? (
           <p className="py-2 text-sm text-muted-foreground">
             No signals right now. Sources may be rate-limited — Live will retry.
           </p>
         ) : (
-          r.items.map((e, i) => (
-            <div key={i} className="border-b border-border/40 py-2.5 last:border-0">
-              <div className="flex items-start justify-between gap-3">
-                {e.sourceUrl ? (
-                  <a href={e.sourceUrl} target="_blank" rel="noreferrer" className="text-sm leading-snug hover:underline">
-                    {e.claim}
-                  </a>
-                ) : (
-                  <span className="text-sm leading-snug">{e.claim}</span>
-                )}
-                <SourceTag e={e} />
-              </div>
-              <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-muted-foreground">
-                {domain(e) ? <span className="font-mono">{domain(e)}</span> : null}
-                {country(e) ? <span>· {country(e)}</span> : null}
-                <span>· {relativeTime(e.retrievedAt)}</span>
-              </div>
-            </div>
-          ))
+          r.stories.map((story) => <StoryRow key={story.id} story={story} />)
         )}
       </Card>
       <p className="px-1 text-[11px] text-muted-foreground">
         Signals from primary-leaning public sources — we link to the origin, never republish.
-        Headlines are reports, not confirmed facts; corroborate before relying on them.
+        A story is graded by how many <em>independent origins</em> reported it: twenty outlets
+        carrying one wire is one confirmation, not twenty.
       </p>
     </div>
   )

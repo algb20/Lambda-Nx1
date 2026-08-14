@@ -6,6 +6,7 @@ import { IntelligenceDashboard } from "@/components/intelligence-dashboard"
 import { MonitoringDashboard } from "@/components/monitor-dashboard"
 import { CalibrationScoreboard } from "@/components/calibration-scoreboard"
 import { GlobeView } from "@/components/globe-view"
+import { StandingBriefPanel } from "@/components/standing-brief"
 import { UserPreferences } from "@/components/user-preferences"
 import { BottomNav } from "@/components/bottom-nav"
 import { SideNav } from "@/components/side-nav"
@@ -55,7 +56,25 @@ export default function HomePage() {
         <main className="mx-auto w-full min-w-0 max-w-2xl lg:mx-0 lg:max-w-none">
           <ErrorBoundary key={activeTab} label={tabDef(activeTab).label}>
             {activeTab === "feed" && <HomeFeed onNavigate={navigate} />}
-            {activeTab === "globe" && <GlobeView />}
+            {activeTab === "globe" && (
+              <div className="space-y-6">
+                {/*
+                  The brief leads the map rather than sitting behind a button.
+                  It reads the same world picture the globe draws, and the
+                  analysis is the thing a user came for — a map of dots asks
+                  them to do the triage themselves, which is what every
+                  comparable board already does.
+
+                  It is here rather than in a sixth tab because the five-tab
+                  shell was a deliberate decision (see lib/navigation.ts): one
+                  tab per question a user arrives with. "What does the world
+                  picture mean" is the same question as "where is it", answered
+                  one layer up.
+                */}
+                <StandingBriefPanel />
+                <GlobeView />
+              </div>
+            )}
             {activeTab === "intelligence" && <IntelligenceDashboard />}
             {activeTab === "monitor" && (
               <div className="space-y-6">

@@ -28,10 +28,17 @@ interface GdeltResponse {
   articles?: GdeltArticle[]
 }
 
-/** GDELT stamps look like "20260731T120000Z"; normalize to ISO. */
-function gdeltDate(s?: string): string {
+/**
+ * GDELT stamps look like "20260731T120000Z"; normalize to ISO.
+ *
+ * Returns null rather than "now" when the stamp is missing or malformed. The
+ * old fallback made every undated article look like it had just been published,
+ * which is exactly backwards: an article GDELT could not date is one we know
+ * *less* about, not one that is fresher.
+ */
+function gdeltDate(s?: string): string | null {
   const m = s ? /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/.exec(s) : null
-  return m ? `${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}Z` : new Date().toISOString()
+  return m ? `${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}Z` : null
 }
 
 export const gdeltNews: Source = {
@@ -50,6 +57,7 @@ export const gdeltNews: Source = {
     if (!res.ok) return []
     const j = (await res.json().catch(() => null)) as GdeltResponse | null
     const articles = j?.articles ?? []
+    const retrievedAt = new Date().toISOString()
     return articles
       .filter((a) => a.title && a.url)
       .slice(0, 15)
@@ -58,7 +66,8 @@ export const gdeltNews: Source = {
         entity: a.domain ? { type: 'other', value: a.domain } : undefined,
         sourceKey: 'gdelt',
         sourceUrl: a.url,
-        retrievedAt: gdeltDate(a.seendate),
+        retrievedAt,
+        publishedAt: gdeltDate(a.seendate),
         // Aggregated media: reports, not confirmation. Corroboration raises this.
         admiralty: { source: 'C', info: 3 },
         confidence: 'possible',
@@ -92,6 +101,7 @@ export const usgsQuakes: Source = {
     if (!res.ok) return []
     const j = (await res.json().catch(() => null)) as UsgsResponse | null
     const features = j?.features ?? []
+    const retrievedAt = new Date().toISOString()
     return features
       .filter((f) => f.properties?.title && Array.isArray(f.geometry?.coordinates))
       .slice(0, 12)
@@ -103,7 +113,9 @@ export const usgsQuakes: Source = {
           entity: p.place ? { type: 'other', value: p.place } : undefined,
           sourceKey: 'usgs_quakes',
           sourceUrl: p.url,
-          retrievedAt: new Date(typeof p.time === 'number' ? p.time : Date.now()).toISOString(),
+          retrievedAt,
+          // The instrument's own origin time — the moment the ground moved.
+          publishedAt: typeof p.time === 'number' ? new Date(p.time).toISOString() : null,
           // Instrument-measured by an authoritative agency — reliable, confirmed.
           admiralty: { source: 'A', info: 1 },
           confidence: 'confirmed',
@@ -147,6 +159,7 @@ export const reliefWeb: Source = {
     if (!res.ok) return []
     const j = (await res.json().catch(() => null)) as ReliefWebResponse | null
     const items = j?.data ?? []
+    const retrievedAt = new Date().toISOString()
     return items
       .filter((it) => it.fields?.title && it.fields?.url)
       .slice(0, 10)
@@ -158,7 +171,8 @@ export const reliefWeb: Source = {
           entity: country ? { type: 'other', value: country } : undefined,
           sourceKey: 'reliefweb',
           sourceUrl: f.url,
-          retrievedAt: f.date?.created ?? new Date().toISOString(),
+          retrievedAt,
+          publishedAt: f.date?.created ?? null,
           // Official responders, curated — stronger than a single outlet, secondary.
           admiralty: { source: 'B', info: 2 },
           confidence: 'probable',
@@ -220,6 +234,10 @@ export const wikiInTheNews: Source = {
           sourceKey: 'wikipedia_itn',
           sourceUrl: link?.content_urls?.desktop?.page,
           retrievedAt: now.toISOString(),
+          // "In the news" is a rolling section with no per-item timestamp. Saying
+          // so is more useful than stamping it with the moment we happened to
+          // look, which would make a week-old entry read as breaking.
+          publishedAt: null,
           // Curated, NPOV, sourced — stronger than a single outlet, still secondary.
           admiralty: { source: 'B', info: 2 },
           confidence: 'probable',

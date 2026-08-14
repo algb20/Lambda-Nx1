@@ -64,7 +64,13 @@ describe('investigateNews', () => {
     expect(r.items.length).toBe(1)
     expect(r.items[0].claim).toMatch(/strategic partnership/)
     expect(r.items[0].sourceUrl).toBe('https://news.example.com/a')
-    expect(r.items[0].retrievedAt).toBe('2026-07-31T12:00:00Z')
+    // GDELT's own stamp is the *publication* time. It used to be written into
+    // `retrievedAt`, which is what left the board sorting by nothing and showing
+    // no dates at all — the two fields now mean two different things.
+    expect(r.items[0].publishedAt).toBe('2026-07-31T12:00:00Z')
+    expect(Date.parse(r.items[0].retrievedAt)).toBeGreaterThan(
+      Date.parse('2026-07-31T12:00:00Z'),
+    )
     expect(r.summary.countries).toContain('United States')
   })
 

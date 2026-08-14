@@ -1,10 +1,14 @@
 import { describe, it, expect } from 'vitest'
 import {
+  MAX_TILT,
+  globeCameraOn,
   globeRadius,
   greatCircle,
+  mapCameraOn,
   mapFrame,
   projectGlobe,
   projectMap,
+  shortestAngle,
   unprojectGlobe,
   unprojectMap,
 } from './projection'
@@ -159,6 +163,50 @@ describe('unprojectGlobe — the coordinate under the cursor', () => {
         expect(p.lon).toBeGreaterThan(-180.0001)
         expect(p.lon).toBeLessThanOrEqual(180.0001)
         expect(Math.abs(p.lat)).toBeLessThanOrEqual(90.0001)
+      }
+    }
+  })
+})
+
+describe('camera helpers — flying to a place the reader picked', () => {
+  it('puts the requested coordinate in the middle of the globe', () => {
+    for (const [lat, lon] of [
+      [0, 0],
+      [48.85, 2.35],
+      [-33.9, 151.2],
+      [64, -21.9],
+    ]) {
+      const cam = globeCameraOn(lat, lon, 2.4)
+      const p = projectGlobe(lat, lon, cam, viewport)
+      expect(p.visible, `${lat},${lon}`).toBe(true)
+      expect(p.x).toBeCloseTo(viewport.width / 2, 6)
+      expect(p.y).toBeCloseTo(viewport.height / 2, 6)
+    }
+  })
+
+  it('clamps the pitch short of the pole so the globe stays steerable', () => {
+    expect(globeCameraOn(89, 0, 1).tilt).toBeCloseTo(MAX_TILT, 6)
+    expect(globeCameraOn(-89, 0, 1).tilt).toBeCloseTo(-MAX_TILT, 6)
+  })
+
+  it('puts the requested coordinate in the middle of the flat map at any zoom', () => {
+    for (const zoom of [1, 2.5, 6]) {
+      const cam = mapCameraOn(-15.8, -47.9, zoom, viewport)
+      const p = projectMap(-15.8, -47.9, cam, viewport)
+      expect(p.x).toBeCloseTo(viewport.width / 2, 6)
+      expect(p.y).toBeCloseTo(viewport.height / 2, 6)
+    }
+  })
+
+  it('takes the short way round instead of spinning the long way', () => {
+    expect(shortestAngle(3.0, -3.0)).toBeCloseTo(0.2832, 3)
+    expect(shortestAngle(-3.0, 3.0)).toBeCloseTo(-0.2832, 3)
+    expect(shortestAngle(0, 1)).toBeCloseTo(1, 6)
+    expect(Math.abs(shortestAngle(0, Math.PI * 4 + 0.5))).toBeCloseTo(0.5, 6)
+    // Whatever the winding, the answer is always the shorter arc.
+    for (let from = -12; from < 12; from += 0.37) {
+      for (let to = -12; to < 12; to += 0.53) {
+        expect(Math.abs(shortestAngle(from, to))).toBeLessThanOrEqual(Math.PI + 1e-9)
       }
     }
   })

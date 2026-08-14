@@ -77,8 +77,27 @@ export interface Evidence {
   entity?: EntityRef
   sourceKey: string
   sourceUrl?: string
-  /** ISO timestamp of retrieval. */
+  /**
+   * ISO timestamp of **retrieval** — when we fetched it. Always known.
+   *
+   * This field used to carry two different meanings depending on the source,
+   * and the cost was concrete: the news feed sorted by it, so a feed whose
+   * sources all stamped their fetch time sorted by nothing at all, and no
+   * publication date was ever shown. `retrievedAt` now means retrieval and only
+   * retrieval; when a source states when the thing happened, that goes in
+   * `publishedAt`.
+   */
   retrievedAt: string
+  /**
+   * ISO timestamp of **publication** — when the source says the thing happened
+   * or was published. Null or absent when the source stated no time.
+   *
+   * Never defaulted to `retrievedAt`. A missing publication date is a real
+   * finding about a source, and filling it with "now" turns a five-year-old
+   * report into breaking news — which is the single most damaging thing a
+   * signals feed can do.
+   */
+  publishedAt?: string | null
   admiralty?: Admiralty
   confidence: Confidence
   /** Raw normalized payload, kept for the archive. */
