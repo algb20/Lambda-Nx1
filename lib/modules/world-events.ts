@@ -47,6 +47,7 @@ import {
   type WorldEvent,
   type WorldEventsReport,
 } from './world-events-shared'
+import { recordSweep } from './self-audit'
 
 /** Worst first, so the states an operator must act on sort to the top. */
 const STATUS_ORDER = { failed: 0, empty: 1, ok: 2 } as const
@@ -334,6 +335,17 @@ export async function getWorldEvents(): Promise<WorldEventsReport> {
     if (!Number.isFinite(t)) return newest
     return !newest || t > Date.parse(newest) ? e.at : newest
   }, null)
+
+  // The sweep's own outcome, written to the platform's record of itself. Not
+  // awaited: this is bookkeeping about a sweep, and it must never be able to
+  // delay or fail the sweep's actual result. See lib/modules/self-audit.ts —
+  // over months, this is what lets a source's declared rating be checked
+  // against what it has really done.
+  void recordSweep(sourceHealth).catch(() => {
+    // Deliberately silent. A failed observation write is a gap in our own
+    // record, which the audit already reports as such; escalating it here
+    // would put a bookkeeping error in front of an operator watching a map.
+  })
 
   return {
     generatedAt: new Date().toISOString(),
