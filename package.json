@@ -14,7 +14,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "package": "node scripts/package.mjs",
-    "verify": "npm run typecheck && npm run test && npm run build"
+    "verify": "npm run typecheck && npm run test && npm run build",
+    "scan:secrets": "vitest run lib/security/secret-scan.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

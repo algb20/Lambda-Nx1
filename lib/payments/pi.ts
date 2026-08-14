@@ -21,6 +21,19 @@ async function piCall(subpath: string, body?: object): Promise<PaymentResult> {
   return { ok: res.ok, status: res.status, data }
 }
 
+/**
+ * Whether this deployment can take a Pi payment at all.
+ *
+ * Asked before a charge is attempted rather than discovered in the middle of
+ * one. A checkout that opens the Pi payment sheet and then fails on our side
+ * has already asked the user to approve spending real Pi — the refusal has to
+ * come first, or a pioneer authorises a payment against a server that was never
+ * going to be able to complete it.
+ */
+export function piPaymentsConfigured(): boolean {
+  return Boolean(process.env.PI_API_KEY)
+}
+
 export const piPaymentProvider: PaymentProvider = {
   name: 'pi',
   approve: (paymentId) => piCall(`${encodeURIComponent(paymentId)}/approve`),

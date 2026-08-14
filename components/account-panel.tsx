@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { AuthForm, type AuthedUser } from '@/components/auth-form'
+import { Avatar } from '@/components/avatar'
 
 /**
  * Account: sign in, sign up, sign out, delete.
@@ -121,13 +122,39 @@ export function AccountPanel() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="flex items-center justify-between gap-2">
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium">{user.username}</p>
-            <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
-              <ShieldCheck className="h-3 w-3 text-emerald-500" />
-              Signed in
-            </p>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            {/*
+              The picture belongs beside the name, not in a separate card three
+              scrolls down. This is the profile — it should read as one.
+            */}
+            <Avatar src={user.avatarUrl} name={user.username} size={44} />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold">
+                {user.handle ? `@${user.handle}` : user.username}
+              </p>
+              <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-muted-foreground">
+                <ShieldCheck className="h-3 w-3 shrink-0 text-emerald-500" />
+                {user.provider === 'pi' ? (
+                  <>
+                    Signed in with Pi Network
+                    {/*
+                      A pioneer never chose this name and cannot change it here:
+                      it is the identity Pi verified, which is exactly what makes
+                      it worth more than one somebody typed.
+                    */}
+                    <span className="opacity-70">— username from your Pi account</span>
+                  </>
+                ) : (
+                  'Signed in'
+                )}
+                {user.plan === 'pro' ? (
+                  <span className="rounded bg-primary/10 px-1 py-px font-medium text-primary">
+                    Pro
+                  </span>
+                ) : null}
+              </p>
+            </div>
           </div>
           <Button variant="outline" size="sm" onClick={signOut} disabled={busy}>
             <LogOut className="mr-1.5 h-3.5 w-3.5" />

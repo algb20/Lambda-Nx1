@@ -17,7 +17,13 @@
  * Dependency-injected so all of this is testable without a database.
  */
 import { hashPassword, verifyPassword } from './password'
-import { MIN_PASSWORD_LENGTH, PI_USERNAME_RE } from './policy'
+import {
+  MIN_PASSWORD_LENGTH,
+  PI_USERNAME_RE,
+  normalizeUsername,
+  usernameError,
+  usernameProblem,
+} from './policy'
 
 export interface CredentialRecord {
   userId: string
@@ -27,7 +33,26 @@ export interface CredentialRecord {
 export interface StandaloneDeps {
   findByEmail: (email: string) => Promise<CredentialRecord | undefined>
   findByPiUsername: (username: string) => Promise<CredentialRecord | undefined>
-  createUserAndCredential: (email: string, passwordHash: string) => Promise<{ userId: string }>
+  /**
+   * Resolve one of *our* handles to its credential.
+   *
+   * Distinct from `findByPiUsername`, which answers "who claimed this Pi
+   * identity". Both are needed because the two live in one namespace but are
+   * stored in different places: a Pi handle is a claim on the credentials row,
+   * an off-Pi handle is the account's own column.
+   */
+  findByUsername: (username: string) => Promise<CredentialRecord | undefined>
+  createUserAndCredential: (
+    email: string,
+    passwordHash: string,
+    username: string,
+  ) => Promise<{ userId: string }>
+  /**
+   * Whether this handle is already held. Advisory: two sign-ups racing on one
+   * name would both be told no, so the database's unique constraint remains the
+   * thing that actually decides.
+   */
+  usernameTaken: (username: string) => Promise<boolean>
 }
 
 export interface ClaimDeps {
@@ -84,6 +109,7 @@ export function classifyIdentifier(raw: string): Identifier {
 export async function registerUser(
   email: string,
   password: string,
+  username: string,
   deps: StandaloneDeps,
 ): Promise<{ userId: string }> {
   const normEmail = normalizeEmail(email)
@@ -91,8 +117,18 @@ export async function registerUser(
   if (password.length < MIN_PASSWORD_LENGTH) {
     throw new Error(`Password must be at least ${MIN_PASSWORD_LENGTH} characters`)
   }
+
+  // The handle is validated before anything is written, and its rules are the
+  // same ones a Pi username obeys — one namespace, so an off-Pi sign-up cannot
+  // take a name that reads as somebody's Pi identity.
+  const handle = normalizeUsername(username)
+  const problem = usernameProblem(handle)
+  if (problem) throw new Error(usernameError(problem))
+
   if (await deps.findByEmail(normEmail)) throw new Error('Email already registered')
-  return deps.createUserAndCredential(normEmail, hashPassword(password))
+  if (await deps.usernameTaken(handle)) throw new Error('That username is taken')
+
+  return deps.createUserAndCredential(normEmail, hashPassword(password), handle)
 }
 
 /**
@@ -109,8 +145,14 @@ export async function loginUser(
   const id = classifyIdentifier(identifier)
   if (id.kind === 'invalid') throw failure
 
+  // A non-email identifier is a handle, and handles share one namespace across
+  // both kinds of account. Try the Pi claim first — that is the stricter,
+  // externally-verified one — then our own column, so someone who signed up
+  // off-Pi can sign in with the name they chose rather than only their email.
   const cred =
-    id.kind === 'email' ? await deps.findByEmail(id.value) : await deps.findByPiUsername(id.value)
+    id.kind === 'email'
+      ? await deps.findByEmail(id.value)
+      : ((await deps.findByPiUsername(id.value)) ?? (await deps.findByUsername(id.value)))
   if (!cred || !verifyPassword(password, cred.passwordHash)) throw failure
   return { userId: cred.userId }
 }
