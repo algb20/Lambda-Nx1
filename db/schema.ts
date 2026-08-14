@@ -671,3 +671,43 @@ export const blobs = pgTable(
   },
   (t) => [index('blobs_key_prefix_idx').on(t.key)],
 )
+
+// ── The platform's record of itself ──────────────────────────────────────────
+//
+// Every source carries an Admiralty rating we *declared* when we wrote its
+// record. This table holds what each source has actually *done*, so the two can
+// be compared — see lib/engine/reliability.ts. A feed that has rotted goes on
+// carrying its A forever unless something is counting.
+//
+// Aggregated per source per day rather than one row per run, deliberately. A
+// row per run grows without bound and buys nothing: the questions this data
+// answers — is it reachable, does it carry anything, when did it last work —
+// are all answerable from daily counters, and a bounded table is one nobody has
+// to remember to prune.
+
+export const sourceHealthDaily = pgTable(
+  'source_health_daily',
+  {
+    /** The source key, matching the catalogue record or the coded source. */
+    sourceKey: text('source_key').notNull(),
+    /** UTC calendar day, `YYYY-MM-DD`. Text, because it is a label not an instant. */
+    day: char('day', { length: 10 }).notNull(),
+    /** Runs where it answered and produced at least one item. */
+    ok: integer('ok').notNull().default(0),
+    /** Runs where it answered and produced nothing. Not failure; not health. */
+    empty: integer('empty').notNull().default(0),
+    /** Runs where it did not answer, or answered with an error. */
+    failed: integer('failed').notNull().default(0),
+    /** Items contributed that day, before deduplication. */
+    items: integer('items').notNull().default(0),
+    /** The most recent error text, kept so a failure can be diagnosed at all. */
+    lastError: text('last_error'),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    // One row per source per day is the whole storage model, so it is enforced
+    // by the primary key rather than by the code that writes it.
+    unique('source_health_daily_pk').on(t.sourceKey, t.day),
+    index('source_health_daily_day_idx').on(t.day),
+  ],
+)

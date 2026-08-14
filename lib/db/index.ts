@@ -5,7 +5,7 @@
  * touch the Drizzle client or a vendor SDK directly. This keeps the storage
  * backend swappable (charter rule #4).
  */
-import { and, desc, eq, inArray, lte, or, isNull, sql } from 'drizzle-orm'
+import { and, desc, eq, gte, inArray, lte, or, isNull, sql } from 'drizzle-orm'
 import { getDb, isDbConfigured } from './client'
 import * as s from '@/db/schema'
 
@@ -26,6 +26,7 @@ export type Evidence = typeof s.evidence.$inferSelect
 export type NewEvidence = typeof s.evidence.$inferInsert
 export type Monitor = typeof s.monitors.$inferSelect
 export type Alert = typeof s.alerts.$inferSelect
+export type SourceHealthDay = typeof s.sourceHealthDaily.$inferSelect
 export type RadarFinding = typeof s.radarFindings.$inferSelect
 export type NewRadarFinding = typeof s.radarFindings.$inferInsert
 export type Source = typeof s.sources.$inferSelect
@@ -579,6 +580,73 @@ export const repo = {
     async setStatus(id: string, status: Monitor['status']): Promise<void> {
       const db = getDb()
       await db.update(s.monitors).set({ status }).where(eq(s.monitors.id, id))
+    },
+  },
+
+  /**
+   * The platform's record of its own sources.
+   *
+   * Written by every sweep, read by the self-audit. Upserted per source per
+   * day: the counters accumulate within a day and the table stays bounded at
+   * sources × days, so nobody has to remember to prune it.
+   */
+  sourceHealth: {
+    /**
+     * Record one sweep's outcome for one source.
+     *
+     * `onConflictDoUpdate` rather than read-modify-write, so two sweeps running
+     * at once cannot lose each other's counts — the increment happens inside
+     * Postgres, where it is atomic. A cron and a manual run overlapping is not
+     * hypothetical here; it is what a redeploy mid-sweep looks like.
+     */
+    async record(input: {
+      sourceKey: string
+      day: string
+      status: 'ok' | 'empty' | 'failed'
+      items?: number
+      error?: string | null
+    }): Promise<void> {
+      const db = getDb()
+      const ok = input.status === 'ok' ? 1 : 0
+      const empty = input.status === 'empty' ? 1 : 0
+      const failed = input.status === 'failed' ? 1 : 0
+      const items = input.items ?? 0
+
+      await db
+        .insert(s.sourceHealthDaily)
+        .values({
+          sourceKey: input.sourceKey,
+          day: input.day,
+          ok,
+          empty,
+          failed,
+          items,
+          lastError: input.error ?? null,
+        })
+        .onConflictDoUpdate({
+          target: [s.sourceHealthDaily.sourceKey, s.sourceHealthDaily.day],
+          set: {
+            ok: sql`${s.sourceHealthDaily.ok} + ${ok}`,
+            empty: sql`${s.sourceHealthDaily.empty} + ${empty}`,
+            failed: sql`${s.sourceHealthDaily.failed} + ${failed}`,
+            items: sql`${s.sourceHealthDaily.items} + ${items}`,
+            // Only overwrite the error when this run had one, so a single good
+            // run does not erase the reason the previous ten failed.
+            ...(input.error ? { lastError: input.error } : {}),
+            updatedAt: new Date(),
+          },
+        })
+    },
+
+    /** Every observation from the last `days` days, oldest first. */
+    async since(days = 90): Promise<SourceHealthDay[]> {
+      const db = getDb()
+      const cutoff = new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10)
+      return db
+        .select()
+        .from(s.sourceHealthDaily)
+        .where(gte(s.sourceHealthDaily.day, cutoff))
+        .orderBy(s.sourceHealthDaily.day)
     },
   },
 
