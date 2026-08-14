@@ -81,7 +81,29 @@ describe('nasaEonet', () => {
     expect(data.lon).toBe(-120.5)
     expect(data.category).toBe('wildfire')
     expect(data.magnitude).toBe(12000)
-    expect(ev.retrievedAt).toBe('2026-08-05T00:00:00Z')
+    // The observatory's own date is the publication time; `retrievedAt` is when
+    // we asked. Writing the former into the latter is the bug that left every
+    // event on the live board undateable.
+    expect(ev.publishedAt).toBe('2026-08-05T00:00:00.000Z')
+    expect(ev.retrievedAt).not.toBe('2026-08-05T00:00:00Z')
+    expect(Date.now() - Date.parse(ev.retrievedAt)).toBeLessThan(5000)
+  })
+
+  it('says a date is missing rather than stamping the fetch time on it', async () => {
+    ctx.fetch.mockResolvedValue(
+      jsonResponse({
+        events: [
+          {
+            id: 'x',
+            title: 'Undated fire',
+            categories: [{ id: 'wildfires' }],
+            geometry: [{ type: 'Point', coordinates: [10, 20] }],
+          },
+        ],
+      }),
+    )
+    const [ev] = await nasaEonet.run({ capability: 'world_events', value: '' }, ctx)
+    expect(ev.publishedAt).toBeNull()
   })
 
   it('drops events it cannot place instead of guessing a coordinate', async () => {
@@ -153,6 +175,10 @@ describe('usgsRecentQuakes', () => {
     expect(data.depthKm).toBe(10)
     expect(data.category).toBe('seismic')
     expect(data.tsunami).toBe(true)
+    // The origin time — the moment the ground moved — kept apart from the
+    // moment we read the feed, so detection lag is a real number.
+    expect(ev.publishedAt).toBe(new Date(1_780_000_000_000).toISOString())
+    expect(Date.parse(ev.retrievedAt)).toBeGreaterThan(1_780_000_000_000)
   })
 
   it('skips features missing a title or coordinates', async () => {

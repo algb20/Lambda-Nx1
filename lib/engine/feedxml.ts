@@ -12,6 +12,7 @@
  * reported as absent rather than guessed — a missing date is `undefined`, never
  * "now", so nothing downstream can mistake a parse failure for a fresh item.
  */
+import { publicationTime } from './observed'
 
 export interface FeedEntry {
   title: string
@@ -81,11 +82,18 @@ function firstTagText(fragment: string, tags: string[]): string | null {
   return null
 }
 
-/** Normalize a feed date (RFC 822 `pubDate` or ISO 8601) to ISO; undefined if unparseable. */
+/**
+ * Normalize a feed date to ISO; undefined if unparseable.
+ *
+ * Delegates to the engine's single publication-time parser rather than calling
+ * `Date.parse` itself. It used to do the latter, and the cost was silent: a
+ * `pubDate` in a format `Date.parse` rejects — Drupal's `Friday, August 14,
+ * 2026 - 09:46`, which most European regulators publish — was dropped here,
+ * before any adapter could see it. Two parsers meant two answers to the same
+ * question, and only one of them was ever improved.
+ */
 export function feedDate(raw: string | null): string | undefined {
-  if (!raw) return undefined
-  const ms = Date.parse(raw)
-  return Number.isNaN(ms) ? undefined : new Date(ms).toISOString()
+  return publicationTime(raw) ?? undefined
 }
 
 const SKIPPED_LINK_RELS = new Set(['self', 'enclosure', 'edit', 'replies', 'via'])
