@@ -8,6 +8,7 @@
  * the model/vendor is swappable (charter rule #4).
  */
 import type { Evidence } from '../engine/types'
+import type { EvidenceReading } from '../analysis/reasoning'
 
 /** Analyst severity read of a report — an opinion about the evidence, not a new fact. */
 export type Severity = 'critical' | 'high' | 'medium' | 'low' | 'info'
@@ -43,12 +44,34 @@ export interface AnalystAssessment {
 export interface AnalystVerdict extends AnalystAssessment {
   /** Provider name, e.g. 'claude'. */
   provider: string
-  /** Model id used, or null when the layer is not configured. */
+  /**
+   * Model id used, or null when no model produced this verdict.
+   *
+   * Null is not a failure state. The deterministic analyst is arithmetic over
+   * the evidence, so it has no model — and the interface uses exactly this to
+   * decide which claims are a model's opinion and which are computed.
+   */
   model: string | null
   /** ISO timestamp. */
   generatedAt: string
-  /** False when no API key/config is present (the verdict is then a graceful notice). */
+  /**
+   * True when a real assessment was produced.
+   *
+   * It used to mean "an API key is present", which is why the whole analyst
+   * layer collapsed to a notice without one. It now means what the interface
+   * actually needs to know: whether there is an assessment to render.
+   */
   configured: boolean
+  /**
+   * The mechanical reading of the same evidence — corroboration, disagreement,
+   * age, source mix and gaps, computed with no model at all.
+   *
+   * Present with **and** without an API key. Where a model also ran, the two
+   * readings sit side by side deliberately: the model reads meaning, the
+   * arithmetic reads structure, and disagreement between them is itself
+   * informative. See `lib/analysis/reasoning.ts`.
+   */
+  reading?: EvidenceReading | null
 }
 
 export interface AiProvider {
