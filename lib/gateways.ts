@@ -33,6 +33,7 @@ export const ALL_MODES = [
   'geo',
   'research',
   'reference',
+  'open-data',
   'media',
 ] as const
 
@@ -52,7 +53,7 @@ export const GATEWAY_FAMILIES: ReadonlyArray<{ label: string; modes: readonly Mo
   { label: 'Infrastructure', modes: ['domain', 'threat', 'geo'] },
   { label: 'People & accounts', modes: ['username', 'email'] },
   { label: 'Money & entities', modes: ['finance', 'ownership', 'procurement', 'board', 'markets'] },
-  { label: 'Knowledge & record', modes: ['research', 'reference', 'news', 'media'] },
+  { label: 'Knowledge & record', modes: ['research', 'reference', 'open-data', 'news', 'media'] },
 ]
 
 export interface GatewayGuidance {
@@ -165,6 +166,13 @@ export const GATEWAY_GUIDANCE: Record<Mode, GatewayGuidance> = {
       'The top world events right now, or the public reporting on a topic you name — each item with its outlet and time.',
     example: 'leave empty for top world events',
     limit: 'Headlines are reports, not confirmed facts. Corroborate before relying on any of them.',
+  },
+  'open-data': {
+    answers:
+      'Which governments hold a record of something — searched across every national open-data catalogue at once, with the publishing ministry or agency named on each result.',
+    example: 'flood risk',
+    limit:
+      'It finds the record, not its contents. And it says plainly when a catalogue could not be reached, because “nothing found” and “we could not look” are different answers.',
   },
   media: {
     answers:

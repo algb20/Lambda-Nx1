@@ -48,6 +48,8 @@ import { mempoolNetwork, coingeckoGlobal, chainStateSources } from './chain'
 import { gdacsAlerts, nwsAlerts, whoOutbreaks, issPosition, hazardSources } from './hazard'
 // Gateway — Multi-chain network state (Pi Network, Ethereum, Solana) + venues
 import { piNetworkChain, ethereumChain, solanaChain, exchangeVenues, multiChainSources } from './chains-multi'
+// Federation — open government data (one CKAN client, every national portal)
+import { ckanFederation, openDataActivePortalCount } from './opendata'
 
 export const moduleOneSources: Source[] = [
   cloudflareDns,
@@ -93,6 +95,8 @@ export const trendingGatewaySources: Source[] = trendingSources
 export const worldEventsGatewaySources: Source[] = [...worldEventSources, ...hazardSources]
 
 export const chainStateGatewaySources: Source[] = [...chainStateSources, ...multiChainSources]
+
+export const openDataGatewaySources: Source[] = [ckanFederation]
 
 interface CatalogRow {
   key: string
@@ -207,6 +211,18 @@ export const chainStateGatewayCatalog: CatalogRow[] = [
   { key: 'coingecko_exchanges', name: 'CoinGecko exchanges (venue volume by country)', capability: 'chain_state', passive: true, enabled: true },
 ]
 
+export const openDataGatewayCatalog: CatalogRow[] = [
+  {
+    key: 'ckan_federation',
+    // The portal count is read from the registry rather than written here, so
+    // the catalogue row cannot fall out of step with the portals it describes.
+    name: `Open government data (${openDataActivePortalCount} national CKAN catalogues)`,
+    capability: 'open_data',
+    passive: true,
+    enabled: true,
+  },
+]
+
 export const allSourceCatalog: CatalogRow[] = [
   ...moduleOneSourceCatalog,
   ...moduleTwoSourceCatalog,
@@ -224,6 +240,7 @@ export const allSourceCatalog: CatalogRow[] = [
   ...trendingGatewayCatalog,
   ...worldEventsGatewayCatalog,
   ...chainStateGatewayCatalog,
+  ...openDataGatewayCatalog,
 ]
 
 let registeredOne = false
@@ -339,6 +356,13 @@ export function registerChainStateGateway(): void {
   registeredChainState = true
 }
 
+let registeredOpenData = false
+export function registerOpenDataGateway(): void {
+  if (registeredOpenData) return
+  registry.registerAll(openDataGatewaySources)
+  registeredOpenData = true
+}
+
 /**
  * The declarative catalogue, registered alongside the hand-written sources.
  *
@@ -369,6 +393,7 @@ export function registerAllSources(): void {
   registerTrendingGateway()
   registerWorldEventsGateway()
   registerChainStateGateway()
+  registerOpenDataGateway()
   registerCatalogSources()
 }
 
@@ -420,4 +445,5 @@ export {
   ethereumChain,
   solanaChain,
   exchangeVenues,
+  ckanFederation,
 }

@@ -40,6 +40,10 @@ const GATEWAY_TARGET_TYPE: Record<string, EntityType> = {
   geo: 'other',
   markets: 'other',
   media: 'image',
+  // A catalogue search is a subject search, not an entity lookup: "flood risk"
+  // is a topic. The organizations it surfaces become entities in their own
+  // right through the evidence, which is where they belong.
+  'open-data': 'other',
 }
 
 export interface HistoryEntry {

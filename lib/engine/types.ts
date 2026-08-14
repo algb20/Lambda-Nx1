@@ -37,6 +37,7 @@ export type Capability =
   | 'trending'
   | 'world_events'
   | 'chain_state'
+  | 'open_data'
 
 export type EntityType =
   | 'domain'

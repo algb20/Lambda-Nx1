@@ -24,6 +24,7 @@ import {
   ExternalLink,
   MapPin,
   BookOpen,
+  Library,
 } from 'lucide-react'
 import { Sparkles } from 'lucide-react'
 import { Card } from '@/components/ui/card'
@@ -44,6 +45,7 @@ import type { NexusReport } from '@/lib/modules/nexus'
 import type { GeoReport } from '@/lib/modules/geo'
 import type { ResearchReport } from '@/lib/modules/research'
 import type { ReferenceReport } from '@/lib/modules/reference'
+import type { OpenDataReport } from '@/lib/modules/open-data'
 import { TargetTracker } from '@/components/target-tracker'
 import { DataGlobe } from '@/components/data-globe'
 import { ExportDossier } from '@/components/export-dossier'
@@ -74,6 +76,7 @@ type Result =
   | { kind: 'geo'; data: GeoReport }
   | { kind: 'research'; data: ResearchReport }
   | { kind: 'reference'; data: ReferenceReport }
+  | { kind: 'open-data'; data: OpenDataReport }
   | { kind: 'media'; data: MediaReport }
 
 const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: string }> = [
@@ -91,6 +94,7 @@ const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: s
   { id: 'geo', label: 'Geo', icon: MapPin, placeholder: 'place, "lat,lon", or aircraft ICAO24 hex' },
   { id: 'research', label: 'Research', icon: Microscope, placeholder: 'a topic, technology or research question' },
   { id: 'reference', label: 'Facts', icon: BookOpen, placeholder: 'a company, person or place — structured facts' },
+  { id: 'open-data', label: 'Open data', icon: Library, placeholder: 'a subject — searched across every national catalogue at once' },
   { id: 'news', label: 'News', icon: Newspaper, placeholder: 'topic (optional) — empty = top world events' },
   { id: 'media', label: 'Media', icon: ImageIcon, placeholder: 'https://…/image.jpg' },
 ]
@@ -106,6 +110,7 @@ const BODY_KEY: Partial<Record<Mode, string>> = {
   geo: 'query',
   research: 'query',
   reference: 'query',
+  'open-data': 'query',
 }
 
 /** Modes where an empty query is valid (returns a top/overview result). */
@@ -374,6 +379,115 @@ function ResearchView({ r }: { r: ResearchReport }) {
             </div>
           ))
         )}
+      </Card>
+    </div>
+  )
+}
+
+/**
+ * Open government data.
+ *
+ * Two things on this screen exist nowhere else in the product, and both are
+ * about telling an operator what an *empty* result means:
+ *
+ *  - the explanation line, which separates "no state holds such a record" from
+ *    "we could not reach the catalogues that would know";
+ *  - the per-catalogue strip, which shows which countries answered. A search
+ *    that missed Brazil and Nigeria is a different search from one that did not,
+ *    and on every comparable platform those look identical.
+ */
+function OpenDataView({ r }: { r: OpenDataReport }) {
+  const unreachable = r.portals.filter((p) => p.status === 'failed')
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="min-w-0">
+            <h3 className="font-semibold break-all">{r.subject}</h3>
+            <p className="text-[11px] text-muted-foreground">
+              open government data · {new Date(r.generatedAt).toLocaleString()}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            <Badge variant="secondary">
+              {r.summary.datasets} dataset{r.summary.datasets === 1 ? '' : 's'}
+            </Badge>
+            <Badge variant="outline">
+              {r.summary.publishers} publisher{r.summary.publishers === 1 ? '' : 's'}
+            </Badge>
+            <Badge variant="outline">
+              {r.summary.portalsOk}/{r.summary.portalsQueried} catalogues
+            </Badge>
+          </div>
+        </div>
+        {/* The sentence that decides whether an absence may be written into a
+            report as a finding. It is the point of the gateway, so it is not
+            hidden behind a tooltip. */}
+        <p className="mt-2 text-xs text-muted-foreground">{r.explanation}</p>
+      </Card>
+
+      <Card className="p-4">
+        <h4 className="mb-1 text-sm font-semibold">Records held</h4>
+        {r.datasets.length === 0 ? (
+          <p className="py-2 text-sm text-muted-foreground">
+            Nothing matched in the catalogues that answered.
+          </p>
+        ) : (
+          r.datasets.map((d) => (
+            <div
+              key={`${d.portalKey}:${d.name}`}
+              className="flex items-start justify-between gap-3 border-b border-border/40 py-2 last:border-0"
+            >
+              <div className="min-w-0">
+                <a
+                  href={d.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm text-primary hover:underline"
+                >
+                  {d.title}
+                </a>
+                <p className="text-[11px] text-muted-foreground">
+                  {d.organization ?? d.portalName} · {d.country}
+                  {/* Never "updated today" for a dataset with no stated date —
+                      that turns a decade-old file into fresh intelligence. */}
+                  {d.modifiedAt
+                    ? ` · updated ${d.modifiedAt.slice(0, 10)}`
+                    : ' · update date not stated'}
+                  {d.licenceTitle ? ` · ${d.licenceTitle}` : ' · licence not stated'}
+                </p>
+              </div>
+              {d.formats.length > 0 ? (
+                <Badge variant="outline" className="shrink-0 text-[10px]">
+                  {d.formats.slice(0, 2).join(' · ')}
+                </Badge>
+              ) : null}
+            </div>
+          ))
+        )}
+      </Card>
+
+      <Card className="p-4">
+        <h4 className="mb-2 text-sm font-semibold">Catalogues asked</h4>
+        <div className="flex flex-wrap gap-1.5">
+          {r.portals.map((p) => (
+            <Badge
+              key={p.portalKey}
+              variant={p.status === 'ok' ? 'secondary' : 'outline'}
+              className={p.status === 'failed' ? 'text-[10px] opacity-60' : 'text-[10px]'}
+              title={p.error ?? `${p.total.toLocaleString()} matches on this catalogue`}
+            >
+              {p.portalName}
+              {p.status === 'ok' ? ` · ${p.count}` : p.status === 'failed' ? ' · no answer' : ' · 0'}
+            </Badge>
+          ))}
+        </div>
+        {unreachable.length > 0 ? (
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            {unreachable.length} catalogue{unreachable.length === 1 ? '' : 's'} did not answer, so
+            this search did not cover {unreachable.map((p) => p.country).join(', ')}.
+          </p>
+        ) : null}
       </Card>
     </div>
   )
@@ -1177,6 +1291,10 @@ function collectFindings(result: Result): { subject: string; gateway: string; fi
       return { subject: 'Markets board', gateway: 'markets', findings: slim(result.data.findings) }
     case 'geo':
       return { subject: result.data.subject, gateway: 'geo', findings: slim(result.data.findings) }
+    case 'open-data':
+      // The graded evidence is built by the engine's own mapper, so what the
+      // analyst triages is exactly what the dossier exports.
+      return { subject: result.data.subject, gateway: 'open-data', findings: slim(result.data.findings) }
     case 'research':
       return { subject: result.data.subject, gateway: 'research', findings: slim(result.data.findings) }
     case 'reference':
@@ -1598,6 +1716,7 @@ export function IntelligenceDashboard() {
       {result?.kind === 'geo' ? <GeoView r={result.data} /> : null}
       {result?.kind === 'research' ? <ResearchView r={result.data} /> : null}
       {result?.kind === 'reference' ? <ReferenceView r={result.data} /> : null}
+      {result?.kind === 'open-data' ? <OpenDataView r={result.data} /> : null}
       {result?.kind === 'media' ? <MediaView r={result.data} /> : null}
 
       {aiInput && aiInput.findings.length > 0 ? (
