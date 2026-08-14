@@ -35,7 +35,7 @@ import { coingeckoTop, stooqCommodities, stooqIndices, frankfurterBoard } from '
 // Gateway — Geospatial (places + flights)
 import { nominatim, opensky } from './geo'
 // Gateway — Research & tech-trend
-import { openalex, crossref, githubTrend, arxiv, hackerNews } from './research'
+import { openalex, crossref, pubmed, githubTrend, arxiv, hackerNews } from './research'
 // Internal Radar — standing ⭐ watch feeds
 import { cisaKev, cisaAdvisories, huggingfacePapers, arxivWatch, watchSources } from './watch'
 // Gateway — Daily global trending
@@ -84,7 +84,7 @@ export const marketsBoardSources: Source[] = [
 
 export const geoGatewaySources: Source[] = [nominatim, opensky]
 
-export const researchGatewaySources: Source[] = [openalex, crossref, githubTrend, arxiv, hackerNews]
+export const researchGatewaySources: Source[] = [openalex, crossref, pubmed, githubTrend, arxiv, hackerNews]
 
 export const referenceGatewaySources: Source[] = [wikidata]
 
@@ -172,6 +172,7 @@ export const geoGatewayCatalog: CatalogRow[] = [
 export const researchGatewayCatalog: CatalogRow[] = [
   { key: 'openalex', name: 'OpenAlex (scholarly works)', capability: 'research', passive: true, enabled: true },
   { key: 'crossref', name: 'Crossref (scholarly records)', capability: 'research', passive: true, enabled: true },
+  { key: 'pubmed', name: 'PubMed / NLM (biomedical literature)', capability: 'research', passive: true, enabled: true },
   { key: 'github', name: 'GitHub (tech-trend repos)', capability: 'research', passive: true, enabled: true },
   { key: 'arxiv', name: 'arXiv (preprint frontier)', capability: 'research', passive: true, enabled: true },
   { key: 'hackernews', name: 'Hacker News (industry signal)', capability: 'research', passive: true, enabled: true },

@@ -24,7 +24,7 @@ This design is future-proof: the platform grows by *families*, not rewrites.
 | Ownership & control networks | who owns / controls this entity? | GLEIF Level-2 (parents, ultimate parents, subsidiaries) |
 | News & Signals | what are the top world events / topic coverage? | GDELT, Wikipedia "In the news", USGS earthquakes (live, geolocated), ReliefWeb/UN OCHA (humanitarian) (see docs/NEWS.md) |
 | Geospatial / Transport | where is this? | Nominatim/OpenStreetMap (places), OpenSky (live flights) |
-| Research & Tech-trend | what's the frontier on X? | OpenAlex, Crossref (papers), arXiv (preprints), GitHub (tools), Hacker News (industry signal) |
+| Research & Tech-trend | what's the frontier on X? | OpenAlex, Crossref (papers), PubMed/NLM (biomedical), arXiv (preprints), GitHub (tools), Hacker News (industry signal) |
 | Reference / knowledge base | structured facts about an entity | Wikidata (parent org, country, HQ, founder, CEO, coordinates) → feeds the ontology |
 | Macro / Economy | a country's key indicators | World Bank (GDP, population, inflation) — via Markets |
 | Open government data | which state holds a record of this? | The CKAN federation — every national/municipal open-data catalogue at once (see below) |

@@ -8,6 +8,7 @@
  */
 import type { Evidence, Source } from '../types'
 import { parseFeed } from '../feedxml'
+import { SourceUnavailableError } from '../fetch-guard'
 
 const MAILTO = 'mailto=research@lambda-nx.app'
 
@@ -270,6 +271,106 @@ export const crossref: Source = {
           admiralty: { source: 'B', info: 2 },
           confidence: 'probable',
           data: { year, citations, doi: it.DOI },
+        }
+      })
+  },
+}
+
+// ── PubMed / NLM (capability: research — biomedical literature) ──────────────
+/**
+ * PubMed, through NCBI's E-utilities.
+ *
+ * Worth the second round-trip that E-utilities costs, for a reason that is not
+ * about scholarship: PubMed is where a health signal is written down *before*
+ * it becomes a news story. An outbreak appears as a case series months before
+ * any wire carries it, and it appears from the country it happened in — which
+ * is precisely the coverage our blind-spot map is loudest about being thin.
+ *
+ * Two calls are unavoidable: `esearch` returns identifiers, `esummary` turns
+ * them into records. NCBI asks callers to identify themselves with `tool` and
+ * `email`, so we do; anonymous polling is how a keyless API stops being one.
+ */
+const NCBI_BASE = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils'
+const NCBI_IDENTITY = 'tool=lambda-nx&email=research@lambda-nx.app'
+
+interface PubmedSearch {
+  esearchresult?: { idlist?: string[]; count?: string }
+}
+interface PubmedSummaryRecord {
+  uid?: string
+  title?: string
+  pubdate?: string
+  source?: string
+  authors?: Array<{ name?: string }>
+  elocationid?: string
+}
+interface PubmedSummary {
+  result?: Record<string, PubmedSummaryRecord | string[]>
+}
+
+/**
+ * PubMed dates are deliberately irregular — "2024", "2024 Mar", "2024 Mar 15".
+ * The year is the only part always present and the only part we claim; parsing
+ * the rest into a full date would invent precision the record does not carry.
+ */
+function pubmedYear(pubdate: string | undefined): number | null {
+  const m = /^(\d{4})/.exec(pubdate?.trim() ?? '')
+  return m ? Number(m[1]) : null
+}
+
+export const pubmed: Source = {
+  key: 'pubmed',
+  capability: 'research',
+  passive: true,
+  hosts: ['eutils.ncbi.nlm.nih.gov'],
+  // NCBI's documented ceiling for unauthenticated callers is three requests a
+  // second; one every 400ms across two calls keeps us comfortably under it.
+  minIntervalMs: 400,
+  async run(input, ctx) {
+    const q = input.value.trim()
+    if (q.length < 2) return []
+
+    const searchUrl = `${NCBI_BASE}/esearch.fcgi?db=pubmed&retmode=json&retmax=5&sort=relevance&term=${encodeURIComponent(q)}&${NCBI_IDENTITY}`
+    const searchRes = await ctx.fetch(searchUrl)
+    if (!searchRes.ok) throw new SourceUnavailableError('pubmed', searchRes.status)
+    const search = (await searchRes.json().catch(() => null)) as PubmedSearch | null
+    const ids = (search?.esearchresult?.idlist ?? []).filter((id) => /^\d+$/.test(id))
+    // No match is a real answer; the second call would be a request for nothing.
+    if (ids.length === 0) return []
+
+    const summaryUrl = `${NCBI_BASE}/esummary.fcgi?db=pubmed&retmode=json&id=${ids.join(',')}&${NCBI_IDENTITY}`
+    const summaryRes = await ctx.fetch(summaryUrl)
+    if (!summaryRes.ok) throw new SourceUnavailableError('pubmed', summaryRes.status)
+    const summary = (await summaryRes.json().catch(() => null)) as PubmedSummary | null
+    const result = summary?.result
+    if (!result) throw new SourceUnavailableError('pubmed', summaryRes.status, 'no summary payload')
+
+    const retrievedAt = new Date().toISOString()
+    return ids
+      .map((id) => result[id])
+      .filter((r): r is PubmedSummaryRecord => Boolean(r) && !Array.isArray(r))
+      .map<Evidence>((r) => {
+        const title = r.title?.replace(/\s+/g, ' ').trim() || `PubMed ${r.uid ?? ''}`.trim()
+        const authors = (r.authors ?? [])
+          .slice(0, 3)
+          .map((a) => a.name)
+          .filter(Boolean)
+          .join(', ')
+        const year = pubmedYear(r.pubdate)
+        const journal = r.source?.trim()
+        return {
+          claim:
+            paperClaim(title, year, authors, null) + (journal ? ` · ${journal}` : ''),
+          entity: { type: 'other', value: title },
+          sourceKey: 'pubmed',
+          sourceUrl: r.uid ? `https://pubmed.ncbi.nlm.nih.gov/${r.uid}/` : undefined,
+          retrievedAt,
+          // The index is authoritative; the paper is still a claim. Rated as the
+          // other scholarly sources are, so a corroboration count never treats
+          // "indexed by NLM" as stronger evidence than the study itself is.
+          admiralty: { source: 'B', info: 2 },
+          confidence: 'probable',
+          data: { year, journal, pmid: r.uid, doi: r.elocationid ?? null },
         }
       })
   },

@@ -198,7 +198,8 @@ export const SOURCE_FAMILIES: SourceFamily[] = [
     basis: 'PubMed states it comprises more than 37 million citations.',
     licence: PUBLIC_DOMAIN,
     keyless: true,
-    status: 'planned',
+    status: 'live',
+    note: 'Wired as `pubmed` under the research capability. Where a health signal is written down before it becomes a news story — and written from the country it happened in, which is where our coverage map is thinnest.',
   },
 
   // ── Infrastructure at internet scale ─────────────────────────────────────
