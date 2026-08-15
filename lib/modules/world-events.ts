@@ -32,6 +32,7 @@ import type { Evidence } from '../engine/types'
 import { countryAt, findCountry } from '../geo/atlas'
 import { fuseEvents, fusionSummary, type Signal } from '../analysis/fusion'
 import { coverageMap, coverageSummary } from '../analysis/blindspots'
+import { buildTimeline } from '../analysis/timeline'
 import { classifyHeadline } from '../analysis/topic'
 import { activeSources } from '../engine/catalog'
 import {
@@ -529,6 +530,14 @@ export async function getWorldEvents(): Promise<WorldEventsReport> {
     fusion,
     coverage,
     coverageSummary: coverageSummary(coverage),
+    /**
+     * The board's own history: is this week worse than last?
+     *
+     * Built from the deduplicated events rather than the raw reports, so a
+     * story carried by twenty feeds is one bar-unit and not twenty. Plotting
+     * reports would make a busy news cycle indistinguishable from a busy world.
+     */
+    timeline: buildTimeline(deduped),
     summary: {
       total: deduped.length,
       placed: events.length,

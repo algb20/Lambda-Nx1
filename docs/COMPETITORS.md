@@ -25,6 +25,129 @@ its code, and the ideas we took — a tiered cache, per-source health with
 staleness bounds — are architectural patterns, which are not copyrightable and
 are in any case standard practice.
 
+## World Monitor v2.10.0 — a teardown of the running product, 2026-08-15
+
+Everything above this section was read from repositories and marketing pages.
+This section is different: it is the first time this project has **seen a
+competitor's product actually running**, which `docs/UNREACHED.md` §3 recorded
+as a standing gap — their dashboards are client-rendered and our fetch method
+executes no JavaScript, so until now we had only ever read their shell.
+
+What follows is observed, screen by screen. Where a number appears it is one
+their interface displayed, not one we inferred.
+
+### What they have that we do not
+
+**A layer system, and it is the backbone of the product.** Roughly forty
+toggleable map layers behind a search box — not categories of *our* events, but
+distinct datasets: submarine cables, pipelines, military bases, nuclear sites,
+spaceports, data centres, gamma-radiation sensors, GPS jamming, strategic
+waterways, critical minerals, storage facilities, fuel shortages, shipping
+movement, trade routes, flight delays, protests, UCDP conflict events,
+displacement flows, climate anomalies, disease outbreaks, sanctions, a
+day/night terminator, live webcams. Toggling several composes a picture — cables
+under conflict zones, jamming over a theatre.
+
+**Reference geodata as a first-class asset.** Cables, bases, pipelines and
+chokepoints are *static* datasets rendered as context. This is the half of the
+product we have none of: everything we draw is an event, so our map has no
+permanent world beneath it.
+
+**Panels with composed indices**, each showing its working:
+
+- *Country instability (CII)* — Afghanistan 62, Iraq 60, Lebanon 52, Israel 50,
+  each with an `I:0 S:53 C:0 U:0` component breakdown.
+- *Strategic posture* — named theatres (South China Sea, Iran, Taiwan, Baltic,
+  Black Sea) each carrying a state: `escalating` / `stable` / `normal`.
+- *Threat timeline* — a daily severity histogram, Info/Low/Medium/High/Critical,
+  with "Worsening — 2 active days, 8 critical/high".
+- *Cascading infrastructure impact* — 1,453 links across cables, pipelines,
+  ports and chokepoints, so a cut is traceable to what it reaches.
+- *Live intelligence* with GDELT-style `VOLUME 133` and `TONE −2.2` sparklines
+  per theme (military activity, cyber, nuclear).
+- *Global risk gauge* — 73 "elevated", trend stable, labelled `18/35 sources`.
+- A **DEFCON-style global posture indicator** in the header, at 51%.
+
+**Data families we carry nothing from:** prediction markets (Polymarket, with
+size and close date), energy inventories (US crude, US and EU gas storage),
+commodities (coal, lithium, uranium, soy, corn, wheat), equity indices.
+
+**Product surface:** live TV from nine broadcasters, 23 live webcams by region,
+an embeddable widget, a desktop app, Discord, and public Docs / Blog / Status /
+Tools / Crises / Chokepoints / Countries pages.
+
+**One thing they do that we should copy outright:** their AI summary carries
+**numbered citations** back to the specific sources, with "Story details (8)"
+and "Sources (8)" expandable. That is exactly our evidence discipline expressed
+in an interface, and ours does not do it.
+
+### Where they are weaker, observed rather than assumed
+
+- **Eight regional intelligence panels all read "No items in the last hour"** in
+  the same session that the map was dense. Their board degrades to empty
+  regions, silently, with no statement of why.
+- **`18/35 sources` on the risk gauge** — the composite is computed from half
+  its inputs and the number is shown, but nothing says what the absence does to
+  the score. We would call that a coverage finding.
+- **"Sources (8)" counts outlets, not origins.** Nothing in the AI-summary
+  panel distinguishes eight independent origins from eight outlets carrying one
+  wire. This remains the deepest difference between the two products, and the
+  one we must not trade away for breadth.
+- **No Admiralty-style source grading**, and no confidence grade on a finding.
+
+> **A correction, made the same day.** An earlier version of this section said
+> they show *"no per-finding retrieval-versus-publication time"*. That was
+> written from the first four screens and it is **wrong**. Their China Logistics
+> Corridors panel displays, per provider: `observed 14 Aug 2026 11:00 PM UTC
+> (Instant)`, `released Time unavailable (unknown)`, `retrieved 14 Aug 2026
+> 11:30 PM UTC`, `revision unknown`, `content current`, `transport fresh` — a
+> **three-way** split of observed / released / retrieved, one axis finer than
+> our own two-way `publishedAt` / `retrievedAt`, plus explicit freshness and
+> revision state.
+>
+> They also publish per-panel *provider-family coverage* (`families available ·
+> Partial 3/6`, `Stale 4/6`) and, best of all, negative caveats naming what a
+> source is **not**: *"UN Comtrade reporter 156 is China-level official
+> statistics. It is not a town, corridor, factory, port, or shipment export
+> ledger."* That is a discipline we do not have anywhere, and it is the single
+> most impressive thing observed in this teardown.
+>
+> The correction is recorded rather than edited away because the error is the
+> instructive part: four screens of a product are not the product, and a
+> comparison written from a partial look reads exactly as confident as one
+> written from a complete one.
+
+### Chokepoints, which they treat as a first-class object
+
+Kerch Strait and the Strait of Hormuz each render as a scored object rather than
+a dot: `red 70/100`, `WAR ZONE`, `Disruption 100.0%`, `weekly change +14.8%`,
+`incidents (7d) 421`, `AIS disturbances 0`, direction-split traffic
+(`eastbound/westbound`), `mb/d (5% of 21 baseline)`, a threat-baseline review
+date, and a written note — *"Traffic down 94% vs 30-day baseline, vessels may be
+transiting dark (AIS off)"*. **"Transiting dark" is an inference from an absence
+of signal**, which is real analysis and is the kind of finding our engine is
+built to make and does not yet make anywhere.
+
+### Macro indicators, straight from FRED
+
+Fed Funds 3.63%, VIX 14.63, Unemployment 4.1%, 10Y–2Y spread 0.51%, each with a
+week-over-week delta and a stamped source line (`FRED · 02:11`). Keyless, and we
+carry none of it.
+- **Two locked panels** (`PREMIUM BACKTESTING`, `PREMIUM STOCK ANALYSIS`) and a
+  locked `RESILIENCE` layer render as teasers to a signed-out visitor.
+
+### Our layers are not the same kind of thing as theirs
+
+Worth stating precisely, because the counts look embarrassing and the comparison
+is not like-for-like. Their ~40 layers answer *"what kind of thing is on the
+map"*. Our five — events, corroboration, latency, coverage, liquidity — answer
+*"what do we know about this data"*: which events are independently confirmed,
+how late each source was, and **where we are blind**. No competitor surveyed
+draws a coverage layer at all.
+
+So: they have breadth we lack, we have an analytic depth they lack, and the
+target is both. Breadth without the grading would make us a worse copy of them.
+
 ## Where we are behind, stated plainly
 
 Measured in this tree, today:
@@ -33,9 +156,16 @@ Measured in this tree, today:
 |---|---|---|
 | Sources | **129** (57 coded + 72 catalogue) | 536+ hosts |
 | Distinct hosts | **67** | 536+ |
-| Map layers | 2 (events, liquidity) | 25+ |
-| Cache tiers | 1 (in-process) | 4 (bootstrap → memory → Redis → upstream) |
+| Map layers | 5 analytic views | ~40 data layers |
+| Reference geodata layers | **0** | cables, bases, pipelines, chokepoints, spaceports |
+| Composed indices | 0 | CII, risk gauge, DEFCON, threat timeline |
+| Cache tiers | 2 (in-process result cache + single-flight) | 4 (bootstrap → memory → Redis → upstream) |
 | Real-time transports | None | WebSocket relay (AIS) |
+| Prediction markets / commodities / energy inventories | None | All three |
+| Live TV / webcams | None | 9 broadcasters, 23 cameras |
+| Per-finding Admiralty grading | **Every finding** | None visible |
+| Corroboration counted by independent origin | **Yes** | Outlets only |
+| Published self-diagnosis | **`/api/diagnose`** | Status page only |
 
 **Sources are the gap that matters, and it was an architectural problem rather
 than an effort problem.** Every source was a hand-written module, so each cost a

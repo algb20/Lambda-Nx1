@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { buildTimeline } from '@/lib/analysis/timeline'
 import {
   MAX_BRIEF_STORIES,
   assembleBrief,
@@ -46,6 +47,7 @@ function report(over: Partial<WorldEventsReport> = {}): WorldEventsReport {
     categories: [],
     regions: [],
     hotspots: [],
+    timeline: buildTimeline([event()], { now: Date.parse('2026-08-14T12:00:00.000Z') }),
     sourceHealth: [
       { sourceKey: 'usgs_recent', status: 'ok', count: 1, error: null, ok: true },
       { sourceKey: 'gdacs', status: 'empty', count: 0, error: null, ok: true },

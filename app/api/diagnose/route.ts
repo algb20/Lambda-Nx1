@@ -124,6 +124,24 @@ export async function GET() {
           : `${dated} of ${allEvents.length} events carry a time their source stated.`,
     },
 
+    /** Is this week worse than last, and how much of it could be measured? */
+    timeline: world
+      ? {
+          activeDays: world.timeline.activeDays,
+          criticalHigh: world.timeline.criticalHigh,
+          trend: world.timeline.trend,
+          verdict: world.timeline.verdict,
+          days: world.timeline.days.map((d) => ({
+            day: d.day,
+            total: d.total,
+            scored: d.scored,
+            origins: d.origins,
+            critical: d.counts.critical,
+            high: d.counts.high,
+          })),
+        }
+      : null,
+
     news: news
       ? {
           reports: news.summary.count,

@@ -62,12 +62,23 @@ Affected, in descending order of how much was missed:
 
 - **Recorded Future, Dataminr, Babel Street, Flashpoint** — marketing shells;
   the actual product is behind a login we do not have.
-- **Any interactive demo, dashboard or map** — never seen working.
+- ~~**Any interactive demo, dashboard or map** — never seen working.~~
+  **Partly resolved, 2026-08-15.** World Monitor v2.10.0 was seen running, in
+  full, and is torn down screen by screen in `docs/COMPETITORS.md`. It is the
+  first competitor product this project has observed rather than inferred, and
+  it changed the assessment materially: their ~40 map layers are *reference
+  geodata*, not event categories, which is a whole half of a product we do not
+  have. Note how it was reached — **a person opened it and sent screenshots**.
+  The fetch limitation is unchanged; what changed is that we stopped requiring
+  the machine to be the one that looks.
+- **The other 29 platforms** — still never seen running. The same route would
+  work for any of them.
 - **Our own app** — the same limitation applies to us, which is exactly why
   `/api/diagnose` exists: it reports what the JavaScript would have shown.
 
-**To resolve:** fix the browser tunnel, or obtain trial accounts for the
-platforms whose product is behind a login.
+**To resolve:** fix the browser tunnel, obtain trial accounts for the platforms
+behind a login, or — cheapest and already proven — have a person open the
+product and capture it.
 
 ---
 
