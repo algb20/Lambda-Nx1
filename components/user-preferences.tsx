@@ -104,8 +104,18 @@ export function UserPreferences() {
       </Card>
 
       {/* Reachable from inside the app, not only from a footer nobody scrolls
-          to. Both pages describe what the code actually does. */}
-      <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          to. Every page here describes what the code actually does — pricing
+          and the API reference are both rendered from the definitions the app
+          itself enforces, so neither can drift from the product. */}
+      <p className="flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
+        <a href="/pricing" className="hover:text-foreground hover:underline">
+          Pricing
+        </a>
+        <span>·</span>
+        <a href="/docs/api" className="hover:text-foreground hover:underline">
+          API
+        </a>
+        <span>·</span>
         <a href="/privacy" className="hover:text-foreground hover:underline">
           Privacy
         </a>
