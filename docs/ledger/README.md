@@ -14,9 +14,19 @@ On 2026-08-15 the observation was made that the same requests were being given
 repeatedly and not carried out, and that hundreds of instructions had been lost.
 That was correct, and it was verifiable.
 
-The session transcript — 78 MB covering 2026-07-28 to 2026-08-15 — was mined.
-It contains **224 substantive instruction messages carrying 1,936 imperative
-verbs**. The estimate of "700+ requests" was low.
+The complete session record — 78 MB across three transcript files, covering
+2026-07-28 to 2026-08-15 — was mined. It contains **150 distinct instruction
+messages carrying 1,510 individual instructions**, an average of ten per
+message. The estimate of "700+ requests" was correct.
+
+**A correction, because this file exists to be trusted.** A first pass reported
+224 messages and 1,936 verbs. That was wrong: it counted harness text as user
+speech — *"Continue from where you left off"* alone appeared 44 times, along
+with session-continuation notices and stop-hook output. The second pass strips
+those and separately recovers **mid-turn messages**, which the first pass
+dropped entirely because the harness wraps them in a prefix. Thirteen asks had
+to be given more than once, and the `repeats` column now records how many
+times — that count is the evidence, not the complaint.
 
 None of them were lost by the system. They were lost because **nothing ever
 wrote them down**. The task tool held 77 engineering tasks, every one of them
