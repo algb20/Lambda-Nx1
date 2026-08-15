@@ -185,7 +185,7 @@ export const faaAirspaceStatus: Source = {
           admiralty: { source: 'A', info: 1 },
           confidence: 'confirmed',
           data: {
-            category: 'manmade',
+            category: 'transport',
             categoryLabel: programme.label,
             country: 'United States of America',
             assignedSeverity: programme.severity,

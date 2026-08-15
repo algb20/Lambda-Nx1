@@ -9,6 +9,32 @@
  */
 import type { Admiralty, Confidence } from '../engine/types'
 
+/**
+ * What kind of thing an event is.
+ *
+ * ## Why this list grew
+ *
+ * It was written for a natural-hazard map, and it showed: fourteen of the
+ * eighteen original members named a way the planet can hurt you, and every
+ * human event in the world had to fit into `manmade` or `world`. The platform
+ * meanwhile grew central banks, statistical agencies, cyber advisories,
+ * sanctions, research publishers and eighty newsrooms — so on the live board
+ * **`world` reached 54% of everything**, with `manmade` a distant second, and a
+ * reader looking at the legend learned nothing.
+ *
+ * That is not a classifier failing. It is a vocabulary that has no word for
+ * what the sources are actually publishing. A category you cannot express is
+ * indistinguishable from one you cannot detect, and no amount of cleverness
+ * downstream recovers it.
+ *
+ * The six added here — conflict, economy, cyber, energy, research, transport —
+ * are each named by the catalogue's own `topics` on records we already carry.
+ * Nothing speculative was added: if no source declares it, it is not here.
+ *
+ * `world` survives, and is meant to. A general political headline genuinely is
+ * world news, and the goal was never to empty the bucket — it was to stop
+ * earthquakes, outbreaks and armed conflict from hiding inside it.
+ */
 export type EventCategory =
   | 'seismic'
   | 'wildfire'
@@ -27,11 +53,24 @@ export type EventCategory =
   | 'health'
   | 'space'
   | 'humanitarian'
+  | 'conflict'
+  | 'economy'
+  | 'cyber'
+  | 'energy'
+  | 'research'
+  | 'transport'
+  | 'infrastructure'
   | 'world'
 
 /**
  * One place for a category's label and colour, so the legend, the filter chips
  * and the dots on the canvas can never disagree about what red means.
+ *
+ * The palette is not arbitrary. Geophysical hazards keep the warm end, water
+ * and ice keep the blues, and the six human categories take hues that were
+ * unused — so a reader who has learned that orange means earthquake does not
+ * have to relearn it, and the new categories are separable from the old at a
+ * glance rather than only in the legend.
  */
 export const CATEGORY_META: Record<EventCategory, { label: string; color: string }> = {
   seismic: { label: 'Earthquake', color: '#f97316' },
@@ -51,6 +90,17 @@ export const CATEGORY_META: Record<EventCategory, { label: string; color: string
   health: { label: 'Health emergency', color: '#14b8a6' },
   space: { label: 'Space', color: '#64748b' },
   humanitarian: { label: 'Humanitarian', color: '#eab308' },
+  conflict: { label: 'Armed conflict', color: '#b91c1c' },
+  economy: { label: 'Economy & markets', color: '#10b981' },
+  cyber: { label: 'Cyber', color: '#8b5cf6' },
+  energy: { label: 'Energy & power', color: '#fbbf24' },
+  research: { label: 'Science & research', color: '#6366f1' },
+  transport: { label: 'Transport', color: '#f472b6' },
+  // Network reachability and routing: RIPE Atlas, OONI censorship measurement,
+  // BGP announcements. Kept apart from `cyber` deliberately — an internet
+  // outage is not an attack, and filing measurement data as a security event
+  // would inflate the cyber picture with 110 routine observations.
+  infrastructure: { label: 'Networks & infrastructure', color: '#0d9488' },
   world: { label: 'World news', color: '#cbd5e1' },
 }
 
