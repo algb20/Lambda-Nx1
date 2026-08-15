@@ -367,7 +367,7 @@ Given again on: 2026-08-01, 2026-08-02, 2026-08-05
 ### R056
 
 ```text
-أين تضع كلمة المرور الآن؟ كلمة المرور وحدها لا تكفي — نحتاج الرابط الكامل. خذ الرابط من زرّ «Connect» الأخضر (اختر Transaction pooler)، وسيبدو هكذا: ``` postgresql://postgres.roykbyzkskhmzclzobmd:[YOUR-PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres ``` استبدل `[YOUR-PASSWORD]` بكلمة المرور التي نسختها. لم افهم هذ1ه الخطوة
+أين تضع كلمة المرور الآن؟ كلمة المرور وحدها لا تكفي — نحتاج الرابط الكامل. خذ الرابط من زرّ «Connect» الأخضر (اختر Transaction pooler)، وسيبدو هكذا: ``` postgresql://[REDACTED-CONNECTION-STRING] ``` استبدل `[YOUR-PASSWORD]` بكلمة المرور التي نسختها. لم افهم هذ1ه الخطوة
 ```
 
 ### R057
@@ -445,7 +445,7 @@ Transaction pooler (أو "Connection pooling") ٤) اضغط أيقونة الن�
 ### R069
 
 ```text
-postgresql://postgres.roykbyzkskhmzclzobmd:[YOUR-PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:5432/postgres هذا مانسخته
+postgresql://[REDACTED-CONNECTION-STRING] هذا مانسخته
 ```
 
 ### R070

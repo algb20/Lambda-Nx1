@@ -92,69 +92,130 @@ export const coingeckoTop: Source = {
   },
 }
 
-// ── Stooq — commodities / raw materials + major indices (free CSV) ───────────
-const COMMODITIES: Array<[string, string]> = [
-  ['XAUUSD', 'Gold'],
-  ['XAGUSD', 'Silver'],
-  ['CL.F', 'Crude Oil (WTI)'],
-  ['CB.F', 'Brent Crude'],
-  ['NG.F', 'Natural Gas'],
-  ['HG.F', 'Copper'],
-]
-const INDICES: Array<[string, string]> = [
-  ['^SPX', 'S&P 500'],
-  ['^NDQ', 'Nasdaq Composite'],
-  ['^DJI', 'Dow Jones'],
-  ['^DAX', 'DAX'],
-  ['^NKX', 'Nikkei 225'],
-]
-
-/** Parse a Stooq light-quote CSV into rows keyed by the header names. */
-function parseStooqCsv(text: string): Array<Record<string, string>> {
-  const lines = text.trim().split(/\r?\n/)
-  if (lines.length < 2) return []
-  const header = lines[0].split(',')
-  return lines.slice(1).map((line) => {
-    const cells = line.split(',')
-    const row: Record<string, string> = {}
-    header.forEach((h, i) => (row[h.trim()] = (cells[i] ?? '').trim()))
-    return row
-  })
+// ── FRED — indices and commodities, from the Federal Reserve ────────────────
+/**
+ * Stooq served these until 2026-08-15, when it began answering every quote URL
+ * with a `noindex,nofollow` challenge page. The source kept reporting healthy
+ * because it answered `200`: the parser simply found no numbers in the HTML and
+ * returned an empty list. So the board silently lost **two of its four
+ * sections** — stocks and commodities — while every health check stayed green,
+ * and a user opening the markets board saw crypto and currencies and concluded
+ * the product had no stocks at all. They were right.
+ *
+ * A bot challenge is a provider stating its terms, and the charter is explicit
+ * that we do not work around one. So Stooq is withdrawn and replaced.
+ *
+ * FRED is the better source anyway, and not only because it answers:
+ *
+ *  - It is the **Federal Reserve Bank of St. Louis** publishing its own series,
+ *    which grades A/1 rather than A/2 — a primary publisher, not an aggregator.
+ *  - `fredgraph.csv` is a documented download endpoint, keyless by design and
+ *    intended to be fetched. No disguise, no scraping, no terms to skirt.
+ *  - The series are the canonical ones an analyst would cite.
+ *
+ * What it costs us, stated rather than hidden: FRED publishes **daily closes**,
+ * not live quotes. A number here is the last settled value, and the row carries
+ * the date it belongs to. That is the honest trade — a real close from the
+ * central bank beats a live price we are not permitted to take.
+ */
+interface FredSeries {
+  /** FRED series id, e.g. `SP500`. */
+  id: string
+  name: string
+  cls: AssetClass
+  unit?: string
 }
 
-function stooqSource(key: string, cls: AssetClass, basket: Array<[string, string]>): Source {
-  const names = new Map(basket.map(([s, n]) => [s.toUpperCase(), n]))
+const FRED_SERIES: FredSeries[] = [
+  // Indices — the ones a reader recognises without a legend.
+  { id: 'SP500', name: 'S&P 500', cls: 'indices', unit: '' },
+  { id: 'DJIA', name: 'Dow Jones Industrial Average', cls: 'indices', unit: '' },
+  { id: 'NASDAQCOM', name: 'Nasdaq Composite', cls: 'indices', unit: '' },
+  { id: 'WILL5000PRFC', name: 'Wilshire 5000 (full cap)', cls: 'indices', unit: '' },
+  { id: 'VIXCLS', name: 'VIX volatility index', cls: 'indices', unit: '' },
+  // Commodities — energy and metals, the ones that move everything else.
+  { id: 'DCOILWTICO', name: 'Crude Oil (WTI)', cls: 'commodities' },
+  { id: 'DCOILBRENTEU', name: 'Brent Crude', cls: 'commodities' },
+  { id: 'DHHNGSP', name: 'Natural Gas (Henry Hub)', cls: 'commodities' },
+  { id: 'GASREGW', name: 'US Retail Gasoline', cls: 'commodities' },
+]
+
+/**
+ * The last two observations of a FRED series.
+ *
+ * Two, not one, because the change between them is the only honest way to state
+ * a move: FRED gives levels, never percentages, so computing it here from two
+ * published closes is arithmetic over its own data rather than a number we
+ * invented. FRED writes `.` for a day with no observation — a holiday, or a
+ * series that has not settled — and those rows are skipped rather than read as
+ * zero, which would draw a crash.
+ */
+function lastTwoObservations(csv: string): Array<{ date: string; value: number }> {
+  const rows: Array<{ date: string; value: number }> = []
+  for (const line of csv.trim().split(/\r?\n/).slice(1)) {
+    const [date, raw] = line.split(',')
+    if (!date || !raw || raw.trim() === '.') continue
+    const value = Number(raw)
+    if (!Number.isFinite(value)) continue
+    rows.push({ date: date.trim(), value })
+  }
+  return rows.slice(-2)
+}
+
+function fredSource(key: string, cls: AssetClass): Source {
+  const series = FRED_SERIES.filter((s) => s.cls === cls)
   return {
     key,
     capability: 'market_board',
     passive: true,
-    hosts: ['stooq.com'],
-    minIntervalMs: 1500,
+    hosts: ['fred.stlouisfed.org'],
+    /**
+     * Per **request**, not per run — and this source makes one request per
+     * series.
+     *
+     * At the 2000 ms used elsewhere, five index series cost ten seconds and the
+     * orchestrator's eight-second deadline killed the whole source: the board
+     * came back with commodities and no stocks, reported as one failure with no
+     * hint that the cause was our own politeness rather than FRED's.
+     *
+     * 300 ms is still deliberate spacing on a static CSV download built to be
+     * fetched, and it puts nine series comfortably inside the budget.
+     */
+    minIntervalMs: 300,
     async run(_input, ctx) {
-      const symbols = basket.map(([s]) => s).join(',')
-      const url = `https://stooq.com/q/l/?s=${encodeURIComponent(symbols)}&f=sd2t2ohlcv&h&e=csv`
-      const res = await ctx.fetch(url)
-      if (!res.ok) return []
-      const text = await res.text().catch(() => '')
-      const rows = parseStooqCsv(text)
       const out: Evidence[] = []
-      for (const row of rows) {
-        const symbol = (row.Symbol ?? '').toUpperCase()
-        const close = Number(row.Close)
-        const open = Number(row.Open)
-        if (!symbol || !Number.isFinite(close) || close <= 0) continue // N/D rows skipped
-        const change = Number.isFinite(open) && open > 0 ? ((close - open) / open) * 100 : null
+      for (const s of series) {
+        const res = await ctx.fetch(
+          `https://fred.stlouisfed.org/graph/fredgraph.csv?id=${encodeURIComponent(s.id)}`,
+        )
+        // One series being unavailable must not cost the other eight. A board
+        // that fails whole because one number is missing is worse than a board
+        // that says which number is missing.
+        if (!res.ok) continue
+        const rows = lastTwoObservations(await res.text().catch(() => ''))
+        const latest = rows[rows.length - 1]
+        if (!latest) continue
+        const previous = rows.length > 1 ? rows[0] : null
+        const change =
+          previous && previous.value !== 0
+            ? ((latest.value - previous.value) / previous.value) * 100
+            : null
+
         out.push(
           boardEvidence({
             cls,
-            symbol,
-            name: names.get(symbol) ?? symbol,
-            price: close,
+            symbol: s.id,
+            // The date travels in the name, because a daily close presented
+            // without its date reads as a live quote and is not one.
+            name: `${s.name} · ${latest.date}`,
+            price: latest.value,
             change,
-            unit: cls === 'indices' ? '' : '$',
+            unit: s.unit ?? '$',
             sourceKey: key,
-            sourceUrl: `https://stooq.com/q/?s=${encodeURIComponent(symbol.toLowerCase())}`,
-            admiraltyInfo: 2,
+            sourceUrl: `https://fred.stlouisfed.org/series/${s.id}`,
+            // The Federal Reserve publishing its own series: primary, not
+            // aggregated.
+            admiraltyInfo: 1,
           }),
         )
       }
@@ -163,8 +224,8 @@ function stooqSource(key: string, cls: AssetClass, basket: Array<[string, string
   }
 }
 
-export const stooqCommodities = stooqSource('stooq_commodities', 'commodities', COMMODITIES)
-export const stooqIndices = stooqSource('stooq_indices', 'indices', INDICES)
+export const fredIndices = fredSource('fred_indices', 'indices')
+export const fredCommodities = fredSource('fred_commodities', 'commodities')
 
 // ── Frankfurter (ECB) — key FX rates ─────────────────────────────────────────
 interface FrankfurterResponse {

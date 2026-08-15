@@ -1,4 +1,4 @@
-# The working list — 160 distinct requests
+# The working list — 177 distinct requests
 
 Recovered 2026-08-15 from the complete session record. Each row links to the
 verbatim text; the summary is a **pointer, never a substitute**.
@@ -51,6 +51,23 @@ The ones that **are** genuine standing work, named rather than buried:
 
 | ID | Date | Theme | Repeats | Status | Request |
 |---|---|---|---|---|---|
+| R161 | 2026-08-15 | `design` | | `done` | **عطل حرج:** خطأ `insertBefore` عند الضغط — سببه المترجم يعدّل DOM تحت React. `lib/dom-resilience.ts` + ٩ اختبارات |
+| R162 | 2026-08-15 | `design` | | `open` | لا تعرض معلومات/علامات غير لازمة على التطبيق |
+| R163 | 2026-08-15 | `globe` | | `done` | صفحة الكرة: الخريطة أعلى الصفحة — `app/page.tsx`، بُدِّل ترتيب `GlobeView` و`StandingBriefPanel` |
+| R164 | 2026-08-15 | `globe` | | `open` | لا تعرض في صفحة الكرة ما لا نحتاجه |
+| R165 | 2026-08-15 | `globe` | | `open` | اجمع المتشابه: الفيضانات والزلازل وغيرها أشياء طبيعية — تُضمّ معًا كما هو أنسب |
+| R166 | 2026-08-15 | `globe` | | `open` | طوّر الخريطة والكوكب إلى الأرقى |
+| R167 | 2026-08-15 | `design` | | `open` | صنّف ورتّب وزِد التنوّع والفئات، والترتيب والفرز والعرض باحترافية |
+| R168 | 2026-08-15 | `data` | | `done` | **الأسهم** — Stooq مات (تحدّي بوت بـ200)؛ استُبدل بـFRED. S&P 500 · Dow · Nasdaq · VIX تعمل الآن |
+| R169 | 2026-08-15 | `data` | | `open` | **العملات** (فوركس) — غير موجودة |
+| R170 | 2026-08-15 | `data` | | `open` | **البلوكشين بكل التفاصيل والمعلومات والأسعار** |
+| R171 | 2026-08-15 | `data` | | `open` | **العملات الرقمية بكل التفاصيل** |
+| R172 | 2026-08-15 | `data` | | `open` | **العقارات** |
+| R173 | 2026-08-15 | `data` | | `open` | **أهم الشركات** — خريطة أعمالهم وشركاتهم وجداول أعمالهم |
+| R174 | 2026-08-15 | `auth` | | `open` | **تسجيل تلقائي داخل Pi باسم مستخدم Pi فقط** |
+| R175 | 2026-08-15 | `auth` | | `open` | **خارج Pi:** تسجيل بالبريد + إرسال كود تحقّق + إعادة تعيين كلمة السر |
+| R176 | 2026-08-15 | `auth` | | `open` | اسم مستخدم يختاره المستخدم، باحترافية مثل التطبيقات العالمية |
+| R177 | 2026-08-15 | `deploy` | | `open` | تنزيل ملف zip (حزمة التطبيق) |
 | R151 | 2026-08-15 | `design` | | `open` | فرز وترتيب الصفحة — الصفحة غير مرتّبة وتحتاج فرزًا وترتيبًا حقيقيًا |
 | R152 | 2026-08-15 | `general` | | `open` | النشر التلقائي يجب أن يعمل **باستمرار** وليس مثبّتًا/ساكنًا |
 | R153 | 2026-08-15 | `ai` | | `done` | وكلاء ذكاء دائمون — `.claude/agents/` (ledger-keeper, field-scout, source-hunter, user-walker) |
@@ -116,7 +133,7 @@ The ones that **are** genuine standing work, named rather than buried:
 | [R053](requests-recovered.md#r053) |2026-08-01|`auth`|7| `needs-check` | هناك امر قبل اكمال العمل هل يمكن انشاء حساب اخر علىsupabase ],دون مشاكل وترك تطبيقاتنا دابيا وفاليت على حالهم <br>**evidence:** accounts → lib/auth; database → db/schema.ts |
 | [R054](requests-recovered.md#r054) |2026-08-06|`i18n`|| `needs-check` | لأربط التطبيق بالقاعدة أحتاج كلمة مرور قاعدة البيانات — وهي لا تظهر لأدواتي إطلاقًا (لأسباب أمنية Supabase لا تكشفها عبر API). تجدها هنا: لوحة Supabase → مشروع Lambda-NX <br>**evidence:** i18n/arabic → lib/i18n; database → db/schema.ts; api docs → lib/api-catalog.ts |
 | [R055](requests-recovered.md#r055) |2026-08-06|`general`|| `open` | الان نسخت كلمة المرور |
-| [R056](requests-recovered.md#r056) |2026-08-06|`deploy`|| `needs-check` | أين تضع كلمة المرور الآن؟ كلمة المرور وحدها لا تكفي — نحتاج الرابط الكامل. خذ الرابط من زرّ «Connect» الأخضر (اختر Transaction pooler)، وسيبدو هكذا: ``` postgresql://post <br>**evidence:** publishing → lib/modules/autopublish.ts; database → db/schema.ts |
+| [R056](requests-recovered.md#r056) |2026-08-06|`deploy`|| `needs-check` | أين تضع كلمة المرور الآن؟ كلمة المرور وحدها لا تكفي — نحتاج الرابط الكامل. خذ الرابط من زرّ «Connect» الأخضر (اختر Transaction pooler)، وسيبدو هكذا: ``` postgresql://[REDACTED-CONNECTION-STRING] <br>**evidence:** publishing → lib/modules/autopublish.ts; database → db/schema.ts |
 | [R057](requests-recovered.md#r057) |2026-08-06|`general`|| `answered` | هل هذا |
 | [R058](requests-recovered.md#r058) |2026-08-06|`i18n`|| `needs-check` | تكلم دائما بالعربي اين اجد الرابك <br>**evidence:** i18n/arabic → lib/i18n |
 | [R059](requests-recovered.md#r059) |2026-08-06|`deploy`|| `needs-check` | اعطني مكان الرابط الذي انشره مع الكود <br>**evidence:** deploy → netlify.toml |
@@ -129,7 +146,7 @@ The ones that **are** genuine standing work, named rather than buried:
 | [R066](requests-recovered.md#r066) |2026-08-06|`general`|| `open` | فوق «Session pooler» مباشرةً توجد ثلاثة أزرار اختيار (⚪). اختر الأوسط: بعد اختيار هذا ماذا افعل |
 | [R067](requests-recovered.md#r067) |2026-08-06|`general`|| `needs-check` | انظر إلى port أسفل النافذة: يجب أن يصير 6543 بدل 5432، وuser يصير postgres.roykbyzkskhmzclzobmd. إن لم تتغيّر، فأنت لم تضغط الزر الصحيح. ٢) تأكّد أن Type = URI موجود عندك <br>**evidence:** publishing → lib/modules/autopublish.ts |
 | [R068](requests-recovered.md#r068) |2026-08-06|`general`|| `open` | انا فقط اخترت «Session poole ولا يوجد زر حفض لو تغيير |
-| [R069](requests-recovered.md#r069) |2026-08-06|`deploy`|| `needs-check` | postgresql://postgres.roykbyzkskhmzclzobmd:[YOUR-PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:5432/postgres هذا مانسخته <br>**evidence:** publishing → lib/modules/autopublish.ts; database → db/schema.ts |
+| [R069](requests-recovered.md#r069) |2026-08-06|`deploy`|| `needs-check` | postgresql://[REDACTED-CONNECTION-STRING] هذا مانسخته <br>**evidence:** publishing → lib/modules/autopublish.ts; database → db/schema.ts |
 | [R070](requests-recovered.md#r070) |2026-08-06|`security`|| `answered` | هل اغير كلمة السر من تفكيري فقط |
 | [R071](requests-recovered.md#r071) |2026-08-06|`deploy`|| `needs-check` | ارسلي خطوة Supabase ي بالخطوات ليقوم بها شخص اخلالر <br>**evidence:** database → db/schema.ts |
 | [R072](requests-recovered.md#r072) |2026-08-06|`general`|| `answered` | نعم اضف المتغيرات الاغري |

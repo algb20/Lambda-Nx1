@@ -76,3 +76,24 @@ A ledger of 224 items is a list, not a plan. The list becomes a plan when every
 item is attached to a branch of work with an owner and an order. That is what
 `REQUESTS.md` does with its `theme` column, and it is why the themes are few
 and the items are many rather than the reverse.
+
+## Secrets, and a leak that already happened
+
+The corpus is generated from a conversation, and a conversation about setting up
+a database contains the database password — because it was pasted while asking
+why a connection was failing.
+
+The first generated ledger therefore committed **live Postgres connection
+strings** to a repository that is going to be public. `lib/security/secret-scan.test.ts`
+caught it, which is the one good part of the story. The rest is that an explicit
+standing instruction — never put keys or secrets in files — was broken by the
+mechanism built to honour the user's instructions.
+
+**Every file written from recovered conversation now passes through
+`scripts/redact.py` before it is written.** Verbatim and safe are not in
+conflict, but only when the redaction is part of generating the file rather than
+something remembered afterwards.
+
+**Redaction does not undo a leak.** A credential that reached a commit is
+compromised and must be rotated at the provider. Scrubbing the file only stops
+it spreading further.

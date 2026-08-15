@@ -103,8 +103,21 @@ export default function HomePage() {
                   picture mean" is the same question as "where is it", answered
                   one layer up.
                 */}
-                <StandingBriefPanel />
+                {/*
+                  The map leads, the reading follows.
+
+                  These were the other way round, and it was wrong for the one
+                  reason that matters: a user opening the globe tab came to see
+                  the world. Putting an analytic summary above the map means
+                  the thing they asked for is below the fold on a phone, and
+                  the first impression of a *map* product is a wall of text.
+
+                  The brief keeps its place immediately beneath — close enough
+                  to read together, second because it explains what the map is
+                  already showing.
+                */}
                 <GlobeView />
+                <StandingBriefPanel />
               </div>
             )}
             {activeTab === "intelligence" && <IntelligenceDashboard />}

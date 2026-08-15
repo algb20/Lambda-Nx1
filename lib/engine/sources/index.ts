@@ -31,7 +31,7 @@ import { gleifOwnership } from './ownership'
 import { gdeltNews, wikiInTheNews, usgsQuakes, reliefWeb } from './news'
 import { wikidata } from './reference'
 // Gateway — Markets Board (live multi-class overview)
-import { coingeckoTop, stooqCommodities, stooqIndices, frankfurterBoard } from './markets-board'
+import { coingeckoTop, fredCommodities, fredIndices, frankfurterBoard } from './markets-board'
 // Gateway — Geospatial (places + flights)
 import { nominatim, opensky } from './geo'
 // Gateway — Research & tech-trend
@@ -79,8 +79,8 @@ export const newsGatewaySources: Source[] = [gdeltNews, wikiInTheNews, usgsQuake
 
 export const marketsBoardSources: Source[] = [
   coingeckoTop,
-  stooqCommodities,
-  stooqIndices,
+  fredCommodities,
+  fredIndices,
   frankfurterBoard,
 ]
 
@@ -165,8 +165,12 @@ export const newsGatewayCatalog: CatalogRow[] = [
 
 export const marketsBoardCatalog: CatalogRow[] = [
   { key: 'coingecko_board', name: 'CoinGecko top crypto', capability: 'market_board', passive: true, enabled: true },
-  { key: 'stooq_commodities', name: 'Stooq commodities', capability: 'market_board', passive: true, enabled: true },
-  { key: 'stooq_indices', name: 'Stooq stock indices', capability: 'market_board', passive: true, enabled: true },
+  // Stooq began answering every quote URL with a bot-challenge page on
+  // 2026-08-15 while still returning 200, so the board silently lost its stock
+  // and commodity sections. Replaced by FRED, which publishes these series
+  // itself and offers a keyless CSV download built to be fetched.
+  { key: 'fred_commodities', name: 'FRED commodities (Federal Reserve)', capability: 'market_board', passive: true, enabled: true },
+  { key: 'fred_indices', name: 'FRED stock indices (Federal Reserve)', capability: 'market_board', passive: true, enabled: true },
   { key: 'frankfurter_board', name: 'Frankfurter FX (ECB)', capability: 'market_board', passive: true, enabled: true },
 ]
 
@@ -432,8 +436,8 @@ export {
   usgsQuakes,
   reliefWeb,
   coingeckoTop,
-  stooqCommodities,
-  stooqIndices,
+  fredCommodities,
+  fredIndices,
   frankfurterBoard,
   wikidata,
   cisaKev,
