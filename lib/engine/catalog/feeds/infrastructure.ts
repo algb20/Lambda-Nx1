@@ -198,21 +198,10 @@ export const INFRASTRUCTURE_SOURCES: CatalogSource[] = [
   },
 
   // ── Aviation ─────────────────────────────────────────────────────────────
-  {
-    key: 'faa_nasstatus',
-    name: 'FAA — US airport and airspace status',
-    publisher: 'US Federal Aviation Administration',
-    url: 'https://nasstatus.faa.gov/api/airport-status-information',
-    kind: 'json',
-    discipline: 'infra',
-    topics: ['aviation'],
-    coverage: ['US'],
-    admiralty: 'A',
-    licence: PUBLIC_DOMAIN,
-    minIntervalSec: 900,
-    keyless: true,
-    note: 'Ground stops and delays, from the authority that issues them.',
-  },
+  // `faa_nasstatus` used to sit here declaring `kind: 'json'`. The endpoint
+  // answers a bespoke `<AIRPORT_STATUS_INFORMATION>` document, so every sweep
+  // failed on "Unexpected token '<'" and the aviation topic was empty. It is now
+  // a coded source with a real parser: `lib/engine/sources/aviation.ts`.
   {
     key: 'opensky_states',
     name: 'OpenSky Network — live aircraft states',

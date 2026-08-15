@@ -94,7 +94,10 @@ export const OFFICIAL_SOURCES: CatalogSource[] = [
     key: 'ifrc_appeals',
     name: 'IFRC emergency appeals',
     publisher: 'International Federation of Red Cross and Red Crescent Societies',
-    url: 'https://go.ifrc.org/api/v2/appeal/?format=json&limit=40&ordering=-start_date',
+    // `go.ifrc.org` now serves the single-page app for this path and returns
+    // its HTML shell to an API request. The API itself lives on the admin host,
+    // unchanged and unauthenticated.
+    url: 'https://goadmin.ifrc.org/api/v2/appeal/?format=json&limit=40&ordering=-start_date',
     kind: 'json',
     path: 'results',
     discipline: 'humint',

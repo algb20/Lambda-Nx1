@@ -158,8 +158,14 @@ function categorize(e: Evidence, data: RawData): EventCategory {
   return 'world'
 }
 
-/** Map a source's evidence onto our event shape without inventing anything. */
-function toEvent(e: Evidence, index: number): WorldEvent | null {
+/**
+ * Map a source's evidence onto our event shape without inventing anything.
+ *
+ * Exported for its tests. The mapping is where the engine's vocabulary meets
+ * the board's, and the one defect that made every dot on the live map
+ * undateable lived exactly here — on one line, invisible from either side.
+ */
+export function toEvent(e: Evidence, index: number): WorldEvent | null {
   const title = e.claim?.trim()
   if (!title) return null
   const data = (e.data ?? {}) as RawData
@@ -206,9 +212,16 @@ function toEvent(e: Evidence, index: number): WorldEvent | null {
     severity,
     alertLevel: str(data.alertLevel),
     at: e.retrievedAt,
-    // Never defaulted to the retrieval time: a feed that published no date
-    // yields an event we cannot age, and saying so is the honest answer.
-    observedAt: str(data.observedAt),
+    /**
+     * Never defaulted to the retrieval time: a feed that published no date
+     * yields an event we cannot age, and saying so is the honest answer.
+     *
+     * `publishedAt` is the canonical field and the only one any source sets
+     * today. `data.observedAt` is read after it because the catalogue carried
+     * the time in the payload bag for a while, and an archived record replayed
+     * from that era must not silently lose its date.
+     */
+    observedAt: str(e.publishedAt) ?? str(data.observedAt),
     sourceKey: e.sourceKey,
     sourceUrl: e.sourceUrl ?? null,
     independence: str(data.independence),

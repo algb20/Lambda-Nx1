@@ -80,7 +80,10 @@ describe('gdacsAlerts', () => {
     expect(d.lat).toBe(-18.2)
     expect(d.lon).toBe(120.1)
     expect(d.magnitude).toBe(185)
-    expect(e.retrievedAt).toBe('2026-08-05T00:00:00Z')
+    // `fromdate` is when the disaster began — a publication time, not a
+    // retrieval time. Collapsing the two made every alert look brand new.
+    expect(e.publishedAt).toBe('2026-08-05T00:00:00.000Z')
+    expect(e.retrievedAt).not.toBe('2026-08-05T00:00:00Z')
   })
 
   it('drops entries with no coordinate or no name', async () => {

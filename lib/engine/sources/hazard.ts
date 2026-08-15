@@ -11,6 +11,7 @@
  */
 import type { Evidence, Source, SourceContext, SourceInput } from '../types'
 import { expectJson } from '../fetch-guard'
+import { publicationTime } from '../observed'
 
 const num = (v: unknown): number | null =>
   typeof v === 'number' && Number.isFinite(v) ? v : null
@@ -86,6 +87,7 @@ export const gdacsAlerts: Source = {
       'https://www.gdacs.org/gdacsapi/api/events/geteventlist/SEARCH?alertlevel=Green;Orange;Red'
     const j = await expectJson<GdacsResponse>('gdacs', await ctx.fetch(url))
     const features = j?.features ?? []
+    const retrievedAt = new Date().toISOString()
     const out: Evidence[] = []
     for (const f of features) {
       const p = f.properties
@@ -102,7 +104,11 @@ export const gdacsAlerts: Source = {
         entity: p.country ? { type: 'other', value: p.country } : undefined,
         sourceKey: 'gdacs',
         sourceUrl: p.url?.report ?? p.url?.details,
-        retrievedAt: p.fromdate ?? new Date().toISOString(),
+        retrievedAt,
+        // When the disaster began, per GDACS. `todate` is deliberately not used
+        // as a fallback: it is when the alert *ends*, often in the future, and
+        // an event dated by its own expiry would sort as tomorrow's news.
+        publishedAt: publicationTime(p.fromdate),
         // A joint UN / European Commission alert system — official and reliable.
         admiralty: { source: 'A', info: 2 },
         confidence: 'confirmed',
@@ -196,7 +202,12 @@ export const nwsAlerts: Source = {
   hosts: ['api.weather.gov'],
   minIntervalMs: 1500,
   async run(_input: SourceInput, ctx: SourceContext) {
-    const url = 'https://api.weather.gov/alerts/active?severity=Extreme,Severe&limit=100'
+    // No `limit`: the NWS accepts it on `/alerts` but rejects it outright on
+    // `/alerts/active`, answering 400 and dropping every US severe-weather
+    // warning from the board. The cap belongs on our side anyway — see the
+    // slice below — because a limit the provider applies is a limit we cannot
+    // reason about.
+    const url = 'https://api.weather.gov/alerts/active?severity=Extreme,Severe'
     const res = await ctx.fetch(url, {
       headers: {
         // The NWS asks every client to identify itself.
@@ -206,6 +217,7 @@ export const nwsAlerts: Source = {
     })
     const j = await expectJson<NwsResponse>('nws_alerts', res)
     const features = j?.features ?? []
+    const retrievedAt = new Date().toISOString()
     const out: Evidence[] = []
     for (const f of features) {
       const p = f.properties
@@ -217,7 +229,11 @@ export const nwsAlerts: Source = {
         entity: { type: 'other', value: 'United States of America' },
         sourceKey: 'nws_alerts',
         sourceUrl: p['@id'],
-        retrievedAt: p.effective ?? new Date().toISOString(),
+        retrievedAt,
+        // When the warning took effect. A warning may legitimately be issued for
+        // a time a few hours ahead, which is why the plausibility window in
+        // `publicationTime` allows a bounded amount of future.
+        publishedAt: publicationTime(p.effective),
         // A national meteorological agency issuing a warning.
         admiralty: { source: 'A', info: 1 },
         confidence: 'confirmed',
@@ -235,9 +251,27 @@ export const nwsAlerts: Source = {
         },
       })
     }
+    /**
+     * A cap, applied after ranking rather than by the provider.
+     *
+     * The feed routinely carries 200+ active warnings, and every one of them
+     * is US-only. Left uncapped, a single national agency would outnumber the
+     * rest of the world on a board that claims global coverage. Extreme
+     * warnings survive the cut before Severe ones, so what is dropped is the
+     * least urgent end of one country's weather rather than an arbitrary tail.
+     */
     return out
+      .sort(
+        (a, b) =>
+          ((b.data as { assignedSeverity: number }).assignedSeverity ?? 0) -
+          ((a.data as { assignedSeverity: number }).assignedSeverity ?? 0),
+      )
+      .slice(0, MAX_US_ALERTS)
   },
 }
+
+/** How many US warnings may reach a global board in one sweep. */
+const MAX_US_ALERTS = 60
 
 // ── WHO — Disease Outbreak News ──────────────────────────────────────────────
 // The authoritative record of verified outbreaks. Country-level, so it plots on
@@ -267,6 +301,7 @@ export const whoOutbreaks: Source = {
       await ctx.fetch(url, { headers: { Accept: 'application/json' } }),
     )
     const items = j?.value ?? []
+    const retrievedAt = new Date().toISOString()
     return items
       .filter((it) => it.Title)
       .map<Evidence>((it) => ({
@@ -275,7 +310,11 @@ export const whoOutbreaks: Source = {
         sourceUrl: it.ItemDefaultUrl
           ? `https://www.who.int${it.ItemDefaultUrl}`
           : 'https://www.who.int/emergencies/disease-outbreak-news',
-        retrievedAt: it.PublicationDateAndTime ?? new Date().toISOString(),
+        retrievedAt,
+        // WHO publishes both a machine timestamp and a display string; only the
+        // former is parsed, because `FormattedDate` is prose in the reader's
+        // locale and guessing at it would invent a date.
+        publishedAt: publicationTime(it.PublicationDateAndTime),
         // The UN's health agency confirming an outbreak.
         admiralty: { source: 'A', info: 2 },
         confidence: 'confirmed',
@@ -307,6 +346,8 @@ export const issPosition: Source = {
       longitude?: number
       altitude?: number
       velocity?: number
+      /** Epoch **seconds** — the instant this sub-satellite point is valid for. */
+      timestamp?: number
     }>('iss_position', await ctx.fetch('https://api.wheretheiss.at/v1/satellites/25544'))
     const c = coord(j?.longitude, j?.latitude)
     if (!c) return []
@@ -320,6 +361,10 @@ export const issPosition: Source = {
         sourceKey: 'iss_position',
         sourceUrl: 'https://www.n2yo.com/satellite/?s=25544',
         retrievedAt: new Date().toISOString(),
+        // The epoch the position is valid for. It is close to the fetch time by
+        // construction, but they are not the same fact: the station moves ~7.7
+        // km every second, so which one a reader is looking at matters.
+        publishedAt: publicationTime(j?.timestamp),
         admiralty: { source: 'A', info: 1 },
         confidence: 'confirmed',
         data: {

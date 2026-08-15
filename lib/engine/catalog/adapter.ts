@@ -1,5 +1,6 @@
 import type { Evidence, Source, SourceContext } from '../types'
 import { parseFeed } from '../feedxml'
+import { publicationTime } from '../observed'
 import type { CatalogSource } from './types'
 
 /**
@@ -53,34 +54,6 @@ function num(value: unknown): number | null {
   return null
 }
 
-/**
- * A timestamp we can defend, or undefined.
- *
- * Never falls back to "now". A feed whose items carry no date is a feed we
- * cannot age, and pretending otherwise turns an unknown into a freshness claim
- * — the exact failure the `observed_at` / `received_at` split exists to
- * prevent. Epoch milliseconds and seconds are both accepted because agencies
- * publish both, and telling them apart by magnitude is safe for any date this
- * side of 1970.
- */
-function timestamp(value: unknown): string | undefined {
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    const ms = value > 1e11 ? value : value * 1000
-    const date = new Date(ms)
-    return Number.isNaN(date.getTime()) ? undefined : date.toISOString()
-  }
-  const text = str(value)
-  if (!text) return undefined
-  // GDELT publishes `20260814T031500Z`, which Date cannot parse unaided.
-  const compact = text.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/)
-  if (compact) {
-    const [, y, mo, d, h, mi, s] = compact
-    return new Date(`${y}-${mo}-${d}T${h}:${mi}:${s}Z`).toISOString()
-  }
-  const parsed = Date.parse(text)
-  return Number.isFinite(parsed) ? new Date(parsed).toISOString() : undefined
-}
-
 /** GeoJSON, or a JSON payload shaped like it. */
 function fromGeoJson(source: CatalogSource, body: unknown, retrievedAt: string): Evidence[] {
   const features = (dig(body, 'features') ?? []) as Array<Record<string, unknown>>
@@ -100,12 +73,12 @@ function fromGeoJson(source: CatalogSource, body: unknown, retrievedAt: string):
         sourceKey: source.key,
         sourceUrl: str(props.url) ?? str(props.link) ?? source.url,
         retrievedAt,
+        publishedAt: publicationTime(props.time ?? props.date ?? props.sent),
         admiralty: { source: source.admiralty, info: 2 },
         confidence: 'unconfirmed',
         data: {
           lat: num(lat),
           lon: num(lon),
-          observedAt: timestamp(props.time ?? props.date ?? props.sent),
           magnitude: num(props.mag ?? props.magnitude),
           topics: source.topics,
           publisher: source.publisher,
@@ -141,12 +114,12 @@ function fromJson(source: CatalogSource, body: unknown, retrievedAt: string): Ev
         sourceKey: source.key,
         sourceUrl: str(dig(row, map.url)) ?? str(dig(row, 'url')) ?? str(dig(row, 'link')) ?? source.url,
         retrievedAt,
+        publishedAt: publicationTime(dig(row, map.time) ?? dig(row, 'time') ?? dig(row, 'date')),
         admiralty: { source: source.admiralty, info: 2 },
         confidence: 'unconfirmed',
         data: {
           lat: num(dig(row, map.lat)) ?? num(dig(row, 'lat')) ?? num(dig(row, 'latitude')),
           lon: num(dig(row, map.lon)) ?? num(dig(row, 'lon')) ?? num(dig(row, 'longitude')),
-          observedAt: timestamp(dig(row, map.time) ?? dig(row, 'time') ?? dig(row, 'date')),
           magnitude: num(dig(row, map.magnitude)),
           summary: str(dig(row, map.summary)) ?? str(dig(row, 'summary')),
           topics: source.topics,
@@ -169,6 +142,10 @@ function fromFeed(source: CatalogSource, xml: string, retrievedAt: string): Evid
         sourceKey: source.key,
         sourceUrl: entry.link ?? source.url,
         retrievedAt,
+        // The feed parser already normalises `pubDate` / `updated` / `dc:date`;
+        // it is re-checked here so that a feed publishing a date outside the
+        // plausible range is treated exactly like a JSON source doing the same.
+        publishedAt: publicationTime(entry.published),
         admiralty: { source: source.admiralty, info: 2 },
         confidence: 'unconfirmed',
         data: {
@@ -176,7 +153,6 @@ function fromFeed(source: CatalogSource, xml: string, retrievedAt: string): Evid
           // geocoding a headline would be inventing a location.
           lat: null,
           lon: null,
-          observedAt: entry.published,
           summary: entry.summary,
           topics: source.topics,
           publisher: source.publisher,

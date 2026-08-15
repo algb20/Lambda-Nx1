@@ -11,6 +11,7 @@
  */
 import type { Evidence, Source, SourceContext, SourceInput } from '../types'
 import { expectJson } from '../fetch-guard'
+import { publicationTime } from '../observed'
 
 // ── NASA EONET v3 (natural hazards, exact coordinates) ───────────────────────
 // The Earth Observatory Natural Event Tracker: wildfires, severe storms,
@@ -104,6 +105,7 @@ export const nasaEonet: Source = {
     const url = 'https://eonet.gsfc.nasa.gov/api/v3/events?status=open&days=10&limit=120'
     const j = await expectJson<EonetResponse>('nasa_eonet', await ctx.fetch(url))
     const events = j?.events ?? []
+    const retrievedAt = new Date().toISOString()
     const out: Evidence[] = []
     for (const ev of events) {
       if (!ev.title) continue
@@ -118,7 +120,13 @@ export const nasaEonet: Source = {
         sourceKey: 'nasa_eonet',
         // Prefer the reporting observatory over the API record when given.
         sourceUrl: ev.sources?.[0]?.url ?? ev.link,
-        retrievedAt: geometry?.date ?? new Date().toISOString(),
+        retrievedAt,
+        // The date on the geometry is when the event was *observed at that
+        // position* — for a moving event, the timestamp of the latest sighting.
+        // It used to be written into `retrievedAt`, which destroyed both facts
+        // at once: the board could not age a single dot, and detection lag came
+        // out as zero everywhere because both times were the same number.
+        publishedAt: publicationTime(geometry?.date),
         // Curated by NASA from official observing systems.
         admiralty: { source: 'A', info: 2 },
         confidence: 'confirmed',
@@ -166,6 +174,7 @@ export const usgsRecentQuakes: Source = {
     const url = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson'
     const j = await expectJson<UsgsResponse>('usgs_recent', await ctx.fetch(url))
     const features = j?.features ?? []
+    const retrievedAt = new Date().toISOString()
     const out: Evidence[] = []
     for (const f of features) {
       const p = f.properties
@@ -178,7 +187,11 @@ export const usgsRecentQuakes: Source = {
         entity: p.place ? { type: 'other', value: p.place } : undefined,
         sourceKey: 'usgs_recent',
         sourceUrl: p.url,
-        retrievedAt: new Date(typeof p.time === 'number' ? p.time : Date.now()).toISOString(),
+        retrievedAt,
+        // The origin time: the moment the ground actually moved, as the network
+        // solved it. The single most defensible timestamp in the whole product,
+        // and it was being discarded.
+        publishedAt: publicationTime(p.time),
         // Instrument-measured by an authoritative agency.
         admiralty: { source: 'A', info: 1 },
         confidence: 'confirmed',

@@ -79,7 +79,7 @@ describe('nothing is invented', () => {
     // how stale data ends up presented as live.
     const source = catalogSource({ ...base, path: 'items' })
     const [item] = await source.run(NO_INPUT, ctxReturning({ items: [{ title: 'No date here' }] }))
-    expect((item.data as { observedAt?: string }).observedAt).toBeUndefined()
+    expect(item.publishedAt).toBeNull()
   })
 
   it('does not geocode a headline', async () => {
@@ -122,11 +122,11 @@ describe('shapes', () => {
         ],
       }),
     )
-    const data = item.data as { lat: number; lon: number; magnitude: number; observedAt: string }
+    const data = item.data as { lat: number; lon: number; magnitude: number }
     expect(data.lat).toBe(42.3)
     expect(data.lon).toBe(-70.5)
     expect(data.magnitude).toBe(5.1)
-    expect(data.observedAt).toBe(new Date(1786680000000).toISOString())
+    expect(item.publishedAt).toBe(new Date(1786680000000).toISOString())
   })
 
   it('reads a GeoJSON body even when the record declares plain json', async () => {
@@ -160,15 +160,13 @@ describe('shapes', () => {
     const source = catalogSource({ ...base, path: 'i', map: { time: 't' } })
     const [ms] = await source.run(NO_INPUT, ctxReturning({ i: [{ title: 'a', t: 1786680000000 }] }))
     const [sec] = await source.run(NO_INPUT, ctxReturning({ i: [{ title: 'a', t: 1786680000 }] }))
-    expect((ms.data as { observedAt: string }).observedAt).toBe(
-      (sec.data as { observedAt: string }).observedAt,
-    )
+    expect(ms.publishedAt).toBe(sec.publishedAt)
   })
 
   it('parses the compact timestamp GDELT publishes', async () => {
     const source = catalogSource({ ...base, path: 'i', map: { time: 't' } })
     const [item] = await source.run(NO_INPUT, ctxReturning({ i: [{ title: 'a', t: '20260814T031500Z' }] }))
-    expect((item.data as { observedAt: string }).observedAt).toBe('2026-08-14T03:15:00.000Z')
+    expect(item.publishedAt).toBe('2026-08-14T03:15:00.000Z')
   })
 
   it('carries the independence group onto every finding', async () => {

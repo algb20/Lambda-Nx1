@@ -91,6 +91,17 @@ export const QUARANTINE: QuarantinedSource[] = [
   q('ethiopia_addisstandard', 'bot-blocked', 403),
 
   // ── The publisher moved. Ours to fix. ────────────────────────────────────
+  {
+    key: 'saws_south_africa',
+    reason: 'moved',
+    status: 200,
+    observedOn: '2026-08-15',
+    note:
+      'Rebuilt as a single-page app; /home/rssfeed and every other path we tried answer 200 with the ' +
+      'HTML shell and no feed anywhere. A 200 that is not the document is worse than a 404 — it fails ' +
+      'the parser rather than the request. Southern African weather now reaches the board only through ' +
+      'GDACS, which is a real coverage gap, not a solved one.',
+  },
   q('reuters_world', 'moved', 404, 'Reuters withdrew its public RSS entirely. No first-party replacement exists.'),
   q('reliefweb_reports', 'moved', 410, 'ReliefWeb retired the v1 API. v2 answers 403 to our agent; needs the appname registration their terms describe.'),
   q('reliefweb_disasters', 'moved', 410, 'Same v1 retirement.'),
