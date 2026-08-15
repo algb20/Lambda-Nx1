@@ -3,6 +3,7 @@ import { getWorldEvents } from '@/lib/modules/world-events'
 import { investigateNews } from '@/lib/modules/news'
 import { activeSources, CATALOG } from '@/lib/engine/catalog'
 import { allSourceCatalog } from '@/lib/engine/sources'
+import { sourceCacheSize } from '@/lib/engine/source-cache'
 
 /**
  * GET /api/diagnose — one URL that says what is actually wrong.
@@ -57,6 +58,7 @@ export async function GET() {
     .filter((h) => h.status === 'failed')
     .map((h) => ({ source: h.sourceKey, error: (h.error ?? 'no detail').slice(0, MAX_ERROR) }))
   const empty = health.filter((h) => h.status === 'empty').map((h) => h.sourceKey)
+  const cached = health.filter((h) => h.status === 'cached')
 
   // ── Is one category drowning the board? ───────────────────────────────────
   const byCategory = (world?.categories ?? [])
@@ -82,6 +84,17 @@ export async function GET() {
     /** The first question: what is broken, named and with its reason. */
     feeds: {
       contributing: health.filter((h) => h.status === 'ok').length,
+      /**
+       * Not fetched this run because the publisher's interval had not elapsed,
+       * and serving the last answer instead.
+       *
+       * Reported separately from `contributing` so the share of the board that
+       * is live is visible. A high number here is healthy — it means the
+       * refresh buffer is doing its job on a warm container — but it is not the
+       * same claim as "fetched just now", and merging the two would hide it.
+       */
+      servedFromCache: cached.length,
+      cacheHeld: sourceCacheSize(),
       answeredEmpty: empty.length,
       failed: failed.length,
       /** Capped, because a hundred identical timeouts teach nothing new. */
@@ -121,6 +134,13 @@ export async function GET() {
           newestAt: news.analysis.newestAt,
           oldestAt: news.analysis.oldestAt,
           sourcesFailed: news.summary.sourcesFailed,
+          /** Feeds that answer but have stopped publishing, with how long. */
+          staleFeeds: news.staleFeeds.map((f) => ({
+            source: f.sourceKey,
+            daysSilent: f.daysSilent,
+            items: f.items,
+          })),
+          stalenessNote: news.summary.stalenessNote,
         }
       : { error: String((newsResult as PromiseRejectedResult).reason).slice(0, MAX_ERROR) },
 

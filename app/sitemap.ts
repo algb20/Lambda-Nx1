@@ -39,6 +39,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: (tab === 'account' ? 'monthly' : 'hourly') as 'monthly' | 'hourly',
       priority: tab === 'account' ? 0.3 : 0.8,
     })),
+    // Higher priority than the legal pages and lower than the live boards:
+    // these are what someone evaluating the product actually looks for, and
+    // they are the two pages every comparable platform publishes.
+    { url: `${base}/pricing`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/docs/api`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/privacy`, lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
     { url: `${base}/terms`, lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
   ]

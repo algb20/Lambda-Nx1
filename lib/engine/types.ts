@@ -123,6 +123,17 @@ export interface SourceResult {
   ok: boolean
   evidence: Evidence[]
   error?: string
+  /**
+   * The source was not fetched because its own minimum interval had not
+   * elapsed, and this evidence (if any) is the last answer it gave.
+   *
+   * A distinct state from both success and failure, because it is neither. The
+   * evidence keeps its original `retrievedAt`, so its true age is visible
+   * everywhere downstream.
+   */
+  cached?: boolean
+  /** Age of the replayed answer in ms; null when nothing was held. */
+  cacheAgeMs?: number | null
 }
 
 /**

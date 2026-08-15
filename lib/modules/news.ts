@@ -30,6 +30,7 @@ import { registry } from '../engine/registry'
 import { registerNewsGateway } from '../engine/sources'
 import type { Evidence } from '../engine/types'
 import { CATALOG } from '../engine/catalog'
+import { registerCatalog } from '../engine/catalog/register'
 import { independenceGroup } from '../engine/catalog/types'
 import {
   analyseStories,
@@ -38,6 +39,7 @@ import {
   type Story,
   type StoryAnalysis,
 } from '../analysis/stories'
+import { staleFeeds, stalenessNote, type StaleFeed } from '../analysis/staleness'
 
 export interface NewsReport {
   topic: string | null
@@ -53,12 +55,22 @@ export interface NewsReport {
    */
   items: Evidence[]
   analysis: StoryAnalysis
+  /**
+   * Feeds that answered but have stopped publishing.
+   *
+   * A dead feed that returns 200 is invisible to every other health check we
+   * have — it counts as an active source and contributes items that look
+   * current apart from a date nobody reads. This names them.
+   */
+  staleFeeds: StaleFeed[]
   summary: {
     count: number
     sources: string[]
     countries: string[]
     sourcesOk: number
     sourcesFailed: number
+    /** The staleness finding in one sentence, or null when all feeds publish. */
+    stalenessNote: string | null
   }
 }
 
@@ -86,6 +98,16 @@ function countryOf(e: Evidence): string | null {
 
 export async function investigateNews(input = ''): Promise<NewsReport> {
   registerNewsGateway()
+  /**
+   * The eighty newsrooms.
+   *
+   * Without this the gateway saw four sources — GDELT, Wikipedia, USGS and
+   * ReliefWeb — and reported *9 stories from 2 independent origins*, while the
+   * catalogue's newsrooms were being read successfully in the same process and
+   * filed as world events. The clustering and corroboration machinery below was
+   * never the limit; its input was.
+   */
+  registerCatalog()
   const topic = input.trim() || null
   const generatedAt = new Date().toISOString()
 
@@ -93,6 +115,7 @@ export async function investigateNews(input = ''): Promise<NewsReport> {
 
   const stories = clusterStories(r.evidence, { groups: independenceGroups() }).sort(storyOrder)
   const analysis = analyseStories(stories, r.evidence.length)
+  const stale = staleFeeds(r.evidence)
 
   const sources = [...new Set(r.evidence.map((i) => i.sourceKey))]
   const countries = [
@@ -105,12 +128,14 @@ export async function investigateNews(input = ''): Promise<NewsReport> {
     stories,
     items: r.evidence,
     analysis,
+    staleFeeds: stale,
     summary: {
       count: r.evidence.length,
       sources,
       countries,
       sourcesOk: r.results.filter((x) => x.ok).length,
       sourcesFailed: r.results.filter((x) => !x.ok).length,
+      stalenessNote: stalenessNote(stale),
     },
   }
 }

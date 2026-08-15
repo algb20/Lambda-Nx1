@@ -32,6 +32,7 @@ import type { Evidence } from '../engine/types'
 import { countryAt, findCountry } from '../geo/atlas'
 import { fuseEvents, fusionSummary, type Signal } from '../analysis/fusion'
 import { coverageMap, coverageSummary } from '../analysis/blindspots'
+import { classifyHeadline } from '../analysis/topic'
 import { activeSources } from '../engine/catalog'
 import {
   CATEGORY_META,
@@ -50,7 +51,7 @@ import {
 import { recordSweep } from './self-audit'
 
 /** Worst first, so the states an operator must act on sort to the top. */
-const STATUS_ORDER = { failed: 0, empty: 1, ok: 2 } as const
+const STATUS_ORDER = { failed: 0, empty: 1, cached: 2, ok: 3 } as const
 
 // Re-exported so existing importers keep one obvious entry point.
 export * from './world-events-shared'
@@ -105,14 +106,28 @@ const TOPIC_CATEGORY: Partial<Record<string, EventCategory>> = {
   health: 'health',
   displacement: 'humanitarian',
   humanitarian: 'humanitarian',
-  conflict: 'manmade',
-  'cyber-advisory': 'manmade',
-  vulnerability: 'manmade',
-  malware: 'manmade',
-  energy: 'manmade',
-  connectivity: 'manmade',
-  aviation: 'manmade',
+  // These six used to collapse into `manmade` and `water` because the category
+  // list had no word for them. Now that it does, the catalogue's own topics —
+  // which have declared them accurately all along — reach the right bucket.
+  conflict: 'conflict',
+  'cyber-advisory': 'cyber',
+  vulnerability: 'cyber',
+  malware: 'cyber',
+  energy: 'energy',
+  // Not `cyber`. RIPE Atlas anchors, OONI measurements and BGP announcements
+  // are reachability data; calling 110 routine observations security events
+  // would inflate the cyber picture with exactly the noise it must not carry.
+  connectivity: 'infrastructure',
+  aviation: 'transport',
+  // Not `transport` either: the only source declaring `maritime` is NOAA's
+  // tide-gauge network, which measures water, not shipping.
   maritime: 'water',
+  rail: 'transport',
+  economy: 'economy',
+  markets: 'economy',
+  sanctions: 'economy',
+  research: 'research',
+  technology: 'research',
 }
 
 /**
@@ -143,18 +158,72 @@ function categorize(e: Evidence, data: RawData): EventCategory {
   const declared = str(data.category)
   if (declared && declared in CATEGORY_META) return declared as EventCategory
 
-  const topics = Array.isArray(data.topics) ? (data.topics as unknown[]) : []
+  const topics = (Array.isArray(data.topics) ? (data.topics as unknown[]) : []).filter(
+    (t): t is string => typeof t === 'string',
+  )
+
+  /**
+   * The source's declared beat — the first topic that names a kind of event.
+   *
+   * Written most-specific-first in the records, because that is the order a
+   * person naturally lists them in, so the first match is the most informative.
+   */
+  let beat: EventCategory | undefined
   for (const topic of topics) {
-    const mapped = typeof topic === 'string' ? TOPIC_CATEGORY[topic] : undefined
-    if (mapped) return mapped
+    beat = TOPIC_CATEGORY[topic]
+    if (beat) break
+  }
+
+  /**
+   * Whether the source is a general newsroom, decided by topic **order**.
+   *
+   * Ten records declare `news` alongside a specific topic, and they are two
+   * different kinds of publication that the order already tells apart, because
+   * the records are written most-specific-first:
+   *
+   *  - `['news', 'conflict']` — Middle East Eye, RFE/RL, the Kyiv Independent.
+   *    A general newsroom **with a beat**. The beat describes the outlet, not
+   *    the item: Middle East Eye publishes conflict reporting and also "Trump
+   *    urges Americans to accept higher oil prices", which the beat rule filed
+   *    as Armed conflict.
+   *  - `['cyber-advisory', 'news']` — Krebs, BleepingComputer, The Hacker News.
+   *    A single-subject publication that happens to publish news. Its topic is
+   *    authoritative for every item, and an advisory whose headline names no
+   *    keyword is still an advisory.
+   *
+   * So `news` in first position means the headline decides and there is no beat
+   * to fall back on — an item a newsroom published that the classifier cannot
+   * place is general reporting, and `world` says that honestly. Anywhere else,
+   * the declared topic wins and a word in a title must never overrule it.
+   */
+  const isGeneralNewsroom = topics[0] === 'news'
+  const headline = () => classifyHeadline(e.claim ?? '')?.category
+
+  if (isGeneralNewsroom) {
+    const read = headline()
+    if (read) return read
+  } else if (beat) {
+    return beat
   }
 
   // Kept because these two predate the catalogue and carry no topics at all.
   if (e.sourceKey === 'reliefweb') return 'humanitarian'
   if (e.sourceKey.includes('quake')) return 'seismic'
 
-  // Genuinely unclassifiable: a general news item from a general feed. It is a
-  // real category, not a failure — but it must be the exception, not 96%.
+  /**
+   * The general newsroom with nothing declared but `news`.
+   *
+   * Roughly eighty sources are in exactly that position, because that is what
+   * they are: one feed carrying an earthquake, a rate decision and a football
+   * result. Source-level categorisation has nothing left to say about them, and
+   * filing all of it as `world` put 1,512 items — 52% of the board — into one
+   * grey bucket with real seismic and health reporting inside it.
+   */
+  const read = headline()
+  if (read) return read
+
+  // Genuinely general reporting. A real category, not a failure — a political
+  // headline from a national newsroom *is* world news.
   return 'world'
 }
 
@@ -402,9 +471,17 @@ export async function getWorldEvents(): Promise<WorldEventsReport> {
       const count = contributed.get(r.sourceKey) ?? 0
       return {
         sourceKey: r.sourceKey,
-        status: !r.ok ? ('failed' as const) : count > 0 ? ('ok' as const) : ('empty' as const),
+        status: !r.ok
+          ? ('failed' as const)
+          : count === 0
+            ? ('empty' as const)
+            : // Contributed, but from the last answer rather than a fresh fetch.
+              r.cached
+              ? ('cached' as const)
+              : ('ok' as const),
         count,
         error: r.error ?? null,
+        cacheAgeMs: r.cacheAgeMs ?? null,
         ok: r.ok,
       }
     })

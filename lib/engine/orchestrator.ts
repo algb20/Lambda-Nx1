@@ -24,6 +24,8 @@
  */
 import type { Capability, Evidence, SourceInput, SourceResult, Source } from './types'
 import { Registry, registry as defaultRegistry } from './registry'
+import { RateLimitedError } from './guardrail'
+import { cachedSourceResult, rememberSourceResult, singleFlight } from './source-cache'
 import { dedupeEvidence } from './analysis'
 
 export type CollectMode = 'first' | 'all'
@@ -66,14 +68,55 @@ async function runSource(
   const ctx = { fetch: reg.guardrail.createFetch(source.key, source.minIntervalMs) }
   let timer: ReturnType<typeof setTimeout> | undefined
   try {
-    const evidence = await Promise.race([
-      source.run(input, ctx),
-      new Promise<never>((_, reject) => {
-        timer = setTimeout(() => reject(new SourceTimeoutError(source.key, timeoutMs)), timeoutMs)
-      }),
-    ])
+    /**
+     * One request per source, however many callers want it.
+     *
+     * The deadline is inside the shared promise, so a caller that joins an
+     * existing run inherits the same bound rather than adding its own — two
+     * timers on one fetch would mean the second caller could report a timeout
+     * for work that succeeded.
+     */
+    const { promise, joined } = singleFlight(source.key, input.value, () =>
+      Promise.race([
+        source.run(input, ctx),
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(() => reject(new SourceTimeoutError(source.key, timeoutMs)), timeoutMs)
+        }),
+      ]),
+    )
+    const evidence = await promise
+    // Only the caller that actually made the request writes the cache. The one
+    // that joined would write the same answer a second time under the same key.
+    if (!joined) rememberSourceResult(source.key, input.value, evidence)
     return { sourceKey: source.key, ok: true, evidence }
   } catch (err) {
+    /**
+     * A source inside its own quiet interval.
+     *
+     * Not a failure: we chose not to fetch it, because the publisher asked us
+     * not to yet. Reporting it as a failure is what made a warm container look
+     * like a total outage — a hundred healthy feeds red at once, on a board
+     * whose data was sitting in memory the whole time.
+     *
+     * `retrievedAt` on the replayed evidence is untouched, so nothing
+     * downstream mistakes this for a fresh reading.
+     */
+    if (err instanceof RateLimitedError) {
+      const cached = cachedSourceResult(source.key, input.value)
+      if (cached) {
+        return {
+          sourceKey: source.key,
+          ok: true,
+          evidence: cached.evidence,
+          cached: true,
+          cacheAgeMs: cached.ageMs,
+        }
+      }
+      // Nothing held yet — the first request of a container that has already
+      // called this source. Still not a failure, and still not evidence.
+      return { sourceKey: source.key, ok: true, evidence: [], cached: true, cacheAgeMs: null }
+    }
+
     return {
       sourceKey: source.key,
       ok: false,

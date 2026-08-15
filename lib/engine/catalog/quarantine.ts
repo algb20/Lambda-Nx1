@@ -32,6 +32,12 @@
  *   stale. Ours to fix, and the only class here that is genuinely our fault.
  * - **`unreachable`** — DNS or TLS failure, or a server error. May be
  *   temporary; the probe date says when it was last true.
+ * - **`frozen`** — answers `200` with a valid document that has not gained a
+ *   new item in months. The hardest class to notice and the most damaging: it
+ *   passes every health check, counts as an active source, and puts years-old
+ *   reporting on a live board looking exactly like today's apart from a date
+ *   nobody reads. Found by `lib/analysis/staleness.ts`, which measures the
+ *   newest item each feed offers rather than whether it answered.
  *
  * ## What is NOT done here
  *
@@ -45,7 +51,7 @@
  * left open and the blind-spot map reports it.
  */
 
-export type QuarantineReason = 'bot-blocked' | 'moved' | 'unreachable'
+export type QuarantineReason = 'bot-blocked' | 'moved' | 'unreachable' | 'frozen'
 
 export interface QuarantinedSource {
   key: string
@@ -89,6 +95,19 @@ export const QUARANTINE: QuarantinedSource[] = [
   q('nation_kenya', 'bot-blocked', 403),
   q('map_morocco', 'bot-blocked', 403),
   q('ethiopia_addisstandard', 'bot-blocked', 403),
+
+  // ── Answering perfectly, publishing nothing. ─────────────────────────────
+  {
+    key: 'thedailystar_bd',
+    reason: 'frozen',
+    status: 200,
+    observedOn: '2026-08-15',
+    note:
+      'Returns a valid RSS document whose newest item is dated 2022-07-22 — silent 1,484 days. It ' +
+      'was contributing 10 items to every news sweep, all four years old, and every health check we ' +
+      'had called it healthy because it answered. Bangladesh coverage is now thinner by one outlet; ' +
+      'release it if the publisher restores the feed.',
+  },
 
   // ── The publisher moved. Ours to fix. ────────────────────────────────────
   {

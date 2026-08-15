@@ -61,3 +61,61 @@ describe('toEvent — the time contract', () => {
     expect(event?.observedAt).toBe('2026-08-14T09:30:00.000Z')
   })
 })
+
+/**
+ * Which evidence decides an item's category.
+ *
+ * The board filed 52% of everything as `world` because a source could only
+ * declare what it *is*, never what a given item was about. These tests pin the
+ * order the two kinds of evidence are trusted in.
+ */
+describe('toEvent — the category contract', () => {
+  const news = (title: string, topics: string[]) =>
+    toEvent({ ...base, claim: title, sourceKey: 'somefeed', data: { topics } }, 0)?.category
+
+  it('trusts a single-purpose source over any word in a headline', () => {
+    // A seismic network publishing an oddly-worded title is still seismic.
+    expect(news('Network status update for the week', ['earthquake'])).toBe('seismic')
+  })
+
+  it('reads the headline when the source can only say "news"', () => {
+    expect(news('Cholera outbreak spreads in the north', ['news'])).toBe('health')
+    expect(news('Magnitude 6.2 earthquake strikes the coast', ['news'])).toBe('seismic')
+  })
+
+  /**
+   * `['news', 'conflict']` is a general newsroom with a beat; `['cyber-advisory',
+   * 'news']` is a single-subject publication. The records already tell them
+   * apart by writing topics most-specific-first, so nothing new has to be
+   * declared for this to work.
+   */
+  it('does not let a newsroom’s beat label an item it does not describe', () => {
+    // Middle East Eye publishing an oil-price story is not armed conflict.
+    expect(news('Oil climbs over $1 a barrel on supply concerns', ['news', 'conflict'])).toBe(
+      'world',
+    )
+    // The same outlet's actual conflict reporting still lands correctly.
+    expect(news('Air strike reported in the northern district', ['news', 'conflict'])).toBe(
+      'conflict',
+    )
+  })
+
+  it('keeps a single-subject publication on its subject', () => {
+    // Krebs: `['cyber-advisory', 'news']`. An advisory whose headline names no
+    // keyword is still an advisory.
+    expect(news('Patch Tuesday, August 2026 edition', ['cyber-advisory', 'news'])).toBe('cyber')
+  })
+
+  it('leaves genuinely general reporting in world, which is a real category', () => {
+    expect(news('Parties to conduct primaries in new constituencies', ['news'])).toBe('world')
+  })
+
+  it('does not file network measurement as a security event', () => {
+    // 110 RIPE Atlas and OONI observations were landing in `cyber`, inflating
+    // the security picture with routine reachability data.
+    expect(news('ae-dxb-as15412-client.anchors.atlas.ripe.net', ['connectivity'])).toBe(
+      'infrastructure',
+    )
+  })
+
+})
