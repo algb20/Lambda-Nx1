@@ -4,6 +4,12 @@ import { investigateNews } from '@/lib/modules/news'
 import { activeSources, CATALOG } from '@/lib/engine/catalog'
 import { allSourceCatalog } from '@/lib/engine/sources'
 import { sourceCacheSize } from '@/lib/engine/source-cache'
+import {
+  CAPABILITIES,
+  enforcedCapabilities,
+  unenforcedPaidCapabilities,
+} from '@/lib/plans/capabilities'
+import { TIERS_ENFORCED } from '@/lib/plans/plans'
 
 /**
  * GET /api/diagnose — one URL that says what is actually wrong.
@@ -122,6 +128,24 @@ export async function GET() {
         allEvents.length > 0 && dated === 0
           ? 'Not one event carries a source-stated time. Every age shown on the board is the moment we fetched it, not when it happened.'
           : `${dated} of ${allEvents.length} events carry a time their source stated.`,
+    },
+
+    /**
+     * Whether the paid tier is a mechanism or a description.
+     *
+     * Published for the same reason everything else here is: a pricing page
+     * that implies a paywall which does not exist is a trust problem, and the
+     * honest way to hold ourselves to fixing it is to report the number.
+     */
+    subscription: {
+      tiersEnforced: TIERS_ENFORCED,
+      capabilities: CAPABILITIES.length,
+      genuinelyGated: enforcedCapabilities().map((c) => c.id),
+      paidButUnguarded: unenforcedPaidCapabilities().map((c) => c.id),
+      verdict:
+        unenforcedPaidCapabilities().length === 0
+          ? 'Every paid capability is enforced.'
+          : `${unenforcedPaidCapabilities().length} capabilities are sold as paid and checked by nothing. Enabling tiers today would change almost nothing.`,
     },
 
     /** Is this week worse than last, and how much of it could be measured? */

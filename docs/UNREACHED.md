@@ -71,8 +71,17 @@ Affected, in descending order of how much was missed:
   have. Note how it was reached — **a person opened it and sent screenshots**.
   The fetch limitation is unchanged; what changed is that we stopped requiring
   the machine to be the one that looks.
-- **The other 29 platforms** — still never seen running. The same route would
-  work for any of them.
+- **The other 29 platforms** — still never seen running. A five-surface sweep
+  (`/llms.txt`, `/pricing.md`, `/openapi.json`, `/swagger.json`,
+  `/.well-known/mcp/server-card.json`) was run against thirteen of them on
+  2026-08-15 and returned **one hit**: Censys publishes an `llms.txt`, pointing
+  at a pricing page with no price in it. Nobody else exposes a machine surface
+  at a discoverable path.
+  **Not yet tried, and it is the obvious next move:** their documentation sites
+  answer `200` with full readable pages — `docs.opencti.io` (123 KB),
+  `misp-project.org/openapi` (26 KB), `urlscan.io/docs/api` (30 KB). That route
+  is open and has not been mined. Doing so is the difference between "one
+  platform measured properly" and the thirty the charter asks for.
 - **Our own app** — the same limitation applies to us, which is exactly why
   `/api/diagnose` exists: it reports what the JavaScript would have shown.
 
