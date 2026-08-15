@@ -9,6 +9,7 @@ import { FeedbackButton } from "./feedback-button";
 import { AutoTranslate } from "./auto-translate";
 import { shouldBlockApp } from "@/lib/auth/pi-client";
 import { pingVisit } from "@/lib/visit";
+import { installDomResilience } from "@/lib/dom-resilience";
 
 /**
  * Pi mode shell.
@@ -45,6 +46,18 @@ function AppContent({ children }: { children: ReactNode }) {
  */
 export function AppWrapper({ children }: { children: ReactNode }) {
   const mode = process.env.NEXT_PUBLIC_AUTH_MODE ?? "pi";
+  /**
+   * Survive a translator editing the page underneath React.
+   *
+   * Installed before anything renders, and synchronously rather than in an
+   * effect, because the very first reconciliation can already collide with the
+   * browser's built-in translator — which most of our readers have on, since
+   * most of them do not read English.
+   *
+   * Without this, one click produced "Failed to execute insertBefore on Node"
+   * and the panel blanked. See lib/dom-resilience.ts.
+   */
+  if (typeof window !== "undefined") installDomResilience();
   // One beacon per open, for everyone (guest included). A signed-in re-ping
   // happens inside AppContent / the standalone gate once identity is known.
   useEffect(() => {
