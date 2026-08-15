@@ -8,6 +8,7 @@
  * category palette, severity and region maths — so both sides can share it.
  */
 import type { Admiralty, Confidence } from '../engine/types'
+import type { Timeline } from '../analysis/timeline'
 
 /**
  * What kind of thing an event is.
@@ -277,6 +278,15 @@ export interface WorldEventsReport {
   hotspots: Array<{ country: string; iso: string; count: number; lat: number; lon: number }>
   /** Per-feed health — a board that quietly loses a source is a lying board. */
   sourceHealth: SourceHealth[]
+  /**
+   * Daily severity history over the last week.
+   *
+   * Six bands rather than the five every comparable board shows, because the
+   * sixth — `unscored` — is a fact this engine can express and they cannot: an
+   * event for which no real measurement existed. Folding those into "low" would
+   * draw a calm week out of a week nobody measured.
+   */
+  timeline: Timeline
   /**
    * The fused picture: distinct **events**, each carrying every report of it.
    *

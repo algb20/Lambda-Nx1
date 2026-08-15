@@ -30,3 +30,6 @@ next-env.d.ts
 # release packager output
 /dist
 !.env.example
+
+# Real-browser walkthrough output — screenshots and findings, regenerated on demand
+.walkthrough/
