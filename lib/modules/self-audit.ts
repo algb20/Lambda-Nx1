@@ -43,12 +43,28 @@ export async function recordSweep(
   if (!isDbConfigured()) return
   const day = todayKey(now)
 
+  /**
+   * A cached run is **not** an observation of the source.
+   *
+   * We deliberately did not fetch it — its publisher's interval had not
+   * elapsed — so this sweep learned nothing about whether it is up, and the
+   * items it replayed were already counted on the sweep that fetched them.
+   * Recording it as `ok` would inflate availability with requests we never
+   * made; recording it as `failed` would be a straight lie about a healthy
+   * feed. Both are the kind of number-padding this project exists to refuse,
+   * and the reliability ledger is exactly where it would do the most damage.
+   *
+   * So a non-observation is not written. The ledger stays a record of things
+   * we actually tried.
+   */
+  const observed = health.filter((h) => h.status !== 'cached')
+
   await Promise.allSettled(
-    health.map((h) =>
+    observed.map((h) =>
       repo.sourceHealth.record({
         sourceKey: h.sourceKey,
         day,
-        status: h.status,
+        status: h.status as 'ok' | 'empty' | 'failed',
         items: h.count,
         error: h.error,
       }),

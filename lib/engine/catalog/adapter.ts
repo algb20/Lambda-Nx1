@@ -174,10 +174,35 @@ const MAX_ITEMS_PER_SOURCE = 120
  * against an investigation subject, and the guardrail's host allowlist enforces
  * that independently of anything claimed here.
  */
+/**
+ * Which capability a catalogue record answers.
+ *
+ * ## The bug this fixes
+ *
+ * Every catalogue record declared `world_events`, unconditionally. So the news
+ * gateway had exactly **four** sources — GDELT, Wikipedia, USGS, ReliefWeb —
+ * and the live news page showed *9 reports from 2 independent origins*, while
+ * the same process was successfully reading DW, Le Monde, the BBC, Al Jazeera,
+ * El País, The Hindu and seventy-five other newsrooms and filing all of it as
+ * geolocated world events.
+ *
+ * The story-clustering, the corroboration counting and the independence-group
+ * lookup were all written and all working. They were being handed four inputs.
+ *
+ * ## Why this does not remove anything from the globe
+ *
+ * `getWorldEvents` collects **both** capabilities and merges them, so a
+ * newsroom that moves to `news` still reaches the map exactly as before. What
+ * changes is that it now also reaches the gateway built to analyse it.
+ */
+function capabilityOf(entry: CatalogSource): 'news' | 'world_events' {
+  return entry.topics.includes('news') ? 'news' : 'world_events'
+}
+
 export function catalogSource(entry: CatalogSource): Source {
   return {
     key: entry.key,
-    capability: 'world_events',
+    capability: capabilityOf(entry),
     passive: true,
     // Declared from the record's own URL, so the guardrail's allowlist is
     // derived from the address the source will actually request. A hand-kept

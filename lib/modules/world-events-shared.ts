@@ -154,7 +154,14 @@ export interface WorldEvent {
  * explanation anywhere on screen. The map looked broken and the diagnostics
  * insisted it was fine.
  *
- *  - `ok`      — answered, and gave us events. The only state that earns green.
+ *  - `ok`      — fetched just now, and gave us events. The only state that
+ *                earns green.
+ *  - `cached`  — deliberately **not** fetched, because the publisher's minimum
+ *                interval had not elapsed, and replaying the last answer it
+ *                gave. Its own state rather than a shade of `ok`, because the
+ *                two answer different questions and merging them would hide how
+ *                much of a board is live — which is precisely what an operator
+ *                opens this panel to find out.
  *  - `empty`   — answered, gave us nothing. Not a failure (a quiet hour is real)
  *                but not health either: it means this feed is contributing
  *                **no coverage right now**, and the operator must be told.
@@ -163,7 +170,7 @@ export interface WorldEvent {
  * `empty` is the state that keeps us honest about blind spots: the absence of
  * events is never evidence that nothing happened.
  */
-export type SourceStatus = 'ok' | 'empty' | 'failed'
+export type SourceStatus = 'ok' | 'cached' | 'empty' | 'failed'
 
 export interface SourceHealth {
   sourceKey: string
@@ -171,6 +178,8 @@ export interface SourceHealth {
   /** How many events this feed contributed before deduplication. */
   count: number
   error: string | null
+  /** Age of the replayed answer in ms, when `status` is `cached`. */
+  cacheAgeMs?: number | null
   /**
    * Kept for callers written against the old shape. It is deliberately *not*
    * the same as `status === 'ok'`: a feed that answered empty reports

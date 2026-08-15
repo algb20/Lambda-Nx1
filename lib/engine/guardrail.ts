@@ -21,6 +21,35 @@ export class PassiveGuardrailError extends Error {
   }
 }
 
+/**
+ * The longest we will sit inside a request waiting for a source's interval.
+ *
+ * Set just above the slowest coded source's own interval (3s), so those still
+ * sleep exactly as they always did, and every catalogue feed's 15-to-60-minute
+ * interval refuses instantly instead.
+ */
+export const MAX_POLITE_WAIT_MS = 3_500
+
+/**
+ * A source we are not allowed to fetch yet.
+ *
+ * Deliberately its own type rather than a generic error: it is not a failure of
+ * the source or of the network, and treating it as one is what turned every
+ * catalogue feed red on a warm container. The orchestrator recognises it and
+ * answers from the last successful result.
+ */
+export class RateLimitedError extends Error {
+  constructor(
+    readonly sourceKey: string,
+    readonly waitMs: number,
+  ) {
+    super(
+      `rate limit: "${sourceKey}" may not be fetched for another ${Math.ceil(waitMs / 1000)}s`,
+    )
+    this.name = 'RateLimitedError'
+  }
+}
+
 export class Guardrail {
   private readonly allowedHosts = new Set<string>()
   private readonly lastCallAt = new Map<string, number>()
@@ -66,9 +95,44 @@ export class Guardrail {
         throw new PassiveGuardrailError(`state-changing method not allowed: ${method}`)
       }
 
+      /**
+       * The publisher's minimum interval, honoured without blocking.
+       *
+       * ## The bug this replaces, which was severe
+       *
+       * This used to `await` the full remaining interval. For the coded sources
+       * that is 1.5–3 seconds and harmless. For a catalogue feed it is
+       * **900 to 3,600 seconds** — so the *second* request to reach a warm
+       * container slept fifteen minutes inside a ten-second request, was killed
+       * by the orchestrator's 8s deadline, and reported as a failure. Every
+       * catalogue source at once.
+       *
+       * That is the intermittent production fault: one reading of the live
+       * board showed *112 sources failed, 125 events, 0 with a stated date* —
+       * exactly the six hand-coded sources surviving, because their intervals
+       * are short enough to wait out. A cold container looked healthy; a warm
+       * one looked broken; nothing in between explained why.
+       *
+       * It also leaked: each blocked call left a 900-second timer pending, so
+       * one sweep armed eighty of them and the process would not exit.
+       *
+       * ## What replaces it
+       *
+       * A wait we cannot afford is not politeness — it is a self-inflicted
+       * outage that still ends in not fetching. So a short wait is still slept
+       * (genuinely polite, and invisible), and a long one refuses immediately
+       * with a distinguishable error. The orchestrator answers that error from
+       * the last successful result rather than reporting a dead source.
+       *
+       * The publisher is protected either way: the request is not made. The
+       * only thing that changed is that we stop punishing ourselves for it.
+       */
       if (minIntervalMs && minIntervalMs > 0) {
         const last = this.lastCallAt.get(sourceKey) ?? 0
         const wait = last + minIntervalMs - Date.now()
+        if (wait > MAX_POLITE_WAIT_MS) {
+          throw new RateLimitedError(sourceKey, wait)
+        }
         if (wait > 0) await new Promise((r) => setTimeout(r, wait))
         this.lastCallAt.set(sourceKey, Date.now())
       }

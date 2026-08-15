@@ -51,7 +51,7 @@ import {
 import { recordSweep } from './self-audit'
 
 /** Worst first, so the states an operator must act on sort to the top. */
-const STATUS_ORDER = { failed: 0, empty: 1, ok: 2 } as const
+const STATUS_ORDER = { failed: 0, empty: 1, cached: 2, ok: 3 } as const
 
 // Re-exported so existing importers keep one obvious entry point.
 export * from './world-events-shared'
@@ -471,9 +471,17 @@ export async function getWorldEvents(): Promise<WorldEventsReport> {
       const count = contributed.get(r.sourceKey) ?? 0
       return {
         sourceKey: r.sourceKey,
-        status: !r.ok ? ('failed' as const) : count > 0 ? ('ok' as const) : ('empty' as const),
+        status: !r.ok
+          ? ('failed' as const)
+          : count === 0
+            ? ('empty' as const)
+            : // Contributed, but from the last answer rather than a fresh fetch.
+              r.cached
+              ? ('cached' as const)
+              : ('ok' as const),
         count,
         error: r.error ?? null,
+        cacheAgeMs: r.cacheAgeMs ?? null,
         ok: r.ok,
       }
     })
