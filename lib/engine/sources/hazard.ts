@@ -202,7 +202,12 @@ export const nwsAlerts: Source = {
   hosts: ['api.weather.gov'],
   minIntervalMs: 1500,
   async run(_input: SourceInput, ctx: SourceContext) {
-    const url = 'https://api.weather.gov/alerts/active?severity=Extreme,Severe&limit=100'
+    // No `limit`: the NWS accepts it on `/alerts` but rejects it outright on
+    // `/alerts/active`, answering 400 and dropping every US severe-weather
+    // warning from the board. The cap belongs on our side anyway — see the
+    // slice below — because a limit the provider applies is a limit we cannot
+    // reason about.
+    const url = 'https://api.weather.gov/alerts/active?severity=Extreme,Severe'
     const res = await ctx.fetch(url, {
       headers: {
         // The NWS asks every client to identify itself.
@@ -246,9 +251,27 @@ export const nwsAlerts: Source = {
         },
       })
     }
+    /**
+     * A cap, applied after ranking rather than by the provider.
+     *
+     * The feed routinely carries 200+ active warnings, and every one of them
+     * is US-only. Left uncapped, a single national agency would outnumber the
+     * rest of the world on a board that claims global coverage. Extreme
+     * warnings survive the cut before Severe ones, so what is dropped is the
+     * least urgent end of one country's weather rather than an arbitrary tail.
+     */
     return out
+      .sort(
+        (a, b) =>
+          ((b.data as { assignedSeverity: number }).assignedSeverity ?? 0) -
+          ((a.data as { assignedSeverity: number }).assignedSeverity ?? 0),
+      )
+      .slice(0, MAX_US_ALERTS)
   },
 }
+
+/** How many US warnings may reach a global board in one sweep. */
+const MAX_US_ALERTS = 60
 
 // ── WHO — Disease Outbreak News ──────────────────────────────────────────────
 // The authoritative record of verified outbreaks. Country-level, so it plots on

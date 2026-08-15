@@ -46,6 +46,8 @@ import { nasaEonet, usgsRecentQuakes, worldEventSources } from './world-events'
 import { mempoolNetwork, coingeckoGlobal, chainStateSources } from './chain'
 // Gateway — Official hazard & alert systems (geolocated, agency-assigned severity)
 import { gdacsAlerts, nwsAlerts, whoOutbreaks, issPosition, hazardSources } from './hazard'
+// Gateway — US national airspace status (bespoke XML, so a coded source)
+import { faaAirspaceStatus } from './aviation'
 // Gateway — Multi-chain network state (Pi Network, Ethereum, Solana) + venues
 import { piNetworkChain, ethereumChain, solanaChain, exchangeVenues, multiChainSources } from './chains-multi'
 // Federation — open government data (one CKAN client, every national portal)
@@ -92,7 +94,11 @@ export const watchFeedSources: Source[] = watchSources
 
 export const trendingGatewaySources: Source[] = trendingSources
 
-export const worldEventsGatewaySources: Source[] = [...worldEventSources, ...hazardSources]
+export const worldEventsGatewaySources: Source[] = [
+  ...worldEventSources,
+  ...hazardSources,
+  faaAirspaceStatus,
+]
 
 export const chainStateGatewaySources: Source[] = [...chainStateSources, ...multiChainSources]
 
