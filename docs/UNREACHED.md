@@ -87,7 +87,13 @@ product and capture it.
 Beyond access, the survey has real method gaps:
 
 - **No pricing verified by purchase.** Published prices were read from public
-  pages. Enterprise pricing is quoted on request everywhere and is unknown.
+  documents. Enterprise pricing is quoted on request everywhere and is unknown.
+  **One platform is now read in full** — World Monitor's six tiers, prices,
+  hard limits and licence ladder are in `docs/MONETIZATION-FIELD.md`, taken
+  from the `/pricing.md` and `/llms.txt` files they publish for machines. The
+  same three-file route (`/llms.txt`, `/pricing.md`, the hint inside their
+  `404` JSON) has **not yet been tried on the other 29** and should be before
+  anyone assumes it will not work.
 - **Capability detection is keyword-based.** A page mentioning "STIX" scores a
   hit whether the platform implements it or merely names it. The counts in the
   comparison are *signals*, not audits, and MISP scoring zero is proof of the

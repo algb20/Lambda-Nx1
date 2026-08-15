@@ -30,6 +30,9 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: '*',
         allow: '/',
         disallow: [
+          // `/llms.txt` and `/pricing.md` are deliberately NOT disallowed:
+          // they exist to be read by machines, and blocking them would defeat
+          // the only reason they were written.
           '/api/', // JSON, expensive to serve, useless in an index
           '/admin/', // secret-gated; no reason to advertise the path
           '/p/', // per-investigation permalinks: shareable, not for indexing
