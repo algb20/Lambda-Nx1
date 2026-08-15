@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { AppWrapper } from "@/components/app-wrapper";
-import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -40,7 +39,24 @@ html {
       </head>
       <body>
         <AppWrapper>{children}</AppWrapper>
-        <Analytics />
+        {/*
+          Vercel Analytics was mounted here and is deliberately gone.
+
+          It injects `/_vercel/insights/script.js`, which exists only on Vercel.
+          This product's primary host is Netlify (charter §4), so on every page
+          view, for every visitor, the browser fetched a **404** and then logged
+          a MIME-type refusal because the 404 page is HTML. Two console errors
+          per page, on every route, shipped to production.
+
+          Nothing detected it: the page returns 200, the tests pass, and the
+          server never sees a problem. It was found the first time anyone opened
+          the product in a real browser and read the console
+          (`scripts/walkthrough.ts`).
+
+          Analytics belongs behind the same portability rule as everything else —
+          an adapter chosen by host, not a vendor component hard-wired into the
+          root layout of a codebase that deploys to three places.
+        */}
       </body>
     </html>
   );
