@@ -156,6 +156,91 @@ describe('collect, on a warm container', () => {
     expect(second.evidence[0].retrievedAt).toBe('2026-08-15T00:00:00.000Z')
   })
 
+  /**
+   * The gap the first version of this fix shipped with, reproduced exactly.
+   *
+   * `/api/diagnose` runs the world sweep and the news sweep concurrently and
+   * both read the `news` capability. The world sweep won every race, stamped
+   * the source's clock, and the news sweep was refused a millisecond later with
+   * nothing cached yet — so the deploy preview reported *9 reports from 2
+   * independent origins* while 101 answers sat in the cache put there by the
+   * sweep that beat it.
+   */
+  it('gives both concurrent sweeps the full answer from one request', async () => {
+    let fetches = 0
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        fetches++
+        // A real fetch is not instantaneous, which is the entire point: the
+        // second caller arrives while the first is still in flight.
+        await new Promise((r) => setTimeout(r, 40))
+        return new Response('{}')
+      }),
+    )
+
+    const source: Source = {
+      key: 'contested_feed',
+      capability: 'news',
+      passive: true,
+      hosts: ['example.com'],
+      minIntervalMs: 900_000,
+      async run(_input, ctx) {
+        await ctx.fetch('https://example.com/feed')
+        return [evidence('one'), evidence('two')]
+      },
+    }
+    const reg = new Registry()
+    reg.registerAll([source])
+
+    const [a, b] = await Promise.all([
+      collect({ capability: 'news', value: '' }, { registry: reg, mode: 'all' }),
+      collect({ capability: 'news', value: '' }, { registry: reg, mode: 'all' }),
+    ])
+
+    // One request served both — the publisher sees exactly what it would have.
+    expect(fetches).toBe(1)
+    // And neither caller was starved. Before single-flight, one got zero.
+    expect(a.evidence).toHaveLength(2)
+    expect(b.evidence).toHaveLength(2)
+    expect(a.results[0].ok).toBe(true)
+    expect(b.results[0].ok).toBe(true)
+  })
+
+  it('lets the next caller retry after a failed run rather than inheriting it', async () => {
+    let attempts = 0
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        attempts++
+        if (attempts === 1) throw new Error('provider hiccup')
+        return new Response('{}')
+      }),
+    )
+    const source: Source = {
+      key: 'flaky_feed',
+      capability: 'news',
+      passive: true,
+      hosts: ['example.com'],
+      // Short enough that the retry is not itself rate-limited.
+      minIntervalMs: 1,
+      async run(_input, ctx) {
+        await ctx.fetch('https://example.com/feed')
+        return [evidence('recovered')]
+      },
+    }
+    const reg = new Registry()
+    reg.registerAll([source])
+
+    const first = await collect({ capability: 'news', value: '' }, { registry: reg, mode: 'all' })
+    expect(first.results[0].ok).toBe(false)
+
+    // A rejected promise left in the in-flight map would poison the key forever.
+    const second = await collect({ capability: 'news', value: '' }, { registry: reg, mode: 'all' })
+    expect(second.results[0].ok).toBe(true)
+    expect(second.evidence).toHaveLength(1)
+  })
+
   it('reports a rate-limited source with nothing held as empty, not failed', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response('{}')))
     const source: Source = {
