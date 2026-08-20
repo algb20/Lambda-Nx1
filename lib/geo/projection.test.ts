@@ -211,3 +211,39 @@ describe('camera helpers — flying to a place the reader picked', () => {
     }
   })
 })
+
+/**
+ * The one-frame bug a browser found and no test did.
+ *
+ * `globeRadius` subtracts an 18px inset, so any viewport under 36px produced a
+ * negative radius. That is not a viewport a person ever sees — it is the single
+ * frame before the canvas has been laid out. The renderer passed the negative
+ * value to `createRadialGradient`, which throws `IndexSizeError`, and the throw
+ * aborted the whole draw: a blank globe and an exception nobody was watching
+ * for.
+ */
+describe('globeRadius never returns something a canvas cannot draw', () => {
+  const camera = { rotation: 0, tilt: 0, zoom: 1 }
+
+  it('is never negative, whatever the viewport', () => {
+    for (const size of [0, 1, 10, 20, 35, 36, 37, 100, 4000]) {
+      const r = globeRadius(camera, { width: size, height: size })
+      expect(r, `${size}px viewport`).toBeGreaterThanOrEqual(0)
+    }
+  })
+
+  it('is never negative for a viewport that is tiny in one dimension only', () => {
+    expect(globeRadius(camera, { width: 1600, height: 4 })).toBeGreaterThanOrEqual(0)
+    expect(globeRadius(camera, { width: 4, height: 1600 })).toBeGreaterThanOrEqual(0)
+  })
+
+  it('survives a zoom that has not been initialised yet', () => {
+    expect(globeRadius({ ...camera, zoom: 0 }, { width: 800, height: 600 })).toBe(0)
+    expect(globeRadius({ ...camera, zoom: -1 }, { width: 800, height: 600 })).toBe(0)
+  })
+
+  it('still sizes a real viewport the way it always did', () => {
+    expect(globeRadius(camera, { width: 800, height: 600 })).toBe(600 / 2 - 18)
+    expect(globeRadius({ ...camera, zoom: 2 }, { width: 800, height: 600 })).toBe((600 / 2 - 18) * 2)
+  })
+})

@@ -22,6 +22,7 @@ import {
 import { Card } from '@/components/ui/card'
 import { usePrefs } from '@/components/prefs-provider'
 import { CategoryPanels } from '@/components/category-panels'
+import { CountryDossier } from '@/components/country-dossier'
 import { TimeStamp } from '@/components/time-stamp'
 import { Badge } from '@/components/ui/badge'
 import { ErrorBoundary } from '@/components/error-boundary'
@@ -1231,6 +1232,13 @@ export function GlobeView() {
         re-queried would show a different world from the globe it sits beneath.
       */}
       <CategoryPanels report={report} />
+
+      {/*
+        Below the panels, because it reads the same events at a different
+        altitude: the panels answer "what happened", this answers "what does it
+        say about a country, and how well can we see that country at all".
+      */}
+      <CountryDossier />
     </div>
   )
 }
