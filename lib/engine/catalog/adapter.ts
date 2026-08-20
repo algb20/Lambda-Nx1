@@ -1,6 +1,6 @@
 import type { Evidence, Source, SourceContext } from '../types'
 import { parseFeed } from '../feedxml'
-import { publicationTime } from '../observed'
+import { publicationTime, publicationZoneOffset } from '../observed'
 import type { CatalogSource } from './types'
 
 /**
@@ -83,6 +83,9 @@ function fromGeoJson(source: CatalogSource, body: unknown, retrievedAt: string):
           topics: source.topics,
           publisher: source.publisher,
           independence: source.independence ?? source.key,
+          // The publisher's own UTC offset, kept because `publishedAt` has
+          // already normalised it away by the time anyone reads it.
+          statedOffsetMinutes: publicationZoneOffset(props.time ?? props.date ?? props.sent),
           raw: props,
         },
       } satisfies Evidence,
@@ -154,6 +157,7 @@ function fromFeed(source: CatalogSource, xml: string, retrievedAt: string): Evid
           lat: null,
           lon: null,
           summary: entry.summary,
+          statedOffsetMinutes: entry.publishedOffsetMinutes ?? null,
           topics: source.topics,
           publisher: source.publisher,
           independence: source.independence ?? source.key,

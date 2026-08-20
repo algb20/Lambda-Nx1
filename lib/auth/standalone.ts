@@ -46,6 +46,7 @@ export interface StandaloneDeps {
     email: string,
     passwordHash: string,
     username: string,
+    fullName: string | null,
   ) => Promise<{ userId: string }>
   /**
    * Whether this handle is already held. Advisory: two sign-ups racing on one
@@ -53,6 +54,11 @@ export interface StandaloneDeps {
    * thing that actually decides.
    */
   usernameTaken: (username: string) => Promise<boolean>
+}
+
+export interface ResetDeps {
+  findByEmail: (email: string) => Promise<CredentialRecord | undefined>
+  setPassword: (userId: string, passwordHash: string) => Promise<void>
 }
 
 export interface ClaimDeps {
@@ -106,11 +112,30 @@ export function classifyIdentifier(raw: string): Identifier {
   return PI_USERNAME_RE.test(username) ? { kind: 'pi', value: username } : { kind: 'invalid' }
 }
 
+/**
+ * A real name is optional, capped, and stored exactly as typed apart from
+ * trimming. Not validated beyond a length bound on purpose: names contain
+ * apostrophes, hyphens, spaces, every script there is, and a single word is a
+ * complete name for a great many people. A "name validator" is almost always a
+ * list of the shapes its author's own name happens to take.
+ */
+export const FULL_NAME_MAX = 80
+
+export function normalizeFullName(raw: string): string | null {
+  const trimmed = raw.trim().replace(/\s+/g, ' ')
+  if (!trimmed) return null
+  if (trimmed.length > FULL_NAME_MAX) {
+    throw new Error(`Name must be ${FULL_NAME_MAX} characters or fewer`)
+  }
+  return trimmed
+}
+
 export async function registerUser(
   email: string,
   password: string,
   username: string,
   deps: StandaloneDeps,
+  fullName = '',
 ): Promise<{ userId: string }> {
   const normEmail = normalizeEmail(email)
   if (!EMAIL_RE.test(normEmail)) throw new Error('Invalid email address')
@@ -128,7 +153,12 @@ export async function registerUser(
   if (await deps.findByEmail(normEmail)) throw new Error('Email already registered')
   if (await deps.usernameTaken(handle)) throw new Error('That username is taken')
 
-  return deps.createUserAndCredential(normEmail, hashPassword(password), handle)
+  return deps.createUserAndCredential(
+    normEmail,
+    hashPassword(password),
+    handle,
+    normalizeFullName(fullName),
+  )
 }
 
 /**
@@ -154,6 +184,34 @@ export async function loginUser(
       ? await deps.findByEmail(id.value)
       : ((await deps.findByPiUsername(id.value)) ?? (await deps.findByUsername(id.value)))
   if (!cred || !verifyPassword(password, cred.passwordHash)) throw failure
+  return { userId: cred.userId }
+}
+
+/**
+ * Set a new password after a reset code has been proven.
+ *
+ * The caller must have already spent a valid code for this address — this
+ * function assumes that and enforces everything else. It returns the user id so
+ * the route can sign the person in immediately: a reset that ends at the login
+ * screen asks someone to type the password they just chose, which is where they
+ * mistype it and start again.
+ *
+ * A reset for an address with no account is a silent success. That is not
+ * sloppiness: the request only got here by carrying a code we mailed to that
+ * address, and answering differently would turn the reset form into the
+ * membership oracle the whole flow is built to avoid.
+ */
+export async function resetPassword(
+  email: string,
+  password: string,
+  deps: ResetDeps,
+): Promise<{ userId: string } | null> {
+  if (password.length < MIN_PASSWORD_LENGTH) {
+    throw new Error(`Password must be at least ${MIN_PASSWORD_LENGTH} characters`)
+  }
+  const cred = await deps.findByEmail(normalizeEmail(email))
+  if (!cred) return null
+  await deps.setPassword(cred.userId, hashPassword(password))
   return { userId: cred.userId }
 }
 

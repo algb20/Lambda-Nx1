@@ -47,8 +47,40 @@ Verified end-to-end by `scripts/smoke.mjs` (analyst → 401, radar → 503).
 
 ## 3. Secrets handling
 
+### The owner rule (standing, all projects)
+
+**A secret lives in exactly one place: the owner's own secret store.** Not in a
+file, not in a commit, not in a document, not in a message, not in an issue —
+and not reachable by anyone the owner adds to the repository. Contributors,
+assistants and future collaborators get the *names* of the variables from
+`.env.example` and never the values. This holds whether the repository is public
+or private; a private repository is one access grant away from being read by
+somebody who was added for an unrelated reason.
+
+Concretely, for this project:
+
+| Where a value belongs | Where it must never be |
+|---|---|
+| The host's environment panel (Netlify / Vercel / the server's own env) | Any tracked file, including docs and ledgers |
+| The provider's own dashboard (Supabase, Stripe, Pi, Anthropic) | A commit message, a PR body, a chat transcript pasted into the repo |
+| A password manager the owner alone holds | A `.env` committed "temporarily" |
+
+**This rule was written because it was broken.** A generated request ledger
+copied conversation verbatim into `docs/ledger/`, and the conversation contained
+live Postgres connection strings the owner had pasted while debugging a
+connection. The project's own scanner (`lib/security/secret-scan.test.ts`)
+caught it and the push happened anyway. The credential was rotated; the file was
+scrubbed; **scrubbing does not undo a leak** — anything that reached a commit is
+compromised and must be rotated. Two mechanisms now stand between a conversation
+and a file: `scripts/redact.py`, which runs as part of *generating* any file
+from a transcript rather than as something remembered afterwards, and the
+scanner, which fails the test suite and the release packager.
+
+### Mechanisms
+
 - All keys are environment variables (`SESSION_SECRET`, `PI_API_KEY`,
-  `STRIPE_SECRET_KEY`, `ANTHROPIC_API_KEY`, `DATABASE_URL`, `CRON_SECRET`).
+  `STRIPE_SECRET_KEY`, `ANTHROPIC_API_KEY`, `DATABASE_URL`, `CRON_SECRET`,
+  `SMTP_URL`).
   None are committed; `.gitignore` excludes `.env*` except `.env.example`.
 - The **release packager** (`scripts/package.mjs`) hard-fails if a secret file
   (`.env`, `*.pem`, `*.key`, …) or a secret-shaped string (Stripe live key,

@@ -72,6 +72,7 @@ interface RawData {
   assignedSeverity?: unknown
   alertLevel?: unknown
   observedAt?: unknown
+  statedOffsetMinutes?: unknown
   independence?: unknown
 }
 
@@ -292,6 +293,10 @@ export function toEvent(e: Evidence, index: number): WorldEvent | null {
      * from that era must not silently lose its date.
      */
     observedAt: str(e.publishedAt) ?? str(data.observedAt),
+    // Carried from the source's own string by the adapter and the feed parser.
+    // Null where a feed stated no zone at all, which is common and honest — the
+    // reader is then shown their own time, labelled as theirs.
+    observedOffsetMinutes: num(data.statedOffsetMinutes),
     sourceKey: e.sourceKey,
     sourceUrl: e.sourceUrl ?? null,
     independence: str(data.independence),

@@ -26,7 +26,7 @@ import {
   BookOpen,
   Library,
 } from 'lucide-react'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, Building2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -42,6 +42,8 @@ import type { OwnershipReport } from '@/lib/modules/ownership'
 import type { NewsReport } from '@/lib/modules/news'
 import type { Story, StoryGrade } from '@/lib/analysis/stories'
 import type { MarketsBoardReport } from '@/lib/modules/markets-board'
+import type { PropertyReport } from '@/lib/modules/property'
+import type { CompanyReport } from '@/lib/modules/companies'
 import type { NexusReport } from '@/lib/modules/nexus'
 import type { GeoReport } from '@/lib/modules/geo'
 import type { ResearchReport } from '@/lib/modules/research'
@@ -74,6 +76,8 @@ type Result =
   | { kind: 'ownership'; data: OwnershipReport }
   | { kind: 'news'; data: NewsReport }
   | { kind: 'board'; data: MarketsBoardReport }
+  | { kind: 'property'; data: PropertyReport }
+  | { kind: 'companies'; data: CompanyReport }
   | { kind: 'geo'; data: GeoReport }
   | { kind: 'research'; data: ResearchReport }
   | { kind: 'reference'; data: ReferenceReport }
@@ -89,6 +93,8 @@ const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: s
   { id: 'threat', label: 'Threat', icon: ShieldAlert, placeholder: 'IP, domain, URL or hash' },
   { id: 'finance', label: 'Finance', icon: Landmark, placeholder: 'company name or BTC address' },
   { id: 'board', label: 'Board', icon: Gauge, placeholder: 'live market board — press Load' },
+  { id: 'property', label: 'Property', icon: Building2, placeholder: 'housing prices, rates and supply — press Load' },
+  { id: 'companies', label: 'Companies', icon: Landmark, placeholder: 'a company name or ticker — or press Load for the biggest' },
   { id: 'markets', label: 'Markets', icon: LineChart, placeholder: 'BTC, AAPL, or USD/EUR' },
   { id: 'procurement', label: 'Contracts', icon: Gavel, placeholder: 'company, agency or project name' },
   { id: 'ownership', label: 'Ownership', icon: Network, placeholder: 'company / legal-entity name' },
@@ -102,6 +108,7 @@ const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: s
 
 const BODY_KEY: Partial<Record<Mode, string>> = {
   nexus: 'query',
+  companies: 'company',
   threat: 'indicator',
   finance: 'query',
   markets: 'query',
@@ -115,7 +122,7 @@ const BODY_KEY: Partial<Record<Mode, string>> = {
 }
 
 /** Modes where an empty query is valid (returns a top/overview result). */
-const EMPTY_OK: Partial<Record<Mode, boolean>> = { news: true, board: true }
+const EMPTY_OK: Partial<Record<Mode, boolean>> = { news: true, board: true, property: true, companies: true }
 
 type EvidenceItem = DomainReport['sections']['dns'][number]
 
@@ -1401,6 +1408,14 @@ function collectFindings(result: Result): { subject: string; gateway: string; fi
       }
     case 'board':
       return { subject: 'Markets board', gateway: 'markets', findings: slim(result.data.findings) }
+    case 'property':
+      return { subject: 'Property & real estate', gateway: 'property', findings: slim(result.data.findings) }
+    case 'companies':
+      return {
+        subject: result.data.subject || 'Largest filers',
+        gateway: 'companies',
+        findings: slim(result.data.findings),
+      }
     case 'geo':
       return { subject: result.data.subject, gateway: 'geo', findings: slim(result.data.findings) }
     case 'open-data':
@@ -1536,6 +1551,247 @@ function readFileAsBase64(file: File): Promise<string> {
   })
 }
 
+
+/**
+ * Property & real estate.
+ *
+ * ## The lag banner is the point
+ *
+ * Housing statistics are published months in arrears — the UK index runs about
+ * two months behind, Eurostat's quarterly index up to a full quarter — and a
+ * reader who assumes "as of today" is wrong about the market by a whole cycle.
+ * Every product in this space buries that. Here it is the first thing on the
+ * card, and every row carries the period it describes.
+ */
+function PropertyView({ r }: { r: PropertyReport }) {
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <h3 className="font-semibold">Property &amp; real estate</h3>
+        <p className="mt-0.5 text-[11px] text-muted-foreground">
+          {r.summary.figures} figures across {r.summary.regions} territories · {r.summary.sourcesOk} source
+          {r.summary.sourcesOk === 1 ? '' : 's'} answered
+          {r.summary.sourcesFailed > 0 ? `, ${r.summary.sourcesFailed} failed` : ''}
+        </p>
+        {r.summary.freshestLagDays !== null ? (
+          <p className="mt-2 rounded-md bg-amber-500/10 px-2 py-1.5 text-[11px] leading-relaxed text-amber-600 dark:text-amber-400">
+            The freshest figure here describes a period that ended{' '}
+            <strong>{r.summary.freshestLagDays} days ago</strong>. Housing statistics are published in
+            arrears by nature — this is the market as the statistical authorities have recorded it, not
+            as it stands this morning.
+          </p>
+        ) : null}
+      </Card>
+
+      {r.sections.length === 0 ? (
+        <Card className="p-4 text-sm text-muted-foreground">
+          No housing figures came back. The statistical authorities may be rate-limiting us — press Load
+          again in a moment.
+        </Card>
+      ) : (
+        r.sections.map((section) => (
+          <Card key={section.key} className="p-4">
+            <h4 className="text-sm font-semibold">{section.title}</h4>
+            <p className="mb-2 text-[11px] text-muted-foreground">{section.note}</p>
+            <div className="divide-y divide-border/40">
+              {section.rows.map((row) => {
+                const up = row.change !== null && row.change >= 0
+                return (
+                  <div
+                    key={`${row.region}:${row.name}`}
+                    className="flex items-center justify-between gap-3 py-2"
+                  >
+                    <div className="min-w-0">
+                      {row.sourceUrl ? (
+                        <a
+                          href={row.sourceUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-sm font-medium hover:underline"
+                        >
+                          {row.region}
+                        </a>
+                      ) : (
+                        <span className="text-sm font-medium">{row.region}</span>
+                      )}
+                      <p className="truncate text-[11px] text-muted-foreground">
+                        {row.name} · {row.period}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-3 text-right">
+                      <span className="text-sm tabular-nums">{formatPropertyValue(row.value, row.unit)}</span>
+                      {row.change !== null ? (
+                        <span
+                          className={`w-16 text-xs tabular-nums ${up ? 'text-emerald-500' : 'text-destructive'}`}
+                        >
+                          {up ? '+' : ''}
+                          {row.change.toFixed(2)}%
+                        </span>
+                      ) : (
+                        // An empty cell would read as zero change. It is not zero
+                        // — the publisher gave one observation, so there is
+                        // nothing to compare against.
+                        <span className="w-16 text-xs text-muted-foreground">—</span>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </Card>
+        ))
+      )}
+    </div>
+  )
+}
+
+/** Units differ per row here, unlike a market board where everything is a price. */
+function formatPropertyValue(value: number, unit: string): string {
+  switch (unit) {
+    case '%':
+      return `${value.toFixed(2)}%`
+    case 'USD':
+      return `$${Math.round(value).toLocaleString('en-US')}`
+    case 'GBP':
+      return `£${Math.round(value).toLocaleString('en-GB')}`
+    case 'thousands of units':
+      return `${value.toLocaleString('en-US')}k`
+    case 'months':
+      return `${value.toFixed(1)} mo`
+    case 'transactions':
+      return value.toLocaleString('en-US')
+    default:
+      return value.toLocaleString('en-US', { maximumFractionDigits: 2 })
+  }
+}
+
+
+/**
+ * Companies.
+ *
+ * Two shapes from one gateway: a profile when a company was named, a ranking
+ * when it was not. The scope line is always present, because an absence here is
+ * the finding a reader is most likely to misread — a company missing from EDGAR
+ * has not been shown to be small or fictitious, it simply does not file in the
+ * United States.
+ */
+function CompaniesView({ r }: { r: CompanyReport }) {
+  return (
+    <div className="space-y-4">
+      {r.profile ? (
+        <Card className="p-4">
+          <h3 className="font-semibold">{r.profile.name}</h3>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">
+            CIK {r.profile.cik}
+            {r.profile.ticker ? ` · ${r.profile.ticker}` : ''}
+            {r.profile.industry ? ` · ${r.profile.industry}` : ''}
+            {r.profile.exchanges.length ? ` · ${r.profile.exchanges.join(', ')}` : ''}
+            {r.profile.city ? ` · ${r.profile.city}` : ''}
+          </p>
+          {r.profile.formerNames.length > 0 ? (
+            <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+              {/* Not trivia: a company that changed its name has an earlier record filed
+                  under something else, and an analyst who does not know that concludes it
+                  has no history. */}
+              Formerly:{' '}
+              {r.profile.formerNames
+                .map((f) => (f.until ? `${f.name} (until ${f.until.slice(0, 10)})` : f.name))
+                .join(' · ')}
+            </p>
+          ) : null}
+        </Card>
+      ) : null}
+
+      {r.financials.length > 0 ? (
+        <Card className="p-4">
+          <h4 className="text-sm font-semibold">As reported</h4>
+          <p className="mb-2 text-[11px] text-muted-foreground">
+            Straight from the company&rsquo;s own XBRL filings — never adjusted, never estimated. A
+            quarterly figure is not an annual one, so each carries the period and the form it came
+            from.
+          </p>
+          <div className="divide-y divide-border/40">
+            {r.financials.map((f) => (
+              <div key={f.label} className="flex items-center justify-between gap-3 py-2">
+                <div className="min-w-0">
+                  <span className="text-sm font-medium">{f.label}</span>
+                  <p className="truncate text-[11px] text-muted-foreground">
+                    {f.form} · period ending {f.periodEnd}
+                    {f.xbrlTag ? ` · ${f.xbrlTag}` : ''}
+                  </p>
+                </div>
+                <span className="shrink-0 text-sm tabular-nums">{compactUsd(f.value)}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      ) : null}
+
+      {r.filings.length > 0 ? (
+        <Card className="p-4">
+          <h4 className="mb-2 text-sm font-semibold">Recent filings</h4>
+          <ul className="space-y-1.5">
+            {r.filings.map((f, i) => (
+              <li key={`${f.form}-${f.filedAt}-${i}`} className="text-xs">
+                <span className="mr-1.5 rounded bg-muted px-1.5 py-px font-mono text-[10px]">{f.form}</span>
+                {f.sourceUrl ? (
+                  <a href={f.sourceUrl} target="_blank" rel="noreferrer" className="hover:underline">
+                    {f.claim}
+                  </a>
+                ) : (
+                  f.claim
+                )}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      ) : null}
+
+      {r.ranking.length > 0 ? (
+        <Card className="p-4">
+          <h4 className="text-sm font-semibold">Largest filers by total assets</h4>
+          <p className="mb-2 text-[11px] text-muted-foreground">
+            Every filer&rsquo;s own balance sheet for one period, sorted. Banks and the housing
+            agencies dominate because assets measure balance-sheet size, not revenue or worth — a
+            different metric gives a different order, and this one is named rather than implied.
+          </p>
+          <div className="divide-y divide-border/40">
+            {r.ranking.map((row) => (
+              <div key={`${row.rank}-${row.cik}`} className="flex items-center justify-between gap-3 py-1.5">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="w-6 shrink-0 text-right text-[11px] tabular-nums text-muted-foreground">
+                    {row.rank}
+                  </span>
+                  <span className="truncate text-sm">{row.name}</span>
+                </div>
+                <span className="shrink-0 text-sm tabular-nums">{compactUsd(row.value)}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      ) : null}
+
+      {!r.profile && r.ranking.length === 0 ? (
+        <Card className="p-4 text-sm text-muted-foreground">
+          Nothing matched &ldquo;{r.subject}&rdquo;. {r.summary.scope}
+        </Card>
+      ) : (
+        <p className="px-1 text-[11px] leading-relaxed text-muted-foreground">{r.summary.scope}</p>
+      )}
+    </div>
+  )
+}
+
+/** `4424900000000` → `$4.42T`. Full precision stays in the finding. */
+function compactUsd(value: number): string {
+  const abs = Math.abs(value)
+  const sign = value < 0 ? '-' : ''
+  if (abs >= 1e12) return `${sign}$${(abs / 1e12).toFixed(2)}T`
+  if (abs >= 1e9) return `${sign}$${(abs / 1e9).toFixed(2)}B`
+  if (abs >= 1e6) return `${sign}$${(abs / 1e6).toFixed(1)}M`
+  return `${sign}$${Math.round(abs).toLocaleString('en-US')}`
+}
+
 export function IntelligenceDashboard() {
   const [modeState, setMode] = useState<Mode>('nexus')
   /** What the interface is showing. `run` shadows this when reopening a
@@ -1616,6 +1872,9 @@ export function IntelligenceDashboard() {
         setResult({ kind: 'track', data: { query: typed } })
         setLoading(false)
         return
+      } else if (mode === 'property') {
+        endpoint = '/api/intelligence/property'
+        payload = {}
       } else if (mode === 'board') {
         endpoint = '/api/intelligence/board'
         payload = {}
@@ -1739,8 +1998,10 @@ export function IntelligenceDashboard() {
           <Button onClick={() => run()} disabled={loading || (!query.trim() && !EMPTY_OK[mode])}>
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
-            ) : mode === 'board' ? (
+            ) : mode === 'board' || mode === 'property' ? (
               'Load'
+            ) : mode === 'companies' ? (
+              query.trim() ? 'Investigate' : 'Load'
             ) : mode === 'news' ? (
               'Fetch'
             ) : mode === 'track' ? (
@@ -1784,7 +2045,7 @@ export function IntelligenceDashboard() {
         <GatewayEmpty
           guidance={GATEWAY_GUIDANCE[mode]}
           onTry={
-            mode === 'media' || mode === 'board' || mode === 'news'
+            mode === 'media' || mode === 'board' || mode === 'news' || mode === 'property'
               ? undefined
               : (example) => {
                   setQuery(example)
@@ -1825,6 +2086,8 @@ export function IntelligenceDashboard() {
       {result?.kind === 'ownership' ? <OwnershipView r={result.data} /> : null}
       {result?.kind === 'news' ? <NewsView r={result.data} onReload={run} loading={loading} /> : null}
       {result?.kind === 'board' ? <BoardView r={result.data} onReload={run} loading={loading} /> : null}
+      {result?.kind === 'property' ? <PropertyView r={result.data} /> : null}
+      {result?.kind === 'companies' ? <CompaniesView r={result.data} /> : null}
       {result?.kind === 'geo' ? <GeoView r={result.data} /> : null}
       {result?.kind === 'research' ? <ResearchView r={result.data} /> : null}
       {result?.kind === 'reference' ? <ReferenceView r={result.data} /> : null}

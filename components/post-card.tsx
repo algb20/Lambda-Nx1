@@ -8,13 +8,13 @@ import { Avatar } from '@/components/avatar'
 import { PostShareBar } from '@/components/post-share-bar'
 import { api } from '@/lib/api'
 import type { PublicPost } from '@/lib/posts'
+import { TimeStamp } from '@/components/time-stamp'
 
 /** One published item in the feed: content, λ watermark, like + share/copy/download. */
 export function PostCard({ post }: { post: PublicPost }) {
   const [likes, setLikes] = useState(post.likeCount)
   const [liked, setLiked] = useState(false)
   const permalink = typeof window !== 'undefined' ? `${window.location.origin}/p/${post.id}` : `/p/${post.id}`
-  const date = new Date(post.createdAt).toISOString().slice(0, 10)
 
   async function like() {
     if (liked) return
@@ -35,7 +35,7 @@ export function PostCard({ post }: { post: PublicPost }) {
       <Watermarked>
         <div className="mb-1 flex items-center gap-2 text-xs text-muted-foreground">
           <span className="rounded bg-muted px-1.5 py-0.5 uppercase tracking-wide">{post.kind}</span>
-          <span>{date}</span>
+          <TimeStamp iso={post.createdAt} />
           {post.author ? (
             <span className="inline-flex items-center gap-1">
               · <Avatar src={post.authorAvatarUrl} name={post.author} size={16} /> {post.author}

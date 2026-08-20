@@ -124,6 +124,25 @@ export const users = pgTable(
      */
     username: text('username'),
     /**
+     * The person's real name, as they gave it at sign-up.
+     *
+     * Held separately from `displayName` — which is what the product shows —
+     * because they answer different questions. `displayName` is "what should
+     * appear next to this post"; `fullName` is "who is this", and it is not
+     * published unless its owner says so.
+     */
+    fullName: text('full_name'),
+    /**
+     * Whether the real name is shown alongside the handle.
+     *
+     * Defaults to **false**, and that default is the decision: on a platform
+     * whose charter forbids profiling private individuals, a real name that
+     * appears until you find the switch has already been published. The eye
+     * control in the interface flips this, and every reader sees the result —
+     * it is one visibility state, not a per-viewer preference.
+     */
+    showRealName: boolean('show_real_name').notNull().default(false),
+    /**
      * Profile picture. Stored through lib/storage (never a vendor URL), so the
      * storage backend stays swappable; this column holds only the key we can
      * resolve back to an image.
@@ -160,6 +179,45 @@ export const credentials = pgTable('credentials', {
   passwordHash: text('password_hash').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
+
+// ── Email verification & password reset codes ────────────────────────────────
+//
+// One live code per (email, purpose). Issuing a new code replaces the previous
+// one rather than adding to it: a mailbox holding five valid codes at once is
+// five chances for a guess, and a reader looking at five near-identical emails
+// cannot tell which is current.
+//
+// The code itself is never stored. `codeHash` is the same scrypt hash used for
+// passwords, which matters more here than it looks: a six-digit code has only a
+// million possibilities, so a plain-text column would hand every pending code to
+// anyone who ever reads a backup. scrypt makes even an offline sweep of the
+// whole keyspace cost days per code, and `attempts` makes an online one cost
+// five tries.
+
+export const verificationPurposeEnum = pgEnum('verification_purpose', ['signup', 'reset'])
+
+export const verificationCodes = pgTable(
+  'verification_codes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    /** Normalised (trimmed, lowercased) address the code was sent to. */
+    email: text('email').notNull(),
+    purpose: verificationPurposeEnum('purpose').notNull(),
+    /** scrypt hash as "saltHex:hashHex" — never the code itself. */
+    codeHash: text('code_hash').notNull(),
+    /** Wrong guesses so far. The row dies at the limit, not the request. */
+    attempts: integer('attempts').notNull().default(0),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    /** Set the moment a code is spent, so a correct code still works only once. */
+    consumedAt: timestamp('consumed_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique('verification_codes_email_purpose_uq').on(t.email, t.purpose),
+    // Expired rows are swept by address, and by age when nobody comes back.
+    index('verification_codes_expires_idx').on(t.expiresAt),
+  ],
+)
 
 // ── Source catalog (our engine's adapters) ───────────────────────────────────
 

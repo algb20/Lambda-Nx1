@@ -11,13 +11,14 @@
  *     or if any staged file's contents match a secret-shaped pattern.
  *   • Writes a manifest (file count, bytes, git sha, node/next versions).
  *
- * Usage:  node scripts/package.mjs            → dist/lambda-nx-<sha>.zip
- *         node scripts/package.mjs --out foo  → foo.zip
+ * Usage:  node scripts/package.mjs                    → dist/lambda-nx-<sha>.zip
+ *         node scripts/package.mjs --profile studio  → …-studio.zip, under 1 MB
+ *         node scripts/package.mjs --out foo          → foo.zip
  *
  * No third-party deps: uses the system `zip` when available, else `git archive`.
  */
 import { execSync } from 'node:child_process'
-import { existsSync, mkdirSync, readFileSync, writeFileSync, statSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync, statSync, rmSync, unlinkSync } from 'node:fs'
 import { join } from 'node:path'
 import { findSecrets, describeFinding } from '../lib/security/secret-scan.mjs'
 
@@ -41,15 +42,73 @@ function gitSha() {
   }
 }
 
+/**
+ * The `studio` profile — a runnable bundle under Pi App Studio's 1 MB ceiling.
+ *
+ * ## Why a second profile rather than a smaller repository
+ *
+ * Pi App Studio accepts an upload of **one megabyte**. The full source bundle is
+ * 1.4 MB zipped and cannot be made to fit by tidying: it is not bloated, it is a
+ * real application with 117 test files, 26 documents and nineteen migration
+ * snapshots. Deleting any of those to satisfy an upload limit would be trading a
+ * permanent loss for a temporary convenience — the tests are the reason the
+ * gateways can be trusted, and charter §6 makes them part of "done".
+ *
+ * So nothing is deleted. A second, smaller *view* of the same commit is built,
+ * containing exactly what is needed to install and run:
+ *
+ *  - **Tests** — 624 KB. They prove the code; they do not execute it.
+ *  - **`docs/`** — 397 KB. The request ledger alone is 155 KB.
+ *  - **`db/migrations/meta/`** — 720 KB of drizzle-kit snapshots, used only to
+ *    *generate* the next migration. The `.sql` files themselves stay, so a
+ *    database can still be built from zero — which is the property that
+ *    actually matters (charter rule #4).
+ *  - **`.claude/`** — agent definitions for our own tooling.
+ *
+ * What ships is the application. What is held back is the apparatus around it,
+ * all of which stays in the repository the bundle was cut from.
+ */
+const STUDIO_EXCLUDE = [
+  /\.test\.[tj]sx?$/,
+  /^docs\//,
+  /^db\/migrations\/meta\//,
+  /^\.claude\//,
+  /^scripts\/(reconcile-ledger|redact)\.py$/,
+]
+
 /** All tracked, non-excluded files (git is the source of truth for what ships). */
-function listFiles() {
+function listFiles(profile = 'full') {
   let files
   try {
     files = sh('git ls-files').split('\n').filter(Boolean)
   } catch {
     throw new Error('package.mjs requires a git repository (uses git ls-files).')
   }
-  return files.filter((f) => !EXCLUDE_DIRS.some((d) => f === d || f.startsWith(`${d}/`)))
+  const kept = files.filter((f) => !EXCLUDE_DIRS.some((d) => f === d || f.startsWith(`${d}/`)))
+  if (profile !== 'studio') return kept
+  return kept.filter((f) => !STUDIO_EXCLUDE.some((re) => re.test(f)))
+}
+
+/**
+ * Zip an explicit file list.
+ *
+ * `git archive` cannot express "everything except these", so the studio profile
+ * needs the system `zip`. It is present on every platform this is built on, and
+ * its absence is reported as the actual problem rather than as a mysterious
+ * failure to produce a file.
+ */
+function zipFiles(files, zipPath) {
+  const listPath = join(OUT_DIR, '.package-filelist')
+  writeFileSync(listPath, files.join('\n'))
+  try {
+    execSync(`zip -q -X -@ "${zipPath}" < "${listPath}"`, { cwd: ROOT, stdio: 'inherit', shell: '/bin/bash' })
+  } catch (err) {
+    throw new Error(
+      `zip failed (is the "zip" command installed?): ${err instanceof Error ? err.message : err}`,
+    )
+  } finally {
+    rmSync(listPath, { force: true })
+  }
 }
 
 function assertNoSecrets(files) {
@@ -91,13 +150,22 @@ function pkgVersion(dep) {
   }
 }
 
+/** Pi App Studio refuses an upload larger than this. */
+const STUDIO_LIMIT_BYTES = 1024 * 1024
+
 function main() {
   const outArg = process.argv.indexOf('--out')
+  const profileArg = process.argv.indexOf('--profile')
+  const profile = profileArg > -1 ? process.argv[profileArg + 1] : 'full'
+  if (profile !== 'full' && profile !== 'studio') {
+    throw new Error(`unknown profile "${profile}" (expected: full | studio)`)
+  }
   const sha = gitSha()
-  const base = outArg > -1 ? process.argv[outArg + 1] : join('dist', `lambda-nx-${sha}`)
+  const suffix = profile === 'studio' ? '-studio' : ''
+  const base = outArg > -1 ? process.argv[outArg + 1] : join('dist', `lambda-nx-${sha}${suffix}`)
   const zipPath = base.endsWith('.zip') ? base : `${base}.zip`
 
-  const files = listFiles()
+  const files = listFiles(profile)
   assertNoSecrets(files)
 
   const totalBytes = files.reduce((n, f) => {
@@ -110,6 +178,7 @@ function main() {
 
   const manifest = {
     name: 'lambda-nx',
+    profile,
     version: pkgVersion('next') === 'n/a' ? '0.0.0' : JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version,
     gitSha: sha,
     files: files.length,
@@ -120,18 +189,50 @@ function main() {
   }
 
   if (!existsSync(OUT_DIR)) mkdirSync(OUT_DIR, { recursive: true })
-  writeFileSync(join(OUT_DIR, 'MANIFEST.json'), JSON.stringify(manifest, null, 2))
+  writeFileSync(join(OUT_DIR, `MANIFEST${suffix}.json`), JSON.stringify(manifest, null, 2))
 
-  // git archive is deterministic and honors the tracked file set precisely.
-  try {
-    execSync(`git archive --format=zip -o "${zipPath}" HEAD`, { cwd: ROOT, stdio: 'inherit' })
-  } catch (err) {
-    throw new Error(`git archive failed: ${err instanceof Error ? err.message : err}`)
+  // Overwrite rather than add to an existing archive: `zip` appends by default,
+  // so a rebuild would otherwise keep every file the previous build had and
+  // grow past the very limit this profile exists to respect.
+  if (existsSync(zipPath)) unlinkSync(zipPath)
+
+  if (profile === 'full') {
+    // git archive is deterministic and honors the tracked file set precisely.
+    try {
+      execSync(`git archive --format=zip -o "${zipPath}" HEAD`, { cwd: ROOT, stdio: 'inherit' })
+    } catch (err) {
+      throw new Error(`git archive failed: ${err instanceof Error ? err.message : err}`)
+    }
+  } else {
+    zipFiles(files, zipPath)
   }
 
-  console.log(`\n✓ Packaged ${manifest.files} files (${(totalBytes / 1024).toFixed(0)} KB) → ${zipPath}`)
+  const zipped = statSync(join(ROOT, zipPath)).size
+  console.log(`\n✓ Packaged ${manifest.files} files (${(totalBytes / 1024).toFixed(0)} KB source) → ${zipPath}`)
+  console.log(`  archive ${(zipped / 1024).toFixed(0)} KB · profile ${profile}`)
   console.log(`  git ${sha} · next ${manifest.next} · node ${manifest.node}`)
-  console.log(`  manifest → dist/MANIFEST.json`)
+
+  if (profile === 'studio' && zipped > STUDIO_LIMIT_BYTES * 0.9 && zipped <= STUDIO_LIMIT_BYTES) {
+    // Warn before it breaks, not after. The bundle grows with the product, and
+    // the failure mode without this is an upload rejected months from now by
+    // somebody who has no idea a ceiling exists.
+    console.warn(
+      `\n⚠ ${(zipped / 1024).toFixed(0)} KB of the ${STUDIO_LIMIT_BYTES / 1024} KB Pi App Studio ceiling — ${(
+        (STUDIO_LIMIT_BYTES - zipped) / 1024
+      ).toFixed(0)} KB of headroom left.`,
+    )
+  }
+
+  if (profile === 'studio' && zipped > STUDIO_LIMIT_BYTES) {
+    // Loud, and a failure. A bundle that quietly exceeds the ceiling is
+    // discovered by the upload being rejected, which is a worse place to find
+    // out than here.
+    throw new Error(
+      `studio bundle is ${(zipped / 1024).toFixed(0)} KB, over Pi App Studio's ${
+        STUDIO_LIMIT_BYTES / 1024
+      } KB limit. Trim STUDIO_EXCLUDE further.`,
+    )
+  }
 }
 
 // Only package when run as a command: importing this file must not build a

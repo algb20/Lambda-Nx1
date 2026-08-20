@@ -5,6 +5,7 @@ import { History, Loader2, RotateCcw, Search, Trash2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { ALL_MODES, type Mode } from '@/lib/gateways'
+import { TimeStamp } from '@/components/time-stamp'
 
 /**
  * What this account has already investigated.
@@ -34,17 +35,6 @@ export interface HistoryEntry {
 
 const DEBOUNCE_MS = 300
 
-function ago(iso: string): string {
-  const diff = Date.now() - Date.parse(iso)
-  if (!Number.isFinite(diff) || diff < 0) return 'just now'
-  const mins = Math.floor(diff / 60_000)
-  if (mins < 1) return 'just now'
-  if (mins < 60) return `${mins}m ago`
-  const hours = Math.floor(mins / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  return days < 30 ? `${days}d ago` : `${Math.floor(days / 30)}mo ago`
-}
 
 export function HistoryPanel({
   onReopen,
@@ -157,7 +147,7 @@ export function HistoryPanel({
                   <p className="truncate text-xs leading-tight">{e.subject}</p>
                   <p className="truncate text-[10px] text-muted-foreground">
                     {e.gateway} · {e.findingCount} finding{e.findingCount === 1 ? '' : 's'} ·{' '}
-                    {ago(e.createdAt)}
+                    <TimeStamp iso={e.createdAt} />
                   </p>
                 </div>
                 {reopenable ? (

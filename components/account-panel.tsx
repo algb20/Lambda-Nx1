@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { AuthForm, type AuthedUser } from '@/components/auth-form'
 import { Avatar } from '@/components/avatar'
+import { RealNameControl } from '@/components/real-name-control'
 
 /**
  * Account: sign in, sign up, sign out, delete.
@@ -161,6 +162,11 @@ export function AccountPanel() {
             Sign out
           </Button>
         </div>
+
+        <RealNameControl
+          initialName={user.fullName ?? null}
+          initialVisible={user.showRealName ?? false}
+        />
 
         <div className="rounded-md border border-destructive/30 p-3">
           <p className="text-sm font-medium">Delete this account</p>

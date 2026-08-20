@@ -68,6 +68,54 @@ export function publicationTime(value: unknown): string | null {
   return new Date(ms).toISOString()
 }
 
+/**
+ * The UTC offset the source itself stated, in minutes, or `null`.
+ *
+ * ## Why this is worth keeping
+ *
+ * `publicationTime` normalises everything to an instant, which is correct for
+ * comparing and sorting — and throws away a real fact while doing it. When a
+ * Japanese agency publishes `2026-08-14T18:46:00+09:00`, the `+09:00` is not
+ * formatting: it is the agency telling us the event happened at *quarter to
+ * seven in the evening, where it happened*. Rendering that as `09:46 UTC`, or
+ * as whatever o'clock it is in the reader's own city, is a different fact.
+ *
+ * So the offset travels alongside the instant, and a reader can be shown the
+ * time in the place the thing occurred rather than only in their own.
+ *
+ * ## When it is null, and why that is not a gap to fill
+ *
+ * Plenty of feeds publish `Z`, and plenty publish no zone at all. `Z` is a real
+ * answer — offset zero — and is returned as `0`. No zone at all returns `null`,
+ * and the caller must then say "your time" rather than guess: a timezone
+ * inferred from a country is wrong for every country wide enough to have more
+ * than one, which includes most of the large ones.
+ */
+export function publicationZoneOffset(value: unknown): number | null {
+  if (typeof value !== 'string') return null
+  const text = value.trim()
+  if (!text) return null
+
+  // ISO-8601 and GDELT compact: a trailing Z, or ±HH:MM / ±HHMM.
+  const iso = text.match(/(?:Z|([+-])(\d{2}):?(\d{2}))$/)
+  if (iso) {
+    if (!iso[1]) return 0 // trailing Z
+    const minutes = Number(iso[2]) * 60 + Number(iso[3])
+    return iso[1] === '-' ? -minutes : minutes
+  }
+
+  // RFC-822 named zones, as RSS `pubDate` still uses them.
+  const named: Record<string, number> = {
+    GMT: 0, UT: 0, UTC: 0,
+    EST: -300, EDT: -240, CST: -360, CDT: -300,
+    MST: -420, MDT: -360, PST: -480, PDT: -420,
+  }
+  const zone = text.match(/\s([A-Z]{2,4})$/)
+  if (zone && zone[1] in named) return named[zone[1]]
+
+  return null
+}
+
 function toMillis(value: unknown): number | null {
   if (value instanceof Date) {
     const t = value.getTime()

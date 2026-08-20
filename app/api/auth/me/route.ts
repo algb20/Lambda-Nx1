@@ -22,6 +22,10 @@ export async function GET() {
       plan: user.plan,
       avatarUrl: user.avatarUrl,
       provider: user.authProvider,
+      // The caller is the owner of this account, so they see their own real
+      // name whatever the switch says — the switch governs what *others* see.
+      fullName: user.fullName,
+      showRealName: user.showRealName,
     },
   })
 }

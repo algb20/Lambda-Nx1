@@ -4,6 +4,7 @@ import { SESSION_COOKIE } from '@/lib/auth/session'
 import { isDbConfigured, repo } from '@/lib/db'
 import { getStorageProvider, deleteByPrefix } from '@/lib/storage'
 import { keyFromAvatarPath } from '@/lib/modules/avatar'
+import { normalizeFullName } from '@/lib/auth/standalone'
 
 /**
  * DELETE /api/account — erase the signed-in account.
@@ -33,6 +34,54 @@ export const dynamic = 'force-dynamic'
 
 /** Body must confirm intent, so a stray fetch cannot erase an account. */
 const CONFIRMATION = 'DELETE'
+
+/**
+ * PATCH /api/account { fullName?, showRealName? } — the profile switch.
+ *
+ * `showRealName` is one visibility state for everybody, not a per-viewer
+ * preference: the eye control in the interface asks "can other people see my
+ * name", and an answer that varied by who was looking would be a different,
+ * much more complicated promise than the one the control makes.
+ *
+ * Sending `fullName: ""` erases the name. That has to be possible — a person who
+ * gave a real name and regrets it needs a way back that is not deleting the
+ * whole account.
+ */
+export async function PATCH(request: Request) {
+  const userId = await getSessionUserId()
+  if (!userId) return NextResponse.json({ error: 'Sign in first' }, { status: 401 })
+  if (!isDbConfigured()) {
+    return NextResponse.json({ error: 'Database is not configured' }, { status: 503 })
+  }
+
+  let body: { fullName?: unknown; showRealName?: unknown }
+  try {
+    body = (await request.json()) as typeof body
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+  }
+
+  const patch: { fullName?: string | null; showRealName?: boolean } = {}
+  if (typeof body.fullName === 'string') {
+    try {
+      patch.fullName = normalizeFullName(body.fullName)
+    } catch (err) {
+      return NextResponse.json(
+        { error: err instanceof Error ? err.message : 'Invalid name' },
+        { status: 400 },
+      )
+    }
+  }
+  if (typeof body.showRealName === 'boolean') patch.showRealName = body.showRealName
+
+  if (Object.keys(patch).length === 0) {
+    return NextResponse.json({ error: 'Nothing to change' }, { status: 400 })
+  }
+
+  const user = await repo.users.setProfile(userId, patch)
+  if (!user) return NextResponse.json({ error: 'Account not found' }, { status: 404 })
+  return NextResponse.json({ fullName: user.fullName, showRealName: user.showRealName })
+}
 
 export async function DELETE(request: Request) {
   const userId = await getSessionUserId()

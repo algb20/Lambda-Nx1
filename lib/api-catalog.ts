@@ -326,6 +326,33 @@ export const API_GROUPS: ApiGroup[] = [
           'The multi-class market overview in one call. Takes no body.',
         returns: ['classes', 'movers', 'generatedAt'],
       },
+      {
+        path: '/api/intelligence/property',
+        route: 'intelligence/property',
+        method: 'POST',
+        title: 'Property & real estate',
+        description:
+          'Housing prices, construction and sales activity, mortgage rates and unsold supply, from the statistical authority of each territory. Takes no body. Every figure carries the period it describes — these series are published months in arrears by nature.',
+        returns: ['sections', 'summary', 'findings'],
+      },
+      {
+        path: '/api/intelligence/companies',
+        route: 'intelligence/companies',
+        method: 'POST',
+        title: 'Companies',
+        description:
+          'A company as its regulator holds it — legal and former names, industry, listings, recent filings, and the figures it reported, each with the period it covers and the form it came from. Send no company and the answer is the largest filers ranked by their own balance sheets.',
+        params: [
+          {
+            name: 'company',
+            type: 'string',
+            required: false,
+            description: 'A company name or ticker. Omit for the ranking.',
+            example: 'Apple',
+          },
+        ],
+        returns: ['profile', 'financials', 'filings', 'ranking', 'summary'],
+      },
     ],
   },
   {
@@ -364,9 +391,14 @@ export const INTERNAL_ROUTES: Record<string, string> = {
   'auth/login': 'authentication, under its own much tighter limit',
   'auth/logout': 'authentication',
   'auth/me': 'the signed-in caller’s own session',
+  'auth/methods': 'tells the sign-in form which flows this deployment can offer',
+  'auth/password/forgot': 'account recovery — answers identically for every address by design',
+  'auth/password/reset': 'account recovery, spending a code we mailed',
   'auth/pi': 'Pi Network authentication',
   'auth/pi/claim': 'Pi Network authentication',
   'auth/register': 'authentication',
+  'auth/verify/confirm': 'sign-up, spending a code we mailed',
+  'auth/verify/request': 'sign-up — sends a code to an address, so it is rate-limited hard',
   avatar: 'a person’s own profile image',
   'avatar/[...path]': 'a person’s own profile image',
   calibration: 'the forecast-tracking ledger, tied to an account',

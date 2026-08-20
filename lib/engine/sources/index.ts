@@ -32,6 +32,8 @@ import { gdeltNews, wikiInTheNews, usgsQuakes, reliefWeb } from './news'
 import { wikidata } from './reference'
 // Gateway — Markets Board (live multi-class overview)
 import { coingeckoTop, fredCommodities, fredIndices, frankfurterBoard } from './markets-board'
+import { PROPERTY_SOURCES } from './property'
+import { COMPANY_SOURCES } from './companies'
 // Gateway — Geospatial (places + flights)
 import { nominatim, opensky } from './geo'
 // Gateway — Research & tech-trend
@@ -318,6 +320,22 @@ export function registerMarketsBoard(): void {
   registeredBoard = true
 }
 
+let registeredProperty = false
+/** Property & real estate: FRED housing, Eurostat HPI, HM Land Registry. */
+export function registerProperty(): void {
+  if (registeredProperty) return
+  registry.registerAll(PROPERTY_SOURCES)
+  registeredProperty = true
+}
+
+let registeredCompanies = false
+/** Companies: SEC EDGAR profile, financials, filings and the assets ranking. */
+export function registerCompanies(): void {
+  if (registeredCompanies) return
+  registry.registerAll(COMPANY_SOURCES)
+  registeredCompanies = true
+}
+
 let registeredGeo = false
 export function registerGeoGateway(): void {
   if (registeredGeo) return
@@ -397,6 +415,8 @@ export function registerAllSources(): void {
   registerOwnershipGateway()
   registerNewsGateway()
   registerMarketsBoard()
+  registerProperty()
+  registerCompanies()
   registerGeoGateway()
   registerResearchGateway()
   registerReferenceGateway()
