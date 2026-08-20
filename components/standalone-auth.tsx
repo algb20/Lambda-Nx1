@@ -1,63 +1,109 @@
 'use client'
 
-import { useCallback, useEffect, useState, type ReactNode } from 'react'
-import { Radar, Loader2, ShieldCheck } from 'lucide-react'
+import { useCallback, useState } from 'react'
+import { Radar, ShieldCheck, X } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { AuthForm, type AuthedUser } from '@/components/auth-form'
+import { AuthForm } from '@/components/auth-form'
+import { useViewer } from '@/hooks/use-viewer'
+import { refreshViewer } from '@/lib/auth/viewer'
 
 /**
- * Standalone (off-Pi) auth gate. Used when NEXT_PUBLIC_AUTH_MODE=standalone: the
- * app runs as an independent web app with our own signed sessions, talking to
- * the existing /api/auth endpoints — no Pi dependency.
+ * The off-Pi sign-in offer. It signs people in; it does **not** gate anything.
+ *
+ * ## The regression this documents
+ *
+ * This used to be a *gate*: it wrapped the whole app and rendered a full-screen
+ * sign-in card whenever nobody was signed in, with nothing behind it. That was
+ * survivable while it only ran under an explicit `NEXT_PUBLIC_AUTH_MODE=
+ * standalone` deployment — and the moment the shell started choosing this
+ * surface automatically for every ordinary browser, it locked the entire
+ * product behind an account for every web visitor.
+ *
+ * Which contradicts charter §1 outright: the intelligence gateways are open,
+ * need no account, and are the reason someone arrives. It also mirrors a bug
+ * the Pi shell already had and already fixed — gating everything behind a
+ * sign-in that most visitors have no reason to complete.
+ *
+ * So it stopped wrapping the app and became what it always should have been: a
+ * small card that sits *beside* the product. A signed-out visitor gets the whole
+ * free platform and an unobtrusive prompt; signing in also lives in
+ * Preferences, where the account already is.
+ *
+ * Being a sibling rather than a wrapper matters for a second reason. The surface
+ * is decided after hydration, so this component appears or disappears on the
+ * first update — and if it still wrapped `children`, that update would change
+ * the element type above the entire app and React would unmount and rebuild
+ * every screen, losing all of it. As a sibling, the swap costs one card.
  *
  * The form itself lives in `auth-form.tsx`, shared with the account panel in
  * Preferences, so there is exactly one sign-in implementation to keep correct.
  */
-export function StandaloneAuthGate({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthedUser | null | undefined>(undefined)
+export function StandaloneSignInPrompt() {
+  const { status, user } = useViewer()
+  const [dismissed, setDismissed] = useState(false)
+  const [open, setOpen] = useState(false)
 
-  const loadMe = useCallback(async () => {
-    try {
-      const res = await fetch('/api/auth/me')
-      const data = (await res.json()) as { user?: AuthedUser | null }
-      setUser(data.user ?? null)
-    } catch {
-      setUser(null)
-    }
+  // Signing in changes the account for the whole app, not just this card.
+  const onAuthenticated = useCallback(() => {
+    void refreshViewer()
   }, [])
 
-  useEffect(() => {
-    void loadMe()
-  }, [loadMe])
-
-  if (user === undefined) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    )
-  }
-  if (user) return <>{children}</>
+  /**
+   * Nothing is shown while the session is still being read, and nothing is
+   * shown to someone already signed in.
+   *
+   * A spinner here would put a placeholder over a platform that never needed
+   * the answer — the gateways do not care whether anyone is signed in.
+   */
+  if (status !== 'ready' || user) return null
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-sm p-6">
-        <div className="mb-4 flex items-center gap-2">
-          <Radar className="h-6 w-6 text-primary" />
-          <div>
-            <h1 className="text-lg font-bold leading-none">Lambda</h1>
-            <p className="text-[10px] text-muted-foreground">Intelligence platform</p>
-          </div>
+    <>
+      {/*
+        A prompt, not a gate. It sits above the product rather than in front of
+        it, and it can be dismissed — a visitor reading the world map has no
+        reason to make an account, and asking twice is how they leave.
+      */}
+      {dismissed ? null : (
+        <div className="fixed inset-x-0 bottom-16 z-40 mx-auto w-full max-w-sm px-4 lg:bottom-4">
+          <Card className="p-3 shadow-lg">
+            <div className="flex items-start gap-2">
+              <Radar className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold">Keep your work</p>
+                <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">
+                  Everything here works without an account. One keeps your investigations, monitors
+                  and settings across devices.
+                </p>
+              </div>
+              <button
+                onClick={() => setDismissed(true)}
+                aria-label="Dismiss"
+                className="shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+
+            {open ? (
+              <div className="mt-3">
+                <AuthForm onAuthenticated={onAuthenticated} />
+                <p className="mt-3 flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                  <ShieldCheck className="h-3 w-3 text-emerald-500" />
+                  Our own signed sessions — passwords hashed, never stored in plain text.
+                </p>
+              </div>
+            ) : (
+              <button
+                onClick={() => setOpen(true)}
+                className="mt-2 w-full rounded-md bg-primary px-3 py-1.5 text-[11px] font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                Sign in or create an account
+              </button>
+            )}
+          </Card>
         </div>
-        <h2 className="mb-3 text-sm font-semibold">Sign in or create an account</h2>
-
-        <AuthForm onAuthenticated={loadMe} />
-
-        <p className="mt-4 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-          <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-          Our own signed sessions — passwords hashed, never stored in plain text.
-        </p>
-      </Card>
-    </div>
+      )}
+    </>
   )
 }

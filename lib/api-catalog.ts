@@ -379,6 +379,34 @@ export const API_GROUPS: ApiGroup[] = [
         ],
       },
       {
+        path: '/api/intelligence/filings',
+        route: 'intelligence/filings',
+        method: 'POST',
+        title: 'Filings intelligence — the disclosure tape',
+        description:
+          'Full-text search across every recent SEC filing, graded by disclosure item. Send a phrase to find every filing whose text contains it; send nothing for the last few days of 8-Ks ranked by what they disclose. Item 9.01 appears on most filings and means an exhibit is attached; item 4.02 means a company\u2019s past financials cannot be relied upon, and this tells them apart.',
+        returns: [
+          'bands — serious, substantive, routine and administrative',
+          'each filing with its form, item codes, tickers, CIK and the SEC\u2019s own page',
+          'standouts — the consequential item codes present in this window',
+          'limits — US filers only, and what an item code does and does not say',
+        ],
+      },
+      {
+        path: '/api/intelligence/broadcasts',
+        route: 'intelligence/broadcasts',
+        method: 'POST',
+        title: 'Live broadcasts — what is on air',
+        description:
+          'Verified-live audio streams by country, language or name, from a catalogue of 62,000 stations across 241 countries. A two-letter query is a country code; anything else is a name search; nothing returns the most-opened stations worldwide. Broadcast presence is a public signal about a place: which languages it transmits in, and whether its stations are reachable at all.',
+        returns: [
+          'countries — each with its stations and the languages on air from it',
+          'each station with its stream URL, languages, codec, bitrate and coordinate',
+          'lastCheckedAt — when the stream was last confirmed live, on every row',
+          'limits — nothing is proxied or recorded, and coverage is uneven',
+        ],
+      },
+      {
         path: '/api/intelligence/companies',
         route: 'intelligence/companies',
         method: 'POST',

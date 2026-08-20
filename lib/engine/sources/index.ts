@@ -34,6 +34,8 @@ import { wikidata } from './reference'
 import { coingeckoTop, fredCommodities, fredIndices, frankfurterBoard } from './markets-board'
 import { PROPERTY_SOURCES } from './property'
 import { VENUE_SOURCES } from './venues'
+import { FILING_SOURCES } from './filings'
+import { BROADCAST_SOURCES } from './broadcasts'
 import { COMPANY_SOURCES } from './companies'
 import { BOARD_SOURCES } from './boards'
 // Gateway — Geospatial (places + flights)
@@ -336,6 +338,22 @@ export function registerVenues(): void {
   if (registeredVenues) return
   registry.registerAll(VENUE_SOURCES)
   registeredVenues = true
+}
+
+let registeredFilings = false
+/** Filings: the SEC full-text index, graded by disclosure item. */
+export function registerFilings(): void {
+  if (registeredFilings) return
+  registry.registerAll(FILING_SOURCES)
+  registeredFilings = true
+}
+
+let registeredBroadcasts = false
+/** Broadcasts: verified-live streams from the community radio catalogue. */
+export function registerBroadcasts(): void {
+  if (registeredBroadcasts) return
+  registry.registerAll(BROADCAST_SOURCES)
+  registeredBroadcasts = true
 }
 
 let registeredCompanies = false

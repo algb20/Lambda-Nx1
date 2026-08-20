@@ -1,9 +1,11 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Camera, Loader2, Trash2, AlertCircle } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { initialsOf } from '@/lib/modules/avatar'
+import { useViewer } from '@/hooks/use-viewer'
+import { refreshViewer } from '@/lib/auth/viewer'
 
 /**
  * A user's picture, and the control to change it.
@@ -49,32 +51,20 @@ export function Avatar({
   )
 }
 
-interface Me {
-  id: string
-  username: string
-  avatarUrl?: string | null
-}
-
+/**
+ * The upload control.
+ *
+ * It reads the account from the shared viewer store rather than fetching
+ * `/api/auth/me` itself, and refreshes that store after a change instead of
+ * updating a private copy. The private copy was a real defect: a new picture
+ * appeared here and nowhere else — not in the header, not beside the user's
+ * own posts — until the page was reloaded.
+ */
 export function AvatarSetting() {
-  const [me, setMe] = useState<Me | null>(null)
+  const { user: me } = useViewer()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
-
-  useEffect(() => {
-    let alive = true
-    fetch('/api/auth/me')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => {
-        if (alive && d?.user) setMe(d.user as Me)
-      })
-      .catch(() => {
-        /* the panel does not appear */
-      })
-    return () => {
-      alive = false
-    }
-  }, [])
 
   if (!me) return null
 
@@ -87,7 +77,7 @@ export function AvatarSetting() {
       const res = await fetch('/api/avatar', { method: 'POST', body: form })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data?.error ?? 'Upload failed')
-      setMe({ ...me, avatarUrl: data.avatarUrl })
+      await refreshViewer()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed')
     } finally {
@@ -102,7 +92,7 @@ export function AvatarSetting() {
     try {
       const res = await fetch('/api/avatar', { method: 'DELETE' })
       if (!res.ok) throw new Error('Could not remove the picture')
-      setMe({ ...me, avatarUrl: null })
+      await refreshViewer()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not remove the picture')
     } finally {

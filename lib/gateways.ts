@@ -33,6 +33,7 @@ export const ALL_MODES = [
   'property',
   'companies',
   'venues',
+  'filings',
   'statements',
   'courts',
   'regulation',
@@ -46,6 +47,7 @@ export const ALL_MODES = [
   'reference',
   'open-data',
   'media',
+  'broadcasts',
 ] as const
 
 export type Mode = (typeof ALL_MODES)[number]
@@ -63,10 +65,10 @@ export const GATEWAY_FAMILIES: ReadonlyArray<{ label: string; modes: readonly Mo
   { label: 'Start anywhere', modes: ['nexus', 'track'] },
   { label: 'Infrastructure', modes: ['domain', 'threat', 'geo'] },
   { label: 'People & accounts', modes: ['username', 'email'] },
-  { label: 'Money & entities', modes: ['finance', 'ownership', 'procurement', 'board', 'markets', 'property', 'companies', 'venues'] },
+  { label: 'Money & entities', modes: ['finance', 'ownership', 'procurement', 'board', 'markets', 'property', 'companies', 'venues', 'filings'] },
   { label: 'Law & the state', modes: ['statements', 'courts', 'regulation', 'officials'] },
   { label: 'Earth & systems', modes: ['resources', 'grid', 'space-weather', 'orbital'] },
-  { label: 'Knowledge & record', modes: ['research', 'reference', 'open-data', 'news', 'media'] },
+  { label: 'Knowledge & record', modes: ['research', 'reference', 'open-data', 'news', 'media', 'broadcasts'] },
 ]
 
 export interface GatewayGuidance {
@@ -163,6 +165,20 @@ export const GATEWAY_GUIDANCE: Record<Mode, GatewayGuidance> = {
     example: 'nigeria',
     limit:
       'Registration is not endorsement: a venue is listed because an authority assigned it a code, not because anyone vouched for it. Crypto venues from the market index are not registry entries and are labelled separately. A venue with no LEI cannot be traced to an owner from here.',
+  },
+  filings: {
+    answers:
+      'What companies have just told their regulator, and which of it matters. Searches the full text of every recent SEC filing, and grades each one by its disclosure item codes — a bankruptcy notice, a delisting warning or a statement that past financials cannot be relied upon, separated from the ninety-odd routine exhibit notices they arrive among.',
+    example: 'material weakness',
+    limit:
+      'US filers only, and item codes describe the obligation a filing was made under rather than its contents — a 5.02 covers a planned retirement and an abrupt resignation identically. A filing is a company\u2019s own statement to its regulator: this grades what kind of statement it is, and is never investment advice or a claim that a company is in trouble.',
+  },
+  broadcasts: {
+    answers:
+      'What a place is putting on air right now — verified-live radio and audio streams by country, language and name, from a catalogue of 62,000 stations across 241 countries. Shows which languages a territory actually broadcasts in, which is a fact about the place that no language census reports.',
+    example: 'SA',
+    limit:
+      'Only streams that answered their last health check are listed, and every row states when that was. Nothing is proxied, recorded or transcribed \u2014 these are the broadcasters\u2019 own public URLs. The catalogue is community-maintained and unevenly covered: a country with few entries may be under-catalogued rather than quiet.',
   },
   courts: {
     answers:

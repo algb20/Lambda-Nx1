@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { ArrowDown, ArrowUp, LayoutGrid, X } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { TimeStamp } from '@/components/time-stamp'
@@ -81,6 +81,19 @@ export function CategoryPanels({ report }: { report: WorldEventsReport | null })
         .sort((a, b) => b.count - a.count),
     [byCategory],
   )
+
+  /**
+   * How many category chips are shown before the reader asks for the rest.
+   *
+   * The full list is twenty-one categories and it wrapped to four dense rows
+   * above the map — a wall of chips is not a choice, it is a search task. The
+   * busiest eight cover the great majority of any run's events, and one button
+   * reveals every one of them.
+   */
+  const FIRST_ROW = 8
+  const [showAll, setShowAll] = useState(false)
+  const visible = showAll ? available : available.slice(0, FIRST_ROW)
+  const hidden = available.length - visible.length
 
   const setSize = (next: PanelSize) =>
     update((p) => ({ ...p, globe: { ...p.globe, panelSize: next } }))
@@ -166,7 +179,7 @@ export function CategoryPanels({ report }: { report: WorldEventsReport | null })
         </div>
 
         <div className="mt-3 flex flex-wrap gap-1.5">
-          {available.map(({ category, count }) => {
+          {visible.map(({ category, count }) => {
             const on = open.includes(category)
             const hidden = prefs.globe.muted.includes(category)
             const meta = CATEGORY_META[category]
@@ -198,6 +211,21 @@ export function CategoryPanels({ report }: { report: WorldEventsReport | null })
               </button>
             )
           })}
+          {/*
+            One button for every category, rather than twenty-one chips always
+            on screen. Counted, never a bare "more": a reader deciding whether
+            to press it needs to know how much is behind it.
+          */}
+          {hidden > 0 || showAll ? (
+            <button
+              onClick={() => setShowAll((wasOpen: boolean) => !wasOpen)}
+              aria-expanded={showAll}
+              className="rounded-full border border-dashed border-border px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted"
+            >
+              {showAll ? 'Show fewer' : `All ${available.length} categories`}
+            </button>
+          ) : null}
+
           {shown.length > 0 ? (
             <button
               onClick={() => update((p) => ({ ...p, globe: { ...p.globe, panels: [] } }))}

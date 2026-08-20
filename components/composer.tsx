@@ -5,17 +5,23 @@ import { Send, PenLine } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { api } from '@/lib/api'
-import { usePiAuthOptional } from '@/contexts/pi-auth-context'
+import { useViewer } from '@/hooks/use-viewer'
 import { POST_LIMITS, type PublicPost } from '@/lib/posts'
 
 /**
  * Publish on the app itself. Signed-in users write a post; it appears in the
  * feed immediately and gets its own shareable permalink. Signed-out users see a
  * gentle prompt instead (the gateways stay open to everyone — charter §1).
+ *
+ * Whether someone is signed in is read from the session, not from the Pi
+ * context. It used to be the latter, and that quietly locked publishing away
+ * from every email-account holder: `POST /api/posts` accepts any session Pi or
+ * otherwise, so the server was willing all along and only the button was
+ * missing. They were shown "sign in to publish" while already signed in.
  */
 export function Composer({ onPublished }: { onPublished: (post: PublicPost) => void }) {
-  const pi = usePiAuthOptional()
-  const signedIn = Boolean(pi?.userData)
+  const { status, user } = useViewer()
+  const signedIn = Boolean(user)
 
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
@@ -46,11 +52,16 @@ export function Composer({ onPublished }: { onPublished: (post: PublicPost) => v
     }
   }
 
+  // Nothing at all until the session is known: a prompt that appears and then
+  // vanishes on every load is worse than a beat of silence, and it would tell
+  // a signed-in reader they are signed out.
+  if (status !== 'ready') return null
+
   if (!signedIn) {
     return (
       <Card className="flex items-center gap-3 p-4 text-sm text-muted-foreground">
         <PenLine className="h-4 w-4 shrink-0" />
-        <span>Sign in with Pi to publish posts and research to the feed.</span>
+        <span>Sign in to publish posts and research to the feed.</span>
       </Card>
     )
   }
