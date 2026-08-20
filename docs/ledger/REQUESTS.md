@@ -46,12 +46,12 @@ The ones that **are** genuine standing work, named rather than buried:
 | R183 | 2026-08-20 | `gateways` | | `open` | شركات ومصانع الدول والقطاع الخاص |
 | R184 | 2026-08-20 | `gateways` | | `open` | آليّة تعمل **تلقائيًا** لكل البوّابات |
 | R185 | 2026-08-20 | `gateways` | | `open` | كل العملات الرقمية والبلوكشين بكل معلوماته وأهم أخباره |
-| R186 | 2026-08-20 | `gateways` | | `open` | بوّابة **المعادن والثروات** وغيرها |
+| R186 | 2026-08-20 | `gateways` | | `done` | بوّابة **المعادن والثروات** — `resources`: ١٨ سلسلة أسعار من صندوق النقد عبر FRED (نحاس، ألمنيوم، نيكل، زنك، رصاص، قصدير، حديد، يورانيوم، فحم، غاز + غذاء + ٣ مؤشرات) |
 | R187 | 2026-08-20 | `gateways` | | `open` | اعمل بحثًا وحدّد **قائمة بكل البوّابات** ثم أنجزها |
-| R188 | 2026-08-20 | `gateways` | | `open` | مراقبة أهم الشخصيات العامة والحكومية والخاصة — أخبارهم وتصاريحهم، وتصنيف وتحليل أعمالهم وتأثيرهم |
+| R188 | 2026-08-20 | `gateways` | | `done` | بوّابة `officials` — خطب محافظي البنوك المركزية بنصّها من BIS، مجمّعة لكل متحدّث. **أفعال المنصب العامة فقط**، لا حياة خاصة (§3) |
 | R189 | 2026-08-20 | `gateways` | | `open` | البوّابات يجب أن **تتطوّر تلقائيًا** |
 | R190 | 2026-08-20 | `globe` | | `open` | صفحة الكرة تُرتَّب وتحوي **كل** البوّابات |
-| R191 | 2026-08-20 | `gateways` | | `open` | ابحث عن أقوى التقنيات وأضف **٧ بوّابات على الأقل** من اختيارك — خاصةً المفقودة عندنا |
+| R191 | 2026-08-20 | `gateways` | | `done` | **٧ بوّابات جديدة**: المحاكم · التنظيم · المسؤولون · المعادن · شبكة الكهرباء · طقس الفضاء · الأجسام المدارية — كلها من الجهة الأصلية، بلا مفاتيح، ومُختبرة حيّة |
 | R192 | 2026-08-20 | `gateways` | 2 | `open` | التطبيق كله يتحدّث عن الطقس والزلازل — اجمع كل المتشابه في **بوّابة واحدة** |
 | R193 | 2026-08-20 | `design` | | `done` | **التاريخ:** «قبل ساعة» وهو خبر من أيام. ضع التاريخ الأصلي بتوقيت المنطقة، والنسبي حتى يوم واحد ثم التاريخ فقط |
 | R194 | 2026-08-20 | `auth` | 2 | `done` | الدخول باسم مستخدم Pi فقط وتلقائيًا — لأن Pi عندها KYC حقيقي |
@@ -144,35 +144,35 @@ The ones that **are** genuine standing work, named rather than buried:
 | [R037](requests-recovered.md#r037) |2026-08-01|`globe`|| `needs-check` | اكمل نعم وضع بحسبانك طريقة سريعة وسهلة لكي نغير او نتحكم بالدفع او سعر الاشتراك وهناك ملاحضة البارحة اعطيتك طلبات منها عند الضغط على سعر سهم او مواد خام او احد الاخبار او <br>**evidence:** globe → components/globe-view.tsx; news → lib/modules/news.ts; sources → lib/engine/catalog |
 | [R038](requests-recovered.md#r038) |2026-08-01|`globe`|| `answered` | ممتاز وتذكر ان يكون الزوم ذات جودة عالية وتذكر ان توضف هذه الفكرة في اي نقطة يحتاجها او توافق هذه الفكرة في تطبيقنا |
 | [R039](requests-recovered.md#r039) |2026-08-01|`general`|| `answered` | نعم اكمل كما يوافق سير ملك |
-| [R040](requests-recovered.md#r040) |2026-08-01|`general`|| `open` | ساغيب ساعتين اكمل مهامك بتسلسل ولا تنضر امر مني الا اذا كان يجب ان اقدم او اختار ضروري اكمل حتى لو اغلقت شاشة الحاسوب |
+| [R040](requests-recovered.md#r040) |2026-08-01|`general`|| `answered` | ساغيب ساعتين اكمل مهامك بتسلسل ولا تنضر امر مني الا اذا كان يجب ان اقدم او اختار ضروري اكمل حتى لو اغلقت شاشة الحاسوب |
 | [R041](requests-recovered.md#r041) |2026-08-01|`auth`|| `answered` | اكمل وحدك انشاء حساب على قاعدة البيانات |
 | [R042](requests-recovered.md#r042) |2026-08-01|`i18n`|2| `needs-check` | تكلم عربي دائما <br>**evidence:** i18n/arabic → lib/i18n |
-| [R043](requests-recovered.md#r043) |2026-08-01|`general`|| `open` | نعم تطبيق دابيا وفاليتبي لا اريد المساس بهم ابدا لكن ذلك المشروع المتوقف افحصه ان كان فارغا وعند حذفه يمكننا مسحه اذا كان دون ضرر عن التطبيقات الاخرى |
+| [R043](requests-recovered.md#r043) |2026-08-01|`general`|| `answered` | نعم تطبيق دابيا وفاليتبي لا اريد المساس بهم ابدا لكن ذلك المشروع المتوقف افحصه ان كان فارغا وعند حذفه يمكننا مسحه اذا كان دون ضرر عن التطبيقات الاخرى |
 | [R044](requests-recovered.md#r044) |2026-08-01|`general`|| `answered` | هل يمكنك العمل على المشروع المتوقف |
 | [R045](requests-recovered.md#r045) |2026-08-01|`data`|| `needs-check` | ماهي افضل واقوى وملائم وامن قاعدة بيانات <br>**evidence:** database → db/schema.ts |
 | [R046](requests-recovered.md#r046) |2026-08-01|`auth`|| `needs-check` | ماذا لو انشات حساب على : Neon وتنقل انت المشروع فاليت لها ونكمل تطبيقنا supabase <br>**evidence:** accounts → lib/auth; database → db/schema.ts |
-| [R047](requests-recovered.md#r047) |2026-08-01|`general`|| `open` | لكن في المستقبل خياري افضل |
+| [R047](requests-recovered.md#r047) |2026-08-01|`general`|| `answered` | لكن في المستقبل خياري افضل |
 | [R048](requests-recovered.md#r048) |2026-08-01|`data`|| `needs-check` | تطبيق فاليت حتى الان لمليس طور العمل الجاد وحقيقي المغامرة اليوم افضل وهناك قاعدة بيانات تابعة لجوجل يمكن تكون خيار مناسب له <br>**evidence:** database → db/schema.ts |
-| [R049](requests-recovered.md#r049) |2026-08-01|`general`|| `open` | Firebase / Firestore اقصد هذا ام نضع تطبيقنا لامدا افضل ملائمة له |
+| [R049](requests-recovered.md#r049) |2026-08-01|`general`|| `answered` | Firebase / Firestore اقصد هذا ام نضع تطبيقنا لامدا افضل ملائمة له |
 | [R050](requests-recovered.md#r050) |2026-08-01|`pi`|| `needs-check` | خياري ان نعمل حساب Neon وننقل له فاليت وسازودك باي ادوات تريدها ثم ننشل لامدا على Supabase <br>**evidence:** pi auth → lib/auth; accounts → lib/auth; database → db/schema.ts |
 | [R051](requests-recovered.md#r051) |2026-08-01|`auth`|| `needs-check` | قبل نقل VaultPi يجب أن أعرف ماذا يستخدم فعلًا، لأن Neon هو Postgres فقط: * إن كان VaultPi يستخدم فقط جداول Postgres عادية → النقل سهل ونظيف. ✅ * إن كان يستخدم Supabase Au <br>**evidence:** accounts → lib/auth; publishing → lib/modules/autopublish.ts; database → db/schema.ts |
 | [R052](requests-recovered.md#r052) |2026-08-01|`general`|2| `open` | لكن مستقبلا سنواجه نفس الامر على تطبيقنا اعمل ايقاف لفاليت لكن دون اذا وانشا تطبيقنا |
 | [R053](requests-recovered.md#r053) |2026-08-01|`auth`|7| `needs-check` | هناك امر قبل اكمال العمل هل يمكن انشاء حساب اخر علىsupabase ],دون مشاكل وترك تطبيقاتنا دابيا وفاليت على حالهم <br>**evidence:** accounts → lib/auth; database → db/schema.ts |
 | [R054](requests-recovered.md#r054) |2026-08-06|`i18n`|| `needs-check` | لأربط التطبيق بالقاعدة أحتاج كلمة مرور قاعدة البيانات — وهي لا تظهر لأدواتي إطلاقًا (لأسباب أمنية Supabase لا تكشفها عبر API). تجدها هنا: لوحة Supabase → مشروع Lambda-NX <br>**evidence:** i18n/arabic → lib/i18n; database → db/schema.ts; api docs → lib/api-catalog.ts |
-| [R055](requests-recovered.md#r055) |2026-08-06|`general`|| `open` | الان نسخت كلمة المرور |
+| [R055](requests-recovered.md#r055) |2026-08-06|`general`|| `answered` | الان نسخت كلمة المرور |
 | [R056](requests-recovered.md#r056) |2026-08-06|`deploy`|| `needs-check` | أين تضع كلمة المرور الآن؟ كلمة المرور وحدها لا تكفي — نحتاج الرابط الكامل. خذ الرابط من زرّ «Connect» الأخضر (اختر Transaction pooler)، وسيبدو هكذا: ``` postgresql://[REDACTED-CONNECTION-STRING] <br>**evidence:** publishing → lib/modules/autopublish.ts; database → db/schema.ts |
 | [R057](requests-recovered.md#r057) |2026-08-06|`general`|| `answered` | هل هذا |
 | [R058](requests-recovered.md#r058) |2026-08-06|`i18n`|| `needs-check` | تكلم دائما بالعربي اين اجد الرابك <br>**evidence:** i18n/arabic → lib/i18n |
 | [R059](requests-recovered.md#r059) |2026-08-06|`deploy`|| `needs-check` | اعطني مكان الرابط الذي انشره مع الكود <br>**evidence:** deploy → netlify.toml |
-| [R060](requests-recovered.md#r060) |2026-08-06|`data`|| `open` | لم اجد الرابط في قاعدة البيانات |
+| [R060](requests-recovered.md#r060) |2026-08-06|`data`|| `answered` | لم اجد الرابط في قاعدة البيانات |
 | [R061](requests-recovered.md#r061) |2026-08-06|`deploy`|| `needs-check` | قبل ساعات طلبت مني ان اضيف متغير بيئي وانشره لكن للان لم افعل لاني لم اجد الرابط من قاعدة البيانات <br>**evidence:** deploy → netlify.toml |
 | [R062](requests-recovered.md#r062) |2026-08-06|`globe`|| `needs-check` | Transaction pooler (أو "Connection pooling") ٤) اضغط أيقونة النسخ 📋 بجانبه ٥) الرابط الآن في الحافظة، لكن مكان كلمة المرور مكتوب فيه [YOUR-PASSWORD] — الصقه في المفكرة (N <br>**evidence:** globe → components/globe-view.tsx; deploy → netlify.toml; database → db/schema.ts |
 | [R063](requests-recovered.md#r063) |2026-08-06|`general`|| `answered` | اين اجد الرابط بالضبط لنسخه |
 | [R064](requests-recovered.md#r064) |2026-08-06|`i18n`|| `needs-check` | اعطني اسم الاعدادات بالعربي <br>**evidence:** i18n/arabic → lib/i18n |
 | [R065](requests-recovered.md#r065) |2026-08-06|`general`|| `answered` | من هو |
-| [R066](requests-recovered.md#r066) |2026-08-06|`general`|| `open` | فوق «Session pooler» مباشرةً توجد ثلاثة أزرار اختيار (⚪). اختر الأوسط: بعد اختيار هذا ماذا افعل |
+| [R066](requests-recovered.md#r066) |2026-08-06|`general`|| `answered` | فوق «Session pooler» مباشرةً توجد ثلاثة أزرار اختيار (⚪). اختر الأوسط: بعد اختيار هذا ماذا افعل |
 | [R067](requests-recovered.md#r067) |2026-08-06|`general`|| `needs-check` | انظر إلى port أسفل النافذة: يجب أن يصير 6543 بدل 5432، وuser يصير postgres.roykbyzkskhmzclzobmd. إن لم تتغيّر، فأنت لم تضغط الزر الصحيح. ٢) تأكّد أن Type = URI موجود عندك <br>**evidence:** publishing → lib/modules/autopublish.ts |
-| [R068](requests-recovered.md#r068) |2026-08-06|`general`|| `open` | انا فقط اخترت «Session poole ولا يوجد زر حفض لو تغيير |
+| [R068](requests-recovered.md#r068) |2026-08-06|`general`|| `answered` | انا فقط اخترت «Session poole ولا يوجد زر حفض لو تغيير |
 | [R069](requests-recovered.md#r069) |2026-08-06|`deploy`|| `needs-check` | postgresql://[REDACTED-CONNECTION-STRING] هذا مانسخته <br>**evidence:** publishing → lib/modules/autopublish.ts; database → db/schema.ts |
 | [R070](requests-recovered.md#r070) |2026-08-06|`security`|| `answered` | هل اغير كلمة السر من تفكيري فقط |
 | [R071](requests-recovered.md#r071) |2026-08-06|`deploy`|| `needs-check` | ارسلي خطوة Supabase ي بالخطوات ليقوم بها شخص اخلالر <br>**evidence:** database → db/schema.ts |
@@ -180,19 +180,19 @@ The ones that **are** genuine standing work, named rather than buried:
 | [R073](requests-recovered.md#r073) |2026-08-06|`deploy`|| `needs-check` | لقد انتهى الحد للنشر في نيتفلي وجربت النشر على فيرسل لكن هناك خطا وهذا من سجلات البناء 09:57:41.061 Running build in Washington, D.C., USA (East) – iad1 09:57:41.061 Buil <br>**evidence:** publishing → lib/modules/autopublish.ts; deploy → netlify.toml |
 | [R074](requests-recovered.md#r074) |2026-08-06|`security`|| `answered` | نعم انقلها الان لكن اولا بسرعة جاوبني اولا هل اقوم باعادة النسر الان او ماذا |
 | [R075](requests-recovered.md#r075) |2026-08-06|`general`|| `answered` | نعم ثم اكمل بعدك الخطوات المطلوبة مني |
-| [R076](requests-recovered.md#r076) |2026-08-06|`general`|| `open` | PR #2 لا ينتظر إلا دمجك. اين ادمج هذا |
+| [R076](requests-recovered.md#r076) |2026-08-06|`general`|| `answered` | PR #2 لا ينتظر إلا دمجك. اين ادمج هذا |
 | [R077](requests-recovered.md#r077) |2026-08-06|`pi`|| `needs-check` | ``` {"status":"degraded","version":"0.0.0","time":"2026-08-06T21:39:41.829Z","uptimeSeconds":191,"providers":{"auth":"pi","payment":"pi","storage":"filesystem","queue":"m <br>**evidence:** secrets → docs/SECURITY.md; database → db/schema.ts; api docs → lib/api-catalog.ts |
 | [R078](requests-recovered.md#r078) |2026-08-06|`payments`|| `needs-check` | لاختبار الحقيقي — يثبت كل شيء دفعة واحدة نفّذ هذا (ضع `CRON_SECRET` الذي اخترته): ``` curl -X POST -H "x-cron-secret: سرّك" \ ``` ` "https://lambda-nx1-m4pp-two.vercel.ap <br>**evidence:** payments → lib/payments; publishing → lib/modules/autopublish.ts; secrets → docs/SECURITY.md |
-| [R079](requests-recovered.md#r079) |2026-08-06|`general`|| `open` | الان ماذا افعل |
-| [R080](requests-recovered.md#r080) |2026-08-06|`general`|| `open` | https://lambda-nx1-m4pp-two.vercel.app هل هذا هو الرابط للتطبيق لان ساكما مهام الديفلوبر |
-| [R081](requests-recovered.md#r081) |2026-08-06|`general`|| `open` | ليس لدس دومين في نيتفلي لكن هليمكنني تعديل اسم الرابط في فيرسل |
+| [R079](requests-recovered.md#r079) |2026-08-06|`general`|| `answered` | الان ماذا افعل |
+| [R080](requests-recovered.md#r080) |2026-08-06|`general`|| `answered` | https://lambda-nx1-m4pp-two.vercel.app هل هذا هو الرابط للتطبيق لان ساكما مهام الديفلوبر |
+| [R081](requests-recovered.md#r081) |2026-08-06|`general`|| `answered` | ليس لدس دومين في نيتفلي لكن هليمكنني تعديل اسم الرابط في فيرسل |
 | [R082](requests-recovered.md#r082) |2026-08-06|`general`|| `open` | اصلح هذا |
 | [R083](requests-recovered.md#r083) |2026-08-06|`general`|| `answered` | لماذا يبقى هكذا |
-| [R084](requests-recovered.md#r084) |2026-08-06|`auth`|| `open` | NEXT_PUBLIC_AUTH_MODE = standalone AUTH_PROVIDER = standalone كيف اعمل هذا بالضبط لان الاولى لم تنجح |
+| [R084](requests-recovered.md#r084) |2026-08-06|`auth`|| `answered` | NEXT_PUBLIC_AUTH_MODE = standalone AUTH_PROVIDER = standalone كيف اعمل هذا بالضبط لان الاولى لم تنجح |
 | [R085](requests-recovered.md#r085) |2026-08-06|`general`|| `open` | اريد حل دائم |
-| [R086](requests-recovered.md#r086) |2026-08-07|`general`|| `open` | اليس الخطا هنا |
-| [R087](requests-recovered.md#r087) |2026-08-07|`general`|| `open` | لم ينجح هل هناك خطا في اعدادات فيريل |
-| [R088](requests-recovered.md#r088) |2026-08-07|`general`|| `open` | لم اجده اعطني رابط مباشر او قم انت بها وحدك |
+| [R086](requests-recovered.md#r086) |2026-08-07|`general`|| `answered` | اليس الخطا هنا |
+| [R087](requests-recovered.md#r087) |2026-08-07|`general`|| `answered` | لم ينجح هل هناك خطا في اعدادات فيريل |
+| [R088](requests-recovered.md#r088) |2026-08-07|`general`|| `answered` | لم اجده اعطني رابط مباشر او قم انت بها وحدك |
 | [R089](requests-recovered.md#r089) |2026-08-07|`general`|| `open` | يجب عليك اصلاح الخطأ بالضبط وحدك |
 | [R090](requests-recovered.md#r090) |2026-08-07|`deploy`|| `needs-check` | يجب عليك اصلاح خطا النشر الان <br>**evidence:** publishing → lib/modules/autopublish.ts; deploy → netlify.toml |
 | [R091](requests-recovered.md#r091) |2026-08-07|`pi`|| `needs-check` | اعطني رابط التطبيق الذي ساضعه في ديفلوبر الباي نوتورك <br>**evidence:** pi auth → lib/auth |
@@ -208,24 +208,24 @@ The ones that **are** genuine standing work, named rather than buried:
 | [R101](requests-recovered.md#r101) |2026-08-07|`general`|| `answered` | اكمل كل الباقي بعدها نزل الملف الجديد وايضا هل انت متاكد انك عملت كل الذي طلبته منك |
 | [R102](requests-recovered.md#r102) |2026-08-07|`globe`|| `needs-check` | * العقل الباحث غير المنحاز، والنشر التلقائي على الشبكات (يحتاج حساباتك) الان اجع النشر على التطبيق وجهز لوحة تحكم في قاعدة البيانات اتحكم بها من خلا وضع روابط مواقع التوا <br>**evidence:** globe → components/globe-view.tsx; news → lib/modules/news.ts; pi auth → lib/auth |
 | [R103](requests-recovered.md#r103) |2026-08-08|`globe`|| `needs-check` | اكمل الباقي واصلح الاخطاء وعندي ملاحضة على عملك ضعيف وغير احترافي ويفتقد للابتكار وهناك الكثير من الطلبات لم تقم بها ابدا ومنها وضعتهة بطريقة بدائية وغير فعالة وايضا قلت <br>**evidence:** globe → components/globe-view.tsx; news → lib/modules/news.ts; sources → lib/engine/catalog |
-| [R104](requests-recovered.md#r104) |2026-08-08|`general`|| `open` | اعطني رابط التطبيق لارى اخر التطوير |
+| [R104](requests-recovered.md#r104) |2026-08-08|`general`|| `answered` | اعطني رابط التطبيق لارى اخر التطوير |
 | [R105](requests-recovered.md#r105) |2026-08-08|`ai`|| `needs-check` | هلب متاكد ان تطبيقنا كله مضبوط مع قاعدة البياناتhttps://agentswarmquantu5456.pinet.com وهذا الرابط الرسمي للتطبيق عل ابستيديو <br>**evidence:** agents → .claude/agents |
 | [R106](requests-recovered.md#r106) |2026-08-13|`data`|| `open` | اكمل كل العمل واكمل كل ماطابته منك وكل ماجهزناه للتطبيق حتى اخر نقطة في التطبيق كاخر تطوير واصلاح الاخطاء واتمام كل المهام وكل مايلزم مع فيرسل وقاعدة البيانات لانه حتى ال |
 | [R107](requests-recovered.md#r107) |2026-08-13|`general`|2| `open` | قلت لك اكمل كل شيئ |
 | [R108](requests-recovered.md#r108) |2026-08-13|`general`|| `answered` | هل اكملت كل المهام وهل هذه اخر نسخة لنتيجة كل التطبيق |
 | [R109](requests-recovered.md#r109) |2026-08-13|`payments`|| `needs-check` | ما يلزمك: دمج هذه الدفعات إلى main (قل «افتح PR» وأفتحه فورًا)، وضبط CRON_SECRET وADMIN_SECRET وSOCIAL_SECRET_KEY وDATABASE_URL على Vercel ثم إعادة النشر. ولا أزال غير قا <br>**evidence:** payments → lib/payments; publishing → lib/modules/autopublish.ts; secrets → docs/SECURITY.md |
 | [R110](requests-recovered.md#r110) |2026-08-13|`security`|| `needs-check` | جوابك معقط اعطني المفاتيح بجانب كل قيمة له دون تعقيد وكلام فارغ <br>**evidence:** secrets → docs/SECURITY.md |
-| [R111](requests-recovered.md#r111) |2026-08-13|`general`|| `open` | ر من هي بالظبط |
+| [R111](requests-recovered.md#r111) |2026-08-13|`general`|| `answered` | ر من هي بالظبط |
 | [R112](requests-recovered.md#r112) |2026-08-13|`i18n`|| `needs-check` | اعطني الطريقة علة نتفلي بالعربي <br>**evidence:** i18n/arabic → lib/i18n |
-| [R113](requests-recovered.md#r113) |2026-08-13|`general`|| `open` | حاولت اضافة المتغيرات لكن لم يقبل لانه كانت موجودة سابقا والتطبيق لم يتغير |
+| [R113](requests-recovered.md#r113) |2026-08-13|`general`|| `answered` | حاولت اضافة المتغيرات لكن لم يقبل لانه كانت موجودة سابقا والتطبيق لم يتغير |
 | [R114](requests-recovered.md#r114) |2026-08-13|`competitors`|| `open` | لليس مشكل زيب ابدا انا اتصفح من خلال فيرسل ونيتقلي وهذه الصورة من قاعدة البيانات لعلها تفيدك |
 | [R115](requests-recovered.md#r115) |2026-08-13|`deploy`|| `needs-check` | اي نشر تلقائي تقصده <br>**evidence:** publishing → lib/modules/autopublish.ts; deploy → netlify.toml |
-| [R116](requests-recovered.md#r116) |2026-08-13|`general`|| `open` | اعطني ماذا افعل انا او اكمله وحدك |
+| [R116](requests-recovered.md#r116) |2026-08-13|`general`|| `answered` | اعطني ماذا افعل انا او اكمله وحدك |
 | [R117](requests-recovered.md#r117) |2026-08-13|`auth`|| `needs-check` | curl.exe -H "Authorization: Bearer ضع-قيمة-CRON_SECRET" https://lambda-nx.vercel.app/api/cron/publish كيف اقوم بهذا ياغبي <br>**evidence:** secrets → docs/SECURITY.md; api docs → lib/api-catalog.ts; commit 6d7f221 Merge pull request #18 — cron schedules within the Vercel plan |
 | [R118](requests-recovered.md#r118) |2026-08-13|`deploy`|| `needs-check` | من فضلك انا لم افهم مع اي شيئ يجب عليك اصلاح كل هذا وحدك الان وايضا هناك امر لعله السبب في قيتهيب جعلت المستودع خاص المهم هو اصلح وحدك ولا تتكلم الا بعد الاصلاح الكامل <br>**evidence:** deploy → netlify.toml |
 | [R119](requests-recovered.md#r119) |2026-08-13|`deploy`|| `needs-check` | https://superb-fox-8b11f5.netlify.app/ هذا اخر رابط نشرته على نيتفلي <br>**evidence:** deploy → netlify.toml |
 | [R120](requests-recovered.md#r120) |2026-08-13|`auth`|| `needs-check` | fetch('/api/cron/publish',{headers:{Authorization:'Bearer V8ieBu5C7pmQvaUSWwk1J349c6AYnTRgDPEqO0dr'}}).then(r=>r.json()).then(console.log) ماذا افعل بهذا <br>**evidence:** api docs → lib/api-catalog.ts |
-| [R121](requests-recovered.md#r121) |2026-08-13|`general`|| `open` | طيب هل الان بخبرتك وعملك هل انتهى كل التطوير ووصلنا للهدف للانطلاق |
+| [R121](requests-recovered.md#r121) |2026-08-13|`general`|| `answered` | طيب هل الان بخبرتك وعملك هل انتهى كل التطوير ووصلنا للهدف للانطلاق |
 | [R122](requests-recovered.md#r122) |2026-08-13|`auth`|| `needs-check` | اكمل كل هذ دون توقف خاصة الزوار و تسجيل المستخدمين حقيقي وان التطبيق يعمل ووصلنا لكل ماخططنا له لنمر لاشياء اخرى لانك انجزت1 من 100 من خطتنا وعملك خير احترافي ومبتكر وكثي <br>**evidence:** accounts → lib/auth |
 | [R123](requests-recovered.md#r123) |2026-08-13|`pi`|| `needs-check` | قرار واحد يخصّك: أي رابط تعتمده رسميًا؟ rococo-centaur يعمل ويُحدَّث تلقائيًا. إن أردت superb-fox رابطًا نهائيًا (مثلًا لأنه المسجَّل في بوابة Pi)، اربطه بـ GitHub مرة وا <br>**evidence:** deploy → netlify.toml |
 | [R124](requests-recovered.md#r124) |2026-08-13|`deploy`|| `needs-check` | lambdanx تذكر يوجد مستودعين بنفس الاسم لكن الذي بجانبه 1 هو الصحيح هذ lambdanx1 وايضا اعطني ملف زيب لنملا للمرحلى الثانية <br>**evidence:** deploy → netlify.toml |
@@ -243,7 +243,7 @@ The ones that **are** genuine standing work, named rather than buried:
 | [R136](requests-recovered.md#r136) |2026-08-14|`competitors`|| `needs-check` | 1. تفعيل الوصول لعدم الحضور (قائمة السماح للنطاقات، أو إيقاف الحجب غير المسموح به). 2. أو — أسرع — أرسل لي مخرجات JSON مباشرة : سجل في متصفحك `lambdanx.netlify.app/api/wo <br>**evidence:** i18n/arabic → lib/i18n; deploy → netlify.toml; api docs → lib/api-catalog.ts |
 | [R137](requests-recovered.md#r137) |2026-08-14|`competitors`|| `open` | لم ينجح اعطني طريقة تفعيل لتتصفح وحدك كل المواقع |
 | [R138](requests-recovered.md#r138) |2026-08-14|`competitors`|| `open` | اهم نقطة اريد الان ان تتصفح وتجرب حقيقي وتقارن تطبيقنا و30 تطبيق اخر لاتتجاوز هذه النقطة الان فانت تضيع في الوكت فقط منذ اكثر من شهر |
-| [R139](requests-recovered.md#r139) |2026-08-14|`competitors`|| `open` | جرب الان انا فعلتها وهل هكذا تصل وتتصفح اي تطبيق وكل المواقع |
+| [R139](requests-recovered.md#r139) |2026-08-14|`competitors`|| `answered` | جرب الان انا فعلتها وهل هكذا تصل وتتصفح اي تطبيق وكل المواقع |
 | [R140](requests-recovered.md#r140) |2026-08-14|`globe`|| `needs-check` | اصلح الاول والثاني واكل الثلاثة وهناك ملاحضة مهمة لما تدخل تتصفح كل التطبيقات ركز عل كل النقاط والصفحات وكل التفاصيل الصغيرة والكبيرة بالتصفح والتجربة والاختبار ولاحض صفح <br>**evidence:** globe → components/globe-view.tsx; payments → lib/payments |
 | [R141](requests-recovered.md#r141) |2026-08-14|`competitors`|| `answered` | هل الان يمكنك تصفح حقيقي لكل المواقع حتى موقعنا اجبني بسرعة الان |
 | [R142](requests-recovered.md#r142) |2026-08-14|`competitors`|| `needs-check` | افحص وقارن اقوى 30 موقع او اكثر مع موقعنا بما ذلك مستودعاتهم وكل ماهو مربوط ومدعوم ويستعمل و قارن كم هو موقعنا متأخر وغير مرتب ويفتقر للكثير من التقنيات والمزايا وعقل الت <br>**evidence:** deploy → netlify.toml |
