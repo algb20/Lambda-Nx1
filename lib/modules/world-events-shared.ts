@@ -9,6 +9,7 @@
  */
 import type { Admiralty, Confidence } from '../engine/types'
 import type { Timeline } from '../analysis/timeline'
+import { countBySource, rarityOf, rarityReason } from '../analysis/significance'
 
 /**
  * What kind of thing an event is.
@@ -754,6 +755,17 @@ export function rankEvents(
   options: { now?: number; fused?: Map<string, FusedEventSummary> } = {},
 ): RankedEvent[] {
   const now = options.now ?? Date.now()
+  /**
+   * How much each publisher contributed to *this* run.
+   *
+   * The correction for a measured failure: 17 of the top 20 rows were one
+   * publisher, because NWS issues county-level warnings continuously and each
+   * grades to the same 0.75 severity. A source sending forty reports is doing
+   * its routine job; a source sending one is saying something it does not say
+   * often. See lib/analysis/significance.ts for the full argument.
+   */
+  const perSource = countBySource(events)
+
   return events
     .map((event) => {
       const cluster = options.fused?.get(event.id)
@@ -780,9 +792,16 @@ export function rankEvents(
       else reasons.push('single origin')
       if (contested) reasons.push('origins disagree')
 
+      const fromSource = perSource.get(event.sourceKey) ?? 1
+      // Stated on the row: a reader must be able to see that a report sits low
+      // because its publisher sent forty of them, not because we judged it
+      // unimportant.
+      if (fromSource > 3) reasons.push(rarityReason(event.sourceKey, fromSource))
+
       return {
         event,
-        score: operationalScore(event, now) * corroborationFactor(origins),
+        score:
+          operationalScore(event, now) * corroborationFactor(origins) * rarityOf(fromSource),
         ageHours,
         byReceipt,
         origins,

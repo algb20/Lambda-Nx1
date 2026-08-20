@@ -9,6 +9,7 @@ import { GlobeView } from "@/components/globe-view"
 import { StandingBriefPanel } from "@/components/standing-brief"
 import { UserPreferences } from "@/components/user-preferences"
 import { BottomNav } from "@/components/bottom-nav"
+import { CommandPalette } from '@/components/command-palette'
 import { SideNav } from "@/components/side-nav"
 import { ContextRail } from "@/components/context-rail"
 import { Header } from "@/components/header"
@@ -67,11 +68,47 @@ export default function HomePage() {
     return () => window.removeEventListener('popstate', onPop)
   }, [])
 
-  const navigate = (id: string) => setActiveTab(resolveTab(id))
+  /**
+   * Where the shell can be sent.
+   *
+   * A plain tab id switches tab. `gateway:<id>` — what the command palette
+   * emits — switches to Investigate *and* names the gateway in the hash, which
+   * is what the dashboard listens to. Doing it in one call keeps the palette
+   * from having to know how the dashboard holds its state.
+   */
+  const navigate = (id: string) => {
+    if (id.startsWith('gateway:')) {
+      const gateway = id.slice('gateway:'.length)
+      setTab('intelligence')
+      if (typeof window !== 'undefined') {
+        /**
+         * Path and hash in **one** `pushState`, then the event by hand.
+         *
+         * The obvious version — `setActiveTab('intelligence')` followed by
+         * `location.hash = gateway` — pushed the path first and the hash
+         * second, and the URL ended up back at `/intelligence` with the hash
+         * gone. The gateway still opened, so it looked fine; the address bar
+         * simply stopped being shareable, which is the kind of breakage nobody
+         * reports because nobody notices it happening.
+         *
+         * One push cannot race with itself, and `hashchange` does not fire for
+         * a `pushState`, so the dashboard is told directly.
+         */
+        window.history.pushState({ tab: 'intelligence' }, '', `/intelligence#${gateway}`)
+        window.dispatchEvent(new HashChangeEvent('hashchange'))
+      }
+      return
+    }
+    setActiveTab(resolveTab(id))
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20 lg:pb-0">
       <Header onNavigate={navigate} />
+
+      {/* One keystroke to any of five tabs and twenty-seven gateways. Mounted
+          at the shell so it works from every panel, including a broken one. */}
+      <CommandPalette onNavigate={navigate} />
 
       {/*
         Width is earned, not taken. `lg` brings the navigation rail and real

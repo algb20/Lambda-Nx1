@@ -33,6 +33,7 @@ import { wikidata } from './reference'
 // Gateway — Markets Board (live multi-class overview)
 import { coingeckoTop, fredCommodities, fredIndices, frankfurterBoard } from './markets-board'
 import { PROPERTY_SOURCES } from './property'
+import { VENUE_SOURCES } from './venues'
 import { COMPANY_SOURCES } from './companies'
 import { BOARD_SOURCES } from './boards'
 // Gateway — Geospatial (places + flights)
@@ -327,6 +328,14 @@ export function registerProperty(): void {
   if (registeredProperty) return
   registry.registerAll(PROPERTY_SOURCES)
   registeredProperty = true
+}
+
+let registeredVenues = false
+/** Venues: the ISO 10383 registry plus the crypto exchange index. */
+export function registerVenues(): void {
+  if (registeredVenues) return
+  registry.registerAll(VENUE_SOURCES)
+  registeredVenues = true
 }
 
 let registeredCompanies = false

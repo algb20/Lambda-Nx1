@@ -101,6 +101,7 @@ const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: s
   { id: 'board', label: 'Board', icon: Gauge, placeholder: 'live market board — press Load' },
   { id: 'property', label: 'Property', icon: Building2, placeholder: 'housing prices, rates and supply — press Load' },
   { id: 'companies', label: 'Companies', icon: Landmark, placeholder: 'a company name or ticker — or press Load for the biggest' },
+  { id: 'venues', label: 'Exchanges', icon: Landmark, placeholder: 'an exchange, a country or a MIC — or press Load for the registry' },
   { id: 'statements', label: 'Statements', icon: Megaphone, placeholder: 'a subject — or press Load for what has just been said' },
   { id: 'courts', label: 'Courts', icon: Scale, placeholder: 'a party, a subject or a doctrine — or press Load' },
   { id: 'regulation', label: 'Regulation', icon: FileText, placeholder: 'a subject — or press Load for today’s journal' },
@@ -1824,7 +1825,32 @@ function compactUsd(value: number): string {
 }
 
 export function IntelligenceDashboard() {
-  const [modeState, setMode] = useState<Mode>('nexus')
+  /**
+   * Opens on whatever the URL names, so a gateway is deep-linkable.
+   *
+   * Read synchronously in the initialiser rather than in an effect: an effect
+   * would paint Nexus first and then jump, which reads as a bug to anyone who
+   * followed a link. `#threat` is honoured, anything unrecognised falls back.
+   */
+  const [modeState, setMode] = useState<Mode>(() => {
+    if (typeof window === 'undefined') return 'nexus'
+    const asked = window.location.hash.replace(/^#/, '')
+    return MODES.some((m) => m.id === asked) ? (asked as Mode) : 'nexus'
+  })
+
+  /**
+   * The command palette switches tab and names a gateway in the hash. React has
+   * already mounted this component by then, so the initialiser above cannot
+   * see it — this is what makes ⌘K → "Space weather" land on the right gateway.
+   */
+  useEffect(() => {
+    const onHash = () => {
+      const asked = window.location.hash.replace(/^#/, '')
+      if (MODES.some((m) => m.id === asked)) setMode(asked as Mode)
+    }
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
   /** What the interface is showing. `run` shadows this when reopening a
    *  history entry, which switches gateway and runs in one gesture. */
   const mode = modeState
