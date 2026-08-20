@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { publicationTime } from './observed'
+import { publicationTime, publicationZoneOffset } from './observed'
 
 describe('publicationTime', () => {
   it('reads ISO-8601, the format most agencies publish', () => {
@@ -68,5 +68,51 @@ describe('publicationTime', () => {
   it('allows a forward-dated alert, because agencies legitimately publish one', () => {
     const soon = new Date(Date.now() + 6 * 3600 * 1000).toISOString()
     expect(publicationTime(soon)).toBe(soon)
+  })
+})
+
+describe('publicationZoneOffset', () => {
+  /**
+   * The offset is a fact about *where* something happened, not formatting. A
+   * Japanese bulletin saying `+09:00` is telling us the event happened at that
+   * hour in Japan — which is the hour every other account of it will use.
+   */
+  it('reads an ISO offset in both written forms', () => {
+    expect(publicationZoneOffset('2026-08-14T18:46:00+09:00')).toBe(540)
+    expect(publicationZoneOffset('2026-08-14T18:46:00+0900')).toBe(540)
+    expect(publicationZoneOffset('2026-08-14T05:46:00-04:00')).toBe(-240)
+  })
+
+  it('reads a half-hour and a three-quarter-hour zone', () => {
+    expect(publicationZoneOffset('2026-08-14T18:46:00+05:30')).toBe(330)
+    expect(publicationZoneOffset('2026-08-14T18:46:00+05:45')).toBe(345)
+  })
+
+  it('treats a trailing Z as the real answer zero, not as absent', () => {
+    expect(publicationZoneOffset('2026-08-14T09:46:00Z')).toBe(0)
+    expect(publicationZoneOffset('20260814T031500Z')).toBe(0)
+  })
+
+  it('reads the named zones RSS pubDate still uses', () => {
+    expect(publicationZoneOffset('Thu, 14 Aug 2026 09:46:00 GMT')).toBe(0)
+    expect(publicationZoneOffset('Thu, 14 Aug 2026 09:46:00 EDT')).toBe(-240)
+    expect(publicationZoneOffset('Thu, 14 Aug 2026 09:46:00 PST')).toBe(-480)
+  })
+
+  it('reads a numeric RFC-822 offset', () => {
+    expect(publicationZoneOffset('Thu, 14 Aug 2026 09:46:00 +0300')).toBe(180)
+  })
+
+  /**
+   * Null, not zero. A feed that stated no zone has not said "UTC" — and showing
+   * a reader a confident UTC stamp for a time nobody located is the kind of
+   * quiet wrongness this module exists to refuse.
+   */
+  it('answers null when the source stated no zone at all', () => {
+    expect(publicationZoneOffset('2026-08-14T09:46:00')).toBeNull()
+    expect(publicationZoneOffset('2026-08-14')).toBeNull()
+    expect(publicationZoneOffset('Friday, August 14, 2026 - 09:46')).toBeNull()
+    expect(publicationZoneOffset(1786806360000)).toBeNull()
+    expect(publicationZoneOffset(null)).toBeNull()
   })
 })

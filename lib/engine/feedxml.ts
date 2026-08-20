@@ -12,7 +12,7 @@
  * reported as absent rather than guessed — a missing date is `undefined`, never
  * "now", so nothing downstream can mistake a parse failure for a fresh item.
  */
-import { publicationTime } from './observed'
+import { publicationTime, publicationZoneOffset } from './observed'
 
 export interface FeedEntry {
   title: string
@@ -22,6 +22,15 @@ export interface FeedEntry {
   summary?: string
   /** ISO 8601 timestamp, only when the feed gave a parseable date. */
   published?: string
+  /**
+   * The UTC offset the feed itself stated, in minutes east of UTC.
+   *
+   * `published` normalises to an instant, which is right for sorting and wrong
+   * for display: `Thu, 14 Aug 2026 09:46:00 +0300` is the publisher telling us
+   * what time it was *there*. Kept so a reader can be shown the hour the source
+   * reported rather than only the hour in their own city.
+   */
+  publishedOffsetMinutes?: number
   /** The feed's own identifier for the item (Atom `<id>` / RSS `<guid>`). */
   id?: string
   authors: string[]
@@ -96,6 +105,23 @@ export function feedDate(raw: string | null): string | undefined {
   return publicationTime(raw) ?? undefined
 }
 
+/**
+ * The instant and the publisher's own offset, from one raw string.
+ *
+ * Returned as a pair so the two can never come apart: an offset attached to a
+ * date that failed to parse would describe nothing, and a caller spreading this
+ * gets both or neither.
+ */
+export function feedTime(raw: string | null): {
+  published?: string
+  publishedOffsetMinutes?: number
+} {
+  const published = feedDate(raw)
+  if (!published) return {}
+  const offset = publicationZoneOffset(raw)
+  return offset === null ? { published } : { published, publishedOffsetMinutes: offset }
+}
+
 const SKIPPED_LINK_RELS = new Set(['self', 'enclosure', 'edit', 'replies', 'via'])
 
 /**
@@ -168,7 +194,7 @@ export function parseFeed(xml: string, opts: { summaryMax?: number } = {}): Feed
       title,
       link: entryLink(block),
       summary: summary ? truncate(summary, opts.summaryMax ?? 400) : undefined,
-      published: feedDate(firstTagText(block, ['published', 'pubDate', 'dc:date', 'updated'])),
+      ...feedTime(firstTagText(block, ['published', 'pubDate', 'dc:date', 'updated'])),
       id: firstTagText(block, ['id', 'guid']) ?? undefined,
       authors: entryAuthors(block),
     })

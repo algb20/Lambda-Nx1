@@ -20,6 +20,7 @@ import {
   Pause,
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { TimeStamp } from '@/components/time-stamp'
 import { Badge } from '@/components/ui/badge'
 import { ErrorBoundary } from '@/components/error-boundary'
 import { WorldSurface, type SurfacePoint } from '@/components/world-surface'
@@ -139,17 +140,6 @@ const HISTOGRAM_BARS = 48
  */
 const CLUSTER_RADIUS_PX = 24
 
-function timeAgo(iso: string | null): string {
-  if (!iso) return 'unknown'
-  const diff = Date.now() - Date.parse(iso)
-  if (!Number.isFinite(diff) || diff < 0) return 'just now'
-  const mins = Math.floor(diff / 60000)
-  if (mins < 1) return 'just now'
-  if (mins < 60) return `${mins}m ago`
-  const hours = Math.floor(mins / 60)
-  if (hours < 24) return `${hours}h ago`
-  return `${Math.floor(hours / 24)}d ago`
-}
 
 /**
  * The canvas has to fit a phone as well as a desktop. A fixed 440px filled a
@@ -495,7 +485,7 @@ export function GlobeView() {
           className="ml-auto flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-muted-foreground ring-1 ring-border transition-colors hover:bg-muted disabled:opacity-50"
         >
           <RefreshCw className={`h-3 w-3 ${refreshing ? 'animate-spin' : ''}`} />
-          {report ? timeAgo(report.generatedAt) : 'Refresh'}
+          {report ? <TimeStamp iso={report.generatedAt} fallback="Refresh" /> : 'Refresh'}
         </button>
       </div>
 
@@ -888,7 +878,7 @@ export function GlobeView() {
                 ) : (
                   <span>{e.title}</span>
                 )}
-                <span className="ml-1 text-muted-foreground">· {timeAgo(e.at)}</span>
+                <TimeStamp iso={e.observedAt ?? e.at} offsetMinutes={e.observedOffsetMinutes ?? null} place={e.country} className="ml-1 text-muted-foreground" prefix="·" />
               </li>
             ))}
           </ul>

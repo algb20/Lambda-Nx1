@@ -132,6 +132,17 @@ export interface WorldEvent {
    * "now".
    */
   observedAt: string | null
+  /**
+   * The UTC offset the source itself stated, in minutes east of UTC.
+   *
+   * `+09:00` on a Japanese bulletin is not formatting — it is the agency saying
+   * the event happened at that hour *where it happened*, which is the hour every
+   * other account of it will use. `observedAt` normalises to an instant and
+   * would otherwise throw that away. Null means the source stated no zone, and
+   * the reader is shown their own, labelled as theirs; a zone guessed from a
+   * country is wrong for every country wide enough to have more than one.
+   */
+  observedOffsetMinutes?: number | null
   sourceKey: string
   sourceUrl: string | null
   /**
