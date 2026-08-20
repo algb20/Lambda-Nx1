@@ -25,10 +25,10 @@
  *
  *  - **Not before 1970.** Nothing in a live hazard, alert or news feed is older
  *    than the epoch. A date that early is a parse artefact, not history.
- *  - **Not more than 30 days ahead.** Observations are not made in the future.
- *    The allowance is not zero because official alert systems legitimately
- *    publish a forward `effective` time, and because a timezone-less string
- *    parsed as local can land hours ahead of UTC.
+ *  - **Not meaningfully ahead of now.** Observations are not made in the
+ *    future. The allowance is not zero, because a publisher's clock drifts and
+ *    a timezone-less string can be read a little ahead — but it is small, for
+ *    the reason set out at MAX_FUTURE_SKEW_MS.
  *
  * Outside those bounds the answer is `null`, which is the honest one: the source
  * stated a time and we could not defend it. That is a finding about the source,
@@ -39,8 +39,36 @@
 /** Lower bound: the Unix epoch. Nothing a live feed publishes precedes it. */
 const EARLIEST_MS = 0
 
-/** Upper allowance for forward-dated alerts and timezone-less strings. */
-const FUTURE_ALLOWANCE_MS = 30 * 24 * 60 * 60 * 1000
+/**
+ * How far ahead of now a *publication* time may still be believed.
+ *
+ * ## Why this used to be thirty days, and why that was wrong
+ *
+ * The old allowance was a month, on the reasoning that alert systems publish
+ * forward `effective` times and that a timezone-less string can land hours
+ * ahead. Both are true and neither justified it, because of what the number is
+ * used for: `publishedAt` is *when this was said*, and it feeds the freshness
+ * decay in the ranking.
+ *
+ * The consequence was measured on the live board. Four rows carried times that
+ * had not happened yet — a US hurricane centre bulletin dated **33 hours into
+ * the future**, because the field being read was the next scheduled advisory
+ * rather than the publication. And since the ranking decays severity by age, an
+ * event dated tomorrow is fresher than everything real, so it is guaranteed the
+ * top of "most significant now". A wrong date does not merely display wrongly;
+ * it reorders the whole board around itself.
+ *
+ * Two hours covers what genuinely deserves covering: a publisher's clock drift,
+ * and a string with no zone read a little ahead of the reader's. Past that, the
+ * honest answer is that the source stated a time we cannot defend — which is
+ * `null`, which every renderer already shows as "not stated" and every ranker
+ * already places by receipt instead.
+ *
+ * A forward `effective` or `expires` is a real and useful fact. It is simply not
+ * this fact, and a feed that wants it carried should map it as its own field
+ * rather than as the moment of publication.
+ */
+export const MAX_FUTURE_SKEW_MS = 2 * 60 * 60 * 1000
 
 /**
  * Milliseconds vs seconds, decided by magnitude.
@@ -64,7 +92,7 @@ export function publicationTime(value: unknown): string | null {
   const ms = toMillis(value)
   if (ms === null) return null
   if (ms < EARLIEST_MS) return null
-  if (ms > Date.now() + FUTURE_ALLOWANCE_MS) return null
+  if (ms > Date.now() + MAX_FUTURE_SKEW_MS) return null
   return new Date(ms).toISOString()
 }
 

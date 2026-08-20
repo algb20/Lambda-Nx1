@@ -32,8 +32,22 @@ export const INFRASTRUCTURE_SOURCES: CatalogSource[] = [
     licence: ccBy('National Grid ESO, Carbon Intensity API', 'https://carbonintensity.org.uk/'),
     minIntervalSec: 1800,
     keyless: true,
-    map: { time: 'from' },
-    note: 'Half-hourly. A grid under stress shows here before it shows anywhere else.',
+    /**
+     * The record is three numbers and a word — `from`, `to`, `intensity` — with
+     * nothing an adapter could read as a headline, so this feed answered every
+     * half-hour and contributed nothing, and the board reported it as a quiet
+     * hour. It was never quiet; it was unreadable.
+     *
+     * The forecast is deliberately absent from the headline. The measured figure
+     * is what happened; the forecast is what someone expected to happen, and
+     * this platform does not put predictions on the board (charter §1).
+     */
+    map: {
+      time: 'from',
+      titleTemplate:
+        'UK grid carbon intensity {intensity.actual} gCO₂/kWh — {intensity.index}',
+    },
+    note: 'Half-hourly, measured. A grid under stress shows here before it shows anywhere else.',
   },
   {
     key: 'eia_electricity',
@@ -245,8 +259,17 @@ export const INFRASTRUCTURE_SOURCES: CatalogSource[] = [
     licence: PUBLIC_DOMAIN,
     minIntervalSec: 900,
     keyless: true,
-    map: { time: 't', title: 'v' },
-    note: 'Storm surge measured at the gauge, not modelled.',
+    /**
+     * The station is fixed in the URL above (8454000, Providence RI), so naming
+     * it in the headline states a fact rather than guessing one. The row itself
+     * carries only a time and a number — which is how this feed came to publish
+     * world events titled "0.821".
+     */
+    map: {
+      time: 't',
+      titleTemplate: 'Water level {v} m at Providence, Rhode Island — NOAA gauge 8454000',
+    },
+    note: 'Storm surge measured at the gauge, not modelled. One station, not a national picture.',
   },
   {
     key: 'usgs_water_alerts',

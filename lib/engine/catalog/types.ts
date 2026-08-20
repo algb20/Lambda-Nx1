@@ -171,11 +171,47 @@ export interface CatalogSource {
    */
   keyEnv?: string
 
+  /**
+   * A rolling window over `url`, for publishers whose "recent" is a query.
+   *
+   * Given the moment of the request, it returns the address to fetch. It must
+   * keep the host of `url` — that host is what the passive guardrail
+   * allow-lists, and it is checked, so a function that wandered to another
+   * domain would be refused rather than followed.
+   *
+   * It exists because a frozen address can be quietly, permanently wrong. NVD's
+   * API returns its catalogue from the beginning when no date range is given,
+   * so a source entered as "recently published CVEs" spent its life reporting
+   * **CVE-1999-0095** — a 27-year-old record, delivered every hour, correct in
+   * every particular except the one that mattered. Nothing failed; the feed was
+   * simply answering a different question from the one it was catalogued under.
+   */
+  urlFor?: (now: Date) => string
+
   /** For `kind: 'json'`, the dotted path to the array of records. */
   path?: string
 
   /** Field mapping for `kind: 'json'`, from our names to theirs. */
   map?: {
+    /**
+     * A readable headline built from the record's own fields.
+     *
+     * `{field}` placeholders are filled from the row by the same dotted-path
+     * lookup as every other mapping; anything else is literal. It takes
+     * precedence over `title`.
+     *
+     * It exists because a great many measurement APIs publish records with no
+     * headline at all — only numbers — and pointing `title` at one of those
+     * numbers produces exactly what it says. NOAA's tide gauge appeared on the
+     * world board as an event titled **"0.821"**: true, sourced, timestamped,
+     * and meaningless to anyone reading it. A row nobody can understand is not
+     * intelligence, whatever its provenance.
+     *
+     * A placeholder that the row does not carry leaves the template unused, so
+     * a feed that changes shape falls back to the ordinary title lookup rather
+     * than publishing half a sentence.
+     */
+    titleTemplate?: string
     title?: string
     url?: string
     time?: string

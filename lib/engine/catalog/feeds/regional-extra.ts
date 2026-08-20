@@ -316,7 +316,8 @@ export const REGIONAL_EXTRA_SOURCES: CatalogSource[] = [
     key: 'kyivindependent',
     name: 'The Kyiv Independent',
     publisher: 'The Kyiv Independent',
-    url: 'https://kyivindependent.com/feed/',
+    // The site's own <head> advertises this address; /feed/ is gone.
+    url: 'https://kyivindependent.com/news-archive/rss/',
     kind: 'rss',
     discipline: 'osint',
     topics: ['news', 'conflict'],

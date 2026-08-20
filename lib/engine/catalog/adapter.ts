@@ -93,6 +93,32 @@ function fromGeoJson(source: CatalogSource, body: unknown, retrievedAt: string):
   })
 }
 
+/**
+ * Build a headline from a record's own fields, or nothing.
+ *
+ * Measurement APIs frequently publish rows with no headline at all — only
+ * numbers — and pointing `title` at one of those numbers yields exactly what it
+ * says. NOAA's tide gauge reached the world board as an event titled **"0.821"**:
+ * sourced, timestamped, and meaningless to whoever read it.
+ *
+ * Returns null rather than a half-filled sentence when a placeholder is missing,
+ * so a feed that changes shape falls back to the ordinary title lookup instead
+ * of publishing "water level {v} m at ".
+ */
+export function fillTemplate(template: string | undefined, row: unknown): string | null {
+  if (!template) return null
+  let missing = false
+  const out = template.replace(/\{([^{}]+)\}/g, (_, path: string) => {
+    const value = dig(row, path.trim())
+    const text = str(value) ?? (typeof value === 'number' ? String(value) : null)
+    if (text === null) missing = true
+    return text ?? ''
+  })
+  if (missing) return null
+  const trimmed = out.trim()
+  return trimmed.length > 0 ? trimmed : null
+}
+
 /** Arbitrary JSON, guided by the record's `path` and `map`. */
 function fromJson(source: CatalogSource, body: unknown, retrievedAt: string): Evidence[] {
   // A GeoJSON-shaped payload is read as GeoJSON even when declared `json`,
@@ -105,6 +131,7 @@ function fromJson(source: CatalogSource, body: unknown, retrievedAt: string): Ev
 
   return list.flatMap((row) => {
     const claim =
+      fillTemplate(map.titleTemplate, row) ??
       str(dig(row, map.title)) ??
       str(dig(row, 'title')) ??
       str(dig(row, 'name')) ??
@@ -203,6 +230,30 @@ function capabilityOf(entry: CatalogSource): 'news' | 'world_events' {
   return entry.topics.includes('news') ? 'news' : 'world_events'
 }
 
+/**
+ * The address to fetch right now.
+ *
+ * `urlFor` may narrow a feed to a rolling window (see `CatalogSource.urlFor`),
+ * but it may not leave the host the guardrail allow-listed. That is checked here
+ * rather than trusted: the allow-list is derived from `url`, so a window
+ * function that wandered to another domain would otherwise be a way to reach a
+ * host no catalogue entry ever declared. On a mismatch — or on anything
+ * malformed — the declared `url` is used, so the feed degrades to its old
+ * behaviour instead of going silent.
+ */
+export function requestUrl(entry: CatalogSource, now: Date): string {
+  if (!entry.urlFor) return entry.url
+  try {
+    const candidate = new URL(entry.urlFor(now))
+    const declared = new URL(entry.url)
+    return candidate.hostname.toLowerCase() === declared.hostname.toLowerCase()
+      ? candidate.toString()
+      : entry.url
+  } catch {
+    return entry.url
+  }
+}
+
 export function catalogSource(entry: CatalogSource): Source {
   return {
     key: entry.key,
@@ -217,7 +268,7 @@ export function catalogSource(entry: CatalogSource): Source {
     minIntervalMs: entry.minIntervalSec * 1000,
 
     async run(_input, ctx: SourceContext): Promise<Evidence[]> {
-      const res = await ctx.fetch(entry.url, {
+      const res = await ctx.fetch(requestUrl(entry, new Date()), {
         headers: {
           // Named honestly with a contact route. Providers block anonymous
           // scrapers and they are right to; a source that will not say who it

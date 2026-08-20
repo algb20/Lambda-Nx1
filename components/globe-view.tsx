@@ -1012,11 +1012,34 @@ export function GlobeView() {
                     style={{ backgroundColor: r.event.color }}
                   />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-xs">{r.event.title}</span>
+                    <span className="block truncate text-xs">
+                      {/*
+                        The mark is rare by construction, and that is what makes
+                        it worth anything: severe *and* unusual for its
+                        publisher, or agreed by independent origins, or measured
+                        past the point where grading matters — and never more
+                        than twelve hours old. A banner that fires on the county
+                        flood warning is a banner nobody reads, which then fails
+                        at the one moment it exists for.
+                      */}
+                      {r.breaking.breaking ? (
+                        <span className="mr-1.5 inline-block rounded-sm bg-red-600 px-1 py-px align-[1px] text-[9px] font-bold uppercase tracking-wide text-white">
+                          Breaking
+                        </span>
+                      ) : null}
+                      {r.event.title}
+                    </span>
                     <span className="block text-[10px] text-muted-foreground">
                       {r.event.country ? `${r.event.country} · ` : ''}
                       {r.event.categoryLabel} · {r.reasons.join(' · ')}
                     </span>
+                    {/* Never a bare label: the reader is told what made it one,
+                        in the same breath, so they can disagree. */}
+                    {r.breaking.breaking ? (
+                      <span className="block text-[10px] font-medium text-red-600 dark:text-red-400">
+                        Breaking because {r.breaking.reasons.join('; ')}
+                      </span>
+                    ) : null}
                   </span>
                   {r.contested ? (
                     <span className="shrink-0 text-[10px] text-amber-600 dark:text-amber-500">
@@ -1527,6 +1550,16 @@ function EventDetail({
         </span>{' '}
         · {ranked.reasons.join(' · ')}
       </p>
+
+      {/* The same verdict as the board row, from the same computation, so the
+          two can never disagree about what is breaking. */}
+      {ranked.breaking.breaking ? (
+        <p className="mt-1.5 rounded border border-red-600/30 bg-red-600/10 px-2 py-1 text-[10px] leading-relaxed text-red-700 dark:text-red-400">
+          <span className="font-bold uppercase tracking-wide">Breaking</span> — {' '}
+          {ranked.breaking.reasons.join('; ')}. Nothing here is a forecast: this says the report is
+          unusual, corroborated or extreme right now, not what happens next.
+        </p>
+      ) : null}
 
       {/* Both clocks, never collapsed into one. */}
       <div className="mt-2 flex flex-wrap gap-x-4 gap-y-0.5 text-[10px] text-muted-foreground">

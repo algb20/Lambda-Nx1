@@ -237,3 +237,123 @@ function locale2(raw: string): Locale | null {
   const base = raw.trim().toLowerCase().split(/[-_]/)[0]
   return base in COPY ? (base as Locale) : null
 }
+
+// ── Following by email ──────────────────────────────────────────────────────
+
+/**
+ * Copy for the one message a pending follower is ever sent.
+ *
+ * Deliberately short and entirely about consent. It says who we are, what will
+ * arrive, that nothing arrives unless they click, and that ignoring it ends the
+ * matter — which is the honest description of double opt-in and also the thing
+ * that makes a message like this survive a spam filter: it reads as a
+ * transaction the reader started, because it is one.
+ */
+const FOLLOW_COPY: Record<Locale, {
+  dir: 'ltr' | 'rtl'
+  subject: string
+  lead: string
+  action: string
+  ignore: string
+  signature: string
+}> = {
+  en: {
+    dir: 'ltr',
+    subject: 'Confirm that you want the Lambda brief',
+    lead: 'Somebody asked for the Lambda world brief to be sent to this address. If that was you, confirm it below and it will start arriving.',
+    action: 'Confirm this address',
+    ignore: 'If it was not you, ignore this message. Nothing will ever be sent to this address, and we will forget the request.',
+    signature: 'Lambda — open-source intelligence',
+  },
+  ar: {
+    dir: 'rtl',
+    subject: 'أكّد رغبتك في تلقّي موجز لامبدا',
+    lead: 'طلب أحدهم إرسال موجز لامبدا العالمي إلى هذا العنوان. إن كنت أنت، فأكّد ذلك أدناه ليبدأ وصوله.',
+    action: 'تأكيد هذا العنوان',
+    ignore: 'إن لم تكن أنت، فتجاهل هذه الرسالة. لن يُرسل أي شيء إلى هذا العنوان، وسننسى الطلب.',
+    signature: 'لامبدا — منصة الاستخبارات',
+  },
+  es: {
+    dir: 'ltr',
+    subject: 'Confirma que quieres el informe de Lambda',
+    lead: 'Alguien ha pedido que el informe mundial de Lambda se envíe a esta dirección. Si has sido tú, confírmalo abajo y empezará a llegar.',
+    action: 'Confirmar esta dirección',
+    ignore: 'Si no has sido tú, ignora este mensaje. No se enviará nada a esta dirección y olvidaremos la solicitud.',
+    signature: 'Lambda — inteligencia de fuentes abiertas',
+  },
+  fr: {
+    dir: 'ltr',
+    subject: 'Confirmez que vous voulez le bulletin Lambda',
+    lead: "Quelqu'un a demandé que le bulletin mondial de Lambda soit envoyé à cette adresse. Si c'était vous, confirmez ci-dessous et il commencera à arriver.",
+    action: 'Confirmer cette adresse',
+    ignore: "Si ce n'était pas vous, ignorez ce message. Rien ne sera envoyé à cette adresse et nous oublierons la demande.",
+    signature: 'Lambda — renseignement de sources ouvertes',
+  },
+  zh: {
+    dir: 'ltr',
+    subject: '确认您希望接收 Lambda 简报',
+    lead: '有人请求将 Lambda 全球简报发送至此地址。如果是您本人，请在下方确认，简报将开始送达。',
+    action: '确认此地址',
+    ignore: '如果不是您，请忽略此邮件。我们不会向此地址发送任何内容，并会删除该请求。',
+    signature: 'Lambda — 公开来源情报',
+  },
+  hi: {
+    dir: 'ltr',
+    subject: 'पुष्टि करें कि आप Lambda ब्रीफ़ चाहते हैं',
+    lead: 'किसी ने इस पते पर Lambda का वैश्विक ब्रीफ़ भेजने के लिए कहा है। यदि यह आप थे, तो नीचे पुष्टि करें और यह आना शुरू हो जाएगा।',
+    action: 'इस पते की पुष्टि करें',
+    ignore: 'यदि यह आप नहीं थे, तो इस संदेश को अनदेखा करें। इस पते पर कुछ भी नहीं भेजा जाएगा और हम अनुरोध भूल जाएंगे।',
+    signature: 'Lambda — मुक्त स्रोत ख़ुफ़िया',
+  },
+  id: {
+    dir: 'ltr',
+    subject: 'Konfirmasi bahwa Anda ingin menerima ringkasan Lambda',
+    lead: 'Seseorang meminta ringkasan dunia Lambda dikirim ke alamat ini. Jika itu Anda, konfirmasikan di bawah dan ringkasan akan mulai datang.',
+    action: 'Konfirmasi alamat ini',
+    ignore: 'Jika itu bukan Anda, abaikan pesan ini. Tidak ada yang akan dikirim ke alamat ini, dan kami akan melupakan permintaan tersebut.',
+    signature: 'Lambda — intelijen sumber terbuka',
+  },
+}
+
+/**
+ * The confirmation message.
+ *
+ * Carries the unsubscribe link as well as the confirm link, and declares
+ * `List-Unsubscribe` — even here, where there is nothing yet to unsubscribe
+ * from. Mail providers read that header as a signal that a sender is honest
+ * about letting people leave, and the first message from a domain is exactly
+ * the one being judged.
+ */
+export function followConfirmEmail(input: {
+  to: string
+  confirmUrl: string
+  unsubscribeUrl: string
+  locale?: string
+}): MailMessage {
+  const locale = (input.locale && locale2(input.locale)) || 'en'
+  const copy = FOLLOW_COPY[locale]
+
+  const text = [copy.lead, '', `${copy.action}: ${input.confirmUrl}`, '', copy.ignore, '', copy.signature].join('\n')
+
+  const html = [
+    `<div dir="${copy.dir}" style="margin:0;padding:24px;background:#0b0f14;color:#e6edf3;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:15px;line-height:1.6">`,
+    '<div style="max-width:520px;margin:0 auto;background:#111820;border:1px solid #1f2933;border-radius:12px;padding:28px">',
+    '<div style="font-size:22px;font-weight:700;letter-spacing:-0.02em;color:#4fc3f7">&#955; Lambda</div>',
+    `<p style="margin:20px 0 0">${escapeHtml(copy.lead)}</p>`,
+    `<p style="margin:24px 0"><a href="${escapeHtml(input.confirmUrl)}" style="display:inline-block;background:#4fc3f7;color:#04121a;font-weight:600;text-decoration:none;border-radius:8px;padding:12px 20px">${escapeHtml(copy.action)}</a></p>`,
+    `<p style="margin:16px 0 0;font-size:13px;color:#8b98a5">${escapeHtml(copy.ignore)}</p>`,
+    `<p style="margin:22px 0 0;font-size:12px;color:#5c6b7a">${escapeHtml(copy.signature)}</p>`,
+    '</div></div>',
+  ].join('')
+
+  return {
+    to: input.to,
+    subject: copy.subject,
+    text,
+    html,
+    headers: {
+      'List-Unsubscribe': `<${input.unsubscribeUrl}>`,
+      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+    },
+  }
+}

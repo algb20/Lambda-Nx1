@@ -9,7 +9,13 @@
  */
 import type { Admiralty, Confidence } from '../engine/types'
 import type { Timeline } from '../analysis/timeline'
-import { countBySource, rarityOf, rarityReason } from '../analysis/significance'
+import {
+  assessBreaking,
+  countBySource,
+  rarityOf,
+  rarityReason,
+  type BreakingVerdict,
+} from '../analysis/significance'
 
 /**
  * What kind of thing an event is.
@@ -739,6 +745,20 @@ export interface RankedEvent {
    * to take on faith, and this product exists to be the opposite of that.
    */
   reasons: string[]
+  /**
+   * Whether this one deserves to interrupt the reader, and why.
+   *
+   * Computed here rather than in a component so that the globe, the category
+   * panels, the brief and the MCP tools all interrupt on the same evidence. A
+   * banner that means one thing on one screen and another elsewhere is worse
+   * than no banner.
+   *
+   * The bar is high on purpose (see lib/analysis/significance): severe *and*
+   * rare, or corroborated by independent origins, or a measurement past the
+   * point where grading matters — and never stale. Routine high-severity
+   * volume, the county flood warning, cannot qualify on any of the three.
+   */
+  breaking: BreakingVerdict
 }
 
 /**
@@ -807,6 +827,19 @@ export function rankEvents(
         origins,
         contested,
         reasons,
+        breaking: assessBreaking(
+          {
+            title: event.title,
+            sourceKey: event.sourceKey,
+            category: event.category,
+            severity: event.severity,
+            magnitude: event.magnitude,
+            magnitudeUnit: event.magnitudeUnit,
+            origins,
+            ageHours,
+          },
+          fromSource,
+        ),
       }
     })
     .sort((a, b) => {

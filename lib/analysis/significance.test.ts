@@ -262,6 +262,52 @@ describe('what earns a breaking banner', () => {
     expect(verdict.reasons.join(' ')).toContain('measured at 7.7')
   })
 
+  it('names the scale, because a bare number is not a claim anyone can check', () => {
+    const verdict = assessBreaking({ ...base, severity: 0.2, magnitudeUnit: 'Mww' }, 40)
+    expect(verdict.reasons.join(' ')).toContain('measured at 7.7 Mww')
+  })
+
+  /**
+   * Found in live output, not in review. Across 119 sources `magnitude` is not
+   * one quantity — it is a moment magnitude here, an altitude in kilometres
+   * there — and a single threshold written for earthquakes reported the
+   * **International Space Station as breaking news because it was 429 km up**.
+   */
+  it('refuses to read a number on some other scale as an earthquake', () => {
+    const iss = assessBreaking(
+      {
+        sourceKey: 'iss_position',
+        category: 'space',
+        title: 'International Space Station overhead',
+        severity: 0,
+        magnitude: 428.8,
+        magnitudeUnit: 'km',
+        origins: 1,
+        ageHours: 0.1,
+      },
+      1,
+    )
+    expect(iss.breaking).toBe(false)
+    expect(iss.reasons).toEqual([])
+  })
+
+  it('leaves a category with no stated alarm to qualify like anything else', () => {
+    const gauge = assessBreaking(
+      {
+        sourceKey: 'noaa_coops_water',
+        category: 'infrastructure',
+        title: 'Water level 0.821 m',
+        severity: 0,
+        magnitude: 999,
+        magnitudeUnit: 'm',
+        origins: 1,
+        ageHours: 0.5,
+      },
+      1,
+    )
+    expect(gauge.breaking).toBe(false)
+  })
+
   /**
    * The whole reason the bar is high. A banner that fires on every county
    * warning is a banner nobody reads — and then it fails at the one moment it

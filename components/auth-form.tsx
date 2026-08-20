@@ -34,7 +34,25 @@ import { normalizeUsername, usernameError, usernameProblem } from '@/lib/auth/po
  * assumed — see `/api/auth/methods`. Offering a "Forgot password?" link that
  * leads to a 503 makes a correctly-configured-for-Pi deployment look broken.
  */
-export type AuthMode = 'login' | 'register' | 'forgot'
+/**
+ * ## Why Pi sign-in is its own mode and not a second meaning for one field
+ *
+ * This form used to ask for "Email or Pi username" in one box and "Password or
+ * Pi passphrase" in the next. Two identity systems sharing two inputs, with the
+ * label listing both and committing to neither.
+ *
+ * It reads as unfinished, and it is worse than it reads. A visitor who has never
+ * heard of Pi Network is asked, at the first screen of the product, to choose
+ * between two things when only one of them can apply to them. A pioneer is left
+ * unsure whether the box wants their Pi name or the address they used off-Pi.
+ * No mainstream product does this: they ask for one identity, and offer the
+ * other as a clearly separate route underneath.
+ *
+ * So `pi-login` is a mode of its own. The server never needed the ambiguity —
+ * `/api/auth/login` resolves either kind from one `identifier` field — so this
+ * is purely about asking one question at a time.
+ */
+export type AuthMode = 'login' | 'register' | 'forgot' | 'pi-login'
 type Step = 'identify' | 'code'
 
 export interface AuthedUser {
@@ -122,10 +140,13 @@ export function AuthForm({
   const handleProblem = mode === 'register' && username ? usernameProblem(username) : null
   const digits = code.replace(/\D/g, '')
 
+  /** The two modes that sign somebody in directly, rather than mailing a code. */
+  const isDirectLogin = mode === 'login' || mode === 'pi-login'
+
   const canSubmit = (() => {
     if (busy) return false
     if (step === 'identify') {
-      if (mode === 'login') return Boolean(identifier.trim() && password)
+      if (isDirectLogin) return Boolean(identifier.trim() && password)
       return Boolean(identifier.trim())
     }
     if (digits.length !== 6) return false
@@ -171,7 +192,7 @@ export function AuthForm({
     setError(null)
     try {
       if (step === 'identify') {
-        if (mode === 'login') {
+        if (isDirectLogin) {
           await post('/api/auth/login', { identifier: identifier.trim(), password })
           setPassword('')
           await onAuthenticated()
@@ -337,25 +358,40 @@ export function AuthForm({
   // ── The address / sign-in screen ───────────────────────────────────────────
   return (
     <div className={compact ? 'space-y-2' : 'space-y-2'}>
+      {mode === 'pi-login' ? (
+        <button
+          onClick={() => reset('login')}
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to email sign-in
+        </button>
+      ) : null}
+
+      {/*
+        One identity per screen. `type="email"` gets the right keyboard on a
+        phone and the browser's own address validation; the Pi screen asks for a
+        username instead, and neither box ever says "or".
+      */}
       <Input
-        type={mode === 'login' ? 'text' : 'email'}
+        type={mode === 'pi-login' ? 'text' : 'email'}
         value={identifier}
         onChange={(e) => setIdentifier(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && mode !== 'login' && submit()}
-        placeholder={mode === 'login' ? 'Email or Pi username' : 'name@example.com'}
+        onKeyDown={(e) => e.key === 'Enter' && !isDirectLogin && submit()}
+        placeholder={mode === 'pi-login' ? 'Pi Network username' : 'Email address'}
         autoCapitalize="none"
         autoCorrect="off"
         spellCheck={false}
-        autoComplete={mode === 'login' ? 'username' : 'email'}
+        autoComplete={mode === 'pi-login' ? 'username' : 'email'}
       />
 
-      {mode === 'login' ? (
+      {isDirectLogin ? (
         <Input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && submit()}
-          placeholder="Password or Pi passphrase"
+          placeholder={mode === 'pi-login' ? 'Pi passphrase' : 'Password'}
           autoComplete="current-password"
         />
       ) : null}
@@ -363,7 +399,7 @@ export function AuthForm({
       <Button onClick={submit} disabled={!canSubmit} className="w-full">
         {busy ? (
           <Loader2 className="h-4 w-4 animate-spin" />
-        ) : mode === 'login' ? (
+        ) : isDirectLogin ? (
           'Sign in'
         ) : mode === 'register' ? (
           'Send verification code'
@@ -372,12 +408,12 @@ export function AuthForm({
         )}
       </Button>
 
-      {mode === 'login' ? (
+      {mode === 'pi-login' ? (
         <p className="text-[11px] leading-relaxed text-muted-foreground">
-          Signing in with a Pi Network username works once you have linked it from inside the Pi
-          Browser, under Preferences.
+          This is for a Pi account that already has a passphrase. You set one once, from inside the
+          Pi Browser under Preferences; after that your Pi username works anywhere.
         </p>
-      ) : mode === 'register' ? (
+      ) : mode === 'login' ? null : mode === 'register' ? (
         <p className="text-[11px] leading-relaxed text-muted-foreground">
           We send a six-digit code to confirm the address is yours. We store your username, your
           email address and a hash of your password — nothing else is required. See the{' '}
@@ -414,12 +450,26 @@ export function AuthForm({
         >
           {mode === 'login' ? 'New here? Create an account' : 'Have an account? Sign in'}
         </button>
-        {mode !== 'forgot' && methods?.passwordReset !== false ? (
+        {mode !== 'forgot' && mode !== 'pi-login' && methods?.passwordReset !== false ? (
           <button onClick={() => reset('forgot')} className="text-xs text-muted-foreground hover:underline">
             Forgot password?
           </button>
         ) : null}
       </div>
+
+      {/*
+        The other route, offered as a route rather than folded into the field
+        above. A visitor who has never heard of Pi Network can ignore one line;
+        they could not ignore a box that asked them to choose.
+      */}
+      {mode === 'login' ? (
+        <button
+          onClick={() => reset('pi-login')}
+          className="block w-full rounded-md border border-border py-1.5 text-center text-xs text-muted-foreground transition-colors hover:bg-muted"
+        >
+          Signed up through Pi Network? Use your Pi username
+        </button>
+      ) : null}
     </div>
   )
 }

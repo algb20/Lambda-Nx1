@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getWorldEvents } from '@/lib/modules/world-events'
+import { rankEvents } from '@/lib/modules/world-events-shared'
+import { diversify, overflowSummary } from '@/lib/analysis/significance'
 import { rankByBand, scoreAllCountries, scoreCountry } from '@/lib/analysis/country-risk'
 import { CORRIDORS, watchAllCorridors, watchCorridor } from '@/lib/analysis/corridors'
 import {
@@ -107,27 +109,72 @@ async function runTool(name: string, args: Record<string, unknown>, request: Req
       )
       const failed = world.sourceHealth.filter((s) => s.status === 'failed').length
       const empty = world.sourceHealth.filter((s) => s.status === 'empty').length
+      /**
+       * Ranked, not in arrival order, and carrying the same breaking verdict
+       * the interface shows.
+       *
+       * A caller asking "what is happening right now" and reading the first
+       * forty rows of an unordered list gets whichever publisher happened to be
+       * chattiest — the exact failure this board already had to fix on screen.
+       * Ranking here means the machine surface and the human one agree about
+       * what matters, which is the only way a briefing built from this tool can
+       * be checked against the app.
+       */
+      const ranked = rankEvents(all)
+      /**
+       * And capped, so no single publisher owns the answer.
+       *
+       * Measured on this very tool: **11 of the first 14 rows were
+       * `nws_alerts`**, because NWS issues county-level flood warnings all day
+       * and each grades to the same severity. The interface already had this
+       * hard stop; the machine surface did not, so a model asking "what is
+       * happening in the world" was handed American county weather and would
+       * have reported exactly that. Rarity weighting alone was not enough —
+       * that is why the cap exists on screen, and it has to exist here for the
+       * same reason.
+       *
+       * What is held back is counted and named, never silently dropped.
+       */
+      const board = diversify(
+        ranked.map((r) => ({
+          ...r,
+          sourceKey: r.event.sourceKey,
+          category: r.event.category as string,
+          severity: r.event.severity,
+        })),
+        limit,
+      )
+      const heldBack = overflowSummary(board.overflow)
       return toolResult({
         generatedAt: world.generatedAt,
         matched: all.length,
-        events: all.slice(0, limit).map((e) => ({
-          title: e.title,
-          category: e.categoryLabel,
-          country: e.country,
-          countryIso: e.countryIso,
-          severity: e.severity,
-          alertLevel: e.alertLevel,
-          happenedAt: e.observedAt,
-          receivedAt: e.at,
-          source: e.sourceKey,
-          sourceUrl: e.sourceUrl,
-          admiralty: e.admiralty,
-          independenceGroup: e.independence,
+        returned: board.taken.length,
+        heldBack: heldBack ?? undefined,
+        events: board.taken.map((r) => ({
+          title: r.event.title,
+          category: r.event.categoryLabel,
+          country: r.event.country,
+          countryIso: r.event.countryIso,
+          severity: r.event.severity,
+          alertLevel: r.event.alertLevel,
+          happenedAt: r.event.observedAt,
+          receivedAt: r.event.at,
+          source: r.event.sourceKey,
+          sourceUrl: r.event.sourceUrl,
+          admiralty: r.event.admiralty,
+          independenceGroup: r.event.independence,
+          independentOrigins: r.origins,
+          breaking: r.breaking.breaking,
+          breakingBecause: r.breaking.reasons,
+          rankedBecause: r.reasons,
         })),
         limits: [
           'Public sources, passively read. Anything unpublished is absent by construction, and its absence is not evidence.',
           `${failed} feed(s) failed and ${empty} returned nothing on this run. A quiet region may be a lost feed — call source_health before reading an absence as calm.`,
           'happenedAt is null where the publisher stated no time of occurrence. It is never filled in with the time we received the report.',
+          'Ordered by significance, not by time: severity decayed by age, lifted where independent origins agree, lowered for a publisher sending a great many reports this run. Read rankedBecause before treating position as importance.',
+          'breaking means the report is unusual, corroborated or extreme right now — never a prediction of what happens next, and never a claim that nothing else matters.',
+          'No publisher may hold more than three rows, and no category more than three. This is a cap on crowding, not a judgement that the held-back reports are unimportant: raise limit or filter by category to see them.',
         ],
       })
     }

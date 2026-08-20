@@ -152,9 +152,33 @@ export const CYBER_SOURCES: CatalogSource[] = [
   // ── Vulnerability databases ──────────────────────────────────────────────
   {
     key: 'nvd_recent',
-    name: 'NVD — recently published CVEs',
+    // Named for what the window actually asks: `lastModStartDate` returns a CVE
+    // whose analysis changed yesterday as readily as one first published then,
+    // and calling that "recently published" would be the same kind of quiet
+    // inaccuracy the window was added to fix.
+    name: 'NVD — CVEs published or revised in the last two days',
     publisher: 'NIST National Vulnerability Database',
     url: 'https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=50',
+    /**
+     * NVD returns its catalogue from the beginning when no date range is given,
+     * so the address above — entered once and never re-read — delivered
+     * **CVE-1999-0095** every hour under the name "recently published CVEs".
+     * The window asks for what actually changed in the last two days.
+     *
+     * `lastModStartDate` rather than `pubStartDate` on purpose: a CVE whose
+     * severity was revised yesterday is news to a defender even though it was
+     * published last year, and the reverse — a CVE published with no analysis
+     * yet — is not yet actionable. The API caps a range at 120 days; two is far
+     * inside that and still wide enough to survive a day of failed runs.
+     */
+    urlFor: (now) => {
+      const iso = (d: Date) => d.toISOString().replace(/\.\d{3}Z$/, '.000')
+      const from = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000)
+      return (
+        'https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=50' +
+        `&lastModStartDate=${iso(from)}&lastModEndDate=${iso(now)}`
+      )
+    },
     kind: 'json',
     path: 'vulnerabilities',
     discipline: 'cyber',
@@ -164,7 +188,17 @@ export const CYBER_SOURCES: CatalogSource[] = [
     licence: PUBLIC_DOMAIN,
     minIntervalSec: 3600,
     keyless: true,
-    map: { title: 'cve.id', time: 'cve.published' },
+    /**
+     * The identifier alone is not a headline — "CVE-2026-1234" tells a reader
+     * nothing they can act on. NVD carries the English description in the first
+     * entry of `cve.descriptions`, so the row says what the flaw is and keeps
+     * the identifier in front of it for anyone looking it up.
+     */
+    map: {
+      titleTemplate: '{cve.id} — {cve.descriptions.0.value}',
+      title: 'cve.id',
+      time: 'cve.lastModified',
+    },
   },
   {
     key: 'osv_dev',
@@ -265,7 +299,9 @@ export const CYBER_SOURCES: CatalogSource[] = [
     key: 'redhat_security',
     name: 'Red Hat security advisories',
     publisher: 'Red Hat',
-    url: 'https://access.redhat.com/blogs/product-security/feed',
+    // access.redhat.com retired its blog feeds; the security channel now
+    // publishes from redhat.com itself.
+    url: 'https://www.redhat.com/en/rss/blog/channel/security',
     kind: 'rss',
     discipline: 'cyber',
     topics: ['vulnerability'],
