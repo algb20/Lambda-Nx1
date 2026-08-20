@@ -17,12 +17,210 @@ import { PUBLIC_DOMAIN, ccBy, publicFeed } from '../licence'
  * disruption, a filing.
  */
 export const MARKET_SOURCES: CatalogSource[] = [
+  // ── Filings and regulators (verified live before being added) ────────────
+  {
+    key: 'sec_edgar_current',
+    name: 'SEC EDGAR — 8-K filings as they are filed',
+    publisher: 'US Securities and Exchange Commission',
+    url: 'https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=8-K&company=&dateb=&owner=include&count=40&output=atom',
+    /**
+     * The SEC's access policy requires a User-Agent carrying a contact address
+     * and answers 403 to anything else. That one rule was the difference
+     * between having every US public company's material-event filings in real
+     * time and having none of them.
+     *
+     * An 8-K is a company telling its regulator something it is legally obliged
+     * to disclose *promptly* — a resignation, a bankruptcy, a material
+     * agreement, a restatement. It is the highest-grade corporate signal that
+     * exists, and it is public the moment it is filed.
+     */
+    userAgent: 'LambdaNX Intelligence maskmal088@gmail.com',
+    kind: 'atom',
+    discipline: 'fin',
+    topics: ['corporate', 'markets'],
+    coverage: ['US'],
+    admiralty: 'A',
+    independence: 'sec',
+    licence: PUBLIC_DOMAIN,
+    minIntervalSec: 900,
+    keyless: true,
+    note: 'Material-event disclosures, at the moment of filing. Graded by lib/analysis/disclosure.',
+  },
+  {
+    key: 'fed_speeches',
+    name: 'Federal Reserve — governors’ speeches',
+    publisher: 'US Federal Reserve Board of Governors',
+    url: 'https://www.federalreserve.gov/feeds/speeches.xml',
+    kind: 'rss',
+    discipline: 'fin',
+    topics: ['economy', 'official'],
+    coverage: ['US'],
+    admiralty: 'A',
+    // Same institution as the press releases: a speech and a statement from the
+    // Fed are not two independent confirmations of the Fed's position.
+    independence: 'federalreserve',
+    licence: PUBLIC_DOMAIN,
+    minIntervalSec: 3600,
+    keyless: true,
+  },
+  {
+    key: 'snb_press',
+    name: 'Swiss National Bank — press releases',
+    publisher: 'Swiss National Bank',
+    url: 'https://www.snb.ch/public/en/rss/news',
+    kind: 'rss',
+    discipline: 'fin',
+    topics: ['economy', 'official'],
+    coverage: ['CH'],
+    admiralty: 'A',
+    independence: 'snb',
+    licence: publicFeed('Swiss National Bank', 'https://www.snb.ch/'),
+    minIntervalSec: 3600,
+    keyless: true,
+  },
+  {
+    key: 'boc_press',
+    name: 'Bank of Canada — press releases',
+    publisher: 'Bank of Canada',
+    url: 'https://www.bankofcanada.ca/content_type/press-releases/feed/',
+    kind: 'rss',
+    discipline: 'fin',
+    topics: ['economy', 'official'],
+    coverage: ['CA'],
+    admiralty: 'A',
+    independence: 'bankofcanada',
+    licence: publicFeed('Bank of Canada', 'https://www.bankofcanada.ca/terms/'),
+    minIntervalSec: 3600,
+    keyless: true,
+  },
+  {
+    key: 'rba_media',
+    name: 'Reserve Bank of Australia — media releases',
+    publisher: 'Reserve Bank of Australia',
+    url: 'https://www.rba.gov.au/rss/rss-cb-media-releases.xml',
+    kind: 'rss',
+    discipline: 'fin',
+    topics: ['economy', 'official'],
+    coverage: ['AU'],
+    admiralty: 'A',
+    independence: 'rba',
+    licence: ccBy('Reserve Bank of Australia', 'https://www.rba.gov.au/copyright/'),
+    minIntervalSec: 3600,
+    keyless: true,
+  },
+  {
+    key: 'uk_gazette',
+    name: 'The Gazette — UK official public notices',
+    publisher: 'His Majesty’s Stationery Office',
+    url: 'https://www.thegazette.co.uk/all-notices/notice/data.feed',
+    kind: 'atom',
+    discipline: 'fin',
+    topics: ['corporate', 'official'],
+    coverage: ['GB'],
+    admiralty: 'A',
+    independence: 'uk-gazette',
+    licence: ccBy('The Gazette, Open Government Licence v3.0', 'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/'),
+    minIntervalSec: 3600,
+    keyless: true,
+    note: 'The UK’s official record: insolvencies, strike-offs, appointments. A company’s death certificate is filed here first.',
+  },
+  {
+    key: 'bse_india',
+    name: 'BSE India — exchange notices',
+    publisher: 'BSE Limited (Bombay Stock Exchange)',
+    url: 'https://www.bseindia.com/data/xml/notices.xml',
+    kind: 'rss',
+    discipline: 'fin',
+    topics: ['markets', 'corporate'],
+    coverage: ['IN'],
+    admiralty: 'A',
+    independence: 'bse-india',
+    licence: publicFeed('BSE India', 'https://www.bseindia.com/'),
+    minIntervalSec: 3600,
+    keyless: true,
+  },
+
+  {
+    key: 'sec_edgar_10k',
+    name: 'SEC EDGAR — annual reports as they are filed',
+    publisher: 'US Securities and Exchange Commission',
+    url: 'https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=10-K&company=&dateb=&owner=include&count=40&output=atom',
+    userAgent: 'LambdaNX Intelligence maskmal088@gmail.com',
+    kind: 'atom',
+    discipline: 'fin',
+    topics: ['corporate', 'markets'],
+    coverage: ['US'],
+    admiralty: 'A',
+    /**
+     * Same regulator as the 8-K stream, so the same independence group: a
+     * company filing two forms with the SEC is one source agreeing with itself,
+     * and counting it as two would inflate every corroboration score it touched.
+     */
+    independence: 'sec',
+    licence: PUBLIC_DOMAIN,
+    minIntervalSec: 3600,
+    keyless: true,
+    note: 'The annual report — where the risk factors, the auditor’s opinion and the segment numbers live.',
+  },
+
+  // ── Chain state: blocks are events, prices are not ───────────────────────
+  {
+    key: 'mempool_blocks',
+    name: 'Bitcoin blocks as they are mined',
+    publisher: 'mempool.space',
+    url: 'https://mempool.space/api/v1/blocks',
+    kind: 'json',
+    discipline: 'fin',
+    topics: ['markets'],
+    coverage: 'global',
+    // An aggregator of the chain, not the chain itself — but it reads a public
+    // ledger anyone can verify, which is why it is a B and not a C.
+    admiralty: 'B',
+    independence: 'mempool-space',
+    licence: publicFeed('mempool.space', 'https://mempool.space/'),
+    minIntervalSec: 600,
+    keyless: true,
+    map: {
+      titleTemplate: 'Bitcoin block {height} — {tx_count} transactions',
+      time: 'timestamp',
+    },
+    note: 'One row per block. A block is an event with a time and a size; a price is neither.',
+  },
+  {
+    key: 'blockstream_blocks',
+    name: 'Bitcoin blocks — independent second reader',
+    publisher: 'Blockstream',
+    url: 'https://blockstream.info/api/blocks',
+    kind: 'json',
+    discipline: 'fin',
+    topics: ['markets'],
+    coverage: 'global',
+    admiralty: 'B',
+    /**
+     * Deliberately its own independence group. Two readers of the same public
+     * ledger agreeing is a real corroboration — it means neither is
+     * misreporting the chain — which is exactly what the fusion engine is for.
+     */
+    independence: 'blockstream',
+    licence: publicFeed('Blockstream', 'https://blockstream.info/'),
+    minIntervalSec: 600,
+    keyless: true,
+    map: {
+      titleTemplate: 'Bitcoin block {height} — {tx_count} transactions',
+      time: 'timestamp',
+    },
+  },
+
   // ── Regulators and exchanges ─────────────────────────────────────────────
   {
     key: 'sec_litigation',
     name: 'SEC — litigation releases',
     publisher: 'US Securities and Exchange Commission',
-    url: 'https://www.sec.gov/rss/litigation/litreleases.xml',
+    // The old /rss/litigation/ path is gone (404). This is where the SEC
+    // publishes litigation releases now.
+    url: 'https://www.sec.gov/enforcement-litigation/litigation-releases/rss',
+    // The SEC 403s any agent without a contact address (see sec_edgar_current).
+    userAgent: 'LambdaNX Intelligence maskmal088@gmail.com',
     kind: 'rss',
     discipline: 'fin',
     topics: ['corporate', 'markets', 'official'],
@@ -39,6 +237,9 @@ export const MARKET_SOURCES: CatalogSource[] = [
     name: 'SEC — press releases',
     publisher: 'US Securities and Exchange Commission',
     url: 'https://www.sec.gov/news/pressreleases.rss',
+    // The SEC answers 403 to any agent without a contact address. This entry
+    // had been catalogued and refused for its whole life over that one rule.
+    userAgent: 'LambdaNX Intelligence maskmal088@gmail.com',
     kind: 'rss',
     discipline: 'fin',
     topics: ['markets', 'official'],

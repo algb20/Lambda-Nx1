@@ -132,14 +132,40 @@ export function buildHealthReport(deps: HealthDeps = {}): HealthReport {
    * for a developer and wrong for anyone with users.
    */
   const mailChoice = (env.MAIL_PROVIDER ?? '').trim().toLowerCase()
-  // An HTTPS key needs a sender address to be usable at all — every one of the
+  /**
+   * Which of the mail variables are actually present.
+   *
+   * Names, never values — whether a variable is set is not a secret, and it is
+   * the only thing that makes this check usable. The previous wording listed
+   * the variables to set without saying which were already there, so an
+   * operator who had set `BREVO_API_KEY` read "set MAIL_FROM plus one of
+   * RESEND_API_KEY, BREVO_API_KEY…" and reasonably concluded they had done it.
+   * They had done half of it, and nothing on the page could tell them which
+   * half. This is that half, stated.
+   */
+  const keyNames = ['RESEND_API_KEY', 'BREVO_API_KEY', 'POSTMARK_TOKEN'] as const
+  const keysPresent = keyNames.filter((name) => has(env[name]))
+  const fromPresent = has(env.MAIL_FROM)
+  // A key needs a sender address to be usable at all — every one of the
   // services rejects a `From:` on an unverified domain — so a key without
   // MAIL_FROM is not a configured provider, however present it looks.
-  const httpKey =
-    has(env.MAIL_FROM) &&
-    (has(env.RESEND_API_KEY) || has(env.BREVO_API_KEY) || has(env.POSTMARK_TOKEN))
+  const httpKey = fromPresent && keysPresent.length > 0
   const mailLive =
     mailChoice === 'log' ? 'log' : (httpKey || has(env.SMTP_URL)) && mailChoice !== 'disabled'
+
+  /** The one sentence that says what to do next, given what is already set. */
+  const mailAdvice = (): string => {
+    if (mailChoice === 'disabled') {
+      return 'MAIL_PROVIDER=disabled is switching mail off and overriding everything else. Clear it.'
+    }
+    if (keysPresent.length > 0 && !fromPresent) {
+      return `${keysPresent.join(' and ')} is set, but MAIL_FROM is not — so there is no sender address and nothing can be sent. Add MAIL_FROM (e.g. "Lambda <no-reply@yourdomain.com>"), on an address your provider has verified, then redeploy.`
+    }
+    if (keysPresent.length === 0 && fromPresent && !has(env.SMTP_URL)) {
+      return 'MAIL_FROM is set but no provider key is. Add one of RESEND_API_KEY, BREVO_API_KEY or POSTMARK_TOKEN, then redeploy.'
+    }
+    return 'Set MAIL_FROM plus one of RESEND_API_KEY, BREVO_API_KEY or POSTMARK_TOKEN (an HTTPS key, which serverless hosts allow), or SMTP_URL. Adding them to the host is not enough on its own — redeploy so the running instance picks them up.'
+  }
   checks.push({
     name: 'mail',
     status: mailLive === 'log' ? 'degraded' : mailLive ? 'ok' : 'off',
@@ -148,7 +174,7 @@ export function buildHealthReport(deps: HealthDeps = {}): HealthReport {
         ? 'MAIL_PROVIDER=log — verification codes are written to the server log and never sent. Fine for development, wrong for real users.'
         : mailLive
           ? `mail configured via ${httpKey ? 'an HTTPS provider' : 'SMTP'} — verification codes and password resets can be delivered`
-          : 'no mail provider — email sign-up and password reset answer 503 and are hidden in the form. Set MAIL_FROM plus one of RESEND_API_KEY, BREVO_API_KEY or POSTMARK_TOKEN (an HTTPS key, which serverless hosts allow), or SMTP_URL.',
+          : `no mail provider — email sign-up and password reset answer 503 and are hidden in the form. ${mailAdvice()}`,
     required: false,
   })
 

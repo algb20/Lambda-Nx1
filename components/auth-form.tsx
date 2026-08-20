@@ -74,6 +74,25 @@ interface Methods {
   accounts: boolean
   emailSignUp: boolean
   passwordReset: boolean
+  /**
+   * Which piece is missing when email sign-up is off.
+   *
+   * The form used to have only `emailSignUp: false` and told everyone the same
+   * thing: "no mail provider is configured". On a deployment with mail working
+   * and no database that message is simply false — there is nowhere to store a
+   * user, which is a different missing piece — and it sent the owner chasing a
+   * mail problem that did not exist. A boolean cannot carry a reason.
+   */
+  emailSignUpOffBecause?: 'database' | 'sessions' | 'mail' | null
+}
+
+/** What to tell the reader, given which piece is actually missing. */
+const OFF_BECAUSE: Record<'database' | 'sessions' | 'mail', string> = {
+  database:
+    'Accounts are not switched on here yet — this deployment has no database, so there is nowhere to keep one. Everything on the platform still works without an account.',
+  sessions:
+    'Accounts are not switched on here yet — this deployment cannot sign sessions, so it cannot keep you signed in. Everything on the platform still works without an account.',
+  mail: 'Email sign-up is not switched on here yet — this deployment has no mail provider, so a verification code has nowhere to be sent. Everything on the platform still works without an account.',
 }
 
 /** Seconds a resend stays disabled — mirrors RESEND_COOLDOWN_MS on the server. */
@@ -439,9 +458,7 @@ export function AuthForm({
           change it.
         */
         <p className="text-[11px] leading-relaxed text-muted-foreground">
-          Email sign-up is not switched on here yet — this deployment has no mail provider, so a
-          verification code has nowhere to be sent. Everything on the platform still works without
-          an account.
+          {OFF_BECAUSE[methods?.emailSignUpOffBecause ?? 'mail']}
         </p>
       ) : null}
 

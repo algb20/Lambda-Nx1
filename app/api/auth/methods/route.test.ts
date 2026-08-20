@@ -1,0 +1,72 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+/**
+ * The endpoint that tells the sign-in form what this deployment can offer.
+ *
+ * These exist because a single `emailSignUp: false` sent the owner chasing a
+ * mail problem that did not exist. Mail was configured and working; there was
+ * no database, so there was nowhere to store a user — and the form said "no
+ * mail provider is configured". Days were lost to that one missing distinction.
+ */
+
+const state = { db: false, sessions: false, mail: false }
+
+vi.mock('@/lib/db', () => ({ isDbConfigured: () => state.db }))
+vi.mock('@/lib/auth/session', () => ({ canIssueSessions: () => state.sessions }))
+vi.mock('@/lib/mail', () => ({ mailConfigured: () => state.mail }))
+
+const { GET } = await import('./route')
+
+async function methods(next: Partial<typeof state>) {
+  Object.assign(state, { db: false, sessions: false, mail: false }, next)
+  return (await (await GET()).json()) as {
+    accounts: boolean
+    emailSignUp: boolean
+    passwordReset: boolean
+    pi: boolean
+    emailSignUpOffBecause: string | null
+  }
+}
+
+beforeEach(() => Object.assign(state, { db: false, sessions: false, mail: false }))
+afterEach(() => vi.clearAllMocks())
+
+describe('naming the piece that is actually missing', () => {
+  /** The exact live failure: mail perfect, no database, blamed on mail. */
+  it('blames the database when mail is fine and there is nowhere to store a user', async () => {
+    const m = await methods({ mail: true, sessions: true })
+    expect(m.emailSignUp).toBe(false)
+    expect(m.emailSignUpOffBecause).toBe('database')
+  })
+
+  it('blames mail only when mail is genuinely the missing piece', async () => {
+    const m = await methods({ db: true, sessions: true })
+    expect(m.emailSignUpOffBecause).toBe('mail')
+  })
+
+  it('names the session secret when that is what is absent', async () => {
+    const m = await methods({ db: true, mail: true })
+    expect(m.emailSignUpOffBecause).toBe('sessions')
+  })
+
+  it('blames nothing when everything is in place', async () => {
+    const m = await methods({ db: true, sessions: true, mail: true })
+    expect(m.emailSignUp).toBe(true)
+    expect(m.passwordReset).toBe(true)
+    expect(m.emailSignUpOffBecause).toBeNull()
+  })
+
+  /**
+   * The database is the deeper dependency: with no store, mail is irrelevant.
+   * Reporting the shallower cause would send the owner to fix the wrong thing
+   * again, which is the whole failure being corrected here.
+   */
+  it('names the deeper cause first when several are missing', async () => {
+    expect((await methods({})).emailSignUpOffBecause).toBe('database')
+  })
+
+  /** Pi never needs mail: Pi vouches for the identity itself. */
+  it('offers Pi sign-in whenever accounts work, mail or no mail', async () => {
+    expect((await methods({ db: true, sessions: true })).pi).toBe(true)
+  })
+})

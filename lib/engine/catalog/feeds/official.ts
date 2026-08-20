@@ -129,6 +129,9 @@ export const OFFICIAL_SOURCES: CatalogSource[] = [
   // ── Economic & monetary ──────────────────────────────────────────────────
   {
     key: 'ecb_press',
+    // One institution, one independence group: an ECB speech and an ECB press
+    // release are not two independent confirmations of the ECB's position.
+    independence: 'ecb',
     name: 'European Central Bank — press releases',
     publisher: 'European Central Bank',
     url: 'https://www.ecb.europa.eu/rss/press.html',
@@ -143,6 +146,7 @@ export const OFFICIAL_SOURCES: CatalogSource[] = [
   },
   {
     key: 'fed_press',
+    independence: 'federalreserve',
     name: 'US Federal Reserve — press releases',
     publisher: 'Board of Governors of the Federal Reserve System',
     url: 'https://www.federalreserve.gov/feeds/press_all.xml',
@@ -229,21 +233,6 @@ export const OFFICIAL_SOURCES: CatalogSource[] = [
     note: 'Consolidated sanctions and PEP data, assembled from official lists.',
   },
   {
-    key: 'sec_edgar_filings',
-    name: 'SEC EDGAR — latest filings',
-    publisher: 'US Securities and Exchange Commission',
-    url: 'https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&type=8-K&dateb=&owner=include&count=40&output=atom',
-    kind: 'atom',
-    discipline: 'fin',
-    topics: ['corporate', 'markets'],
-    coverage: ['US'],
-    admiralty: 'A',
-    licence: PUBLIC_DOMAIN,
-    minIntervalSec: 1800,
-    keyless: true,
-    note: 'Material-event filings — where a company states its own bad news first.',
-  },
-  {
     key: 'uk_companies_house',
     name: 'UK Companies House — company data',
     publisher: 'Companies House (UK)',
@@ -292,20 +281,6 @@ export const OFFICIAL_SOURCES: CatalogSource[] = [
     admiralty: 'A',
     licence: PUBLIC_DOMAIN,
     minIntervalSec: 3600,
-    keyless: true,
-  },
-  {
-    key: 'esa_news',
-    name: 'European Space Agency news',
-    publisher: 'European Space Agency',
-    url: 'https://www.esa.int/rssfeed/Our_Activities/Observing_the_Earth',
-    kind: 'rss',
-    discipline: 'sci',
-    topics: ['space', 'research'],
-    coverage: 'global',
-    admiralty: 'A',
-    licence: publicFeed('European Space Agency', 'https://www.esa.int/Services/Terms_and_conditions'),
-    minIntervalSec: 7200,
     keyless: true,
   },
 ]

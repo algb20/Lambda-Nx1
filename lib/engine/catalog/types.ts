@@ -188,6 +188,21 @@ export interface CatalogSource {
    */
   urlFor?: (now: Date) => string
 
+  /**
+   * A User-Agent this publisher requires, instead of our usual one.
+   *
+   * Almost nothing needs this and it should stay that way — one honest agent
+   * across the catalogue is what lets a publisher identify and rate-limit us
+   * fairly. The exception is publishers who *mandate* a particular form.
+   *
+   * The SEC is the one that forced it: its published access policy requires a
+   * User-Agent carrying a contact address, and it answers **403** to anything
+   * else. That single rule was the difference between having every US public
+   * company's 8-K filings in real time and having none of them — the feed had
+   * been catalogued and refused for as long as it had existed.
+   */
+  userAgent?: string
+
   /** For `kind: 'json'`, the dotted path to the array of records. */
   path?: string
 

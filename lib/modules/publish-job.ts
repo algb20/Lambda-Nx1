@@ -15,6 +15,8 @@
  */
 import { repo, isDbConfigured } from '@/lib/db'
 import { getWorldEvents } from './world-events'
+import { rankEvents } from './world-events-shared'
+import { diversify } from '../analysis/significance'
 import { investigateTrending } from './trending'
 import {
   AUTO_REF_TYPE,
@@ -67,8 +69,47 @@ export async function runPublishJob(options: PublishJobOptions = {}): Promise<Pu
   const candidates: Array<PublishCandidate | null> = []
 
   if (world.status === 'fulfilled') {
-    for (const event of world.value.events.slice(0, 30)) {
-      candidates.push(eventToCandidate(event))
+    /**
+     * Ranked and capped, not the first thirty that happened to arrive.
+     *
+     * This was `events.slice(0, 30)` — arrival order, no ranking, no cap — and
+     * the result was measured on the live front page: **six consecutive
+     * auto-published posts, all of them NWS county weather warnings**. NWS
+     * issues those continuously and each grades to the same severity, so an
+     * unranked slice is simply whichever publisher is chattiest.
+     *
+     * This is the third surface where the same failure appeared. The board had
+     * it (17 of the top 20 rows were one weather service), the MCP tool had it
+     * (11 of the first 14), and the auto-publisher had it here — the worst of
+     * the three, because these rows are *written to the database as posts* and
+     * become the permanent public record of what the platform noticed.
+     *
+     * So it uses the same two functions the other two now use: `rankEvents` for
+     * significance, `diversify` for the hard stop behind it.
+     */
+    const ranked = rankEvents(world.value.events)
+    const board = diversify(
+      ranked.map((r) => ({
+        ...r,
+        sourceKey: r.event.sourceKey,
+        category: r.event.category as string,
+        severity: r.event.severity,
+      })),
+      30,
+    )
+    /**
+     * Only the rows that earned their place — never the backfill.
+     *
+     * `diversify` fills any remaining slots from the overflow once the caps are
+     * met, which is right for a *screen*: the rows are visible, labelled, and a
+     * reader can see they are there for completeness. It is wrong here. These
+     * become posts in the database and the permanent public record of what the
+     * platform noticed, and a backfill of twenty-nine county weather warnings
+     * is exactly the record we must not leave. Better to publish six real
+     * events than thirty of which twenty-nine are one publisher.
+     */
+    for (const row of board.taken.slice(0, board.diversified)) {
+      candidates.push(eventToCandidate(row.event))
     }
   }
   if (trending.status === 'fulfilled') {

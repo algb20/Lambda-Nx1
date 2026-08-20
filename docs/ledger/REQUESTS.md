@@ -281,3 +281,75 @@ The ones that **are** genuine standing work, named rather than buried:
 | [R148](requests-recovered.md#r148) |2026-08-15|`ai`|| `needs-check` | اكمل كل شيا وتذكر انني ارسلت لك قليلا من الصور وهنا يجب عليك تصفح وتحليل والاستعانة بكل الادوات الازمة والاهم في كل المواقع وليس هذا فقط مع انه اضعف المواقع والاسعار اترك <br>**evidence:** payments → lib/payments |
 | [R149](requests-recovered.md#r149) |2026-08-15|`ai`|| `needs-check` | اكمل كل شيئ وبحثك ضعيف لم تكتشف اهم المميزات والقدرات واقول لك نقطة ضعها قاعدة دائما كل ما اقوله لك ضعه في قائمة بكل تفاصيله حتى تنفضه ضعه في قائمة التي تم التنفيذ وهناك <br>**evidence:** agents → .claude/agents |
 | [R150](requests-recovered.md#r150) |2026-08-15|`pi`|| `answered` | اكمل وهناك طلبات وتعديلات وكثير الاشياء طلبتها من اول باية المشروع استرجعها كلها مع القائمة |
+
+---
+
+## Restored 2026-08-20 — the gap between R151 and today
+
+The file above stops at **R150, dated 2026-08-15**. Five days of requests were
+tracked inside sessions and never written down here, which is the failure this
+ledger exists to prevent: a list that stops being written is a list that stops
+being a record.
+
+What follows is that gap, reconstructed from the session record. Two honesty
+notes, because a repaired ledger that hides its repair is worse than none:
+
+- **R151–R236 are reconstructed**, not transcribed. The wording is a faithful
+  summary, not the verbatim text, and it is marked `reconstructed` for that
+  reason. Where the verbatim text survives it is quoted.
+- **The standing rules are listed first and separately.** They are not requests
+  that get closed — they are conditions on every future piece of work, and
+  filing them as line items is how they got forgotten.
+
+### Standing rules — never `done`, always in force
+
+| Rule | Given | Text / meaning |
+|---|---|---|
+| S1 | throughout | **تكلم عربي دائما** — always reply in Arabic. |
+| S2 | throughout | **Secrets never in files.** Keys live only where the owner can reach them; not in the repo, not reachable by contributors added to GitHub. |
+| S3 | R230 | **وايضا اصلح كل الاخطاء والثغرات لما تجدها ولا تنتضر اصلحها فورا دائما** — fix every bug and hole the moment it is found. Never defer, never wait to be asked. |
+| S4 | R229 | **اعمل نفسك انت الخبير وتريد ان تكون الاول في مجالك** — act as the expert. Do what was not asked for as well as what was. |
+| S5 | R204 | Build each point with the newest and strongest method, **fully, the first time** — not add-then-patch. |
+| S6 | charter §2.8 | Study the field continuously; every capability a competitor has, we have and better. Never copy their code. |
+| S7 | charter §2a | Count sources honestly: integrations, publishers and independent origins are three different numbers. |
+| S8 | this ledger | **Every request is written here, in full, before work starts** — and stays until it is genuinely delivered. |
+
+### R151–R236 — reconstructed
+
+| # | Area | Status | Request |
+|---|---|---|---|
+| R204 | `method` | `standing` | Implement each point with the newest/strongest methods, fully, first time. `reconstructed` |
+| R215 | `pi` | `done` | One build must serve Pi Browser and the public web — decide the surface at runtime, not at build time. |
+| R216 | `accounts` | `done` | A permanent, human-readable account identifier a person can read down a phone. |
+| R217 | `launch` | `open` | Organise the Pi app and the public website launch professionally. |
+| R218 | `globe` | `open` | Map page: fix errors, wrong information, and anything that must not be public. |
+| R220 | `news` | `done` | Breaking-event highlighting, wired into the interface rather than computed and discarded. |
+| R221 | `design` | `open` | Every gateway rendered in the flowing "happening now" design. |
+| R222 | `design` | `open` | Categories that need more tools should have them. |
+| R223 | `design` | `done` | All 22 categories reachable, not only the first eight. |
+| R227 | `innovation` | `open` | More innovation, more new solutions. |
+| R229 | `method` | `standing` | Act as the expert; do not wait to be told. |
+| R230 | `method` | `standing` | Fix every bug and vulnerability immediately on discovery. |
+| R231 | `mail` | `done` | Email registration, verification codes and password reset must actually work. |
+| R232 | `mail` | `done` | Add follow-by-email with a confirmation message. |
+| R233 | `pi` | `open` | In the Pi app, registration by real Pi identifier only — one button, account saved, payments live. |
+| R234 | `design` | `open` | The sign-in panel must stop mixing email with Pi name/identifier. |
+| R235 | `news` | `open` | News dates are wrong; everything shown is old, scattered and overlapping. |
+| R236 | `design` | `done` | Full-bleed layout: the map holds the screen, data runs beside it. |
+
+### 2026-08-20 — today, verbatim
+
+| # | Area | Status | Request |
+|---|---|---|---|
+| R237 | `mail` | `open` | **يزال هناك خطا في التحقق من الايميل** — email verification still errors. Fix first. |
+| R238 | `design` | `open` | **هل ترى الفرق في التصميم اجعلها مثلها** — match the design in the two screenshots exactly. |
+| R239 | `design` | `open` | **اجعل المربعات اصغر وليس مستطيلات** — the boxes must be smaller and square, not rectangles. |
+| R240 | `design` | `open` | **كل الفئات يجب توفر مربع خاص بها والمعلومات والاخبار تتدفق داخلها** — every category gets its own box with its news flowing inside it. |
+| R241 | `markets` | `open` | **كل اللوحات الاقتصادية وكل المفقود** — every economic board, and everything missing. |
+| R242 | `markets` | `open` | **لا عملات ولا كل بلوكشين ولا بورصات ولا اي شيئ** — still no companies, no blockchains, no exchanges showing anywhere. |
+| R243 | `design` | `open` | **اجمع كل ماهو طبيعي … في مربع وفئة واحدة واعمل لها جزئين منها حدث ومنها تحذير** — merge every natural hazard (earthquakes, volcanoes, weather, all disasters) into ONE category and box, split into two parts: *event* and *warning*. They flood the news and overlap. |
+| R244 | `sources` | `open` | **في التطبيقات المنافسة كل انواع وفئات تجلب دون توقف الاخبار حية … الا تطبيقنا كله تحذير واعادة** — competitors pull every category live and continuously; ours is all warnings and repetition. |
+| R245 | `sources` | `open` | **واين الهجمات السيبرانية والاختراق والابحاث والازمات ونقص الامدادات** — where are cyber attacks and breaches, research, crises, supply shortages? |
+| R246 | `markets` | `open` | **كل اخبار الاقتصاد والشركات والمصانع** — all economy, company and industrial news. |
+| R247 | `innovation` | `open` | **واين تقنية الفرص والاستثمار واين تقنيات مراقبة الاستثمار او الفرص او التنبيهات** — opportunity and investment technology; investment monitoring, opportunity detection, alerting. |
+| R248 | `ledger` | `done` | **واين قائمة الطلبات يجب استعادتها الان وكل الطلبات المفقودة وهذه وتبقى معك دائما** — restore the request list now, with every lost request and these, and keep it always. |

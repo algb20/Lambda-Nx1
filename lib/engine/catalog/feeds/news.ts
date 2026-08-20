@@ -274,20 +274,6 @@ export const RESEARCH_SOURCES: CatalogSource[] = [
     minIntervalSec: 7200,
     keyless: true,
   },
-  {
-    key: 'ietf_rfcs',
-    name: 'IETF — new RFCs',
-    publisher: 'Internet Engineering Task Force',
-    url: 'https://www.rfc-editor.org/rfcrss.xml',
-    kind: 'rss',
-    discipline: 'sci',
-    topics: ['technology', 'research'],
-    coverage: 'global',
-    admiralty: 'A',
-    licence: publicFeed('RFC Editor', 'https://www.rfc-editor.org/'),
-    minIntervalSec: 86400,
-    keyless: true,
-  },
 ]
 
 /**
@@ -308,24 +294,6 @@ export const RESEARCH_SOURCES: CatalogSource[] = [
  * be read directly, the gap is left open and the blind-spot map reports it.
  */
 export const VERIFIED_NEWS_SOURCES: CatalogSource[] = [
-  {
-    key: 'aljazeera_all',
-    name: 'Al Jazeera English — all news',
-    publisher: 'Al Jazeera Media Network',
-    url: 'https://www.aljazeera.com/xml/rss/all.xml',
-    kind: 'rss',
-    discipline: 'osint',
-    topics: ['news', 'conflict', 'humanitarian'],
-    coverage: 'global',
-    // A newsroom with its own correspondents rather than a wire subscriber,
-    // which is what separates a C from the D a rewrite desk earns.
-    admiralty: 'C',
-    independence: 'aljazeera',
-    licence: publicFeed('Al Jazeera', 'https://www.aljazeera.com/terms-and-conditions'),
-    minIntervalSec: 900,
-    keyless: true,
-    note: 'Verified answering 2026-08-14. Reports the Middle East, Africa and South Asia at a depth the Anglophone wires do not.',
-  },
   {
     key: 'un_news',
     name: 'UN News — all',

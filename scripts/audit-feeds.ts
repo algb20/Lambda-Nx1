@@ -151,7 +151,10 @@ async function audit(source: CatalogSource): Promise<Finding> {
     const res = await fetch(requestUrl(source, new Date()), {
       signal: controller.signal,
       headers: {
-        'User-Agent': 'LambdaNX/1.0 (+https://github.com/algb20/Lambda-Nx1)',
+        // The record's own agent where it declares one — the SEC mandates a
+        // contact address and 403s anything else, so an audit that ignored the
+        // override would report a working feed as dead.
+        'User-Agent': source.userAgent ?? 'LambdaNX/1.0 (+https://github.com/algb20/Lambda-Nx1)',
         Accept:
           source.kind === 'geojson' || source.kind === 'json'
             ? 'application/json, application/geo+json;q=0.9, */*;q=0.5'
