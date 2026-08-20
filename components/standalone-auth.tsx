@@ -85,6 +85,15 @@ export function StandaloneSignInPrompt() {
                   Everything here works without an account. One keeps your investigations, monitors
                   and settings across devices.
                 </p>
+                {/*
+                  The word "email" belongs here, in the invitation, and nowhere
+                  near the input labels. A person deciding whether to bother
+                  needs to know what it will cost them; a person already typing
+                  does not need to be told twice.
+                */}
+                <p className="mt-0.5 text-[10px] text-muted-foreground/80">
+                  Takes an email address and about twenty seconds.
+                </p>
               </div>
               <button
                 onClick={() => setDismissed(true)}

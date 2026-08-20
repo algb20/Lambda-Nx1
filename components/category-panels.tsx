@@ -193,7 +193,12 @@ export function CategoryPanels({ report }: { report: WorldEventsReport | null })
                    guess apart — see the note in globe-view.tsx. */
                 aria-label={`${on ? 'Close' : 'Open'} the ${meta?.label ?? category} panel`}
                 title={`${on ? 'Close' : 'Open'} the ${meta?.label ?? category} panel`}
-                className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                /* Sized to match the map legend above rather than to a size of
+                   its own. Two rows of chips a few pixels apart read as two
+                   unrelated controls stacked by accident; the same size reads
+                   as one idea shown twice, which is what they are. Smaller also
+                   means twenty-two of them fit in two lines instead of four. */
+                className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] transition-colors ${
                   on ? 'border-primary bg-primary/10 font-medium text-primary' : 'border-border text-muted-foreground hover:bg-muted'
                 }`}
               >
@@ -220,7 +225,7 @@ export function CategoryPanels({ report }: { report: WorldEventsReport | null })
             <button
               onClick={() => setShowAll((wasOpen: boolean) => !wasOpen)}
               aria-expanded={showAll}
-              className="rounded-full border border-dashed border-border px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted"
+              className="rounded-full border border-dashed border-border px-2 py-0.5 text-[10px] text-muted-foreground transition-colors hover:bg-muted"
             >
               {showAll ? 'Show fewer' : `All ${available.length} categories`}
             </button>
@@ -229,7 +234,7 @@ export function CategoryPanels({ report }: { report: WorldEventsReport | null })
           {shown.length > 0 ? (
             <button
               onClick={() => update((p) => ({ ...p, globe: { ...p.globe, panels: [] } }))}
-              className="rounded-full px-2.5 py-1 text-[11px] text-muted-foreground underline-offset-2 hover:underline"
+              className="rounded-full px-2 py-0.5 text-[10px] text-muted-foreground underline-offset-2 hover:underline"
             >
               close all
             </button>

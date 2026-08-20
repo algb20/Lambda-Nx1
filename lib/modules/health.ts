@@ -117,6 +117,34 @@ export function buildHealthReport(deps: HealthDeps = {}): HealthReport {
     required: false,
   })
 
+  /**
+   * Mail — what stands between a working account system and a broken-looking one.
+   *
+   * This check was missing, and its absence cost more than any of the others.
+   * Email sign-up and password recovery both mail a six-digit code; with no
+   * provider they refuse with a 503 and the sign-in form quietly hides them. The
+   * flows are complete and tested — the deployment simply has nowhere to post
+   * the message — but nothing anywhere in the interface said so, so the only
+   * available reading was "registration is broken".
+   *
+   * `MAIL_PROVIDER=log` is called out by name because it is the setting that
+   * looks like success and is not: codes go to the server log, which is right
+   * for a developer and wrong for anyone with users.
+   */
+  const mailChoice = (env.MAIL_PROVIDER ?? '').trim().toLowerCase()
+  const mailLive = mailChoice === 'log' ? 'log' : has(env.SMTP_URL) && mailChoice !== 'disabled'
+  checks.push({
+    name: 'mail',
+    status: mailLive === 'log' ? 'degraded' : mailLive ? 'ok' : 'off',
+    detail:
+      mailLive === 'log'
+        ? 'MAIL_PROVIDER=log — verification codes are written to the server log and never sent. Fine for development, wrong for real users.'
+        : mailLive
+          ? 'SMTP configured — verification codes and password resets can be delivered'
+          : 'no SMTP_URL — email sign-up and password reset answer 503 and are hidden in the form. Set SMTP_URL (smtp://user:pass@host:587) and MAIL_FROM.',
+    required: false,
+  })
+
   // Auth provider needs — Pi payments/verify need PI_API_KEY; standalone needs none.
   if (providers.auth === 'pi' || providers.payment === 'pi') {
     checks.push({

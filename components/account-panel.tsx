@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { AuthForm } from '@/components/auth-form'
+import { PiSignIn } from '@/components/pi-sign-in'
+import { usePiAuthOptional } from '@/contexts/pi-auth-context'
 import { useViewer } from '@/hooks/use-viewer'
 import { refreshViewer } from '@/lib/auth/viewer'
 import { Avatar } from '@/components/avatar'
@@ -34,6 +36,8 @@ export function AccountPanel() {
   // One shared read of the session, so signing in or out here is reflected
   // everywhere at once rather than in this panel alone.
   const { status, user } = useViewer()
+  // Which sign-in belongs on this surface. See the note beside its use below.
+  const pi = usePiAuthOptional()
   const [confirming, setConfirming] = useState(false)
   const [confirmText, setConfirmText] = useState('')
   const [busy, setBusy] = useState(false)
@@ -101,7 +105,17 @@ export function AccountPanel() {
           </p>
         </CardHeader>
         <CardContent>
-          <AuthForm onAuthenticated={loadMe} compact />
+          {/*
+            One route per surface, never both at once.
+
+            Inside the Pi Browser a pioneer already has a verified identity, so
+            they get one button and no fields. Everywhere else the Pi handshake
+            cannot complete, so offering it would be offering a button that
+            hangs. Showing both would invite the same person to make a second,
+            weaker account for themselves — and then their payments are attached
+            to whichever one they happened to sign into.
+          */}
+          {pi?.active ? <PiSignIn /> : <AuthForm onAuthenticated={loadMe} compact />}
         </CardContent>
       </Card>
     )

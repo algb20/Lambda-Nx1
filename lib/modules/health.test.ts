@@ -21,6 +21,7 @@ describe('buildHealthReport', () => {
         CRON_SECRET: 'c',
         ADMIN_SECRET: 'a',
         SOCIAL_SECRET_KEY: 'k'.repeat(32),
+        SMTP_URL: 'smtp://user:pass@mail.example.org:587',
       },
     })
     expect(r.status).toBe('healthy')
@@ -131,5 +132,45 @@ describe('buildHealthReport', () => {
       expect(r.checks.find((c) => c.name === 'database')?.status).toBe('off')
       expect(r.status).toBe('degraded')
     })
+  })
+})
+
+/**
+ * Mail was the one thing the report never mentioned, and its absence was the
+ * most expensive of all of them: email sign-up and password recovery both mail
+ * a six-digit code, so with no provider they refuse and the form quietly hides
+ * them. The flows work; the deployment has nowhere to post the message. Nothing
+ * said so, which left "registration is broken" as the only available reading.
+ */
+describe('mail, and saying why sign-up is missing', () => {
+  const base = {
+    now: fixedNow,
+    env: { SESSION_SECRET: 's'.repeat(32), DATABASE_URL: 'postgres://x' },
+  }
+
+  it('reports mail off, and names the variable that turns it on', () => {
+    const check = buildHealthReport(base).checks.find((c) => c.name === 'mail')
+    expect(check?.status).toBe('off')
+    expect(check?.detail).toContain('SMTP_URL')
+  })
+
+  it('reports mail configured when SMTP is set', () => {
+    const r = buildHealthReport({
+      ...base,
+      env: { ...base.env, SMTP_URL: 'smtp://user:pass@mail.example.org:587' },
+    })
+    expect(r.checks.find((c) => c.name === 'mail')?.status).toBe('ok')
+  })
+
+  /**
+   * The setting that looks like success and is not. Codes go to the server log,
+   * which is right for a developer and wrong for anyone with real users — so it
+   * is degraded, never ok.
+   */
+  it('does not let the log provider pass as working mail', () => {
+    const r = buildHealthReport({ ...base, env: { ...base.env, MAIL_PROVIDER: 'log' } })
+    const check = r.checks.find((c) => c.name === 'mail')
+    expect(check?.status).toBe('degraded')
+    expect(check?.detail).toContain('never sent')
   })
 })

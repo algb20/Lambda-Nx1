@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { publicationTime, publicationZoneOffset } from './observed'
+import { MAX_FUTURE_SKEW_MS, publicationTime, publicationZoneOffset } from './observed'
 
 describe('publicationTime', () => {
   it('reads ISO-8601, the format most agencies publish', () => {
@@ -65,9 +65,18 @@ describe('publicationTime', () => {
     expect(publicationTime(wayAhead)).toBeNull()
   })
 
-  it('allows a forward-dated alert, because agencies legitimately publish one', () => {
+  /**
+   * This test used to assert the opposite, and it was the bug written down.
+   *
+   * A forward `effective` time is a real thing agencies publish — but it is not
+   * *when the bulletin was issued*, which is what this function returns and what
+   * the ranking ages events by. Accepting six hours ahead meant a row could be
+   * fresher than anything that had actually happened, and take the top of the
+   * board on that strength alone.
+   */
+  it('refuses a time six hours ahead: that is not when it was published', () => {
     const soon = new Date(Date.now() + 6 * 3600 * 1000).toISOString()
-    expect(publicationTime(soon)).toBe(soon)
+    expect(publicationTime(soon)).toBeNull()
   })
 })
 
@@ -114,5 +123,30 @@ describe('publicationZoneOffset', () => {
     expect(publicationZoneOffset('Friday, August 14, 2026 - 09:46')).toBeNull()
     expect(publicationZoneOffset(1786806360000)).toBeNull()
     expect(publicationZoneOffset(null)).toBeNull()
+  })
+})
+
+/**
+ * A publication time that has not happened yet is not a fact about the world —
+ * and because the ranking decays severity by age, it is also the single most
+ * damaging kind of wrong date: an event stamped tomorrow is fresher than
+ * everything real, so it takes the top of the board and reorders the rest
+ * around itself. Measured live: a hurricane-centre bulletin dated 33 hours
+ * ahead, because its feed publishes the *next* advisory time.
+ */
+describe('a time that has not happened yet', () => {
+  it('accepts a small skew, because publishers\' clocks drift', () => {
+    const soon = new Date(Date.now() + 30 * 60 * 1000).toISOString()
+    expect(publicationTime(soon)).not.toBeNull()
+  })
+
+  it('refuses a bulletin dated tomorrow rather than ranking it above everything real', () => {
+    const tomorrow = new Date(Date.now() + 33 * 60 * 60 * 1000).toISOString()
+    expect(publicationTime(tomorrow)).toBeNull()
+  })
+
+  it('refuses anything past the stated skew, exactly', () => {
+    const past = new Date(Date.now() + MAX_FUTURE_SKEW_MS + 60_000).toISOString()
+    expect(publicationTime(past)).toBeNull()
   })
 })
