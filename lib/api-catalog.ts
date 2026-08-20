@@ -353,6 +353,25 @@ export const API_GROUPS: ApiGroup[] = [
         ],
         returns: ['profile', 'financials', 'filings', 'ranking', 'summary'],
       },
+      {
+        path: '/api/intelligence/boards/[board]',
+        route: 'intelligence/boards/[board]',
+        method: 'POST',
+        title: 'Single-authority boards',
+        description:
+          'Seven boards, each reading one primary authority and grouping what it published: `courts` (US case law), `regulation` (the Federal Register), `officials` (central-bank speeches), `resources` (IMF commodity prices), `grid` (metered GB electricity), `space-weather` (NOAA scales and Kp), `orbital` (tracked objects). Rows arrive already grouped, and every group carries its own count.',
+        params: [
+          {
+            name: 'query',
+            type: 'string',
+            required: false,
+            description:
+              'Narrows the board where its publisher supports search (courts, regulation, officials, orbital). Ignored by the rest.',
+            example: 'antitrust',
+          },
+        ],
+        returns: ['groups', 'summary', 'findings', 'title', 'note'],
+      },
     ],
   },
   {

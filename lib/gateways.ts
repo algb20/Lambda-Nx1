@@ -32,6 +32,13 @@ export const ALL_MODES = [
   'board',
   'property',
   'companies',
+  'courts',
+  'regulation',
+  'officials',
+  'resources',
+  'grid',
+  'space-weather',
+  'orbital',
   'geo',
   'research',
   'reference',
@@ -55,6 +62,8 @@ export const GATEWAY_FAMILIES: ReadonlyArray<{ label: string; modes: readonly Mo
   { label: 'Infrastructure', modes: ['domain', 'threat', 'geo'] },
   { label: 'People & accounts', modes: ['username', 'email'] },
   { label: 'Money & entities', modes: ['finance', 'ownership', 'procurement', 'board', 'markets', 'property', 'companies'] },
+  { label: 'Law & the state', modes: ['courts', 'regulation', 'officials'] },
+  { label: 'Earth & systems', modes: ['resources', 'grid', 'space-weather', 'orbital'] },
   { label: 'Knowledge & record', modes: ['research', 'reference', 'open-data', 'news', 'media'] },
 ]
 
@@ -138,6 +147,55 @@ export const GATEWAY_GUIDANCE: Record<Mode, GatewayGuidance> = {
     example: 'Apple',
     limit:
       'US-registered filers only. A company that does not file with the SEC will not be found — that is a limit of the source, not evidence the company does not exist. Figures are as filed, never adjusted, and a quarterly number is not an annual one.',
+  },
+  courts: {
+    answers:
+      'What American courts have just decided — opinions as filed, newest first, grouped by court. Search a party, a subject or a doctrine.',
+    example: 'antitrust',
+    limit:
+      'United States case law only, from the Free Law Project index. A case absent here has not been shown not to exist; it may simply be in a jurisdiction the index does not cover.',
+  },
+  regulation: {
+    answers:
+      'What a government is actually doing, on the day it does it: proposed rules, final rules, notices and presidential documents from the US Federal Register.',
+    example: 'artificial intelligence',
+    limit:
+      'The US federal journal only. State, municipal and non-US rulemaking are not in it — and a notice is not a rule, which is why the type leads each group.',
+  },
+  officials: {
+    answers:
+      'What central bank governors and board members actually said, in their own words, as collected by the BIS.',
+    example: 'inflation',
+    limit:
+      'Public acts of office — a policy speech, on the record. This never follows a person, and it holds nothing about anyone’s private life (charter §3). Central banks only; other officials are not in this feed.',
+  },
+  resources: {
+    answers:
+      'Metals, energy minerals and food at the IMF price series that national budgets, mining investment and food-security policy are set against.',
+    example: 'press Load',
+    limit:
+      'Monthly averages, published in arrears, and labelled as such. Not a live quote, never a forecast — a copper price shown without its month is read as today’s and is not.',
+  },
+  grid: {
+    answers:
+      'How Britain is powered right now, by fuel and by interconnector, metered half-hourly by the body that settles the electricity market.',
+    example: 'press Load',
+    limit:
+      'Great Britain only. Very few countries publish metered generation openly and without a key; where they do not, we do not guess.',
+  },
+  'space-weather': {
+    answers:
+      'NOAA’s own R/S/G scales and the planetary K index — the alerts airlines, satellite operators and grid engineers act on.',
+    example: 'press Load',
+    limit:
+      'Conditions and recent measurements as NOAA published them. Space-weather forecasting is genuinely hard and we publish none of our own.',
+  },
+  orbital: {
+    answers:
+      'What is overhead: crewed stations and everything launched in the last thirty days, with orbital period and inclination from the published element sets.',
+    example: 'ISS',
+    limit:
+      'A tracked-object catalogue, not a live position. Orbital period is arithmetic on the published mean motion; predicting where an object will be is a different problem and we do not claim it.',
   },
   markets: {
     answers: 'One instrument in depth: price, history and the public record around it.',

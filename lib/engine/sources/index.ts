@@ -34,6 +34,7 @@ import { wikidata } from './reference'
 import { coingeckoTop, fredCommodities, fredIndices, frankfurterBoard } from './markets-board'
 import { PROPERTY_SOURCES } from './property'
 import { COMPANY_SOURCES } from './companies'
+import { BOARD_SOURCES } from './boards'
 // Gateway — Geospatial (places + flights)
 import { nominatim, opensky } from './geo'
 // Gateway — Research & tech-trend
@@ -336,6 +337,14 @@ export function registerCompanies(): void {
   registeredCompanies = true
 }
 
+let registeredBoards = false
+/** The seven single-authority boards: courts, regulation, officials, resources, grid, space weather, orbital. */
+export function registerBoards(): void {
+  if (registeredBoards) return
+  registry.registerAll(BOARD_SOURCES)
+  registeredBoards = true
+}
+
 let registeredGeo = false
 export function registerGeoGateway(): void {
   if (registeredGeo) return
@@ -417,6 +426,7 @@ export function registerAllSources(): void {
   registerMarketsBoard()
   registerProperty()
   registerCompanies()
+  registerBoards()
   registerGeoGateway()
   registerResearchGateway()
   registerReferenceGateway()

@@ -26,7 +26,7 @@ import {
   BookOpen,
   Library,
 } from 'lucide-react'
-import { Sparkles, Building2 } from 'lucide-react'
+import { Sparkles, Building2, Scale, FileText, Mic, Pickaxe, Sun, Satellite } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -44,6 +44,11 @@ import type { Story, StoryGrade } from '@/lib/analysis/stories'
 import type { MarketsBoardReport } from '@/lib/modules/markets-board'
 import type { PropertyReport } from '@/lib/modules/property'
 import type { CompanyReport } from '@/lib/modules/companies'
+import type { BoardReport } from '@/lib/modules/board-shared'
+import { BOARDS, boardByKey } from '@/lib/modules/board-shared'
+// Named apart from the markets `BoardView` in this file: they are different
+// things and one of them will otherwise be rendered where the other belongs.
+import { BoardView as AuthorityBoardView } from '@/components/board-view'
 import type { NexusReport } from '@/lib/modules/nexus'
 import type { GeoReport } from '@/lib/modules/geo'
 import type { ResearchReport } from '@/lib/modules/research'
@@ -78,6 +83,7 @@ type Result =
   | { kind: 'board'; data: MarketsBoardReport }
   | { kind: 'property'; data: PropertyReport }
   | { kind: 'companies'; data: CompanyReport }
+  | { kind: 'board-page'; data: BoardReport & { title: string; note: string } }
   | { kind: 'geo'; data: GeoReport }
   | { kind: 'research'; data: ResearchReport }
   | { kind: 'reference'; data: ReferenceReport }
@@ -95,6 +101,13 @@ const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: s
   { id: 'board', label: 'Board', icon: Gauge, placeholder: 'live market board — press Load' },
   { id: 'property', label: 'Property', icon: Building2, placeholder: 'housing prices, rates and supply — press Load' },
   { id: 'companies', label: 'Companies', icon: Landmark, placeholder: 'a company name or ticker — or press Load for the biggest' },
+  { id: 'courts', label: 'Courts', icon: Scale, placeholder: 'a party, a subject or a doctrine — or press Load' },
+  { id: 'regulation', label: 'Regulation', icon: FileText, placeholder: 'a subject — or press Load for today’s journal' },
+  { id: 'officials', label: 'Officials', icon: Mic, placeholder: 'a name or a topic — or press Load' },
+  { id: 'resources', label: 'Resources', icon: Pickaxe, placeholder: 'metals, energy and food prices — press Load' },
+  { id: 'grid', label: 'Grid', icon: Gauge, placeholder: 'live electricity generation — press Load' },
+  { id: 'space-weather', label: 'Space weather', icon: Sun, placeholder: 'solar and geomagnetic conditions — press Load' },
+  { id: 'orbital', label: 'Orbital', icon: Satellite, placeholder: 'an object name — or press Load' },
   { id: 'markets', label: 'Markets', icon: LineChart, placeholder: 'BTC, AAPL, or USD/EUR' },
   { id: 'procurement', label: 'Contracts', icon: Gavel, placeholder: 'company, agency or project name' },
   { id: 'ownership', label: 'Ownership', icon: Network, placeholder: 'company / legal-entity name' },
@@ -122,7 +135,18 @@ const BODY_KEY: Partial<Record<Mode, string>> = {
 }
 
 /** Modes where an empty query is valid (returns a top/overview result). */
-const EMPTY_OK: Partial<Record<Mode, boolean>> = { news: true, board: true, property: true, companies: true }
+/**
+ * Gateways that answer without a subject. The seven boards all do — each reads
+ * one publisher and shows what it published, and typing is a narrowing rather
+ * than a requirement.
+ */
+const EMPTY_OK: Partial<Record<Mode, boolean>> = {
+  news: true,
+  board: true,
+  property: true,
+  companies: true,
+  ...Object.fromEntries(BOARDS.map((b) => [b.key, true])),
+}
 
 type EvidenceItem = DomainReport['sections']['dns'][number]
 
@@ -1410,6 +1434,12 @@ function collectFindings(result: Result): { subject: string; gateway: string; fi
       return { subject: 'Markets board', gateway: 'markets', findings: slim(result.data.findings) }
     case 'property':
       return { subject: 'Property & real estate', gateway: 'property', findings: slim(result.data.findings) }
+    case 'board-page':
+      return {
+        subject: result.data.subject || result.data.title,
+        gateway: result.data.board,
+        findings: slim(result.data.findings),
+      }
     case 'companies':
       return {
         subject: result.data.subject || 'Largest filers',
@@ -1872,6 +1902,10 @@ export function IntelligenceDashboard() {
         setResult({ kind: 'track', data: { query: typed } })
         setLoading(false)
         return
+      } else if (boardByKey(mode)) {
+        // One branch for all seven boards, and for the eighth.
+        endpoint = `/api/intelligence/boards/${mode}`
+        payload = { query: typed }
       } else if (mode === 'property') {
         endpoint = '/api/intelligence/property'
         payload = {}
@@ -1890,7 +1924,9 @@ export function IntelligenceDashboard() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data?.error ?? 'Investigation failed')
-      setResult({ kind: mode, data } as Result)
+      // The seven boards share one result kind, because they share one view.
+      // Keying them by mode would need seven identical branches downstream.
+      setResult({ kind: boardByKey(mode) ? 'board-page' : mode, data } as Result)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Investigation failed')
     } finally {
@@ -2000,8 +2036,8 @@ export function IntelligenceDashboard() {
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : mode === 'board' || mode === 'property' ? (
               'Load'
-            ) : mode === 'companies' ? (
-              query.trim() ? 'Investigate' : 'Load'
+            ) : mode === 'companies' || boardByKey(mode) ? (
+              query.trim() ? 'Search' : 'Load'
             ) : mode === 'news' ? (
               'Fetch'
             ) : mode === 'track' ? (
@@ -2088,6 +2124,9 @@ export function IntelligenceDashboard() {
       {result?.kind === 'board' ? <BoardView r={result.data} onReload={run} loading={loading} /> : null}
       {result?.kind === 'property' ? <PropertyView r={result.data} /> : null}
       {result?.kind === 'companies' ? <CompaniesView r={result.data} /> : null}
+      {result?.kind === 'board-page' ? (
+        <AuthorityBoardView r={result.data} title={result.data.title} note={result.data.note} />
+      ) : null}
       {result?.kind === 'geo' ? <GeoView r={result.data} /> : null}
       {result?.kind === 'research' ? <ResearchView r={result.data} /> : null}
       {result?.kind === 'reference' ? <ReferenceView r={result.data} /> : null}

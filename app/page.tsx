@@ -10,6 +10,7 @@ import { StandingBriefPanel } from "@/components/standing-brief"
 import { UserPreferences } from "@/components/user-preferences"
 import { BottomNav } from "@/components/bottom-nav"
 import { SideNav } from "@/components/side-nav"
+import { ContextRail } from "@/components/context-rail"
 import { Header } from "@/components/header"
 import { ErrorBoundary } from "@/components/error-boundary"
 import { resolveTab, tabDef, type Tab } from "@/lib/navigation"
@@ -72,7 +73,15 @@ export default function HomePage() {
     <div className="min-h-screen bg-background pb-20 lg:pb-0">
       <Header onNavigate={navigate} />
 
-      <div className="container mx-auto flex gap-8 px-4 py-4 lg:max-w-6xl lg:py-6">
+      {/*
+        Width is earned, not taken. `lg` brings the navigation rail and real
+        content width; `xl` brings a second column beside it. Simply raising the
+        cap without the rail would make it worse — a single column stretched to
+        1600px gives 200-character lines nobody can read, and the page still has
+        nothing on either side. A wide screen is a different arrangement, not a
+        tall screen with more room.
+      */}
+      <div className="container mx-auto flex gap-6 px-4 py-4 lg:max-w-[88rem] lg:gap-8 lg:py-6 2xl:max-w-[104rem]">
         <SideNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
         {/*
@@ -135,6 +144,10 @@ export default function HomePage() {
             {activeTab === "account" && <UserPreferences />}
           </ErrorBoundary>
         </main>
+
+        {/* Mounts only above 1280px — gated on a real media query rather than
+            hidden with CSS, so a laptop does not pay for the fetch. */}
+        <ContextRail onNavigate={navigate} />
       </div>
 
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
