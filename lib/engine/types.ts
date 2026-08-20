@@ -29,6 +29,7 @@ export type Capability =
   | 'ownership'
   | 'news'
   | 'market_board'
+  | 'property'
   | 'geo'
   | 'research'
   | 'economy'

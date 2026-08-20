@@ -30,6 +30,7 @@ export const ALL_MODES = [
   'ownership',
   'news',
   'board',
+  'property',
   'geo',
   'research',
   'reference',
@@ -52,7 +53,7 @@ export const GATEWAY_FAMILIES: ReadonlyArray<{ label: string; modes: readonly Mo
   { label: 'Start anywhere', modes: ['nexus', 'track'] },
   { label: 'Infrastructure', modes: ['domain', 'threat', 'geo'] },
   { label: 'People & accounts', modes: ['username', 'email'] },
-  { label: 'Money & entities', modes: ['finance', 'ownership', 'procurement', 'board', 'markets'] },
+  { label: 'Money & entities', modes: ['finance', 'ownership', 'procurement', 'board', 'markets', 'property'] },
   { label: 'Knowledge & record', modes: ['research', 'reference', 'open-data', 'news', 'media'] },
 ]
 
@@ -122,6 +123,13 @@ export const GATEWAY_GUIDANCE: Record<Mode, GatewayGuidance> = {
       'One live board across asset classes — crypto, equities, rates and FX — from public market data.',
     example: 'press Load',
     limit: 'Market data as published, with its timestamp. It is not advice and not a recommendation.',
+  },
+  property: {
+    answers:
+      'Housing: what homes sold for, how much is being built, what a mortgage costs and how much stock is unsold — from the national statistical authority of each territory.',
+    example: 'press Load',
+    limit:
+      'Aggregate market structure only. Never an individual address or a per-property valuation: an address is somebody’s home, and charter §3 rules it out. Every figure carries its published period, which is months behind by nature.',
   },
   markets: {
     answers: 'One instrument in depth: price, history and the public record around it.',

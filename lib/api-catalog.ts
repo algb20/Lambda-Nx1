@@ -326,6 +326,15 @@ export const API_GROUPS: ApiGroup[] = [
           'The multi-class market overview in one call. Takes no body.',
         returns: ['classes', 'movers', 'generatedAt'],
       },
+      {
+        path: '/api/intelligence/property',
+        route: 'intelligence/property',
+        method: 'POST',
+        title: 'Property & real estate',
+        description:
+          'Housing prices, construction and sales activity, mortgage rates and unsold supply, from the statistical authority of each territory. Takes no body. Every figure carries the period it describes — these series are published months in arrears by nature.',
+        returns: ['sections', 'summary', 'findings'],
+      },
     ],
   },
   {
