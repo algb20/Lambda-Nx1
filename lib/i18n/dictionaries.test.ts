@@ -56,3 +56,32 @@ describe('dictionaries — direction', () => {
     for (const l of LOCALES.filter((x) => x !== 'ar')) expect(RTL_LOCALES.has(l)).toBe(false)
   })
 })
+
+/**
+ * The bug this catches, seen on a real screenshot: the navigation rail rendered
+ * `nav.feed`, `nav.intelligence` and `nav.preferences` — the raw keys — to every
+ * user in every language, for weeks. The fallback chain is designed so a missing
+ * translation shows *English* rather than a key, and it works; what it cannot do
+ * is invent a key that was never in the English dictionary either.
+ *
+ * So the check is against the navigation definitions rather than against a list
+ * written here: a tab added without its label fails immediately, in English
+ * first, which is where it would otherwise be least visible.
+ */
+describe('every navigation label exists', () => {
+  it('has an English string for every tab, so nothing can fall back to a key', async () => {
+    const { TAB_DEFS } = await import('@/lib/navigation')
+    for (const tab of TAB_DEFS) {
+      expect(DICTIONARIES.en[tab.i18nKey], `missing en: ${tab.i18nKey}`).toBeTruthy()
+    }
+  })
+
+  it('translates every tab into every locale we claim to support', async () => {
+    const { TAB_DEFS } = await import('@/lib/navigation')
+    for (const locale of LOCALES) {
+      for (const tab of TAB_DEFS) {
+        expect(DICTIONARIES[locale][tab.i18nKey], `missing ${locale}: ${tab.i18nKey}`).toBeTruthy()
+      }
+    }
+  })
+})

@@ -1,3 +1,8 @@
+// Counted, never written down. The description said "sixteen" while the
+// product shipped twenty-six, which is the kind of small lie that makes a
+// reader distrust every other number on the page.
+import { ALL_MODES } from './gateways'
+
 /**
  * The application's tabs — one definition, used by every navigation surface.
  *
@@ -61,7 +66,7 @@ export const TAB_DEFS: readonly TabDef[] = [
     id: 'intelligence',
     short: 'Gateways',
     label: 'The intelligence gateways',
-    description: 'Run an investigation across sixteen passive gateways',
+    description: `Run an investigation across ${ALL_MODES.length} passive gateways`,
     i18nKey: 'nav.intelligence',
   },
   {

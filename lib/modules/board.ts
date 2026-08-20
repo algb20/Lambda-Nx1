@@ -22,42 +22,17 @@
  * offer the choice without first reading every row.
  */
 import { collect } from '../engine/orchestrator'
+// The catalogue and the shapes live apart, because a client component that
+// imported them from here would pull the orchestrator — and `node:crypto`
+// through it — into the browser bundle and fail the build outright.
 import { registry } from '../engine/registry'
 import { registerBoards } from '../engine/sources'
-import type { Capability, Evidence } from '../engine/types'
+import type { Capability } from '../engine/types'
+import type { BoardGroup, BoardReport, BoardRow } from './board-shared'
 
-export interface BoardRow {
-  group: string
-  headline: string
-  detail?: string
-  value?: number
-  unit?: string
-  at: string | null
-  url?: string
-  sourceKey: string
-}
-
-export interface BoardGroup {
-  name: string
-  rows: BoardRow[]
-}
-
-export interface BoardReport {
-  generatedAt: string
-  /** The gateway this is, so one renderer can label many boards. */
-  board: string
-  subject: string
-  groups: BoardGroup[]
-  findings: Evidence[]
-  summary: {
-    rows: number
-    groups: number
-    sourcesOk: number
-    sourcesFailed: number
-    /** The newest publisher timestamp on the board, or null if none stated one. */
-    newestAt: string | null
-  }
-}
+// Re-exported so nothing downstream has to know there are two files. The rule
+// is only that a `'use client'` component imports from `board-shared` directly.
+export * from './board-shared'
 
 interface RowData {
   group?: string
@@ -143,79 +118,4 @@ export async function boardReport(
       newestAt,
     },
   }
-}
-
-/**
- * The boards, as data.
- *
- * Each row is everything the platform needs to know about a gateway that reads
- * one publisher and groups what it returns: which capability to collect, what
- * to call it, and what it is for. Adding the eighth is adding a row here and a
- * source there — no route, no view, no branch.
- */
-export interface BoardDefinition {
-  /** Matches the `Mode` in lib/gateways.ts. */
-  key: string
-  capability: Capability
-  title: string
-  /** One line under the title: what this board is, from the reader's side. */
-  note: string
-  /** Whether typing a subject narrows it. False for boards with no search. */
-  searchable: boolean
-}
-
-export const BOARDS: BoardDefinition[] = [
-  {
-    key: 'courts',
-    capability: 'courts',
-    title: 'Courts & litigation',
-    note: 'American court opinions as filed, newest first, from the Free Law Project index. Search a party, a subject or a doctrine.',
-    searchable: true,
-  },
-  {
-    key: 'regulation',
-    capability: 'regulation',
-    title: 'Regulation & rulemaking',
-    note: 'The US Federal Register — every proposed rule, final rule, notice and presidential document, on the day it publishes.',
-    searchable: true,
-  },
-  {
-    key: 'officials',
-    capability: 'officials',
-    title: 'Officials & statements',
-    note: 'What central bank governors actually said, in their own words, collected by the BIS. Public acts of office — never private life.',
-    searchable: true,
-  },
-  {
-    key: 'resources',
-    capability: 'resources',
-    title: 'Resources & commodities',
-    note: 'Metals, energy minerals and food, at the IMF price series that national budgets and mining investment are set against. Monthly, and dated as monthly.',
-    searchable: false,
-  },
-  {
-    key: 'grid',
-    capability: 'power_grid',
-    title: 'Power grid',
-    note: 'Britain’s electricity, metered half-hourly by the body that settles the market — not an estimate of what the grid is doing, the figure it is paid on.',
-    searchable: false,
-  },
-  {
-    key: 'space-weather',
-    capability: 'space_weather',
-    title: 'Space weather',
-    note: 'NOAA’s own scales and the planetary K index — the alerts airlines and grid operators act on. The one hazard that hits everybody at once.',
-    searchable: false,
-  },
-  {
-    key: 'orbital',
-    capability: 'orbital',
-    title: 'Orbital objects',
-    note: 'What is overhead: crewed stations and the last thirty days of launches, from the tracking network’s own element sets.',
-    searchable: true,
-  },
-]
-
-export function boardByKey(key: string): BoardDefinition | undefined {
-  return BOARDS.find((b) => b.key === key)
 }

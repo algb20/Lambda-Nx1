@@ -44,8 +44,8 @@ import type { Story, StoryGrade } from '@/lib/analysis/stories'
 import type { MarketsBoardReport } from '@/lib/modules/markets-board'
 import type { PropertyReport } from '@/lib/modules/property'
 import type { CompanyReport } from '@/lib/modules/companies'
-import type { BoardReport } from '@/lib/modules/board'
-import { BOARDS, boardByKey } from '@/lib/modules/board'
+import type { BoardReport } from '@/lib/modules/board-shared'
+import { BOARDS, boardByKey } from '@/lib/modules/board-shared'
 // Named apart from the markets `BoardView` in this file: they are different
 // things and one of them will otherwise be rendered where the other belongs.
 import { BoardView as AuthorityBoardView } from '@/components/board-view'

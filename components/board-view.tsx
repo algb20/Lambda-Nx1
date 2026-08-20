@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { TimeStamp } from '@/components/time-stamp'
-import type { BoardReport } from '@/lib/modules/board'
+import type { BoardReport } from '@/lib/modules/board-shared'
 
 /**
  * One view for every single-authority board.
@@ -105,7 +105,12 @@ export function BoardView({
           us — try again in a moment.
         </Card>
       ) : (
-        shown.map((g) => (
+        // Columns on a wide screen. A board of nine groups is nine screens of
+        // scrolling in one column and one screen in three — and the whole
+        // reason for grouping is to see the shape of the thing at once.
+        // `items-start` so a short group does not stretch to match a tall one.
+        <div className="grid items-start gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+        {shown.map((g) => (
           <Card key={g.name} className="p-4">
             <h4 className="mb-2 flex items-baseline justify-between gap-2 text-sm font-semibold">
               <span className="min-w-0 truncate">{g.name}</span>
@@ -140,7 +145,8 @@ export function BoardView({
               ))}
             </ul>
           </Card>
-        ))
+        ))}
+        </div>
       )}
     </div>
   )
