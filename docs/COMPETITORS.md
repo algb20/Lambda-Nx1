@@ -285,3 +285,115 @@ Sources:
 - [GDELT documentation](https://docs.gdeltproject.org/)
 - [ACLED API documentation](https://acleddata.com/acled-api-documentation)
 - [OpenSky terms of use](https://opensky-network.org/about/terms-of-use)
+
+---
+
+# Field survey — 18 platforms fetched live, 2026-08-20
+
+The previous sections were written from repositories and marketing memory. This
+one was **fetched**: eighteen HTTP requests from this machine on 20 August 2026,
+saved, stripped and read. Two returned 403 to a non-browser client
+(Flightradar24, MarineTraffic — both Cloudflare-fronted), one is a JavaScript
+shell with no server-rendered text (Palantir Foundry). The other fifteen are
+quoted below from their own pages.
+
+This matters because the previous entries were written *about* these products
+without opening them, and at least one number in the table above — World
+Monitor's "536+ upstream hosts, 500+ feeds, 25 layers" — is not what the running
+product now claims. It claims layers, curated feeds and attributed sources as
+three separate counts, plus "13 chokepoints", "5 independent alert origins" and
+"100+ signals". Our own table was a version behind and mixed the categories §2a
+exists to keep apart.
+
+## What each one actually says it does
+
+| Platform | Access | Its own words for what it sells |
+|---|---|---|
+| **World Monitor** | Free, no signup; Pro $39.99/mo | "By the time it's news, you already knew." Live map + correlation engine + MCP/REST/SDKs |
+| **Kpler** | Demo only | Vessels tracked/day, AIS signals/day, trades monitored — physical trade flow |
+| **Dataminr** | Demo only | "AI-Powered Real-Time Event, Threat & Risk Intelligence" — first-signal speed |
+| **Recorded Future** | Demo only | "Four solutions. One platform. No blind spots." — threat intelligence |
+| **Sayari** | Demo only | "Mapping the world's shadow economy" — ownership, trade, sanctions |
+| **Crisis24** | Enterprise | 200+ human analysts, critical event management, mass notification |
+| **Janes** | Enterprise | Defence and open-source intelligence, human-curated |
+| **Maltego** | Freemium | Graph-based OSINT investigation; Graph / Search / Monitor / Evidence |
+| **Censys** | Freemium | "The authoritative map of global Internet infrastructure" |
+| **Intel 471** (spiderfoot.net now redirects here) | Enterprise | HUMINT-centric; 700+ ready-built hunt packages |
+| **ACLED** | Free + myACLED | Conflict Index across four indicators, every country |
+| **OpenSanctions** | Free non-commercial | Sanctions, PEPs, watchlists; open pipeline, de-duplicated |
+| **GDELT** | Free data | 100+ languages, every country, 15-minute updates, archive to 1979 |
+| **Liveuamap** | Ads; $8/mo to remove | Regional conflict maps, editorially independent |
+| **Bellingcat** | Free | Method and tooling, not a platform |
+
+## The four findings that change what we build
+
+### 1. Every one of them publishes a score. Not one publishes its observability.
+
+ACLED's Conflict Index ranks every country on four indicators — "deadliness,
+danger to civilians, geographic diffusion, and the number of armed groups".
+World Monitor fuses "12 signals per country" into an instability index and ranks
+nations against each other on it. Crisis24 sells a Global Risk Forecast.
+
+None of them states, beside the score, **how well the country is observed**. And
+an index built from reported events is substantially an index of press and
+sensor density: a country with resident bureaus and a national seismic network
+generates an order of magnitude more events than one without, at identical real
+instability. A reader given only the number cannot tell "quiet" from "unseen" —
+which are opposite conclusions from identical data.
+
+This is not a small gap. It is the field's shared blind spot, and it is
+addressable with method rather than money. `lib/analysis/country-risk.ts` is our
+answer: two numbers that are never combined, and a refusal to rank two countries
+whose observability differs by more than a stated margin.
+
+### 2. The money is behind a demo form, and that is our opening.
+
+Kpler, Dataminr, Recorded Future, Sayari, Crisis24, Janes and Intel 471 have no
+public product at all — every one of them gates on "Request a demo". Maltego and
+Censys are freemium with hard limits. Liveuamap charges $8/month to hide banner
+ads from a conflict map.
+
+Exactly one comparable product is free, complete and needs no account: World
+Monitor. That is not a coincidence and it is not generosity — it is the only
+strategy that reaches people who will never fill in a demo form. Charter §1 put
+us on the same side of that line before we knew the field was this thin there.
+
+### 3. AIS is the moat, and we cannot buy it — so we must not imitate it.
+
+Kpler's headline metrics are vessel and AIS-signal counts. World Monitor's
+chokepoint tracking runs on AISStream. MarineTraffic *is* an AIS product.
+
+We have no AIS feed and will not build a headline number on a key we cannot
+guarantee (§2 rule 4). The temptation is to show something adjacent and let a
+reader assume it is vessel data — which is the fabrication this project exists
+to refuse. `lib/analysis/corridors.ts` therefore answers a different question,
+and says so on every corridor including the quiet ones: not *how many ships
+passed*, but *what is happening near this corridor that could stop them*. A
+transit count tells you a corridor is already disrupted; the causes appear first.
+
+### 4. MCP is now table stakes for the serious ones, and we do not have it.
+
+World Monitor ships an MCP server with a live tool registry, a documented REST
+API under one OpenAPI 3.1 spec, official SDKs on npm, PyPI, RubyGems and Go, and
+JMESPath projection so an agent fetches only the fields it needs. Their framing
+is explicit: "your code researches with live data instead of training-data
+memories."
+
+We have `/llms.txt` and a documented REST surface. We do not have MCP. This is
+the largest genuine capability gap in this survey and it is ours to close.
+
+## Where we now stand, honestly
+
+| Capability | Them (best in field) | Us | Verdict |
+|---|---|---|---|
+| Country instability index | World Monitor, ACLED | `country-risk.ts` | **Ahead** — the only one publishing observability beside the score |
+| Chokepoints | World Monitor (live AIS) | `corridors.ts` | **Behind on data, ahead on honesty** — no vessel counts, and it never pretends |
+| Free, no-signup, complete | World Monitor | Yes | Level |
+| Source breadth | GDELT (100+ languages) | 119 sources | Behind — and GDELT is a source we can read, not only a rival |
+| Provenance per finding | Nobody grades per item | Admiralty + confidence + independence group | **Ahead** |
+| MCP / agent access | World Monitor | Not yet | **Behind** |
+| Human analysts | Crisis24 (200+), Janes | None | Behind, and structurally — we will not match this and should not try |
+| Prediction markets, AIS, satellite tasking | Various, all keyed | None | Behind, by choice, keyless-only |
+
+The two "ahead" rows are both method, not money. That is the only kind of lead
+this project can hold, and it is the kind that does not expire.

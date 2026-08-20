@@ -58,9 +58,24 @@ export function projectGlobe(
   return { x: cx + x * R, y: cy - y2 * R, visible: z2 > 0 }
 }
 
-/** Sphere radius in pixels for the current viewport and zoom. */
+/**
+ * Sphere radius in pixels for the current viewport and zoom.
+ *
+ * Never negative, and that is a fix rather than a formality. The 18px inset
+ * makes the expression go below zero whenever the viewport is under 36px in
+ * either dimension — which happens on the very first paint, before the canvas
+ * has been measured. The renderer then called `createRadialGradient` with a
+ * negative inner radius, which throws `IndexSizeError` in every browser, and
+ * the throw aborted the entire draw: a blank globe with an exception in the
+ * console and no other symptom.
+ *
+ * Found by watching a real browser render the page, not by any test — the maths
+ * is correct for every viewport a person would ever see, and wrong for the one
+ * frame before the layout exists.
+ */
 export function globeRadius(camera: GlobeCamera, viewport: Viewport): number {
-  return (Math.min(viewport.width, viewport.height) / 2 - 18) * camera.zoom
+  const smallest = Math.min(viewport.width, viewport.height)
+  return Math.max(0, (smallest / 2 - 18) * Math.max(0, camera.zoom))
 }
 
 /**

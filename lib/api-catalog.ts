@@ -122,6 +122,35 @@ export const API_GROUPS: ApiGroup[] = [
         ],
       },
       {
+        path: '/api/mcp',
+        route: 'mcp',
+        method: 'POST',
+        title: 'Model Context Protocol — the platform as agent tools',
+        description:
+          'JSON-RPC 2.0. Lets Claude, or any MCP-capable agent, read live public-source intelligence instead of answering about the world from training-data memory. Six tools: world events, country risk, country ranking, corridor status, gateway queries and source health. GET the same URL for a plain description of the tools.',
+        returns: [
+          'Every tool result carries its sources, its timestamps, and a non-empty `limits` list',
+          'The handshake instructs the agent to relay the limits alongside the numbers',
+          'Open, like every other read surface here — an agent endpoint behind a key is one nobody wires up',
+        ],
+      },
+      {
+        path: '/api/countries',
+        route: 'countries',
+        method: 'GET',
+        title: 'Country instability, with its observability beside it',
+        description:
+          'Every country present in the feed, scored twice and never once: what public sources reported, and how well we can see the country at all. Returned in observability bands rather than one list, because one list asserts that every row is comparable with every other. `?iso=XX` for a single dossier; `?corridors=1` adds the critical-corridor watch.',
+        returns: [
+          'bands — densely, moderately and thinly observed, each with what that means',
+          'signal — 0–100, what was reported, weighted by bearing on stability',
+          'observability — 0–100, independent origins first, then sources, then volume',
+          'components — per category: count, contribution, and the strongest report named',
+          'blindSpots — what this score does not cover. Never empty, for any country',
+          'corridors — optional: pressure near places world traffic cannot bypass',
+        ],
+      },
+      {
         path: '/api/brief',
         route: 'brief',
         method: 'GET',
