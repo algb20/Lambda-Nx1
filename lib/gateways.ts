@@ -31,6 +31,7 @@ export const ALL_MODES = [
   'news',
   'board',
   'property',
+  'companies',
   'geo',
   'research',
   'reference',
@@ -53,7 +54,7 @@ export const GATEWAY_FAMILIES: ReadonlyArray<{ label: string; modes: readonly Mo
   { label: 'Start anywhere', modes: ['nexus', 'track'] },
   { label: 'Infrastructure', modes: ['domain', 'threat', 'geo'] },
   { label: 'People & accounts', modes: ['username', 'email'] },
-  { label: 'Money & entities', modes: ['finance', 'ownership', 'procurement', 'board', 'markets', 'property'] },
+  { label: 'Money & entities', modes: ['finance', 'ownership', 'procurement', 'board', 'markets', 'property', 'companies'] },
   { label: 'Knowledge & record', modes: ['research', 'reference', 'open-data', 'news', 'media'] },
 ]
 
@@ -130,6 +131,13 @@ export const GATEWAY_GUIDANCE: Record<Mode, GatewayGuidance> = {
     example: 'press Load',
     limit:
       'Aggregate market structure only. Never an individual address or a per-property valuation: an address is somebody’s home, and charter §3 rules it out. Every figure carries its published period, which is months behind by nature.',
+  },
+  companies: {
+    answers:
+      'A company as its regulator holds it: legal name and former names, industry, listings, the last filings, and the figures it reported — each with the period it covers and the form it came from. With no subject, the largest filers ranked by their own balance sheets.',
+    example: 'Apple',
+    limit:
+      'US-registered filers only. A company that does not file with the SEC will not be found — that is a limit of the source, not evidence the company does not exist. Figures are as filed, never adjusted, and a quarterly number is not an annual one.',
   },
   markets: {
     answers: 'One instrument in depth: price, history and the public record around it.',

@@ -43,6 +43,7 @@ import type { NewsReport } from '@/lib/modules/news'
 import type { Story, StoryGrade } from '@/lib/analysis/stories'
 import type { MarketsBoardReport } from '@/lib/modules/markets-board'
 import type { PropertyReport } from '@/lib/modules/property'
+import type { CompanyReport } from '@/lib/modules/companies'
 import type { NexusReport } from '@/lib/modules/nexus'
 import type { GeoReport } from '@/lib/modules/geo'
 import type { ResearchReport } from '@/lib/modules/research'
@@ -76,6 +77,7 @@ type Result =
   | { kind: 'news'; data: NewsReport }
   | { kind: 'board'; data: MarketsBoardReport }
   | { kind: 'property'; data: PropertyReport }
+  | { kind: 'companies'; data: CompanyReport }
   | { kind: 'geo'; data: GeoReport }
   | { kind: 'research'; data: ResearchReport }
   | { kind: 'reference'; data: ReferenceReport }
@@ -92,6 +94,7 @@ const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: s
   { id: 'finance', label: 'Finance', icon: Landmark, placeholder: 'company name or BTC address' },
   { id: 'board', label: 'Board', icon: Gauge, placeholder: 'live market board — press Load' },
   { id: 'property', label: 'Property', icon: Building2, placeholder: 'housing prices, rates and supply — press Load' },
+  { id: 'companies', label: 'Companies', icon: Landmark, placeholder: 'a company name or ticker — or press Load for the biggest' },
   { id: 'markets', label: 'Markets', icon: LineChart, placeholder: 'BTC, AAPL, or USD/EUR' },
   { id: 'procurement', label: 'Contracts', icon: Gavel, placeholder: 'company, agency or project name' },
   { id: 'ownership', label: 'Ownership', icon: Network, placeholder: 'company / legal-entity name' },
@@ -105,6 +108,7 @@ const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: s
 
 const BODY_KEY: Partial<Record<Mode, string>> = {
   nexus: 'query',
+  companies: 'company',
   threat: 'indicator',
   finance: 'query',
   markets: 'query',
@@ -118,7 +122,7 @@ const BODY_KEY: Partial<Record<Mode, string>> = {
 }
 
 /** Modes where an empty query is valid (returns a top/overview result). */
-const EMPTY_OK: Partial<Record<Mode, boolean>> = { news: true, board: true, property: true }
+const EMPTY_OK: Partial<Record<Mode, boolean>> = { news: true, board: true, property: true, companies: true }
 
 type EvidenceItem = DomainReport['sections']['dns'][number]
 
@@ -1406,6 +1410,12 @@ function collectFindings(result: Result): { subject: string; gateway: string; fi
       return { subject: 'Markets board', gateway: 'markets', findings: slim(result.data.findings) }
     case 'property':
       return { subject: 'Property & real estate', gateway: 'property', findings: slim(result.data.findings) }
+    case 'companies':
+      return {
+        subject: result.data.subject || 'Largest filers',
+        gateway: 'companies',
+        findings: slim(result.data.findings),
+      }
     case 'geo':
       return { subject: result.data.subject, gateway: 'geo', findings: slim(result.data.findings) }
     case 'open-data':
@@ -1655,6 +1665,133 @@ function formatPropertyValue(value: number, unit: string): string {
   }
 }
 
+
+/**
+ * Companies.
+ *
+ * Two shapes from one gateway: a profile when a company was named, a ranking
+ * when it was not. The scope line is always present, because an absence here is
+ * the finding a reader is most likely to misread — a company missing from EDGAR
+ * has not been shown to be small or fictitious, it simply does not file in the
+ * United States.
+ */
+function CompaniesView({ r }: { r: CompanyReport }) {
+  return (
+    <div className="space-y-4">
+      {r.profile ? (
+        <Card className="p-4">
+          <h3 className="font-semibold">{r.profile.name}</h3>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">
+            CIK {r.profile.cik}
+            {r.profile.ticker ? ` · ${r.profile.ticker}` : ''}
+            {r.profile.industry ? ` · ${r.profile.industry}` : ''}
+            {r.profile.exchanges.length ? ` · ${r.profile.exchanges.join(', ')}` : ''}
+            {r.profile.city ? ` · ${r.profile.city}` : ''}
+          </p>
+          {r.profile.formerNames.length > 0 ? (
+            <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+              {/* Not trivia: a company that changed its name has an earlier record filed
+                  under something else, and an analyst who does not know that concludes it
+                  has no history. */}
+              Formerly:{' '}
+              {r.profile.formerNames
+                .map((f) => (f.until ? `${f.name} (until ${f.until.slice(0, 10)})` : f.name))
+                .join(' · ')}
+            </p>
+          ) : null}
+        </Card>
+      ) : null}
+
+      {r.financials.length > 0 ? (
+        <Card className="p-4">
+          <h4 className="text-sm font-semibold">As reported</h4>
+          <p className="mb-2 text-[11px] text-muted-foreground">
+            Straight from the company&rsquo;s own XBRL filings — never adjusted, never estimated. A
+            quarterly figure is not an annual one, so each carries the period and the form it came
+            from.
+          </p>
+          <div className="divide-y divide-border/40">
+            {r.financials.map((f) => (
+              <div key={f.label} className="flex items-center justify-between gap-3 py-2">
+                <div className="min-w-0">
+                  <span className="text-sm font-medium">{f.label}</span>
+                  <p className="truncate text-[11px] text-muted-foreground">
+                    {f.form} · period ending {f.periodEnd}
+                    {f.xbrlTag ? ` · ${f.xbrlTag}` : ''}
+                  </p>
+                </div>
+                <span className="shrink-0 text-sm tabular-nums">{compactUsd(f.value)}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      ) : null}
+
+      {r.filings.length > 0 ? (
+        <Card className="p-4">
+          <h4 className="mb-2 text-sm font-semibold">Recent filings</h4>
+          <ul className="space-y-1.5">
+            {r.filings.map((f, i) => (
+              <li key={`${f.form}-${f.filedAt}-${i}`} className="text-xs">
+                <span className="mr-1.5 rounded bg-muted px-1.5 py-px font-mono text-[10px]">{f.form}</span>
+                {f.sourceUrl ? (
+                  <a href={f.sourceUrl} target="_blank" rel="noreferrer" className="hover:underline">
+                    {f.claim}
+                  </a>
+                ) : (
+                  f.claim
+                )}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      ) : null}
+
+      {r.ranking.length > 0 ? (
+        <Card className="p-4">
+          <h4 className="text-sm font-semibold">Largest filers by total assets</h4>
+          <p className="mb-2 text-[11px] text-muted-foreground">
+            Every filer&rsquo;s own balance sheet for one period, sorted. Banks and the housing
+            agencies dominate because assets measure balance-sheet size, not revenue or worth — a
+            different metric gives a different order, and this one is named rather than implied.
+          </p>
+          <div className="divide-y divide-border/40">
+            {r.ranking.map((row) => (
+              <div key={`${row.rank}-${row.cik}`} className="flex items-center justify-between gap-3 py-1.5">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="w-6 shrink-0 text-right text-[11px] tabular-nums text-muted-foreground">
+                    {row.rank}
+                  </span>
+                  <span className="truncate text-sm">{row.name}</span>
+                </div>
+                <span className="shrink-0 text-sm tabular-nums">{compactUsd(row.value)}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      ) : null}
+
+      {!r.profile && r.ranking.length === 0 ? (
+        <Card className="p-4 text-sm text-muted-foreground">
+          Nothing matched &ldquo;{r.subject}&rdquo;. {r.summary.scope}
+        </Card>
+      ) : (
+        <p className="px-1 text-[11px] leading-relaxed text-muted-foreground">{r.summary.scope}</p>
+      )}
+    </div>
+  )
+}
+
+/** `4424900000000` → `$4.42T`. Full precision stays in the finding. */
+function compactUsd(value: number): string {
+  const abs = Math.abs(value)
+  const sign = value < 0 ? '-' : ''
+  if (abs >= 1e12) return `${sign}$${(abs / 1e12).toFixed(2)}T`
+  if (abs >= 1e9) return `${sign}$${(abs / 1e9).toFixed(2)}B`
+  if (abs >= 1e6) return `${sign}$${(abs / 1e6).toFixed(1)}M`
+  return `${sign}$${Math.round(abs).toLocaleString('en-US')}`
+}
+
 export function IntelligenceDashboard() {
   const [modeState, setMode] = useState<Mode>('nexus')
   /** What the interface is showing. `run` shadows this when reopening a
@@ -1863,6 +2000,8 @@ export function IntelligenceDashboard() {
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : mode === 'board' || mode === 'property' ? (
               'Load'
+            ) : mode === 'companies' ? (
+              query.trim() ? 'Investigate' : 'Load'
             ) : mode === 'news' ? (
               'Fetch'
             ) : mode === 'track' ? (
@@ -1948,6 +2087,7 @@ export function IntelligenceDashboard() {
       {result?.kind === 'news' ? <NewsView r={result.data} onReload={run} loading={loading} /> : null}
       {result?.kind === 'board' ? <BoardView r={result.data} onReload={run} loading={loading} /> : null}
       {result?.kind === 'property' ? <PropertyView r={result.data} /> : null}
+      {result?.kind === 'companies' ? <CompaniesView r={result.data} /> : null}
       {result?.kind === 'geo' ? <GeoView r={result.data} /> : null}
       {result?.kind === 'research' ? <ResearchView r={result.data} /> : null}
       {result?.kind === 'reference' ? <ReferenceView r={result.data} /> : null}

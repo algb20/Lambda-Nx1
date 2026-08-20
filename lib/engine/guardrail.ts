@@ -31,6 +31,25 @@ export class PassiveGuardrailError extends Error {
 export const MAX_POLITE_WAIT_MS = 3_500
 
 /**
+ * How the engine identifies itself to every provider it reads.
+ *
+ * A contact address is part of it because several providers — the SEC most
+ * explicitly — require one, and because a provider who wants to tell us we are
+ * being a nuisance should not have to guess how. `ENGINE_CONTACT` lets a
+ * deployment substitute its own operator; the default is the project's.
+ *
+ * **No URL in it.** The obvious form — `Name/1.0 (+https://project.example)` —
+ * is what half the web publishes and it is refused outright by the SEC's edge
+ * filter with a 403, whichever way it is phrased. Measured, not assumed: a
+ * name-and-contact string is accepted by every provider in the catalogue, and a
+ * string containing a link is not. The repository is discoverable from the
+ * contact address; a blocked request discovers nothing.
+ */
+export const USER_AGENT = `LambdaNX/1.0 (${
+  process.env.ENGINE_CONTACT?.trim() || 'contact@lambdanx.app'
+})`
+
+/**
  * A source we are not allowed to fetch yet.
  *
  * Deliberately its own type rather than a generic error: it is not a failure of
@@ -137,7 +156,22 @@ export class Guardrail {
         this.lastCallAt.set(sourceKey, Date.now())
       }
 
-      return fetch(url, { ...init, method })
+      /**
+       * Say who we are, on every request the engine makes.
+       *
+       * Not decoration. The SEC refuses anonymous automated traffic outright
+       * (403 with a plain-text scolding), Wikimedia and USGS ask for it in
+       * their terms, and a provider who can see which client is misbehaving can
+       * throttle that client instead of blocking a whole address range. It is
+       * also the honest thing for a passive-only engine to do: we are reading
+       * their data, and they are entitled to know it is us and how to reach us.
+       *
+       * A source may override it — `init.headers` wins — for the rare provider
+       * that requires a specific string.
+       */
+      const headers = new Headers(init?.headers)
+      if (!headers.has('user-agent')) headers.set('user-agent', USER_AGENT)
+      return fetch(url, { ...init, method, headers })
     }
   }
 }

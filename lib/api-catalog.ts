@@ -335,6 +335,24 @@ export const API_GROUPS: ApiGroup[] = [
           'Housing prices, construction and sales activity, mortgage rates and unsold supply, from the statistical authority of each territory. Takes no body. Every figure carries the period it describes — these series are published months in arrears by nature.',
         returns: ['sections', 'summary', 'findings'],
       },
+      {
+        path: '/api/intelligence/companies',
+        route: 'intelligence/companies',
+        method: 'POST',
+        title: 'Companies',
+        description:
+          'A company as its regulator holds it — legal and former names, industry, listings, recent filings, and the figures it reported, each with the period it covers and the form it came from. Send no company and the answer is the largest filers ranked by their own balance sheets.',
+        params: [
+          {
+            name: 'company',
+            type: 'string',
+            required: false,
+            description: 'A company name or ticker. Omit for the ranking.',
+            example: 'Apple',
+          },
+        ],
+        returns: ['profile', 'financials', 'filings', 'ranking', 'summary'],
+      },
     ],
   },
   {

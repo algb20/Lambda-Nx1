@@ -30,6 +30,8 @@ export type Capability =
   | 'news'
   | 'market_board'
   | 'property'
+  | 'company'
+  | 'company_ranking'
   | 'geo'
   | 'research'
   | 'economy'
