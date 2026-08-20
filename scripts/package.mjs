@@ -64,16 +64,33 @@ function gitSha() {
  *    database can still be built from zero — which is the property that
  *    actually matters (charter rule #4).
  *  - **`.claude/`** — agent definitions for our own tooling.
+ *  - **`package-lock.json`** — 224 KB, the largest single file in the tree, and
+ *    the one that pushed this bundle over the line as the product grew. Pi App
+ *    Studio runs its own `npm install`, and `package.json` carries the real
+ *    version constraints; the lockfile pins the exact resolution. Dropping it
+ *    here trades reproducible installs for fitting the uploader at all, and
+ *    that trade is stated rather than made quietly: **the full bundle keeps
+ *    it**, and anyone doing serious work should use that one. See docs/RUNNING.
+ *  - **`scripts/`** — the packaging and maintenance tooling. It builds the
+ *    bundle; it is not needed to run what the bundle contains.
  *
  * What ships is the application. What is held back is the apparatus around it,
  * all of which stays in the repository the bundle was cut from.
+ *
+ * ## The ceiling is in bytes, and which byte matters
+ *
+ * `STUDIO_LIMIT_BYTES` is 1024×1024. "One megabyte" is also read as 1,000,000
+ * by plenty of uploaders, so the warning threshold below is set against the
+ * *decimal* million: a bundle between the two is reported as too close to
+ * trust, because which of the two the far end means is not knowable from here.
  */
 const STUDIO_EXCLUDE = [
   /\.test\.[tj]sx?$/,
   /^docs\//,
   /^db\/migrations\/meta\//,
   /^\.claude\//,
-  /^scripts\/(reconcile-ledger|redact)\.py$/,
+  /^scripts\//,
+  /^package-lock\.json$/,
 ]
 
 /** All tracked, non-excluded files (git is the source of truth for what ships). */
@@ -153,6 +170,16 @@ function pkgVersion(dep) {
 /** Pi App Studio refuses an upload larger than this. */
 const STUDIO_LIMIT_BYTES = 1024 * 1024
 
+/**
+ * The stricter reading of "one megabyte".
+ *
+ * Some uploaders mean 1,048,576 bytes and some mean 1,000,000. A bundle between
+ * the two either uploads or does not depending on which, and that is not
+ * knowable from here — so anything above this is reported as too close to trust
+ * rather than as passing.
+ */
+const SAFE_STUDIO_BYTES = 1_000_000
+
 function main() {
   const outArg = process.argv.indexOf('--out')
   const profileArg = process.argv.indexOf('--profile')
@@ -212,7 +239,7 @@ function main() {
   console.log(`  archive ${(zipped / 1024).toFixed(0)} KB · profile ${profile}`)
   console.log(`  git ${sha} · next ${manifest.next} · node ${manifest.node}`)
 
-  if (profile === 'studio' && zipped > STUDIO_LIMIT_BYTES * 0.9 && zipped <= STUDIO_LIMIT_BYTES) {
+  if (profile === 'studio' && zipped > SAFE_STUDIO_BYTES && zipped <= STUDIO_LIMIT_BYTES) {
     // Warn before it breaks, not after. The bundle grows with the product, and
     // the failure mode without this is an upload rejected months from now by
     // somebody who has no idea a ceiling exists.
