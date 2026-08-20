@@ -101,6 +101,8 @@ const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: s
   { id: 'board', label: 'Board', icon: Gauge, placeholder: 'live market board — press Load' },
   { id: 'property', label: 'Property', icon: Building2, placeholder: 'housing prices, rates and supply — press Load' },
   { id: 'companies', label: 'Companies', icon: Landmark, placeholder: 'a company name or ticker — or press Load for the biggest' },
+  { id: 'broadcasts', label: 'Broadcasts', icon: Radio, placeholder: 'a country code, a station name — or press Load for what the world is listening to' },
+  { id: 'filings', label: 'Filings', icon: FileText, placeholder: 'a phrase to find in filings — or press Load for the disclosure tape' },
   { id: 'venues', label: 'Exchanges', icon: Landmark, placeholder: 'an exchange, a country or a MIC — or press Load for the registry' },
   { id: 'statements', label: 'Statements', icon: Megaphone, placeholder: 'a subject — or press Load for what has just been said' },
   { id: 'courts', label: 'Courts', icon: Scale, placeholder: 'a party, a subject or a doctrine — or press Load' },

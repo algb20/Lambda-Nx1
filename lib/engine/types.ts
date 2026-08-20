@@ -31,6 +31,8 @@ export type Capability =
   | 'market_board'
   | 'property'
   | 'venues'
+  | 'filings'
+  | 'broadcasts'
   | 'company'
   | 'company_ranking'
   | 'courts'
