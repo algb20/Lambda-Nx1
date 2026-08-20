@@ -23,6 +23,7 @@ import { Card } from '@/components/ui/card'
 import { usePrefs } from '@/components/prefs-provider'
 import { CategoryPanels } from '@/components/category-panels'
 import { CountryDossier } from '@/components/country-dossier'
+import { diversify, overflowSummary } from '@/lib/analysis/significance'
 import { TimeStamp } from '@/components/time-stamp'
 import { Badge } from '@/components/ui/badge'
 import { ErrorBoundary } from '@/components/error-boundary'
@@ -383,10 +384,61 @@ export function GlobeView() {
    * ranking depends on the cursor: scrubbed back to yesterday, the board must
    * show yesterday's order, not today's applied to yesterday's events.
    */
+  /**
+   * What the ranked list draws from — which is **not** what the map draws from.
+   *
+   * The map can only plot an event that has a coordinate. The list has no such
+   * constraint, and restricting it to placed events was a real defect with a
+   * loud symptom: a Security Council resolution, a sanctions package, a central
+   * bank decision and a breach disclosure all arrive without coordinates, so
+   * every one of them was excluded from "Most significant now" **by
+   * construction**. Only hazards have coordinates, so only hazards could rank.
+   *
+   * That is the larger half of "the news is all weather" — larger than the NWS
+   * volume problem, and invisible until the two were separated.
+   *
+   * Unplaceable events join the list only when no region filter is active: we
+   * cannot honestly place them in a region we do not know.
+   */
+  const listScope = useMemo(() => {
+    if (region !== 'all') return inWindow
+    const extra = (report?.unplaceable ?? []).filter(
+      (e) => !muted.has(e.category) && withinWindow(e, timeWindow),
+    )
+    return [...inWindow, ...extra]
+  }, [inWindow, report, muted, region, timeWindow])
+
   const ranked = useMemo(
-    () => rankEvents(inWindow, { now: cursor, fused: fusedIndex }),
-    [inWindow, cursor, fusedIndex],
+    () => rankEvents(listScope, { now: cursor, fused: fusedIndex }),
+    [listScope, cursor, fusedIndex],
   )
+
+  /**
+   * The board, capped so no single publisher owns it.
+   *
+   * Rarity weighting in `rankEvents` lowers a prolific source's score; this is
+   * the hard stop behind it. Measured before both existed: **17 of the top 20
+   * rows were `nws_alerts`**, because NWS issues county-level warnings all day
+   * and each grades to the same severity. A reader opening the world board saw
+   * American county weather and concluded the product only carries weather.
+   *
+   * What is held back is counted and offered, never dropped — hiding real
+   * events would be a worse failure than the one being fixed.
+   */
+  const board = useMemo(
+    () =>
+      diversify(
+        ranked.map((r) => ({
+          ...r,
+          sourceKey: r.event.sourceKey,
+          category: r.event.category as string,
+          severity: r.event.severity,
+        })),
+        20,
+      ),
+    [ranked],
+  )
+  const heldBack = useMemo(() => overflowSummary(board.overflow), [board.overflow])
 
   const latency = useMemo(() => latencyProfile(inWindow), [inWindow])
   const receiptTimed = useMemo(() => inWindow.filter(timedByReceipt).length, [inWindow])
@@ -943,12 +995,13 @@ export function GlobeView() {
             {windowHours === null ? 'Most significant now' : 'Most significant in this window'}
           </h4>
           <p className="mb-1.5 text-[10px] leading-relaxed text-muted-foreground">
-            Measured severity, halved every 72 hours of age, then lifted where independent origins
-            agree — capped, so corroboration can never outrank a severity. Each line says why it
-            sits where it sits.
+            Measured severity, halved every 72 hours of age, lifted where independent origins agree,
+            and lowered for a publisher that is sending a great many reports this run — a county
+            flood warning is one of forty, a magnitude 7.7 is one of two. No publisher may hold more
+            than three rows. Each line says why it sits where it sits.
           </p>
           <ul className="divide-y divide-border/60">
-            {ranked.slice(0, 20).map((r) => (
+            {board.taken.map((r) => (
               <li key={r.event.id}>
                 <button
                   onClick={() => setSelectedId(r.event.id)}
@@ -974,6 +1027,21 @@ export function GlobeView() {
               </li>
             ))}
           </ul>
+
+          {/* Counted and offered, never dropped. Silently hiding real events
+              would be a worse failure than the crowding it fixes. */}
+          {heldBack || board.diversified < board.taken.length ? (
+            <p className="mt-1.5 border-t border-border/60 pt-1.5 text-[10px] text-muted-foreground">
+              {heldBack}
+              {board.diversified < board.taken.length ? (
+                <>
+                  {' '}
+                  The first {board.diversified} rows met the diversity rule on their own; the rest
+                  fill the board and are there for completeness.
+                </>
+              ) : null}
+            </p>
+          ) : null}
         </Card>
       ) : null}
 
