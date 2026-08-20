@@ -16,7 +16,8 @@
     "package": "node scripts/package.mjs",
     "verify": "npm run typecheck && npm run test && npm run build",
     "scan:secrets": "vitest run lib/security/secret-scan.test.ts",
-    "walkthrough": "tsx scripts/walkthrough.ts"
+    "walkthrough": "tsx scripts/walkthrough.ts",
+    "package:studio": "node scripts/package.mjs --profile studio"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
