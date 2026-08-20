@@ -175,6 +175,11 @@ export function CategoryPanels({ report }: { report: WorldEventsReport | null })
                 key={category}
                 onClick={() => toggle(category)}
                 aria-pressed={on}
+                /* The map legend above carries these same words for a different
+                   action. Each control names its own, so the two are never one
+                   guess apart — see the note in globe-view.tsx. */
+                aria-label={`${on ? 'Close' : 'Open'} the ${meta?.label ?? category} panel`}
+                title={`${on ? 'Close' : 'Open'} the ${meta?.label ?? category} panel`}
                 className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
                   on ? 'border-primary bg-primary/10 font-medium text-primary' : 'border-border text-muted-foreground hover:bg-muted'
                 }`}

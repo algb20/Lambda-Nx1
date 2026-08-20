@@ -887,7 +887,19 @@ export function GlobeView() {
 
       {layer === 'events' && report && report.categories.length > 0 ? (
         <Card className="p-3">
-          <h4 className="mb-1.5 text-xs font-semibold">Event categories</h4>
+          {/*
+            Two rows of chips on this page carry the same words. These hide and
+            show categories *on the map*; the "Category panels" picker further
+            down opens a category as a readable panel. A live walk-through
+            clicked the first "Earthquake" it found, expecting a panel, and hid
+            the earthquakes instead — the two controls were indistinguishable
+            by name, so the heading and each chip's label now say which is which.
+          */}
+          <h4 className="mb-0.5 text-xs font-semibold">Show on the map</h4>
+          <p className="mb-1.5 text-[10px] text-muted-foreground">
+            Hides a category from the globe. To read a category instead, open it under{' '}
+            <span className="font-medium">Category panels</span> below.
+          </p>
           <div className="flex flex-wrap gap-1">
             {report.categories.map((c) => {
               const on = !muted.has(c.category)
@@ -896,6 +908,8 @@ export function GlobeView() {
                   key={c.category}
                   onClick={() => toggleCategory(c.category)}
                   aria-pressed={on}
+                  aria-label={`${on ? 'Hide' : 'Show'} ${c.label} on the map`}
+                  title={`${on ? 'Hide' : 'Show'} ${c.label} on the map`}
                   className={`flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] transition-colors ${
                     on
                       ? 'border-border bg-muted/60 text-foreground'
