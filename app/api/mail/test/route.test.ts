@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { GET, POST, senderShape } from './route'
+import { GET, POST } from './route'
+import { senderShape } from '@/lib/mail/sender'
 
 /**
  * The route that answers "I set the key and it still does not work".

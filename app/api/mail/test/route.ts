@@ -31,23 +31,10 @@ import { NextResponse } from 'next/server'
 import { adminGate } from '@/lib/social/admin'
 import { createMailProvider } from '@/lib/mail'
 import { httpMailFromEnv } from '@/lib/mail/http'
+import { senderShape } from '@/lib/mail/sender'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-
-/** The address, split so a diagnosis can name the domain without echoing it whole. */
-export function senderShape(raw: string | undefined): {
-  present: boolean
-  domain: string | null
-  hasDisplayName: boolean
-} {
-  const value = raw?.trim() ?? ''
-  if (!value) return { present: false, domain: null, hasDisplayName: false }
-  // `Lambda <no-reply@example.org>` and `no-reply@example.org` are both valid.
-  const address = value.match(/<([^>]+)>/)?.[1] ?? value
-  const domain = address.includes('@') ? address.split('@').pop()!.toLowerCase() : null
-  return { present: true, domain, hasDisplayName: value.includes('<') }
-}
 
 /**
  * The configuration as it stands, without sending anything.
