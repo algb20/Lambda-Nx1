@@ -299,7 +299,9 @@ export const CYBER_SOURCES: CatalogSource[] = [
     key: 'redhat_security',
     name: 'Red Hat security advisories',
     publisher: 'Red Hat',
-    url: 'https://access.redhat.com/blogs/product-security/feed',
+    // access.redhat.com retired its blog feeds; the security channel now
+    // publishes from redhat.com itself.
+    url: 'https://www.redhat.com/en/rss/blog/channel/security',
     kind: 'rss',
     discipline: 'cyber',
     topics: ['vulnerability'],

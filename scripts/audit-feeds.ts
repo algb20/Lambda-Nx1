@@ -99,6 +99,41 @@ function readFeed(text: string): { records: number; detail: string } {
     : { records: items.length, detail: 'NO READABLE TITLE — items carry no <title>' }
 }
 
+/**
+ * When a feed has moved, ask the publisher's own page where it went.
+ *
+ * Every site that publishes a feed is supposed to advertise it in its `<head>`
+ * as `<link rel="alternate" type="application/rss+xml">`, and most still do.
+ * A 404 on a feed URL is therefore usually answerable without a search: the new
+ * address is sitting on the front page.
+ *
+ * This only *proposes*. Nothing is changed on the strength of it — a discovered
+ * URL still has to be fetched, read and judged before it earns a catalogue
+ * entry, because "the site has a feed" and "the site has the feed we were
+ * relying on" are different claims.
+ */
+async function discoverFeeds(pageUrl: string): Promise<string[]> {
+  try {
+    const origin = new URL(pageUrl).origin
+    const res = await fetch(origin, {
+      headers: { 'User-Agent': 'LambdaNX/1.0 (+https://github.com/algb20/Lambda-Nx1)' },
+      redirect: 'follow',
+    })
+    if (!res.ok) return []
+    const html = await res.text()
+    const found = new Set<string>()
+    for (const tag of html.match(/<link[^>]+>/gi) ?? []) {
+      if (!/rel=["']?alternate/i.test(tag)) continue
+      if (!/type=["']?application\/(rss|atom)\+xml/i.test(tag)) continue
+      const href = tag.match(/href=["']([^"']+)["']/i)?.[1]
+      if (href) found.add(new URL(href, origin).toString())
+    }
+    return [...found].slice(0, 4)
+  } catch {
+    return []
+  }
+}
+
 async function audit(source: CatalogSource): Promise<Finding> {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
@@ -126,13 +161,19 @@ async function audit(source: CatalogSource): Promise<Finding> {
     })
     const text = await res.text()
     if (!res.ok) {
+      // A 404 or 410 means it moved; ask the publisher where to. A 403 means we
+      // are being refused, and no amount of discovery changes that.
+      const moved = res.status === 404 || res.status === 410
+      const candidates = moved ? await discoverFeeds(source.url) : []
       return {
         key: source.key,
         verdict: 'unreachable',
         status: res.status,
         bytes: text.length,
         records: 0,
-        detail: `publisher answered ${res.status}`,
+        detail:
+          `publisher answered ${res.status}` +
+          (candidates.length ? ` — the site advertises: ${candidates.join(' , ')}` : ''),
       }
     }
     const read = source.kind === 'json' ? readJson(source, text) : readFeed(text)
