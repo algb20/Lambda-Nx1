@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { catalogSource, fillTemplate } from './adapter'
+import { catalogSource, fillTemplate, requestUrl } from './adapter'
 import type { CatalogSource } from './types'
 import { PUBLIC_DOMAIN } from './licence'
 
@@ -227,5 +227,57 @@ describe('a headline built from a record that has none', () => {
 
   it('is inert when no template was declared', () => {
     expect(fillTemplate(undefined, { v: '0.821' })).toBeNull()
+  })
+})
+
+
+/**
+ * A frozen address can be quietly, permanently wrong. NVD returns its catalogue
+ * from the beginning when given no date range, so a feed catalogued as recent
+ * CVEs spent its life reporting a 1999 record — hourly, correctly, and about
+ * the wrong question.
+ */
+describe('a feed that has to ask for "now"', () => {
+  const base: CatalogSource = {
+    key: 'windowed',
+    name: 'A windowed feed',
+    publisher: 'Someone',
+    url: 'https://example.org/api?page=1',
+    kind: 'json' as const,
+    discipline: 'cyber' as const,
+    topics: ['vulnerability'],
+    coverage: 'global' as const,
+    admiralty: 'A' as const,
+    licence: PUBLIC_DOMAIN,
+    minIntervalSec: 60,
+    keyless: true,
+  }
+  const at = new Date('2026-08-20T12:00:00Z')
+
+  it('uses the declared address when no window is given', () => {
+    expect(requestUrl(base, at)).toBe('https://example.org/api?page=1')
+  })
+
+  it('asks for the window when one is given', () => {
+    const url = requestUrl(
+      { ...base, urlFor: (now) => `https://example.org/api?since=${now.toISOString()}` },
+      at,
+    )
+    expect(url).toBe('https://example.org/api?since=2026-08-20T12:00:00.000Z')
+  })
+
+  /**
+   * The guardrail allow-lists the host of `url`, so a window function that
+   * wandered elsewhere would be a way to reach a host no catalogue entry ever
+   * declared. It is refused rather than trusted.
+   */
+  it('refuses to leave the host the guardrail allow-listed', () => {
+    const url = requestUrl({ ...base, urlFor: () => 'https://elsewhere.example/api' }, at)
+    expect(url).toBe(base.url)
+  })
+
+  it('falls back to the declared address rather than going silent on a bad window', () => {
+    const url = requestUrl({ ...base, urlFor: () => 'not a url at all' }, at)
+    expect(url).toBe(base.url)
   })
 })

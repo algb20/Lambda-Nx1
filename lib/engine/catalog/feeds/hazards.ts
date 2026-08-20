@@ -20,6 +20,91 @@ import { PUBLIC_DOMAIN, ccBy, publicFeed } from '../licence'
  *    territory and nowhere else. Marking one `global` would silently claim
  *    worldwide coverage we do not have and hide a blind spot.
  */
+/**
+ * The national meteorological services that publish through MeteoAlarm, and the
+ * territory each one is authoritative for.
+ *
+ * ## Why this is a list and not one feed
+ *
+ * MeteoAlarm used to serve a single Europe-wide Atom feed and the catalogue
+ * carried it as one source. That feed is gone — it answers **404** and had been
+ * doing so silently, because a feed that cannot be fetched is indistinguishable
+ * on the board from a continent with no weather warnings. Europe was simply
+ * missing.
+ *
+ * What replaced it is per-country, and that is better than a restoration.
+ * Coverage in this catalogue is stated per territory (see the file header), and
+ * one feed marked "Europe" could never say which country a warning was
+ * authoritative for. Thirty-nine feeds each carrying one country's warnings can.
+ *
+ * They share the `eumetnet-meteoalarm` independence group on purpose: they are
+ * distinct national services, but they reach us through one aggregator, and a
+ * storm crossing four borders must not read as four independent confirmations.
+ */
+const METEOALARM: ReadonlyArray<readonly [slug: string, name: string, iso: string]> = [
+  ['andorra', 'Andorra', 'AD'],
+  ['austria', 'Austria', 'AT'],
+  ['belgium', 'Belgium', 'BE'],
+  ['bosnia-herzegovina', 'Bosnia and Herzegovina', 'BA'],
+  ['bulgaria', 'Bulgaria', 'BG'],
+  ['croatia', 'Croatia', 'HR'],
+  ['cyprus', 'Cyprus', 'CY'],
+  ['czechia', 'Czechia', 'CZ'],
+  ['denmark', 'Denmark', 'DK'],
+  ['estonia', 'Estonia', 'EE'],
+  ['finland', 'Finland', 'FI'],
+  ['france', 'France', 'FR'],
+  ['germany', 'Germany', 'DE'],
+  ['greece', 'Greece', 'GR'],
+  ['hungary', 'Hungary', 'HU'],
+  ['iceland', 'Iceland', 'IS'],
+  ['ireland', 'Ireland', 'IE'],
+  ['israel', 'Israel', 'IL'],
+  ['italy', 'Italy', 'IT'],
+  ['latvia', 'Latvia', 'LV'],
+  ['lithuania', 'Lithuania', 'LT'],
+  ['luxembourg', 'Luxembourg', 'LU'],
+  ['malta', 'Malta', 'MT'],
+  ['moldova', 'Moldova', 'MD'],
+  ['montenegro', 'Montenegro', 'ME'],
+  ['netherlands', 'Netherlands', 'NL'],
+  ['norway', 'Norway', 'NO'],
+  ['poland', 'Poland', 'PL'],
+  ['portugal', 'Portugal', 'PT'],
+  ['republic-of-north-macedonia', 'North Macedonia', 'MK'],
+  ['romania', 'Romania', 'RO'],
+  ['serbia', 'Serbia', 'RS'],
+  ['slovakia', 'Slovakia', 'SK'],
+  ['slovenia', 'Slovenia', 'SI'],
+  ['spain', 'Spain', 'ES'],
+  ['sweden', 'Sweden', 'SE'],
+  ['switzerland', 'Switzerland', 'CH'],
+  ['ukraine', 'Ukraine', 'UA'],
+  ['united-kingdom', 'United Kingdom', 'GB'],
+]
+
+function meteoalarmCountries(): CatalogSource[] {
+  return METEOALARM.map(([slug, name, iso]) => ({
+    key: `meteoalarm_${slug.replace(/-/g, '_')}`,
+    name: `Meteoalarm — ${name} severe weather warnings`,
+    publisher: `EUMETNET / national meteorological service of ${name}`,
+    url: `https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-${slug}`,
+    kind: 'atom' as const,
+    discipline: 'geoint' as const,
+    topics: ['weather', 'storm', 'flood'],
+    coverage: [iso],
+    admiralty: 'A' as const,
+    independence: 'eumetnet-meteoalarm',
+    licence: publicFeed('Meteoalarm / EUMETNET', 'https://meteoalarm.org/'),
+    // Warnings are issued on the hour and amended within it. Thirty-nine feeds
+    // at a quarter-hour each is well inside what the aggregator serves, and it
+    // is the interval the aggregator itself refreshes on.
+    minIntervalSec: 900,
+    keyless: true,
+    note: `Official warnings issued by ${name}'s own meteorological service, in CAP.`,
+  }))
+}
+
 export const HAZARD_SOURCES: CatalogSource[] = [
   // ── Seismic ───────────────────────────────────────────────────────────────
   {
@@ -166,7 +251,7 @@ export const HAZARD_SOURCES: CatalogSource[] = [
     key: 'reliefweb_disasters',
     name: 'ReliefWeb disasters',
     publisher: 'UN OCHA',
-    url: 'https://api.reliefweb.int/v1/disasters?appname=lambda-nx&limit=50&sort[]=date:desc&profile=list',
+    url: 'https://api.reliefweb.int/v2/disasters?appname=lambda-nx&limit=50&sort[]=date:desc&profile=list',
     kind: 'json',
     path: 'data',
     discipline: 'humint',
@@ -176,8 +261,26 @@ export const HAZARD_SOURCES: CatalogSource[] = [
     independence: 'un-ocha',
     licence: ccBy('UN OCHA ReliefWeb', 'https://reliefweb.int/terms-conditions'),
     minIntervalSec: 1800,
-    keyless: true,
+    /**
+     * Not keyless any more, and off until that is resolved.
+     *
+     * v1 answers **410 Gone** and v2 answers **403** with "You are not using an
+     * approved appname" — OCHA now issues appnames on request. That is a
+     * credential in everything but name, so calling this keyless would be
+     * false, and leaving it enabled would keep it in the count of integrations
+     * while it contributes nothing. Both are the kind of quiet inflation §2a of
+     * the charter exists to prevent.
+     *
+     * It stays in the catalogue, disabled, because the entry is the record of
+     * what has to be done: request an appname at
+     * https://apidoc.reliefweb.int/parameters#appname, put it in
+     * RELIEFWEB_APPNAME, and turn this back on.
+     */
+    keyless: false,
+    keyEnv: 'RELIEFWEB_APPNAME',
+    enabled: false,
     map: { title: 'fields.name', time: 'fields.date.created' },
+    note: 'Disabled: v1 is gone and v2 requires an appname approved by OCHA.',
   },
 
   // ── Weather warnings ─────────────────────────────────────────────────────
@@ -228,21 +331,7 @@ export const HAZARD_SOURCES: CatalogSource[] = [
     minIntervalSec: 900,
     keyless: true,
   },
-  {
-    key: 'meteoalarm_europe',
-    name: 'Meteoalarm — European severe weather',
-    publisher: 'EUMETNET',
-    url: 'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-europe',
-    kind: 'atom',
-    discipline: 'geoint',
-    topics: ['weather', 'storm', 'flood'],
-    coverage: 'global',
-    admiralty: 'A',
-    licence: publicFeed('Meteoalarm / EUMETNET', 'https://meteoalarm.org/'),
-    minIntervalSec: 900,
-    keyless: true,
-    note: 'The combined warnings of Europe’s national meteorological services.',
-  },
+  ...meteoalarmCountries(),
 
   // ── Volcanic ─────────────────────────────────────────────────────────────
   {

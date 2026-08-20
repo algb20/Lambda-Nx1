@@ -32,8 +32,22 @@ export const INFRASTRUCTURE_SOURCES: CatalogSource[] = [
     licence: ccBy('National Grid ESO, Carbon Intensity API', 'https://carbonintensity.org.uk/'),
     minIntervalSec: 1800,
     keyless: true,
-    map: { time: 'from' },
-    note: 'Half-hourly. A grid under stress shows here before it shows anywhere else.',
+    /**
+     * The record is three numbers and a word — `from`, `to`, `intensity` — with
+     * nothing an adapter could read as a headline, so this feed answered every
+     * half-hour and contributed nothing, and the board reported it as a quiet
+     * hour. It was never quiet; it was unreadable.
+     *
+     * The forecast is deliberately absent from the headline. The measured figure
+     * is what happened; the forecast is what someone expected to happen, and
+     * this platform does not put predictions on the board (charter §1).
+     */
+    map: {
+      time: 'from',
+      titleTemplate:
+        'UK grid carbon intensity {intensity.actual} gCO₂/kWh — {intensity.index}',
+    },
+    note: 'Half-hourly, measured. A grid under stress shows here before it shows anywhere else.',
   },
   {
     key: 'eia_electricity',

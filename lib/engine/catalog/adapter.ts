@@ -230,6 +230,30 @@ function capabilityOf(entry: CatalogSource): 'news' | 'world_events' {
   return entry.topics.includes('news') ? 'news' : 'world_events'
 }
 
+/**
+ * The address to fetch right now.
+ *
+ * `urlFor` may narrow a feed to a rolling window (see `CatalogSource.urlFor`),
+ * but it may not leave the host the guardrail allow-listed. That is checked here
+ * rather than trusted: the allow-list is derived from `url`, so a window
+ * function that wandered to another domain would otherwise be a way to reach a
+ * host no catalogue entry ever declared. On a mismatch — or on anything
+ * malformed — the declared `url` is used, so the feed degrades to its old
+ * behaviour instead of going silent.
+ */
+export function requestUrl(entry: CatalogSource, now: Date): string {
+  if (!entry.urlFor) return entry.url
+  try {
+    const candidate = new URL(entry.urlFor(now))
+    const declared = new URL(entry.url)
+    return candidate.hostname.toLowerCase() === declared.hostname.toLowerCase()
+      ? candidate.toString()
+      : entry.url
+  } catch {
+    return entry.url
+  }
+}
+
 export function catalogSource(entry: CatalogSource): Source {
   return {
     key: entry.key,
@@ -244,7 +268,7 @@ export function catalogSource(entry: CatalogSource): Source {
     minIntervalMs: entry.minIntervalSec * 1000,
 
     async run(_input, ctx: SourceContext): Promise<Evidence[]> {
-      const res = await ctx.fetch(entry.url, {
+      const res = await ctx.fetch(requestUrl(entry, new Date()), {
         headers: {
           // Named honestly with a contact route. Providers block anonymous
           // scrapers and they are right to; a source that will not say who it

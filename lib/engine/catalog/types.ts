@@ -171,6 +171,23 @@ export interface CatalogSource {
    */
   keyEnv?: string
 
+  /**
+   * A rolling window over `url`, for publishers whose "recent" is a query.
+   *
+   * Given the moment of the request, it returns the address to fetch. It must
+   * keep the host of `url` — that host is what the passive guardrail
+   * allow-lists, and it is checked, so a function that wandered to another
+   * domain would be refused rather than followed.
+   *
+   * It exists because a frozen address can be quietly, permanently wrong. NVD's
+   * API returns its catalogue from the beginning when no date range is given,
+   * so a source entered as "recently published CVEs" spent its life reporting
+   * **CVE-1999-0095** — a 27-year-old record, delivered every hour, correct in
+   * every particular except the one that mattered. Nothing failed; the feed was
+   * simply answering a different question from the one it was catalogued under.
+   */
+  urlFor?: (now: Date) => string
+
   /** For `kind: 'json'`, the dotted path to the array of records. */
   path?: string
 

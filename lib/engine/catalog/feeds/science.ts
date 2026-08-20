@@ -48,7 +48,24 @@ export const SCIENCE_SOURCES: CatalogSource[] = [
     key: 'nasa_donki',
     name: 'NASA DONKI — space weather notifications',
     publisher: 'NASA Goddard Space Flight Center',
-    url: 'https://api.nasa.gov/DONKI/notifications',
+    url: 'https://api.nasa.gov/DONKI/notifications?api_key=DEMO_KEY&type=all',
+    /**
+     * NASA's shared demonstration key when we have none of our own.
+     *
+     * The entry required `NASA_API_KEY` and so was never fetched at all — space
+     * weather was simply absent unless an operator happened to have registered.
+     * `DEMO_KEY` is NASA's own published anonymous key: 30 requests an hour and
+     * 50 a day per address, which at the hourly interval below leaves room to
+     * spare. A real key, when one is set, lifts that ceiling without changing
+     * anything else.
+     *
+     * `type=all` because the parameter defaults to flares only, and a
+     * geomagnetic storm is the notification that matters most here.
+     */
+    urlFor: () => {
+      const key = process.env.NASA_API_KEY?.trim() || 'DEMO_KEY'
+      return `https://api.nasa.gov/DONKI/notifications?api_key=${encodeURIComponent(key)}&type=all`
+    },
     kind: 'json',
     discipline: 'geoint',
     topics: ['space-weather', 'space'],
@@ -57,9 +74,10 @@ export const SCIENCE_SOURCES: CatalogSource[] = [
     independence: 'nasa-donki',
     licence: PUBLIC_DOMAIN,
     minIntervalSec: 3600,
-    keyless: false,
+    keyless: true,
     keyEnv: 'NASA_API_KEY',
-    note: 'Independent of NOAA — a second instrument network on the same phenomenon, which is what makes corroboration possible here at all.',
+    map: { title: 'messageType', time: 'messageIssueTime', summary: 'messageBody' },
+    note: 'Independent of NOAA — a second instrument network on the same phenomenon, which is what makes corroboration possible here at all. Runs on NASA’s shared demo key unless NASA_API_KEY is set.',
   },
 
   // ── Ice, ocean and climate ───────────────────────────────────────────────
@@ -67,7 +85,10 @@ export const SCIENCE_SOURCES: CatalogSource[] = [
     key: 'nsidc_news',
     name: 'National Snow and Ice Data Center — analyses',
     publisher: 'NSIDC, University of Colorado Boulder',
-    url: 'https://nsidc.org/rss.xml',
+    // The site-wide feed is gone (404). Arctic Sea Ice News is the one NSIDC
+    // still publishes, and it is the one worth having: the monthly minimum and
+    // maximum analyses, written by the scientists who compute them.
+    url: 'https://nsidc.org/arcticseaicenews/feed',
     kind: 'rss',
     discipline: 'geoint',
     topics: ['weather'],
@@ -128,7 +149,21 @@ export const SCIENCE_SOURCES: CatalogSource[] = [
   // ── Air quality ──────────────────────────────────────────────────────────
   {
     key: 'openaq_latest',
-    name: 'OpenAQ — global air quality measurements',
+    /**
+     * Named for the endpoint it actually calls.
+     *
+     * It was catalogued as "global air quality measurements" while pointing at
+     * `/v3/parameters`, which returns the *list of pollutants OpenAQ tracks* —
+     * a reference table that never changes, not a measurement. Nobody noticed
+     * because the entry needs `OPENAQ_API_KEY` and so was never fetched: a
+     * source can be wrong for as long as it is switched off, and switching it
+     * on later would have put pollutant names on the world board as events.
+     *
+     * v2, which served measurements without a key, answers 410. Reaching the
+     * measurements now needs a registered key, and the URL has to change with
+     * it — so that is recorded here rather than guessed at.
+     */
+    name: 'OpenAQ — pollutant reference list (measurements need a key)',
     publisher: 'OpenAQ',
     url: 'https://api.openaq.org/v3/parameters',
     kind: 'json',
