@@ -73,6 +73,13 @@ export interface BoardDefinition {
 
 export const BOARDS: BoardDefinition[] = [
   {
+    key: 'statements',
+    capability: 'statements',
+    title: 'Statements that carry weight',
+    note: 'Nine institutions whose words are themselves acts — the White House, the UN, the European Commission, the Fed, the ECB, the UK government, the IAEA and the WHO. Ranked by consequence, with the reasoning shown on every line rather than a score you cannot check.',
+    searchable: true,
+  },
+  {
     key: 'courts',
     capability: 'courts',
     title: 'Courts & litigation',

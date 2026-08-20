@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { ALL_MODES, GATEWAY_FAMILIES, GATEWAY_GUIDANCE } from './gateways'
 
 /**
@@ -63,5 +65,40 @@ describe('every gateway explains itself when empty', () => {
         expect(text, `${mode} promises "${forbidden}"`).not.toContain(forbidden)
       }
     }
+  })
+})
+
+/**
+ * The registry and the screen must agree.
+ *
+ * A live browser walk caught the exact failure this prevents: the `statements`
+ * gateway was added to `ALL_MODES` and to a family, the app then advertised
+ * "27 passive gateways" in its own navigation — and the Investigate screen
+ * offered 26, because its `MODES` array had not been touched. The gateway was
+ * built, tested, routed, reachable by URL, and simply invisible to anyone using
+ * the product.
+ *
+ * Reading the array out of the component source rather than importing it is
+ * deliberate: `intelligence-dashboard.tsx` is a client component that pulls in
+ * the whole UI tree, and importing it here would drag `node:crypto` into a test
+ * environment that has no business loading it.
+ */
+describe('the gateways on screen are the gateways that exist', () => {
+  const source = readFileSync(join(process.cwd(), 'components/intelligence-dashboard.tsx'), 'utf8')
+  const listed = [...source.matchAll(/^\s*\{ id: '([a-z-]+)',/gm)].map((m) => m[1])
+
+  it('offers every registered gateway in the picker', () => {
+    const missing = (ALL_MODES as readonly string[]).filter((m) => !listed.includes(m))
+    expect(missing, 'in ALL_MODES but not selectable on screen').toEqual([])
+  })
+
+  it('offers nothing the registry does not know about', () => {
+    const unknown = listed.filter((m) => !(ALL_MODES as readonly string[]).includes(m))
+    expect(unknown, 'selectable on screen but not a registered gateway').toEqual([])
+  })
+
+  /** Two chips with one label is a picker a person cannot use. */
+  it('lists each gateway exactly once', () => {
+    expect(new Set(listed).size).toBe(listed.length)
   })
 })

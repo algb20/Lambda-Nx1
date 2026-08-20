@@ -20,6 +20,8 @@ import {
   Pause,
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { usePrefs } from '@/components/prefs-provider'
+import { CategoryPanels } from '@/components/category-panels'
 import { TimeStamp } from '@/components/time-stamp'
 import { Badge } from '@/components/ui/badge'
 import { ErrorBoundary } from '@/components/error-boundary'
@@ -161,19 +163,98 @@ function useSurfaceHeight(): number {
   return height
 }
 
+/**
+ * The wait, with the truth in it.
+ *
+ * The first sweep fans out across 119 sources and genuinely takes tens of
+ * seconds — that is not a fault, it is what reading the whole world costs. But
+ * a bare spinner is indistinguishable from a hang, and after twenty seconds of
+ * one a reasonable person concludes the product is broken and leaves.
+ *
+ * So the wait says what it is doing, how long it has been doing it, and — once
+ * it has gone on longer than a healthy sweep ever does — offers the page that
+ * explains why an empty map happens.
+ */
+function SweepProgress() {
+  const [seconds, setSeconds] = useState(0)
+  useEffect(() => {
+    const timer = setInterval(() => setSeconds((n) => n + 1), 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  return (
+    <Card className="space-y-1 p-3 text-xs text-muted-foreground">
+      <p className="flex items-center gap-2">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        Reading 119 live sources — {seconds}s
+      </p>
+      {seconds > 8 ? (
+        <p>A first sweep reads every publisher at once and normally settles inside half a minute.</p>
+      ) : null}
+      {seconds > 40 ? (
+        <p>
+          Longer than a healthy sweep takes.{' '}
+          <a href="/setup" className="font-medium text-primary hover:underline">
+            Check what this deployment is missing
+          </a>
+          .
+        </p>
+      ) : null}
+    </Card>
+  )
+}
+
 export function GlobeView() {
   const [report, setReport] = useState<WorldEventsReport | null>(null)
   const [chain, setChain] = useState<ChainRadarReport | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [mode, setMode] = useState<ViewMode>('globe')
-  const [layer, setLayer] = useState<Layer>('events')
-  const [muted, setMuted] = useState<Set<EventCategory>>(new Set())
-  const [region, setRegion] = useState<Region | 'all'>('all')
+  /**
+   * Five of these used to be plain component state, so switching tabs unmounted
+   * the panel and threw every choice away. They are preferences now: written to
+   * the browser instantly and to the account on a debounce, so a layout survives
+   * a tab switch, a reload, and a new device.
+   */
+  const { prefs, update } = usePrefs()
+  const mode = prefs.globe.view as ViewMode
+  const layer = prefs.globe.layer as Layer
+  const region = prefs.globe.region as Region | 'all'
+  const windowHours = prefs.globe.windowHours
+  const muted = useMemo(() => new Set(prefs.globe.muted as EventCategory[]), [prefs.globe.muted])
+
+  const setMode = useCallback(
+    (next: ViewMode) => update((p) => ({ ...p, globe: { ...p.globe, view: next } })),
+    [update],
+  )
+  const setLayer = useCallback(
+    (next: Layer) => update((p) => ({ ...p, globe: { ...p.globe, layer: next } })),
+    [update],
+  )
+  const setRegion = useCallback(
+    (next: Region | 'all') => update((p) => ({ ...p, globe: { ...p.globe, region: next } })),
+    [update],
+  )
+  const setWindowHours = useCallback(
+    (next: number | null) => update((p) => ({ ...p, globe: { ...p.globe, windowHours: next } })),
+    [update],
+  )
+  /**
+   * Accepts the same updater shape the old `setMuted` took, so every call site
+   * that toggles a category chip is unchanged — the set simply now lives
+   * somewhere that survives the component.
+   */
+  const setMuted = useCallback(
+    (next: Set<EventCategory> | ((current: Set<EventCategory>) => Set<EventCategory>)) =>
+      update((p) => {
+        const current = new Set(p.globe.muted as EventCategory[])
+        const resolved = typeof next === 'function' ? next(current) : next
+        return { ...p, globe: { ...p.globe, muted: [...resolved] } }
+      }),
+    [update],
+  )
   /** The selection is held by id, not by value — see `selected` below. */
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [windowHours, setWindowHours] = useState<number | null>(null)
   /** null means pinned to the live edge, which is not the same as "at now". */
   const [cursorMs, setCursorMs] = useState<number | null>(null)
   const [playing, setPlaying] = useState(false)
@@ -429,14 +510,27 @@ export function GlobeView() {
     }))
   }, [layer, chain, ranked, report])
 
-  const toggleCategory = (category: EventCategory) => {
-    setMuted((prev) => {
-      const next = new Set(prev)
-      if (next.has(category)) next.delete(category)
-      else next.add(category)
-      return next
+  /**
+   * Hide or show a category on the map — and close its panel when it is hidden.
+   *
+   * The two halves of one intention. A category hidden from the map that still
+   * has an open panel underneath it is a contradiction the reader has to resolve
+   * themselves, and resolving it means deciding which of our two surfaces to
+   * believe. Revealing a category does *not* force its panel open: the user
+   * asked to see it on the map, which is a smaller request.
+   */
+  const toggleCategory = (category: EventCategory) =>
+    update((p) => {
+      const hidden = p.globe.muted.includes(category)
+      return {
+        ...p,
+        globe: {
+          ...p.globe,
+          muted: hidden ? p.globe.muted.filter((c) => c !== category) : [...p.globe.muted, category],
+          panels: hidden ? p.globe.panels : p.globe.panels.filter((c) => c !== category),
+        },
+      }
     })
-  }
 
   const isEventLayer = EVENT_LAYERS.includes(layer)
 
@@ -652,18 +746,29 @@ export function GlobeView() {
         />
       ) : null}
 
-      {loading ? (
-        <Card className="flex items-center gap-2 p-3 text-xs text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Reading the live feeds…
-        </Card>
-      ) : null}
+      {loading ? <SweepProgress /> : null}
 
       {error ? (
         <Card className="flex items-start gap-2 border-amber-500/30 bg-amber-500/5 p-3 text-xs">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
-          <span className="text-muted-foreground">
-            {report ? `Showing the last good picture — refresh failed: ${error}` : error}
-          </span>
+          <div className="space-y-1 text-muted-foreground">
+            <p>{report ? `Showing the last good picture — refresh failed: ${error}` : error}</p>
+            {/*
+              An empty map has three causes that look identical: a deployment
+              with no server, a server with no outbound access, and — rarely —
+              a genuine fault here. Leaving the reader to guess is the actual
+              defect; this hands them the page that tells them which.
+            */}
+            {!report ? (
+              <p>
+                Three different things produce an empty map.{' '}
+                <a href="/setup" className="font-medium text-primary hover:underline">
+                  Find out which one this is
+                </a>
+                .
+              </p>
+            ) : null}
+          </div>
         </Card>
       ) : null}
 
@@ -782,7 +887,19 @@ export function GlobeView() {
 
       {layer === 'events' && report && report.categories.length > 0 ? (
         <Card className="p-3">
-          <h4 className="mb-1.5 text-xs font-semibold">Event categories</h4>
+          {/*
+            Two rows of chips on this page carry the same words. These hide and
+            show categories *on the map*; the "Category panels" picker further
+            down opens a category as a readable panel. A live walk-through
+            clicked the first "Earthquake" it found, expecting a panel, and hid
+            the earthquakes instead — the two controls were indistinguishable
+            by name, so the heading and each chip's label now say which is which.
+          */}
+          <h4 className="mb-0.5 text-xs font-semibold">Show on the map</h4>
+          <p className="mb-1.5 text-[10px] text-muted-foreground">
+            Hides a category from the globe. To read a category instead, open it under{' '}
+            <span className="font-medium">Category panels</span> below.
+          </p>
           <div className="flex flex-wrap gap-1">
             {report.categories.map((c) => {
               const on = !muted.has(c.category)
@@ -791,6 +908,8 @@ export function GlobeView() {
                   key={c.category}
                   onClick={() => toggleCategory(c.category)}
                   aria-pressed={on}
+                  aria-label={`${on ? 'Hide' : 'Show'} ${c.label} on the map`}
+                  title={`${on ? 'Hide' : 'Show'} ${c.label} on the map`}
                   className={`flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] transition-colors ${
                     on
                       ? 'border-border bg-muted/60 text-foreground'
@@ -1105,6 +1224,13 @@ export function GlobeView() {
           ) : null}
         </Card>
       ) : null}
+
+      {/*
+        The panels sit under the map, built from the same world picture the dots
+        above them are drawn from — no second fetch, because a panel that
+        re-queried would show a different world from the globe it sits beneath.
+      */}
+      <CategoryPanels report={report} />
     </div>
   )
 }

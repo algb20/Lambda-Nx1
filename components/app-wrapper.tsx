@@ -7,6 +7,7 @@ import { StandaloneAuthGate } from "./standalone-auth";
 import { AuthLoadingScreen } from "./auth-loading-screen";
 import { FeedbackButton } from "./feedback-button";
 import { AutoTranslate } from "./auto-translate";
+import { PrefsProvider } from "./prefs-provider";
 import { shouldBlockApp } from "@/lib/auth/pi-client";
 import { pingVisit } from "@/lib/visit";
 import { installDomResilience } from "@/lib/dom-resilience";
@@ -65,6 +66,10 @@ export function AppWrapper({ children }: { children: ReactNode }) {
   }, [mode]);
   return (
     <I18nProvider>
+      {/* Outside the auth gates on purpose: preferences must work for a visitor
+          without an account, who is the ordinary case here (charter §1). The
+          browser holds the working copy; an account only makes it durable. */}
+      <PrefsProvider>
       {/* Translates the whole rendered interface, including text the engine
           produced at runtime, so a new screen is never English-only. */}
       <AutoTranslate>
@@ -84,6 +89,7 @@ export function AppWrapper({ children }: { children: ReactNode }) {
         </PiAuthProvider>
       )}
       </AutoTranslate>
+      </PrefsProvider>
     </I18nProvider>
   );
 }

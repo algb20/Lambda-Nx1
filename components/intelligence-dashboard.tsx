@@ -26,7 +26,7 @@ import {
   BookOpen,
   Library,
 } from 'lucide-react'
-import { Sparkles, Building2, Scale, FileText, Mic, Pickaxe, Sun, Satellite } from 'lucide-react'
+import { Sparkles, Building2, Scale, FileText, Mic, Pickaxe, Sun, Satellite, Megaphone } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -101,6 +101,7 @@ const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: s
   { id: 'board', label: 'Board', icon: Gauge, placeholder: 'live market board — press Load' },
   { id: 'property', label: 'Property', icon: Building2, placeholder: 'housing prices, rates and supply — press Load' },
   { id: 'companies', label: 'Companies', icon: Landmark, placeholder: 'a company name or ticker — or press Load for the biggest' },
+  { id: 'statements', label: 'Statements', icon: Megaphone, placeholder: 'a subject — or press Load for what has just been said' },
   { id: 'courts', label: 'Courts', icon: Scale, placeholder: 'a party, a subject or a doctrine — or press Load' },
   { id: 'regulation', label: 'Regulation', icon: FileText, placeholder: 'a subject — or press Load for today’s journal' },
   { id: 'officials', label: 'Officials', icon: Mic, placeholder: 'a name or a topic — or press Load' },

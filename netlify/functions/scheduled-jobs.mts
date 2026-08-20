@@ -13,16 +13,37 @@ import type { Config } from '@netlify/functions'
  * would hit, so both hosts drive identical code and there is no second copy of
  * the publishing logic to drift out of step with the first.
  *
- * Runs every six hours. Each job is idempotent — the publisher skips anything
- * already published and the Radar fingerprints its findings — so an extra run
- * costs time and never duplicates.
+ * Every job is idempotent — the publisher skips anything already published and
+ * the Radar fingerprints its findings — so an extra run costs time and never
+ * duplicates. That is what makes a short interval safe (see `config` below).
  */
 export const config: Config = {
-  schedule: '0 */6 * * *',
+  /**
+   * Every twenty minutes, not every six hours.
+   *
+   * Six hours was chosen when this was a research tool. The front page is now
+   * meant to be the world as it stands, and a page that renews itself four
+   * times a day is a page a reader learns to stop revisiting. Twenty minutes
+   * is roughly the interval at which the underlying publishers themselves
+   * update — going faster would spend their goodwill for nothing new.
+   */
+  schedule: '*/20 * * * *',
 }
 
-/** Jobs to run, in order. A failure in one must not skip the others. */
-const JOBS = ['publish', 'radar-watch'] as const
+/**
+ * Jobs to run, in order. A failure in one must not skip the others.
+ *
+ * The Radar is not on every tick: it sweeps a watchlist that changes on the
+ * scale of days, so running it three times an hour would be work nobody reads.
+ * It is triggered on the hour instead — see `shouldRunRadar`.
+ */
+const ALWAYS = ['publish'] as const
+const HOURLY = ['radar-watch'] as const
+
+/** True near the top of the hour, which is when the 20-minute tick lands on :00. */
+function shouldRunRadar(now = new Date()): boolean {
+  return now.getUTCMinutes() < 20
+}
 
 export default async function handler(): Promise<Response> {
   const secret = process.env.CRON_SECRET
@@ -42,7 +63,9 @@ export default async function handler(): Promise<Response> {
 
   const outcomes: Record<string, string> = {}
 
-  for (const job of JOBS) {
+  const jobs = [...ALWAYS, ...(shouldRunRadar() ? HOURLY : [])]
+
+  for (const job of jobs) {
     try {
       const res = await fetch(`${origin}/api/cron/${job}`, {
         headers: { Authorization: `Bearer ${secret}` },

@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { getSessionUserId } from '@/lib/auth/server'
 import { geoFromHeaders } from '@/lib/geo/edge-geo'
 import { repo, isDbConfigured } from '@/lib/db'
+import { publicNameFor } from '@/lib/users/public-name'
 
 /**
  * POST /api/visit — a lightweight, fire-and-forget beacon the app pings once on
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
           subjectKey: `user:${user.id}`,
           userId: user.id,
           provider: user.authProvider,
-          displayName: user.displayName ?? user.externalId,
+          displayName: publicNameFor(user),
           countryCode: geo.countryCode,
           countryName: geo.countryName,
           region: geo.region,

@@ -5,6 +5,7 @@ import { Newspaper, Sparkles } from 'lucide-react'
 import { Composer } from '@/components/composer'
 import { PostCard } from '@/components/post-card'
 import { TrendingBoard } from '@/components/trending-board'
+import { PinnedGateways } from '@/components/pinned-gateways'
 import { XLikeFeed } from '@/components/x-like-feed'
 import type { PublicPost } from '@/lib/posts'
 
@@ -40,6 +41,12 @@ export function HomeFeed({ onNavigate }: { onNavigate: (tab: NavTab) => void }) 
   return (
     <div className="space-y-4">
       <Composer onPublished={onPublished} />
+
+      {/*
+        Above the trending board, because it is the user's own choice and theirs
+        outranks ours. Costs nothing when nothing is pinned — no pins, no fetch.
+      */}
+      <PinnedGateways onNavigate={onNavigate} />
 
       <TrendingBoard />
 

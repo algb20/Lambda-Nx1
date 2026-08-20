@@ -5,6 +5,9 @@ import { repo, isDbConfigured, type Post } from '@/lib/db'
 import { validatePostInput, postPermalink } from '@/lib/posts'
 import { toPublicPost } from '@/lib/post-mapper'
 import { broadcast, channelsForAutoPublish } from '@/lib/social/broadcast'
+import { publicNameFor } from '@/lib/users/public-name'
+import { considerPublishing } from '@/lib/modules/self-drive'
+import { runPublishJob } from '@/lib/modules/publish-job'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -22,6 +25,24 @@ export async function GET(request: Request) {
   const avatars = await repo.users.avatarsByIds(
     rows.map((r) => r.authorUserId).filter((id): id is string => Boolean(id)),
   )
+  /**
+   * Keep the feed current without depending on a scheduler.
+   *
+   * Publishing used to run once a day on one host and every six hours on the
+   * other, and only when an operator had configured a cron secret the right
+   * way. When any of that was missing the front page simply stayed empty and
+   * said nothing. Reading the feed now starts a publish run when the newest
+   * automatic post has gone stale — bounded, single-flight, and never awaited,
+   * so this reader gets the feed exactly as fast as before and the next reader
+   * gets a newer one. Where a scheduler *is* configured it fires first and this
+   * never triggers, because the posts are already fresh.
+   */
+  const newestAuto = rows.find((row) => row.authorUserId === null)?.createdAt ?? null
+  considerPublishing({
+    newestAt: newestAuto,
+    run: () => runPublishJob({ origin: new URL(request.url).origin }),
+  })
+
   return NextResponse.json({
     posts: rows.map((row) => toPublicPost(row, row.authorUserId ? (avatars.get(row.authorUserId) ?? null) : null)),
   })
@@ -55,7 +76,7 @@ export async function POST(request: Request) {
 
   const created = await repo.posts.create({
     authorUserId: user.id,
-    authorName: user.displayName ?? user.externalId,
+    authorName: publicNameFor(user),
     kind: parsed.value.kind,
     title: parsed.value.title,
     body: parsed.value.body,
