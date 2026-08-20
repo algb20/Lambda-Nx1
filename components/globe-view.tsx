@@ -20,6 +20,8 @@ import {
   Pause,
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { usePrefs } from '@/components/prefs-provider'
+import { CategoryPanels } from '@/components/category-panels'
 import { TimeStamp } from '@/components/time-stamp'
 import { Badge } from '@/components/ui/badge'
 import { ErrorBoundary } from '@/components/error-boundary'
@@ -167,13 +169,51 @@ export function GlobeView() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [mode, setMode] = useState<ViewMode>('globe')
-  const [layer, setLayer] = useState<Layer>('events')
-  const [muted, setMuted] = useState<Set<EventCategory>>(new Set())
-  const [region, setRegion] = useState<Region | 'all'>('all')
+  /**
+   * Five of these used to be plain component state, so switching tabs unmounted
+   * the panel and threw every choice away. They are preferences now: written to
+   * the browser instantly and to the account on a debounce, so a layout survives
+   * a tab switch, a reload, and a new device.
+   */
+  const { prefs, update } = usePrefs()
+  const mode = prefs.globe.view as ViewMode
+  const layer = prefs.globe.layer as Layer
+  const region = prefs.globe.region as Region | 'all'
+  const windowHours = prefs.globe.windowHours
+  const muted = useMemo(() => new Set(prefs.globe.muted as EventCategory[]), [prefs.globe.muted])
+
+  const setMode = useCallback(
+    (next: ViewMode) => update((p) => ({ ...p, globe: { ...p.globe, view: next } })),
+    [update],
+  )
+  const setLayer = useCallback(
+    (next: Layer) => update((p) => ({ ...p, globe: { ...p.globe, layer: next } })),
+    [update],
+  )
+  const setRegion = useCallback(
+    (next: Region | 'all') => update((p) => ({ ...p, globe: { ...p.globe, region: next } })),
+    [update],
+  )
+  const setWindowHours = useCallback(
+    (next: number | null) => update((p) => ({ ...p, globe: { ...p.globe, windowHours: next } })),
+    [update],
+  )
+  /**
+   * Accepts the same updater shape the old `setMuted` took, so every call site
+   * that toggles a category chip is unchanged — the set simply now lives
+   * somewhere that survives the component.
+   */
+  const setMuted = useCallback(
+    (next: Set<EventCategory> | ((current: Set<EventCategory>) => Set<EventCategory>)) =>
+      update((p) => {
+        const current = new Set(p.globe.muted as EventCategory[])
+        const resolved = typeof next === 'function' ? next(current) : next
+        return { ...p, globe: { ...p.globe, muted: [...resolved] } }
+      }),
+    [update],
+  )
   /** The selection is held by id, not by value — see `selected` below. */
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [windowHours, setWindowHours] = useState<number | null>(null)
   /** null means pinned to the live edge, which is not the same as "at now". */
   const [cursorMs, setCursorMs] = useState<number | null>(null)
   const [playing, setPlaying] = useState(false)
@@ -429,14 +469,27 @@ export function GlobeView() {
     }))
   }, [layer, chain, ranked, report])
 
-  const toggleCategory = (category: EventCategory) => {
-    setMuted((prev) => {
-      const next = new Set(prev)
-      if (next.has(category)) next.delete(category)
-      else next.add(category)
-      return next
+  /**
+   * Hide or show a category on the map — and close its panel when it is hidden.
+   *
+   * The two halves of one intention. A category hidden from the map that still
+   * has an open panel underneath it is a contradiction the reader has to resolve
+   * themselves, and resolving it means deciding which of our two surfaces to
+   * believe. Revealing a category does *not* force its panel open: the user
+   * asked to see it on the map, which is a smaller request.
+   */
+  const toggleCategory = (category: EventCategory) =>
+    update((p) => {
+      const hidden = p.globe.muted.includes(category)
+      return {
+        ...p,
+        globe: {
+          ...p.globe,
+          muted: hidden ? p.globe.muted.filter((c) => c !== category) : [...p.globe.muted, category],
+          panels: hidden ? p.globe.panels : p.globe.panels.filter((c) => c !== category),
+        },
+      }
     })
-  }
 
   const isEventLayer = EVENT_LAYERS.includes(layer)
 
@@ -1105,6 +1158,13 @@ export function GlobeView() {
           ) : null}
         </Card>
       ) : null}
+
+      {/*
+        The panels sit under the map, built from the same world picture the dots
+        above them are drawn from — no second fetch, because a panel that
+        re-queried would show a different world from the globe it sits beneath.
+      */}
+      <CategoryPanels report={report} />
     </div>
   )
 }

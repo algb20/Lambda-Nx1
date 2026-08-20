@@ -103,6 +103,26 @@ export const repo = {
       await db.update(s.users).set({ plan }).where(eq(s.users.id, id))
     },
     /**
+     * Read this account's stored preferences, or null if it has none yet.
+     *
+     * Returned raw. Validation belongs to `lib/prefs/schema.ts` and happens at
+     * every boundary, because a blob written by an older build is exactly what
+     * this column will hold six months from now.
+     */
+    async getPreferences(id: string): Promise<unknown> {
+      const db = getDb()
+      const [row] = await db
+        .select({ preferences: s.users.preferences })
+        .from(s.users)
+        .where(eq(s.users.id, id))
+        .limit(1)
+      return row?.preferences ?? null
+    },
+    async setPreferences(id: string, preferences: unknown): Promise<void> {
+      const db = getDb()
+      await db.update(s.users).set({ preferences }).where(eq(s.users.id, id))
+    },
+    /**
      * The person's own name and whether anyone else sees it.
      *
      * Both in one call because they are one decision: someone typing a name for

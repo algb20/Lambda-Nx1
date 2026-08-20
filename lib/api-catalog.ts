@@ -414,6 +414,7 @@ export const INTERNAL_ROUTES: Record<string, string> = {
   'auth/password/forgot': 'account recovery — answers identically for every address by design',
   'auth/password/reset': 'account recovery, spending a code we mailed',
   'auth/pi': 'Pi Network authentication',
+  preferences: 'a person’s own layout — which panels they opened and which gateways they pinned',
   'auth/pi/claim': 'Pi Network authentication',
   'auth/register': 'authentication',
   'auth/verify/confirm': 'sign-up, spending a code we mailed',

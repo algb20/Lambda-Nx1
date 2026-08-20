@@ -143,6 +143,17 @@ export const users = pgTable(
      */
     showRealName: boolean('show_real_name').notNull().default(false),
     /**
+     * What this person has chosen: globe layers, muted categories, the panels
+     * they opened and their order, the gateways they pinned to the front page.
+     *
+     * One JSON document rather than a row per key. There are eight settings; a
+     * row each means eight round trips, eight migrations, and eight chances for
+     * a partial write to leave a layout nobody chose. The shape is validated on
+     * read by `lib/prefs/schema.ts`, which is what lets a blob from an older
+     * build degrade to defaults instead of crashing the page.
+     */
+    preferences: jsonb('preferences'),
+    /**
      * Profile picture. Stored through lib/storage (never a vendor URL), so the
      * storage backend stays swappable; this column holds only the key we can
      * resolve back to an image.
