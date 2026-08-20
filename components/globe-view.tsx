@@ -163,6 +163,47 @@ function useSurfaceHeight(): number {
   return height
 }
 
+/**
+ * The wait, with the truth in it.
+ *
+ * The first sweep fans out across 119 sources and genuinely takes tens of
+ * seconds — that is not a fault, it is what reading the whole world costs. But
+ * a bare spinner is indistinguishable from a hang, and after twenty seconds of
+ * one a reasonable person concludes the product is broken and leaves.
+ *
+ * So the wait says what it is doing, how long it has been doing it, and — once
+ * it has gone on longer than a healthy sweep ever does — offers the page that
+ * explains why an empty map happens.
+ */
+function SweepProgress() {
+  const [seconds, setSeconds] = useState(0)
+  useEffect(() => {
+    const timer = setInterval(() => setSeconds((n) => n + 1), 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  return (
+    <Card className="space-y-1 p-3 text-xs text-muted-foreground">
+      <p className="flex items-center gap-2">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        Reading 119 live sources — {seconds}s
+      </p>
+      {seconds > 8 ? (
+        <p>A first sweep reads every publisher at once and normally settles inside half a minute.</p>
+      ) : null}
+      {seconds > 40 ? (
+        <p>
+          Longer than a healthy sweep takes.{' '}
+          <a href="/setup" className="font-medium text-primary hover:underline">
+            Check what this deployment is missing
+          </a>
+          .
+        </p>
+      ) : null}
+    </Card>
+  )
+}
+
 export function GlobeView() {
   const [report, setReport] = useState<WorldEventsReport | null>(null)
   const [chain, setChain] = useState<ChainRadarReport | null>(null)
@@ -705,18 +746,29 @@ export function GlobeView() {
         />
       ) : null}
 
-      {loading ? (
-        <Card className="flex items-center gap-2 p-3 text-xs text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Reading the live feeds…
-        </Card>
-      ) : null}
+      {loading ? <SweepProgress /> : null}
 
       {error ? (
         <Card className="flex items-start gap-2 border-amber-500/30 bg-amber-500/5 p-3 text-xs">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
-          <span className="text-muted-foreground">
-            {report ? `Showing the last good picture — refresh failed: ${error}` : error}
-          </span>
+          <div className="space-y-1 text-muted-foreground">
+            <p>{report ? `Showing the last good picture — refresh failed: ${error}` : error}</p>
+            {/*
+              An empty map has three causes that look identical: a deployment
+              with no server, a server with no outbound access, and — rarely —
+              a genuine fault here. Leaving the reader to guess is the actual
+              defect; this hands them the page that tells them which.
+            */}
+            {!report ? (
+              <p>
+                Three different things produce an empty map.{' '}
+                <a href="/setup" className="font-medium text-primary hover:underline">
+                  Find out which one this is
+                </a>
+                .
+              </p>
+            ) : null}
+          </div>
         </Card>
       ) : null}
 

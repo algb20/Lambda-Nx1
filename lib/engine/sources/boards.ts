@@ -36,6 +36,7 @@
 import type { Evidence, Source } from '../types'
 import { publicationTime } from '../observed'
 import { parseFeed } from '../feedxml'
+import { assessImpact, corroborationBySubject } from '../../analysis/impact'
 
 export interface BoardPoint {
   group: string
@@ -620,7 +621,130 @@ export const orbitalSource: Source = {
   },
 }
 
+// ═══ Statements that carry weight ═══════════════════════════════════════════
+
+interface StatementFeed {
+  key: string
+  label: string
+  url: string
+  host: string
+}
+
+/**
+ * The institutions whose words are themselves acts.
+ *
+ * A sanctions designation, a rate decision, a Security Council resolution — the
+ * statement *is* the event. Reading a newspaper's account of one is reading a
+ * summary; reading the press office is reading the thing. Every feed here was
+ * fetched and parsed before being listed, and the ones that answered 403 or 404
+ * were dropped rather than left in hopefully.
+ */
+const STATEMENT_FEEDS: StatementFeed[] = [
+  { key: 'whitehouse', label: 'The White House', url: 'https://www.whitehouse.gov/news/feed/', host: 'www.whitehouse.gov' },
+  { key: 'un_press', label: 'United Nations — press', url: 'https://press.un.org/en/rss.xml', host: 'press.un.org' },
+  { key: 'un_news', label: 'United Nations — news', url: 'https://news.un.org/feed/subscribe/en/news/all/rss.xml', host: 'news.un.org' },
+  { key: 'ec_press', label: 'European Commission', url: 'https://ec.europa.eu/commission/presscorner/api/rss?language=en&pagesize=20', host: 'ec.europa.eu' },
+  { key: 'ecb_press', label: 'European Central Bank', url: 'https://www.ecb.europa.eu/rss/press.html', host: 'www.ecb.europa.eu' },
+  { key: 'fed_press', label: 'US Federal Reserve', url: 'https://www.federalreserve.gov/feeds/press_all.xml', host: 'www.federalreserve.gov' },
+  { key: 'ukgov', label: 'UK government', url: 'https://www.gov.uk/search/news-and-communications.atom', host: 'www.gov.uk' },
+  { key: 'iaea', label: 'IAEA', url: 'https://www.iaea.org/feeds/topnews', host: 'www.iaea.org' },
+  { key: 'who_news', label: 'World Health Organization', url: 'https://www.who.int/rss-feeds/news-english.xml', host: 'www.who.int' },
+]
+
+/**
+ * The statements board.
+ *
+ * Ranked by `assessImpact`, which scores four things a document *is* — who
+ * issued it, what instrument it is, how many independent institutions are
+ * addressing the same subject, and how old it is — and then says which factors
+ * fired and what each contributed. The score orders the list; the reasons are
+ * the product. An impact number nobody can check is a claim with the reasoning
+ * removed.
+ */
+export const statementsSource: Source = {
+  key: 'official_statements',
+  capability: 'statements',
+  passive: true,
+  hosts: STATEMENT_FEEDS.map((f) => f.host),
+  // Nine feeds, one request each, inside the orchestrator's deadline.
+  minIntervalMs: 250,
+  async run(input, ctx) {
+    const query = input.value.trim().toLowerCase()
+
+    interface Raw {
+      sourceKey: string
+      label: string
+      headline: string
+      detail: string
+      at: string | null
+      url?: string
+    }
+    const raw: Raw[] = []
+
+    for (const feed of STATEMENT_FEEDS) {
+      const res = await ctx.fetch(feed.url)
+      // One press office being unreachable must not cost the other eight.
+      if (!res.ok) continue
+      const entries = parseFeed(await res.text().catch(() => ''))
+      for (const e of entries.slice(0, 15)) {
+        raw.push({
+          sourceKey: feed.key,
+          label: feed.label,
+          headline: e.title,
+          detail: e.summary?.slice(0, 220) ?? '',
+          at: e.published ?? null,
+          url: e.link,
+        })
+      }
+    }
+    if (raw.length === 0) return []
+
+    // Corroboration is computed across the whole sweep, not per feed: the
+    // question is whether *other* institutions are addressing the same subject,
+    // which cannot be answered inside one of them.
+    const corroboration = corroborationBySubject(raw)
+
+    const filtered = query
+      ? raw.filter((r) => `${r.headline} ${r.detail}`.toLowerCase().includes(query))
+      : raw
+
+    return filtered.map((r) => {
+      const impact = assessImpact({
+        sourceKey: r.sourceKey,
+        headline: r.headline,
+        detail: r.detail,
+        at: r.at,
+        corroboratingBodies: corroboration.get(r.headline) ?? 1,
+      })
+      return boardEvidence(
+        'official_statements',
+        {
+          group: r.label,
+          headline: r.headline,
+          // The analysis travels with the row, in words: the summary first, then
+          // the factors that produced it, each with its own contribution.
+          detail: `${impact.summary} · ${impact.factors
+            .map((f) => `${f.label} ${f.weight >= 0 ? '+' : ''}${f.weight}`)
+            .join(' · ')}`,
+          value: impact.score,
+          unit: 'impact',
+          at: r.at,
+          url: r.url,
+          // Most consequential first, which is what a board of statements is
+          // for. Chronological would put a workshop announcement above a
+          // sanctions package for the sake of four minutes.
+          weight: impact.score,
+        },
+        // A press office publishing its own institution's words: the source is
+        // reliable and the information is first-hand.
+        { source: 'A', info: 1 },
+      )
+    })
+  },
+}
+
 export const BOARD_SOURCES: Source[] = [
+  statementsSource,
   courtsSource,
   regulationSource,
   officialsSource,

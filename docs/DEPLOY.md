@@ -177,7 +177,7 @@ when a human remembered to trigger it by hand.
 
 | Job | Does | Suggested cadence |
 |---|---|---|
-| `GET /api/cron/publish` | turns the strongest of today's graded findings into real posts on the front page | every 6 h |
+| `GET /api/cron/publish` | turns the strongest of today's graded findings into real posts on the front page | every 20 min |
 | `GET /api/cron/radar-monitors` | runs the product monitors that are due | every 15–60 min |
 | `GET /api/cron/radar-watch` | reads the internal ⭐ watchlist (`docs/RADAR.md`) | daily |
 | `GET /api/cron/radar` | both Radar halves; one half failing does not abort the other | — |
@@ -197,12 +197,36 @@ Every job is idempotent: the publisher skips anything already published (each
 candidate carries a stable identity) and the Radar fingerprints its findings.
 Running a job twice costs time, never duplicates.
 
-**On Vercel**, `vercel.json` already declares the three schedules — importing the
-repo is enough, provided `CRON_SECRET` is set on the project. Vercel injects the
-bearer header itself.
+### The three ways the same job runs
 
-**On Supabase/pg_cron, Netlify Scheduled Functions or any external cron**, call
-the same URLs with either header.
+They are deliberately independent, because each fails in a different way and no
+single one of them is reliable on every host.
+
+**1. Netlify Scheduled Functions — the primary.** This is the host the project
+actually deploys to. `netlify/functions/scheduled-jobs.mts` fires **every 20
+minutes** and calls `/api/cron/publish` over HTTP, with `radar-watch` added on
+the tick that lands near the top of the hour. Nothing to configure beyond
+`CRON_SECRET`; the function reads the site's own address from `URL`.
+
+**2. Vercel Cron — the fallback host, and its cadence is plan-limited.**
+`vercel.json` declares `publish` at 06:00 and `radar` at 07:30 UTC. Those are
+*daily* because Vercel's Hobby plan permits at most two cron jobs and each at
+most once a day — a more frequent expression does not get throttled, it **fails
+the whole build** (`vercel-config.test.ts` asserts both limits so it cannot be
+committed again). Once a day is not "current", which is exactly why freshness
+does not depend on this path. On a Pro plan the two expressions can be raised to
+`*/20 * * * *` freely; nothing else changes.
+
+**3. Self-drive — no scheduler at all.** `lib/modules/self-drive.ts` starts a
+publish run in the background when somebody *reads* the feed and the newest
+automatic post is older than 20 minutes, with a 10-minute floor between runs, a
+single-flight guard, and failures counted rather than retried. This is what
+keeps a laptop, a self-hosted box and Pi App Studio current, none of which have a
+scheduler to configure. Where a scheduler *is* running it fires first, the posts
+are already fresh, and this never triggers.
+
+**On Supabase/pg_cron or any external cron**, call the same URLs with either
+header.
 
 `POST /api/radar/run` still exists and takes the same credential, for anyone
 already scheduling it. `POST /api/publish/run` (guarded by `ADMIN_SECRET`) is the
@@ -247,8 +271,9 @@ nothing changed".
 `vercel.json` in the repo root carries two things so the platform behaves without
 dashboard clicking:
 
-- **`crons`** — the three schedules from §4. They fire only on the production
-  deployment, and only if `CRON_SECRET` is set.
+- **`crons`** — the two daily schedules from §4 (the Hobby plan's ceiling). They
+  fire only on the production deployment, and only if `CRON_SECRET` is set.
+  Freshness between them comes from self-drive, not from here.
 - **`functions`** — a 60-second ceiling for the routes that fan out to several
   public providers. Vercel's default (10 s) kills those mid-request and returns
   an HTML error page where the client expects JSON, which is precisely how the

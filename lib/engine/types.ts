@@ -39,6 +39,7 @@ export type Capability =
   | 'power_grid'
   | 'space_weather'
   | 'orbital'
+  | 'statements'
   | 'geo'
   | 'research'
   | 'economy'

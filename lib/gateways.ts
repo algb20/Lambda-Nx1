@@ -32,6 +32,7 @@ export const ALL_MODES = [
   'board',
   'property',
   'companies',
+  'statements',
   'courts',
   'regulation',
   'officials',
@@ -62,7 +63,7 @@ export const GATEWAY_FAMILIES: ReadonlyArray<{ label: string; modes: readonly Mo
   { label: 'Infrastructure', modes: ['domain', 'threat', 'geo'] },
   { label: 'People & accounts', modes: ['username', 'email'] },
   { label: 'Money & entities', modes: ['finance', 'ownership', 'procurement', 'board', 'markets', 'property', 'companies'] },
-  { label: 'Law & the state', modes: ['courts', 'regulation', 'officials'] },
+  { label: 'Law & the state', modes: ['statements', 'courts', 'regulation', 'officials'] },
   { label: 'Earth & systems', modes: ['resources', 'grid', 'space-weather', 'orbital'] },
   { label: 'Knowledge & record', modes: ['research', 'reference', 'open-data', 'news', 'media'] },
 ]
@@ -147,6 +148,13 @@ export const GATEWAY_GUIDANCE: Record<Mode, GatewayGuidance> = {
     example: 'Apple',
     limit:
       'US-registered filers only. A company that does not file with the SEC will not be found — that is a limit of the source, not evidence the company does not exist. Figures are as filed, never adjusted, and a quarterly number is not an annual one.',
+  },
+  statements: {
+    answers:
+      'What the institutions whose words are themselves acts have just said — sanctions, executive instruments, Security Council actions, rate decisions — ranked by consequence, with the reasoning for that ranking on every line.',
+    example: 'sanctions',
+    limit:
+      'Nine press offices, read directly. The ranking is our own analysis of four things a document *is* — who issued it, what instrument it is, how many independent institutions are addressing the same subject, and how old it is — and every factor is shown. It is never a forecast and never a sentiment reading.',
   },
   courts: {
     answers:
