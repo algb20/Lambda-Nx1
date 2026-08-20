@@ -132,7 +132,14 @@ export function buildHealthReport(deps: HealthDeps = {}): HealthReport {
    * for a developer and wrong for anyone with users.
    */
   const mailChoice = (env.MAIL_PROVIDER ?? '').trim().toLowerCase()
-  const mailLive = mailChoice === 'log' ? 'log' : has(env.SMTP_URL) && mailChoice !== 'disabled'
+  // An HTTPS key needs a sender address to be usable at all — every one of the
+  // services rejects a `From:` on an unverified domain — so a key without
+  // MAIL_FROM is not a configured provider, however present it looks.
+  const httpKey =
+    has(env.MAIL_FROM) &&
+    (has(env.RESEND_API_KEY) || has(env.BREVO_API_KEY) || has(env.POSTMARK_TOKEN))
+  const mailLive =
+    mailChoice === 'log' ? 'log' : (httpKey || has(env.SMTP_URL)) && mailChoice !== 'disabled'
   checks.push({
     name: 'mail',
     status: mailLive === 'log' ? 'degraded' : mailLive ? 'ok' : 'off',
@@ -140,8 +147,8 @@ export function buildHealthReport(deps: HealthDeps = {}): HealthReport {
       mailLive === 'log'
         ? 'MAIL_PROVIDER=log — verification codes are written to the server log and never sent. Fine for development, wrong for real users.'
         : mailLive
-          ? 'SMTP configured — verification codes and password resets can be delivered'
-          : 'no SMTP_URL — email sign-up and password reset answer 503 and are hidden in the form. Set SMTP_URL (smtp://user:pass@host:587) and MAIL_FROM.',
+          ? `mail configured via ${httpKey ? 'an HTTPS provider' : 'SMTP'} — verification codes and password resets can be delivered`
+          : 'no mail provider — email sign-up and password reset answer 503 and are hidden in the form. Set MAIL_FROM plus one of RESEND_API_KEY, BREVO_API_KEY or POSTMARK_TOKEN (an HTTPS key, which serverless hosts allow), or SMTP_URL.',
     required: false,
   })
 

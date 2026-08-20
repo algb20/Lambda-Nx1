@@ -16,6 +16,7 @@
  */
 import type { MailProvider, MailResult } from './types'
 import { parseSmtpUrl, smtpProvider } from './smtp'
+import { httpMailFromEnv, httpMailProvider } from './http'
 
 export type { MailMessage, MailProvider, MailResult } from './types'
 
@@ -54,14 +55,28 @@ let cached: MailProvider | null = null
 /**
  * Build the provider from the environment.
  *
- * `MAIL_PROVIDER` forces a choice; otherwise the presence of `SMTP_URL` decides.
- * A malformed `SMTP_URL` disables mail rather than throwing: a bad mail setting
- * must not be able to take down sign-in, which does not need mail at all.
+ * `MAIL_PROVIDER` forces a choice; otherwise an HTTPS API key decides, then
+ * `SMTP_URL`. A malformed `SMTP_URL` disables mail rather than throwing: a bad
+ * mail setting must not be able to take down sign-in, which does not need mail
+ * at all.
  */
 export function createMailProvider(env: NodeJS.ProcessEnv = process.env): MailProvider {
   const choice = (env.MAIL_PROVIDER ?? '').trim().toLowerCase()
   if (choice === 'disabled') return disabledProvider
   if (choice === 'log') return logProvider()
+
+  /**
+   * An HTTPS provider is preferred over SMTP when both are present.
+   *
+   * Not a matter of taste. This product's primary hosts are Netlify and Vercel
+   * functions, where outbound connections on the SMTP ports are commonly
+   * refused or silently dropped — so a correct `SMTP_URL` can work on a laptop
+   * and time out in production. Port 443 is the one outbound path a serverless
+   * function is guaranteed, so if an operator has configured both, the one that
+   * will actually deliver is the one to use.
+   */
+  const http = httpMailFromEnv(env)
+  if (http) return httpMailProvider(http)
 
   const url = (env.SMTP_URL ?? '').trim()
   if (!url) return disabledProvider

@@ -148,10 +148,32 @@ describe('mail, and saying why sign-up is missing', () => {
     env: { SESSION_SECRET: 's'.repeat(32), DATABASE_URL: 'postgres://x' },
   }
 
-  it('reports mail off, and names the variable that turns it on', () => {
+  it('reports mail off, and names every variable that turns it on', () => {
     const check = buildHealthReport(base).checks.find((c) => c.name === 'mail')
     expect(check?.status).toBe('off')
-    expect(check?.detail).toContain('SMTP_URL')
+    for (const name of ['MAIL_FROM', 'RESEND_API_KEY', 'BREVO_API_KEY', 'POSTMARK_TOKEN', 'SMTP_URL']) {
+      expect(check?.detail).toContain(name)
+    }
+  })
+
+  it('reports mail configured from an HTTPS key', () => {
+    const r = buildHealthReport({
+      ...base,
+      env: { ...base.env, RESEND_API_KEY: 're_x', MAIL_FROM: 'lambda@example.org' },
+    })
+    const check = r.checks.find((c) => c.name === 'mail')
+    expect(check?.status).toBe('ok')
+    expect(check?.detail).toContain('HTTPS')
+  })
+
+  /**
+   * A key with no sender is not a configured provider: every one of these
+   * services rejects a `From:` on a domain you have not verified, so reporting
+   * it as working would send the operator away satisfied and broken.
+   */
+  it('does not count an HTTPS key with no sender address as configured', () => {
+    const r = buildHealthReport({ ...base, env: { ...base.env, RESEND_API_KEY: 're_x' } })
+    expect(r.checks.find((c) => c.name === 'mail')?.status).toBe('off')
   })
 
   it('reports mail configured when SMTP is set', () => {
