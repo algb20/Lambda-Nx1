@@ -196,3 +196,48 @@ describe('mail, and saying why sign-up is missing', () => {
     expect(check?.detail).toContain('never sent')
   })
 })
+
+/**
+ * The wording an owner actually reads when sign-up is off.
+ *
+ * The old text listed the variables to set without saying which were already
+ * set — so an owner who had added `BREVO_API_KEY` read "set MAIL_FROM plus one
+ * of RESEND_API_KEY, BREVO_API_KEY…" and reasonably concluded they had done it.
+ * They had done half. Nothing on the page could tell them which half, and the
+ * deployment sat with email sign-up off while the key was right there.
+ */
+describe('telling the owner which half is missing', () => {
+  const mailDetail = (env: Record<string, string | undefined>): string =>
+    buildHealthReport({ env: { SESSION_SECRET: 's', ...env } }).checks.find((c) => c.name === 'mail')!
+      .detail
+
+  it('names the key that is set and the sender that is not', () => {
+    const detail = mailDetail({ BREVO_API_KEY: 'xkeysib-x' })
+    expect(detail).toContain('BREVO_API_KEY is set')
+    expect(detail).toContain('MAIL_FROM is not')
+  })
+
+  it('says so the other way round too', () => {
+    const detail = mailDetail({ MAIL_FROM: 'a@b.co' })
+    expect(detail).toContain('MAIL_FROM is set but no provider key is')
+  })
+
+  /** The leftover that silently overrides a perfectly good pair. */
+  it('blames MAIL_PROVIDER=disabled rather than the missing variables', () => {
+    const detail = mailDetail({ BREVO_API_KEY: 'x', MAIL_FROM: 'a@b.co', MAIL_PROVIDER: 'disabled' })
+    expect(detail).toContain('MAIL_PROVIDER=disabled')
+  })
+
+  /**
+   * Adding variables to a host does not reach a running instance. It is the
+   * step people miss, so the advice says it.
+   */
+  it('mentions redeploying, because setting a variable is not enough', () => {
+    expect(mailDetail({})).toContain('redeploy')
+  })
+
+  it('never reports a key’s value, only that it is present', () => {
+    const detail = mailDetail({ BREVO_API_KEY: 'xkeysib-super-secret-value' })
+    expect(detail).not.toContain('xkeysib-super-secret-value')
+  })
+})
