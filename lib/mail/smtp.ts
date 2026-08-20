@@ -245,6 +245,20 @@ export function buildMessage(message: MailMessage, from: string, messageId: stri
     'Auto-Submitted: auto-generated',
   ]
 
+  /**
+   * Caller-supplied headers, refused rather than escaped when they contain a
+   * line break.
+   *
+   * A CRLF inside a header value ends the header and starts another, which is
+   * how an injected `Bcc:` gets added to a message somebody else composed. There
+   * is no legitimate use for a newline here, so the safe handling is to drop the
+   * header entirely rather than to sanitise it and carry on.
+   */
+  for (const [name, value] of Object.entries(message.headers ?? {})) {
+    if (/[\r\n]/.test(name) || /[\r\n]/.test(value)) continue
+    headers.push(`${name}: ${value}`)
+  }
+
   if (!message.html) {
     headers.push('Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: base64')
     return `${headers.join('\r\n')}\r\n\r\n${foldBase64(Buffer.from(message.text, 'utf8').toString('base64'))}`

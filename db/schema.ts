@@ -780,3 +780,51 @@ export const sourceHealthDaily = pgTable(
     index('source_health_daily_day_idx').on(t.day),
   ],
 )
+
+// ── Email followers ─────────────────────────────────────────────────────────
+//
+// People who asked to be sent the brief. A row exists the moment somebody types
+// an address, but it is pending: nothing is ever sent to it except the single
+// message asking whether they meant it, and only a click on that link sets
+// `confirmedAt`.
+//
+// That is not etiquette. Without it a subscribe box on a public platform is a
+// machine for mailing strangers — and from the same domain the verification
+// codes come from, so one abused form takes the whole sign-in system's
+// deliverability down with it.
+//
+// Neither token is stored. A leaked backup of plain unsubscribe tokens is a
+// leaked list of who reads us; a leaked confirm token is a way to subscribe
+// somebody who declined.
+
+export const emailFollowers = pgTable(
+  'email_followers',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    /** Normalised (trimmed, lowercased). One subscription per address, ever. */
+    email: text('email').notNull(),
+    /** The language their brief is written in, from the interface they used. */
+    locale: text('locale').notNull().default('en'),
+    /** scrypt hash as "saltHex:hashHex" — never the token itself. */
+    confirmTokenHash: text('confirm_token_hash').notNull(),
+    /**
+     * Also hashed, and deliberately long-lived: it is printed in every message
+     * we ever send, so unlike the confirm token it cannot be single-use.
+     */
+    unsubscribeTokenHash: text('unsubscribe_token_hash').notNull(),
+    /** Null until they click the link. Nothing is sent to a null row. */
+    confirmedAt: timestamp('confirmed_at', { withTimezone: true }),
+    /**
+     * Set when they leave. The row is kept rather than deleted so a later
+     * re-subscribe is a deliberate act, not a silently restored old one.
+     */
+    unsubscribedAt: timestamp('unsubscribed_at', { withTimezone: true }),
+    lastSentAt: timestamp('last_sent_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique('email_followers_email_uq').on(t.email),
+    index('email_followers_sendable_idx').on(t.confirmedAt),
+    index('email_followers_pending_idx').on(t.createdAt),
+  ],
+)

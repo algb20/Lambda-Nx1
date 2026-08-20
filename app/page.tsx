@@ -7,6 +7,7 @@ import { MonitoringDashboard } from "@/components/monitor-dashboard"
 import { CalibrationScoreboard } from "@/components/calibration-scoreboard"
 import { GlobeView } from "@/components/globe-view"
 import { StandingBriefPanel } from "@/components/standing-brief"
+import { FollowByEmail } from "@/components/follow-by-email"
 import { UserPreferences } from "@/components/user-preferences"
 import { BottomNav } from "@/components/bottom-nav"
 import { CommandPalette } from '@/components/command-palette'
@@ -164,6 +165,13 @@ export default function HomePage() {
                 */}
                 <GlobeView />
                 <StandingBriefPanel />
+                {/*
+                  Offered at the foot of the brief, where somebody has just read
+                  one and knows what they would be getting. A subscribe box at
+                  the top of a page asks people to commit to something they have
+                  not seen yet, which is how it gets ignored.
+                */}
+                <FollowByEmail />
               </div>
             )}
             {activeTab === "intelligence" && <IntelligenceDashboard />}

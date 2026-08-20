@@ -5,7 +5,7 @@
  * touch the Drizzle client or a vendor SDK directly. This keeps the storage
  * backend swappable (charter rule #4).
  */
-import { and, desc, eq, gte, inArray, lte, or, isNull, sql } from 'drizzle-orm'
+import { and, desc, eq, gte, inArray, isNotNull, isNull, lt, lte, or, sql } from 'drizzle-orm'
 import { getDb, isDbConfigured } from './client'
 import * as s from '@/db/schema'
 
@@ -17,6 +17,7 @@ export type User = typeof s.users.$inferSelect
 export type NewUser = typeof s.users.$inferInsert
 export type Credential = typeof s.credentials.$inferSelect
 export type VerificationCode = typeof s.verificationCodes.$inferSelect
+export type EmailFollower = typeof s.emailFollowers.$inferSelect
 export type VerificationPurpose = VerificationCode['purpose']
 export type SocialChannel = typeof s.socialChannels.$inferSelect
 export type NewSocialChannel = typeof s.socialChannels.$inferInsert
@@ -331,6 +332,141 @@ export const repo = {
         })
         .returning()
       return row
+    },
+  },
+
+  /**
+   * People following by email.
+   *
+   * The shape of these methods follows one rule: a caller must not be able to
+   * mail somebody by forgetting a condition. So `sendable` is the only way to
+   * read a list for sending, and it filters in SQL rather than returning
+   * everybody and trusting the loop — a `.filter` somebody deletes later is a
+   * mailing to strangers, and a `WHERE` somebody deletes later fails the tests.
+   */
+  followers: {
+    /**
+     * Start or restart a subscription.
+     *
+     * Upserts on the address, because the alternative is two rows for one
+     * person and then two copies of every brief. A repeat request from somebody
+     * who never confirmed simply replaces the pending row with a fresh token and
+     * a fresh clock — the earlier link stops working, which is right: only the
+     * most recent message they were sent should be live.
+     *
+     * `confirmedAt` and `unsubscribedAt` are deliberately never touched here.
+     * Coming back has to be an explicit act — a click on a fresh confirmation
+     * link — and not a side effect of a form anybody could submit on somebody
+     * else's behalf.
+     */
+    async request(input: {
+      email: string
+      locale: string
+      confirmTokenHash: string
+      unsubscribeTokenHash: string
+    }): Promise<EmailFollower> {
+      const db = getDb()
+      const [row] = await db
+        .insert(s.emailFollowers)
+        .values(input)
+        .onConflictDoUpdate({
+          target: s.emailFollowers.email,
+          set: {
+            locale: input.locale,
+            confirmTokenHash: input.confirmTokenHash,
+            // Rotated too. Only pending and departed rows reach this path, and
+            // neither is holding a live link worth preserving — a confirmed
+            // subscriber is answered before anything is written, precisely so
+            // that the address printed in all their past messages keeps working.
+            unsubscribeTokenHash: input.unsubscribeTokenHash,
+            createdAt: new Date(),
+          },
+        })
+        .returning()
+      return row
+    },
+
+    async byId(id: string): Promise<EmailFollower | undefined> {
+      const db = getDb()
+      // A malformed id would make Postgres raise on the uuid cast rather than
+      // return nothing, and a link with a typo in it is a 400, not a 500.
+      if (!/^[0-9a-f-]{36}$/i.test(id)) return undefined
+      const [row] = await db.select().from(s.emailFollowers).where(eq(s.emailFollowers.id, id)).limit(1)
+      return row
+    },
+
+    async byEmail(email: string): Promise<EmailFollower | undefined> {
+      const db = getDb()
+      const [row] = await db
+        .select()
+        .from(s.emailFollowers)
+        .where(eq(s.emailFollowers.email, email))
+        .limit(1)
+      return row
+    },
+
+    /**
+     * Confirm, and clear any earlier departure.
+     *
+     * Clicking a fresh confirmation link *is* the explicit act that re-joining
+     * requires, so this is the one place `unsubscribedAt` is cleared.
+     */
+    async confirm(id: string): Promise<void> {
+      const db = getDb()
+      await db
+        .update(s.emailFollowers)
+        .set({ confirmedAt: new Date(), unsubscribedAt: null })
+        .where(eq(s.emailFollowers.id, id))
+    },
+
+    async unsubscribe(id: string): Promise<void> {
+      const db = getDb()
+      await db
+        .update(s.emailFollowers)
+        .set({ unsubscribedAt: new Date() })
+        .where(eq(s.emailFollowers.id, id))
+    },
+
+    /** Everyone who may be sent this edition. Filtered in SQL, deliberately. */
+    async sendable(limit = 500): Promise<EmailFollower[]> {
+      const db = getDb()
+      return db
+        .select()
+        .from(s.emailFollowers)
+        .where(
+          and(
+            isNotNull(s.emailFollowers.confirmedAt),
+            isNull(s.emailFollowers.unsubscribedAt),
+          ),
+        )
+        .limit(limit)
+    },
+
+    async markSent(id: string, at: Date): Promise<void> {
+      const db = getDb()
+      await db
+        .update(s.emailFollowers)
+        .set({ lastSentAt: at })
+        .where(eq(s.emailFollowers.id, id))
+    },
+
+    /**
+     * Everyone still holding an unconfirmed row, for the sweep.
+     *
+     * An address typed by mistake — or typed for a stranger who sensibly
+     * ignored the message — must not sit in the table forever waiting.
+     */
+    async pendingBefore(cutoff: Date): Promise<EmailFollower[]> {
+      const db = getDb()
+      return db
+        .select()
+        .from(s.emailFollowers)
+        .where(and(isNull(s.emailFollowers.confirmedAt), lt(s.emailFollowers.createdAt, cutoff)))
+    },
+
+    async drop(id: string): Promise<void> {
+      const db = getDb()
+      await db.delete(s.emailFollowers).where(eq(s.emailFollowers.id, id))
     },
   },
 
