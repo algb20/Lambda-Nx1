@@ -16,6 +16,8 @@ export * as schema from '@/db/schema'
 export type User = typeof s.users.$inferSelect
 export type NewUser = typeof s.users.$inferInsert
 export type Credential = typeof s.credentials.$inferSelect
+export type VerificationCode = typeof s.verificationCodes.$inferSelect
+export type VerificationPurpose = VerificationCode['purpose']
 export type SocialChannel = typeof s.socialChannels.$inferSelect
 export type NewSocialChannel = typeof s.socialChannels.$inferInsert
 export type Investigation = typeof s.investigations.$inferSelect
@@ -99,6 +101,21 @@ export const repo = {
     async setPlan(id: string, plan: 'free' | 'pro'): Promise<void> {
       const db = getDb()
       await db.update(s.users).set({ plan }).where(eq(s.users.id, id))
+    },
+    /**
+     * The person's own name and whether anyone else sees it.
+     *
+     * Both in one call because they are one decision: someone typing a name for
+     * the first time and revealing it is a single act, and two round trips
+     * would leave a window where the name exists with an unset switch.
+     */
+    async setProfile(
+      id: string,
+      patch: { fullName?: string | null; showRealName?: boolean },
+    ): Promise<User | undefined> {
+      const db = getDb()
+      const [row] = await db.update(s.users).set(patch).where(eq(s.users.id, id)).returning()
+      return row
     },
     /** Avatars for a set of authors in one query, so a feed is not N+1. */
     async avatarsByIds(ids: string[]): Promise<Map<string, string | null>> {
@@ -268,6 +285,11 @@ export const repo = {
       const [row] = await db.insert(s.credentials).values(input).returning()
       return row
     },
+    /** Replace the password hash after a proven reset code. */
+    async setPassword(userId: string, passwordHash: string): Promise<void> {
+      const db = getDb()
+      await db.update(s.credentials).set({ passwordHash }).where(eq(s.credentials.userId, userId))
+    },
     /**
      * Link a Pi username + passphrase to a user. A Pi user may have no
      * credential row yet (they have only ever signed in through the SDK), or may
@@ -289,6 +311,95 @@ export const repo = {
         })
         .returning()
       return row
+    },
+  },
+
+  /**
+   * Email verification and password-reset codes.
+   *
+   * Every method here is written so that the *database* enforces what matters,
+   * rather than the caller remembering to. Issuing upserts on the unique
+   * (email, purpose) pair, so a second request cannot leave two live codes
+   * behind however it races; spending a code is a conditional update that only
+   * matches an unconsumed row, so two requests arriving with the same correct
+   * code cannot both succeed.
+   */
+  verification: {
+    async issue(input: {
+      email: string
+      purpose: VerificationPurpose
+      codeHash: string
+      expiresAt: Date
+    }): Promise<VerificationCode> {
+      const db = getDb()
+      const [row] = await db
+        .insert(s.verificationCodes)
+        .values(input)
+        .onConflictDoUpdate({
+          target: [s.verificationCodes.email, s.verificationCodes.purpose],
+          // A reissue is a fresh start in every respect: new hash, new clock,
+          // and the attempt counter back to zero. Carrying the old count over
+          // would let someone lock a stranger's address out of sign-up by
+          // burning five guesses against a code they never received.
+          set: {
+            codeHash: input.codeHash,
+            expiresAt: input.expiresAt,
+            attempts: 0,
+            consumedAt: null,
+            createdAt: new Date(),
+          },
+        })
+        .returning()
+      return row
+    },
+
+    async find(email: string, purpose: VerificationPurpose): Promise<VerificationCode | undefined> {
+      const db = getDb()
+      const [row] = await db
+        .select()
+        .from(s.verificationCodes)
+        .where(and(eq(s.verificationCodes.email, email), eq(s.verificationCodes.purpose, purpose)))
+        .limit(1)
+      return row
+    },
+
+    /** Count a wrong guess. Returns the new total so the caller can stop at the limit. */
+    async countAttempt(id: string): Promise<number> {
+      const db = getDb()
+      const [row] = await db
+        .update(s.verificationCodes)
+        .set({ attempts: sql`${s.verificationCodes.attempts} + 1` })
+        .where(eq(s.verificationCodes.id, id))
+        .returning({ attempts: s.verificationCodes.attempts })
+      return row?.attempts ?? 0
+    },
+
+    /**
+     * Spend a code. False means somebody else already did.
+     *
+     * The `is null` in the predicate is the whole point: two requests carrying
+     * the same correct code reach this at the same time, both would read an
+     * unconsumed row, and without it both would proceed — one creating the
+     * account and the other resetting its password a moment later.
+     */
+    async consume(id: string): Promise<boolean> {
+      const db = getDb()
+      const rows = await db
+        .update(s.verificationCodes)
+        .set({ consumedAt: new Date() })
+        .where(and(eq(s.verificationCodes.id, id), isNull(s.verificationCodes.consumedAt)))
+        .returning({ id: s.verificationCodes.id })
+      return rows.length > 0
+    },
+
+    /** Drop expired rows. Called opportunistically when a code is issued. */
+    async sweep(now: Date = new Date()): Promise<number> {
+      const db = getDb()
+      const rows = await db
+        .delete(s.verificationCodes)
+        .where(lte(s.verificationCodes.expiresAt, now))
+        .returning({ id: s.verificationCodes.id })
+      return rows.length
     },
   },
 

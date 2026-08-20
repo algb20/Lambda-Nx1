@@ -106,6 +106,41 @@
       "when": 1786632602487,
       "tag": "0014_investigation_history",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1786719002487,
+      "tag": "0015_usernames",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1786805402487,
+      "tag": "0016_blobs",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1786891802487,
+      "tag": "0017_source_health",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1786978202487,
+      "tag": "0018_verification_codes",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1787191397529,
+      "tag": "0019_real_name",
+      "breakpoints": true
     }
   ]
 }

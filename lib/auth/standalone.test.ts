@@ -1,16 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { hashPassword, verifyPassword } from './password'
-import {
-  claimPiUsername,
-  classifyIdentifier,
-  isValidPiUsername,
-  loginUser,
-  normalizePiUsername,
-  registerUser,
-  type ClaimDeps,
-  type CredentialRecord,
-  type StandaloneDeps,
-} from './standalone'
+import { claimPiUsername, classifyIdentifier, isValidPiUsername, loginUser, normalizePiUsername, registerUser, type ClaimDeps, type CredentialRecord, type StandaloneDeps, resetPassword, normalizeFullName } from './standalone'
 
 describe('password hashing (scrypt)', () => {
   it('never stores the plaintext and verifies correctly', () => {
@@ -267,5 +257,73 @@ describe('claimPiUsername', () => {
     await expect(
       claimPiUsername({ userId: 'u1', piUsername: 'pioneer_01', password: 'short' }, deps),
     ).rejects.toThrow(/at least 8/)
+  })
+})
+
+describe('resetting a password', () => {
+  function resetDeps(existing: { userId: string; passwordHash: string } | undefined) {
+    const saved: { userId?: string; hash?: string } = {}
+    return {
+      saved,
+      deps: {
+        findByEmail: async () => existing,
+        setPassword: async (userId: string, passwordHash: string) => {
+          saved.userId = userId
+          saved.hash = passwordHash
+        },
+      },
+    }
+  }
+
+  it('replaces the hash and returns who to sign in', async () => {
+    const { saved, deps } = resetDeps({ userId: 'u1', passwordHash: 'old:hash' })
+    const result = await resetPassword('A@Example.com ', 'a-new-password', deps)
+    expect(result).toEqual({ userId: 'u1' })
+    expect(saved.userId).toBe('u1')
+    expect(saved.hash).not.toBe('old:hash')
+    // Stored hashed, never as typed.
+    expect(saved.hash).not.toContain('a-new-password')
+  })
+
+  it('holds the new password to the same minimum as a new account', async () => {
+    const { deps } = resetDeps({ userId: 'u1', passwordHash: 'old:hash' })
+    await expect(resetPassword('a@example.com', 'short', deps)).rejects.toThrow(/8 characters/)
+  })
+
+  /**
+   * A reset for an address with no account succeeds silently. It only got here
+   * by carrying a code we mailed to that address, and answering differently
+   * would turn the form into a way to ask whether somebody has an account.
+   */
+  it('says nothing about an address that has no account', async () => {
+    const { saved, deps } = resetDeps(undefined)
+    expect(await resetPassword('nobody@example.com', 'a-new-password', deps)).toBeNull()
+    expect(saved.userId).toBeUndefined()
+  })
+})
+
+describe('the real name', () => {
+  it('collapses runs of whitespace and trims', () => {
+    expect(normalizeFullName('  Ada   Lovelace  ')).toBe('Ada Lovelace')
+  })
+
+  it('treats an empty name as no name, not as an empty string', () => {
+    expect(normalizeFullName('   ')).toBeNull()
+  })
+
+  /**
+   * Names contain apostrophes, hyphens, every script there is, and a single word
+   * is a complete name for a great many people. The only rule is a length bound;
+   * a "name validator" is usually a list of the shapes its author's name takes.
+   */
+  it('accepts names a validator would wrongly reject', () => {
+    expect(normalizeFullName("Sinéad O'Connor")).toBe("Sinéad O'Connor")
+    expect(normalizeFullName('عبدالله')).toBe('عبدالله')
+    expect(normalizeFullName('李雷')).toBe('李雷')
+    expect(normalizeFullName('Prince')).toBe('Prince')
+  })
+
+  it('refuses one long enough to be an essay', () => {
+    expect(() => normalizeFullName('x'.repeat(81))).toThrow(/80 characters/)
   })
 })
