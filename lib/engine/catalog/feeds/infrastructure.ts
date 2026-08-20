@@ -245,8 +245,17 @@ export const INFRASTRUCTURE_SOURCES: CatalogSource[] = [
     licence: PUBLIC_DOMAIN,
     minIntervalSec: 900,
     keyless: true,
-    map: { time: 't', title: 'v' },
-    note: 'Storm surge measured at the gauge, not modelled.',
+    /**
+     * The station is fixed in the URL above (8454000, Providence RI), so naming
+     * it in the headline states a fact rather than guessing one. The row itself
+     * carries only a time and a number — which is how this feed came to publish
+     * world events titled "0.821".
+     */
+    map: {
+      time: 't',
+      titleTemplate: 'Water level {v} m at Providence, Rhode Island — NOAA gauge 8454000',
+    },
+    note: 'Storm surge measured at the gauge, not modelled. One station, not a national picture.',
   },
   {
     key: 'usgs_water_alerts',

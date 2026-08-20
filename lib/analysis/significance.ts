@@ -280,11 +280,31 @@ export function overflowSummary(overflow: ReadonlyArray<Rankable>): string | nul
 export interface BreakingCandidate extends Rankable {
   title: string
   magnitude: number | null
+  /** The scale the magnitude is on, as the publisher stated it ("Mww", "km"). */
+  magnitudeUnit?: string | null
   /** Independent origins reporting it. */
   origins: number
   /** Age in hours, or null when no usable time was published. */
   ageHours: number | null
 }
+
+/**
+ * Where a bare number means something on its own, and what counts as extreme.
+ *
+ * `magnitude` is whatever the publisher measured, and across 119 sources that is
+ * not one quantity: a moment magnitude, an altitude in kilometres, a water level
+ * in metres, a wind speed. Treating them as comparable produced exactly the
+ * error you would expect — **the International Space Station was reported as
+ * breaking news because it was 429 km up**, sailing past a threshold written for
+ * earthquakes.
+ *
+ * So the rule is opt-in per category, and a category earns an entry only when a
+ * single number on a known scale really does settle the question without any
+ * other context. Seismic magnitude is the clear case: past 6.5 nothing else
+ * about the report changes what it is. Everything else must qualify through
+ * severity, rarity or corroboration like any other report.
+ */
+export const MAGNITUDE_ALARM: Record<string, number> = { seismic: 6.5 }
 
 export interface BreakingVerdict {
   breaking: boolean
@@ -314,8 +334,12 @@ export function assessBreaking(
   if (candidate.origins >= 3 && candidate.severity >= 0.4) {
     reasons.push(`${candidate.origins} independent origins reporting it`)
   }
-  if (candidate.magnitude !== null && candidate.magnitude >= 6.5) {
-    reasons.push(`measured at ${candidate.magnitude}`)
+  const alarm = MAGNITUDE_ALARM[candidate.category]
+  if (alarm !== undefined && candidate.magnitude !== null && candidate.magnitude >= alarm) {
+    // The unit is part of the claim. "Measured at 7.1" is a number; "measured at
+    // 7.1 Mww" is a statement a reader can check against the agency.
+    const unit = candidate.magnitudeUnit ? ` ${candidate.magnitudeUnit}` : ''
+    reasons.push(`measured at ${candidate.magnitude}${unit}`)
   }
 
   return { breaking: reasons.length > 0, reasons }

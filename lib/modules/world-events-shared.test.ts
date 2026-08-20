@@ -336,6 +336,55 @@ describe('rankEvents — the order has to be defensible', () => {
     expect(ranked.reasons).toEqual(['6.1 Mww measured', '3h old', 'single origin'])
   })
 
+  /**
+   * The verdict belongs to the ranking, not to a component. Every surface — the
+   * globe, the panels, the MCP tools — reads this one field, so none of them can
+   * interrupt a reader on evidence the others would not.
+   */
+  it('carries a breaking verdict on every ranked row', () => {
+    const [ranked] = rankEvents([event({ observedAt: '2026-08-07T11:00:00Z' })], { now })
+    expect(ranked.breaking).toEqual({ breaking: false, reasons: [] })
+  })
+
+  it('calls a severe report from a quiet publisher breaking, and says why', () => {
+    const [ranked] = rankEvents(
+      [event({ id: 'rare', severity: 0.8, observedAt: '2026-08-07T11:00:00Z' })],
+      { now },
+    )
+    expect(ranked.breaking.breaking).toBe(true)
+    expect(ranked.breaking.reasons.join(' ')).toContain('severe')
+  })
+
+  /**
+   * The measured failure this whole mechanism exists for: NWS issues county
+   * warnings all day and each grades to the same severity. If routine volume
+   * could set off a banner, the banner would fire continuously and be worth
+   * nothing at the one moment it matters.
+   */
+  it('refuses to call routine high-severity volume breaking', () => {
+    const flood = Array.from({ length: 12 }, (_, i) =>
+      event({
+        id: `flood-${i}`,
+        sourceKey: 'nws_alerts',
+        category: 'flood',
+        severity: 0.75,
+        observedAt: '2026-08-07T11:00:00Z',
+      }),
+    )
+    for (const row of rankEvents(flood, { now })) {
+      expect(row.breaking.breaking).toBe(false)
+    }
+  })
+
+  /** "Breaking" about yesterday is not breaking, however severe. */
+  it('will not call a stale report breaking', () => {
+    const [ranked] = rankEvents(
+      [event({ id: 'old', severity: 0.95, observedAt: '2026-08-05T11:00:00Z' })],
+      { now },
+    )
+    expect(ranked.breaking.breaking).toBe(false)
+  })
+
   it('says when a severity was never graded rather than implying one', () => {
     const [ranked] = rankEvents([event({ observedAt: '2026-08-07T11:00:00Z' })], { now })
     expect(ranked.reasons[0]).toBe('no severity graded')

@@ -176,6 +176,25 @@ export interface CatalogSource {
 
   /** Field mapping for `kind: 'json'`, from our names to theirs. */
   map?: {
+    /**
+     * A readable headline built from the record's own fields.
+     *
+     * `{field}` placeholders are filled from the row by the same dotted-path
+     * lookup as every other mapping; anything else is literal. It takes
+     * precedence over `title`.
+     *
+     * It exists because a great many measurement APIs publish records with no
+     * headline at all — only numbers — and pointing `title` at one of those
+     * numbers produces exactly what it says. NOAA's tide gauge appeared on the
+     * world board as an event titled **"0.821"**: true, sourced, timestamped,
+     * and meaningless to anyone reading it. A row nobody can understand is not
+     * intelligence, whatever its provenance.
+     *
+     * A placeholder that the row does not carry leaves the template unused, so
+     * a feed that changes shape falls back to the ordinary title lookup rather
+     * than publishing half a sentence.
+     */
+    titleTemplate?: string
     title?: string
     url?: string
     time?: string

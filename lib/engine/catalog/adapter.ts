@@ -93,6 +93,32 @@ function fromGeoJson(source: CatalogSource, body: unknown, retrievedAt: string):
   })
 }
 
+/**
+ * Build a headline from a record's own fields, or nothing.
+ *
+ * Measurement APIs frequently publish rows with no headline at all — only
+ * numbers — and pointing `title` at one of those numbers yields exactly what it
+ * says. NOAA's tide gauge reached the world board as an event titled **"0.821"**:
+ * sourced, timestamped, and meaningless to whoever read it.
+ *
+ * Returns null rather than a half-filled sentence when a placeholder is missing,
+ * so a feed that changes shape falls back to the ordinary title lookup instead
+ * of publishing "water level {v} m at ".
+ */
+export function fillTemplate(template: string | undefined, row: unknown): string | null {
+  if (!template) return null
+  let missing = false
+  const out = template.replace(/\{([^{}]+)\}/g, (_, path: string) => {
+    const value = dig(row, path.trim())
+    const text = str(value) ?? (typeof value === 'number' ? String(value) : null)
+    if (text === null) missing = true
+    return text ?? ''
+  })
+  if (missing) return null
+  const trimmed = out.trim()
+  return trimmed.length > 0 ? trimmed : null
+}
+
 /** Arbitrary JSON, guided by the record's `path` and `map`. */
 function fromJson(source: CatalogSource, body: unknown, retrievedAt: string): Evidence[] {
   // A GeoJSON-shaped payload is read as GeoJSON even when declared `json`,
@@ -105,6 +131,7 @@ function fromJson(source: CatalogSource, body: unknown, retrievedAt: string): Ev
 
   return list.flatMap((row) => {
     const claim =
+      fillTemplate(map.titleTemplate, row) ??
       str(dig(row, map.title)) ??
       str(dig(row, 'title')) ??
       str(dig(row, 'name')) ??

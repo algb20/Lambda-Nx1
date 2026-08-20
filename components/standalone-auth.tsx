@@ -63,9 +63,19 @@ export function StandaloneSignInPrompt() {
         A prompt, not a gate. It sits above the product rather than in front of
         it, and it can be dismissed — a visitor reading the world map has no
         reason to make an account, and asking twice is how they leave.
+
+        Centred above the tab bar on a phone; on a wide screen it sits at the
+        foot of the navigation column, narrow enough to stay inside it.
+
+        It used to be centred at every width, which on a desktop put it squarely
+        on top of the board — a prompt nobody asked for, covering the rows they
+        came to read. The left is chosen over the right because the ideas button
+        already occupies that corner, and the width is pinned to the nav column
+        rather than left to `max-w-sm`, which overhung the content by enough to
+        clip the first words of every line beneath it.
       */}
       {dismissed ? null : (
-        <div className="fixed inset-x-0 bottom-16 z-40 mx-auto w-full max-w-sm px-4 lg:bottom-4">
+        <div className="fixed inset-x-0 bottom-16 z-40 mx-auto w-full max-w-sm px-4 lg:inset-x-auto lg:bottom-4 lg:left-4 lg:mx-0 lg:w-56 lg:max-w-none lg:px-0">
           <Card className="p-3 shadow-lg">
             <div className="flex items-start gap-2">
               <Radar className="mt-0.5 h-4 w-4 shrink-0 text-primary" />

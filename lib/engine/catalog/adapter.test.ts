@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { catalogSource } from './adapter'
+import { catalogSource, fillTemplate } from './adapter'
 import type { CatalogSource } from './types'
 import { PUBLIC_DOMAIN } from './licence'
 
@@ -191,5 +191,41 @@ describe('one source cannot crowd out the rest', () => {
     const evidence = await source.run(NO_INPUT, ctxReturning({ i: many }))
     expect(evidence.length).toBeLessThanOrEqual(120)
     expect(evidence.length).toBeGreaterThan(0)
+  })
+})
+
+
+/**
+ * Measurement feeds publish rows of numbers and no headline, and pointing
+ * `title` at one of those numbers is how NOAA's tide gauge reached the world
+ * board as an event called **"0.821"** — sourced, timestamped and meaningless.
+ */
+describe('a headline built from a record that has none', () => {
+  it('fills placeholders from the row', () => {
+    expect(fillTemplate('Water level {v} m at the gauge', { t: '2026-08-20', v: '0.821' })).toBe(
+      'Water level 0.821 m at the gauge',
+    )
+  })
+
+  it('reads numbers as readily as strings', () => {
+    expect(fillTemplate('{v} m', { v: 0.821 })).toBe('0.821 m')
+  })
+
+  it('reaches into nested fields by the same dotted path as every other mapping', () => {
+    expect(fillTemplate('{station.name}: {v} m', { station: { name: 'Providence' }, v: '1.2' })).toBe(
+      'Providence: 1.2 m',
+    )
+  })
+
+  /**
+   * The important one. A feed that changes shape must fall back to the ordinary
+   * title lookup rather than publish half a sentence with a hole in it.
+   */
+  it('gives up rather than publish a half-filled sentence', () => {
+    expect(fillTemplate('Water level {v} m at {station}', { v: '0.821' })).toBeNull()
+  })
+
+  it('is inert when no template was declared', () => {
+    expect(fillTemplate(undefined, { v: '0.821' })).toBeNull()
   })
 })
