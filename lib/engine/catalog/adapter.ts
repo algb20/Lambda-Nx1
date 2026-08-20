@@ -270,10 +270,16 @@ export function catalogSource(entry: CatalogSource): Source {
     async run(_input, ctx: SourceContext): Promise<Evidence[]> {
       const res = await ctx.fetch(requestUrl(entry, new Date()), {
         headers: {
-          // Named honestly with a contact route. Providers block anonymous
-          // scrapers and they are right to; a source that will not say who it
-          // is has no standing to complain when it is throttled.
-          'User-Agent': 'LambdaNX/1.0 (+https://github.com/algb20/Lambda-Nx1)',
+          /**
+           * Named honestly with a contact route. Providers block anonymous
+           * scrapers and they are right to; a source that will not say who it
+           * is has no standing to complain when it is throttled.
+           *
+           * A record may override it where the publisher mandates a particular
+           * form — see `CatalogSource.userAgent`. The SEC is the reason that
+           * exists.
+           */
+          'User-Agent': entry.userAgent ?? 'LambdaNX/1.0 (+https://github.com/algb20/Lambda-Nx1)',
           Accept:
             entry.kind === 'geojson' || entry.kind === 'json'
               ? 'application/json, application/geo+json;q=0.9, */*;q=0.5'

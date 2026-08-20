@@ -286,3 +286,33 @@ describe('source families', () => {
     for (const f of shareAlike) expect(f.note, f.key).toBeTruthy()
   })
 })
+
+/**
+ * The guard that was missing when three duplicates got in.
+ *
+ * A key is how evidence, health reports, the licence registry and the rarity
+ * weighting all refer to a source. Two records sharing one is not a cosmetic
+ * problem: whichever loses the lookup becomes invisible while still being
+ * fetched, and the per-source counts that hold the board's diversity caps
+ * together start describing two feeds as one.
+ *
+ * It is exactly the kind of mistake that cannot be caught by reading, because
+ * the two records are usually in different files and were added months apart.
+ */
+describe('every source is its own record', () => {
+  it('has no duplicate keys', () => {
+    const seen = new Map<string, number>()
+    for (const source of CATALOG) seen.set(source.key, (seen.get(source.key) ?? 0) + 1)
+    const duplicated = [...seen.entries()].filter(([, n]) => n > 1).map(([key]) => key)
+    expect(duplicated).toEqual([])
+  })
+
+  it('has no duplicate URLs, which would be the same feed under two names', () => {
+    const seen = new Map<string, string[]>()
+    for (const source of CATALOG) {
+      seen.set(source.url, [...(seen.get(source.url) ?? []), source.key])
+    }
+    const shared = [...seen.values()].filter((keys) => keys.length > 1)
+    expect(shared).toEqual([])
+  })
+})
