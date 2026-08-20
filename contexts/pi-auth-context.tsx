@@ -50,6 +50,15 @@ declare global {
 }
 
 interface PiAuthContextType {
+  /**
+   * Whether Pi is in play here at all.
+   *
+   * The provider is now mounted on every surface, so its mere presence no
+   * longer tells shared chrome whether this is a Pi Browser session. Anything
+   * that used to infer that from `usePiAuthOptional() !== null` must ask this
+   * instead, or it will show Pi affordances to web visitors who have no Pi.
+   */
+  active: boolean;
   isAuthenticated: boolean;
   /** How the sign-in attempt ended; drives what the shell renders. */
   status: PiAuthStatus;
@@ -89,10 +98,42 @@ const loadPiSDK = (): Promise<void> => {
   });
 };
 
-export function PiAuthProvider({ children }: { children: ReactNode }) {
-  const [status, setStatus] = useState<PiAuthStatus>("connecting");
-  const [graceElapsed, setGraceElapsed] = useState(false);
-  const [authMessage, setAuthMessage] = useState(piStatusMessage("connecting"));
+/**
+ * Pi sign-in for the whole app.
+ *
+ * ## Why it has an `active` switch
+ *
+ * The provider used to be mounted only by the Pi shell, so being mounted *was*
+ * the switch. That stopped working when the surface became a runtime decision:
+ * the app now hydrates as the web surface and may become the Pi surface an
+ * instant later, and swapping the provider in at that moment would change the
+ * element type above every screen — React would tear the entire app down and
+ * rebuild it, on the slowest devices we ship to.
+ *
+ * So the provider is always in the tree and `active` says whether to actually
+ * talk to Pi. Inactive, it loads no SDK, opens no handshake, and reports
+ * `unavailable` with the grace window already closed — which is the truth
+ * outside Pi Browser, and which no shell will ever block on.
+ *
+ * It also means `usePiAuth` has a provider everywhere, so shared chrome no
+ * longer has to guess whether Pi is in play.
+ */
+export function PiAuthProvider({
+  children,
+  active = true,
+}: {
+  children: ReactNode
+  /** Whether to attempt the Pi handshake at all. False outside Pi Browser. */
+  active?: boolean
+}) {
+  const [status, setStatus] = useState<PiAuthStatus>(
+    active ? "connecting" : "unavailable",
+  );
+  // Nothing to wait for when Pi is not in play, so nothing should be held back.
+  const [graceElapsed, setGraceElapsed] = useState(!active);
+  const [authMessage, setAuthMessage] = useState(
+    piStatusMessage(active ? "connecting" : "unavailable"),
+  );
   const [piAccessToken, setPiAccessToken] = useState<string | null>(null);
   const [userData, setUserData] = useState<LoginDTO | null>(null);
 
@@ -187,14 +228,24 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  /**
+   * Runs when Pi becomes relevant, not merely when the provider mounts.
+   *
+   * `active` starts false on every first render — the server cannot know it is
+   * a Pi Browser — and turns true a moment later if it is one. Keying the
+   * handshake on that transition is what lets one build serve both surfaces
+   * without ever opening a Pi connection on the public web, where it could only
+   * time out.
+   */
   useEffect(() => {
+    if (!active) return;
     initializePiAndAuthenticate();
     // Reveal the app once the grace window closes, whatever Pi is doing. The
     // handshake above keeps running and signs the user in if it lands later.
     const timer = setTimeout(() => setGraceElapsed(true), PI_TIMEOUTS.grace);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [active]);
 
   const continueAsGuest = () => {
     setGraceElapsed(true);
@@ -203,6 +254,7 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
   };
 
   const value: PiAuthContextType = {
+    active,
     isAuthenticated: status === "authenticated",
     status,
     graceElapsed,

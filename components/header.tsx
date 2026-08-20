@@ -9,6 +9,7 @@ import { BrandMark } from "@/components/brand-mark"
 import { useTheme } from "@/hooks/use-theme"
 import { useI18n, LOCALES, LOCALE_LABELS } from "@/lib/i18n"
 import { usePiAuthOptional } from "@/contexts/pi-auth-context"
+import { useViewer } from "@/hooks/use-viewer"
 
 /**
  * `onNavigate` exists for one reason: the "Pay with π" button used to do
@@ -20,9 +21,21 @@ import { usePiAuthOptional } from "@/contexts/pi-auth-context"
 export function Header({ onNavigate }: { onNavigate?: (tab: 'preferences') => void } = {}) {
   const { theme, toggleTheme } = useTheme()
   const { locale, setLocale, t } = useI18n()
-  // Optional: standalone mode mounts no Pi provider, and the header is shared.
+  // Optional because the header is shared by every surface. `pi.active`, not
+  // `pi !== null`, is what says Pi is in play: the provider is mounted
+  // everywhere now, so its presence alone would put a Pi guest badge in front
+  // of web visitors who have no Pi account.
   const pi = usePiAuthOptional()
-  const username = pi?.userData?.username ?? null
+  /**
+   * The name comes from the session first, and from the Pi handshake only as a
+   * fallback while that handshake is still ahead of the session read.
+   *
+   * Reading Pi alone is what it used to do, and it meant an email-account
+   * holder who was signed in saw no trace of it anywhere in the chrome — the
+   * one place that is supposed to answer "am I signed in?".
+   */
+  const { user } = useViewer()
+  const username = user?.username ?? pi?.userData?.username ?? null
 
   const [langOpen, setLangOpen] = useState(false)
 
@@ -60,7 +73,7 @@ export function Header({ onNavigate }: { onNavigate?: (tab: 'preferences') => vo
                 <UserCircle2 className="h-3.5 w-3.5 shrink-0" />
                 <span className="truncate">@{username}</span>
               </span>
-            ) : pi ? (
+            ) : pi?.active ? (
               <span
                 className="hidden items-center gap-1 rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground sm:flex"
                 title={t('auth.guestHint')}

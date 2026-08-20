@@ -1,11 +1,13 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Loader2, LogOut, ShieldCheck, Trash2, UserRound } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { AuthForm, type AuthedUser } from '@/components/auth-form'
+import { AuthForm } from '@/components/auth-form'
+import { useViewer } from '@/hooks/use-viewer'
+import { refreshViewer } from '@/lib/auth/viewer'
 import { Avatar } from '@/components/avatar'
 import { RealNameControl } from '@/components/real-name-control'
 
@@ -29,31 +31,23 @@ import { RealNameControl } from '@/components/real-name-control'
  * only create is not an account you agreed to.
  */
 export function AccountPanel() {
-  const [user, setUser] = useState<AuthedUser | null | undefined>(undefined)
+  // One shared read of the session, so signing in or out here is reflected
+  // everywhere at once rather than in this panel alone.
+  const { status, user } = useViewer()
   const [confirming, setConfirming] = useState(false)
   const [confirmText, setConfirmText] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const loadMe = useCallback(async () => {
-    try {
-      const res = await fetch('/api/auth/me')
-      const data = (await res.json()) as { user?: AuthedUser | null }
-      setUser(data.user ?? null)
-    } catch {
-      setUser(null)
-    }
+    await refreshViewer()
   }, [])
-
-  useEffect(() => {
-    void loadMe()
-  }, [loadMe])
 
   const signOut = async () => {
     setBusy(true)
     try {
       await fetch('/api/auth/logout', { method: 'POST' })
-      setUser(null)
+      await refreshViewer()
     } finally {
       setBusy(false)
     }
@@ -70,7 +64,6 @@ export function AccountPanel() {
       })
       const data = (await res.json()) as { error?: string }
       if (!res.ok) throw new Error(data?.error ?? 'Could not delete the account')
-      setUser(null)
       setConfirming(false)
       setConfirmText('')
       // The server has cleared the cookie; reload so nothing in the shell keeps
@@ -83,7 +76,7 @@ export function AccountPanel() {
     }
   }
 
-  if (user === undefined) {
+  if (status !== 'ready') {
     return (
       <Card>
         <CardContent className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
@@ -155,6 +148,21 @@ export function AccountPanel() {
                   </span>
                 ) : null}
               </p>
+              {/*
+                The account code. A handle is optional and changeable, so it
+                cannot be what a support request, a payment dispute or an audit
+                line is keyed on — and the id that can be is a UUID nobody can
+                read down a phone. This is the third one, and the only one a
+                person can actually quote. See lib/users/identifier.
+              */}
+              {user.identifier ? (
+                <p className="mt-0.5 font-mono text-[10px] tracking-wide text-muted-foreground">
+                  <span className="select-all">{user.identifier}</span>
+                  <span className="ml-1.5 font-sans opacity-70">
+                    — your account code, quote it to support
+                  </span>
+                </p>
+              ) : null}
             </div>
           </div>
           <Button variant="outline" size="sm" onClick={signOut} disabled={busy}>

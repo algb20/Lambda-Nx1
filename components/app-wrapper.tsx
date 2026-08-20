@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useSyncExternalStore, type ReactNode } from "react";
 import { PiAuthProvider, usePiAuth } from "@/contexts/pi-auth-context";
 import { I18nProvider } from "@/lib/i18n";
-import { StandaloneAuthGate } from "./standalone-auth";
+import { StandaloneSignInPrompt } from "./standalone-auth";
 import { AuthLoadingScreen } from "./auth-loading-screen";
 import { FeedbackButton } from "./feedback-button";
 import { AutoTranslate } from "./auto-translate";
 import { PrefsProvider } from "./prefs-provider";
 import { shouldBlockApp } from "@/lib/auth/pi-client";
+import { subscribeToSurface, surfaceOnServer, surfaceSnapshot } from "@/lib/auth/environment";
+import { refreshViewer } from "@/lib/auth/viewer";
 import { pingVisit } from "@/lib/visit";
 import { installDomResilience } from "@/lib/dom-resilience";
 
@@ -27,10 +29,19 @@ import { installDomResilience } from "@/lib/dom-resilience";
  */
 function AppContent({ children }: { children: ReactNode }) {
   const { status, graceElapsed, userData } = usePiAuth();
-  // Re-ping once Pi sign-in lands, so the visitor's Pi identity is attached to
-  // their (now-known) country in the private registry. De-duped in pingVisit.
   useEffect(() => {
-    if (userData) pingVisit("pi");
+    if (!userData) return;
+    // Re-ping once Pi sign-in lands, so the visitor's Pi identity is attached
+    // to their (now-known) country in the private registry. De-duped in
+    // pingVisit.
+    pingVisit("pi");
+    /**
+     * The Pi handshake creates a server session, and everything else in the app
+     * reads the account from that session. Without this the header, the
+     * composer and the account panel would go on showing a signed-out app to
+     * someone who had just signed in — until they reloaded.
+     */
+    void refreshViewer();
   }, [userData]);
   if (shouldBlockApp(status, graceElapsed)) return <AuthLoadingScreen />;
   return <>{children}</>;
@@ -46,7 +57,35 @@ function AppContent({ children }: { children: ReactNode }) {
  * trapping the visitor. One build serves both.
  */
 export function AppWrapper({ children }: { children: ReactNode }) {
-  const mode = process.env.NEXT_PUBLIC_AUTH_MODE ?? "pi";
+  /**
+   * Which shell to mount, decided where the visitor actually is.
+   *
+   * This used to read `NEXT_PUBLIC_AUTH_MODE`, a build-time switch — so one
+   * build served Pi Browser and another served the public web, and a Pi user
+   * who followed a link from a desktop reached a build offering only a sign-in
+   * they could not complete there. The charter wants one product that is a Pi
+   * app *and* a public website; that means one build and a runtime decision.
+   *
+   * The env var still wins when it is set, because an operator deploying a
+   * deliberately single-purpose instance should be able to say so.
+   *
+   * Read through a store rather than called directly during render. Calling it
+   * directly is what produced React error #418 in Pi Browser: the server has no
+   * browser, answered `web`, and emitted the web shell — then the Pi client
+   * answered `pi-browser` and rendered a different tree, so React threw the
+   * hydration away and re-rendered the entire document on the slowest device we
+   * ship to. `useSyncExternalStore` hydrates with the server's answer, so the
+   * two agree, and adopts the real one immediately after as a normal update.
+   * See lib/auth/environment.ts.
+   */
+  const surface = useSyncExternalStore(
+    subscribeToSurface,
+    surfaceSnapshot,
+    surfaceOnServer,
+  );
+  const mode =
+    process.env.NEXT_PUBLIC_AUTH_MODE ??
+    (surface === "pi-browser" ? "pi" : "standalone");
   /**
    * Survive a translator editing the page underneath React.
    *
@@ -59,35 +98,52 @@ export function AppWrapper({ children }: { children: ReactNode }) {
    * and the panel blanked. See lib/dom-resilience.ts.
    */
   if (typeof window !== "undefined") installDomResilience();
-  // One beacon per open, for everyone (guest included). A signed-in re-ping
-  // happens inside AppContent / the standalone gate once identity is known.
+  /**
+   * One beacon per open, for everyone (guest included). A signed-in re-ping
+   * happens inside AppContent once identity is known.
+   *
+   * Deliberately not keyed on `mode`. The first render is always the server's
+   * answer, so keying on it would record a Pi Browser visit as a web one and
+   * then fire a second beacon. By the time an effect runs the user agent is
+   * readable, so a single read here is both correct and final.
+   */
   useEffect(() => {
-    pingVisit(mode === "standalone" ? "standalone-open" : "open");
-  }, [mode]);
+    const live =
+      process.env.NEXT_PUBLIC_AUTH_MODE ??
+      (surfaceSnapshot() === "pi-browser" ? "pi" : "standalone");
+    pingVisit(live === "standalone" ? "standalone-open" : "open");
+  }, []);
+  /**
+   * One tree, whichever surface this turns out to be.
+   *
+   * The two shells used to be alternative branches, and that was a bug waiting
+   * for the surface to become a runtime decision: the branch flips on the first
+   * update after hydration, the element type above `children` changes with it,
+   * and React unmounts and rebuilds *every screen in the app* — losing all of
+   * their state and re-running every effect, on a Pi Browser phone.
+   *
+   * So the structure is fixed and only the leaves differ: the Pi provider is
+   * always mounted and told whether Pi is in play, and the web sign-in offer is
+   * a sibling card rather than a wrapper. Swapping surfaces now costs one card.
+   */
   return (
     <I18nProvider>
-      {/* Outside the auth gates on purpose: preferences must work for a visitor
+      {/* Outside the auth layer on purpose: preferences must work for a visitor
           without an account, who is the ordinary case here (charter §1). The
           browser holds the working copy; an account only makes it durable. */}
       <PrefsProvider>
       {/* Translates the whole rendered interface, including text the engine
           produced at runtime, so a new screen is never English-only. */}
       <AutoTranslate>
-      {mode === "standalone" ? (
-        <StandaloneAuthGate>
+      <PiAuthProvider active={mode === "pi"}>
+        <AppContent>
           {children}
+          {/* Inside the shell, so every screen carries it — an idea arrives
+              while the user is looking at what prompted it. */}
           <FeedbackButton />
-        </StandaloneAuthGate>
-      ) : (
-        <PiAuthProvider>
-          <AppContent>
-            {children}
-            {/* Inside the shell, so every screen carries it — an idea arrives
-                while the user is looking at what prompted it. */}
-            <FeedbackButton />
-          </AppContent>
-        </PiAuthProvider>
-      )}
+          {mode === "standalone" ? <StandaloneSignInPrompt /> : null}
+        </AppContent>
+      </PiAuthProvider>
       </AutoTranslate>
       </PrefsProvider>
     </I18nProvider>
