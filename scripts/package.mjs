@@ -118,7 +118,18 @@ function zipFiles(files, zipPath) {
   const listPath = join(OUT_DIR, '.package-filelist')
   writeFileSync(listPath, files.join('\n'))
   try {
-    execSync(`zip -q -X -@ "${zipPath}" < "${listPath}"`, { cwd: ROOT, stdio: 'inherit', shell: '/bin/bash' })
+    /**
+     * `-9`, maximum deflate.
+     *
+     * Free headroom, and the studio bundle needed it: at the default level it
+     * came to 1,010,276 bytes — over the stricter reading of "one megabyte" —
+     * with nothing left to strip. Everything in the bundle is application
+     * source by then; the tests, docs, tooling and lockfile are already out.
+     *
+     * Source compresses well, so the extra CPU buys several percent, and this
+     * runs once per release rather than per request.
+     */
+    execSync(`zip -q -9 -X -@ "${zipPath}" < "${listPath}"`, { cwd: ROOT, stdio: 'inherit', shell: '/bin/bash' })
   } catch (err) {
     throw new Error(
       `zip failed (is the "zip" command installed?): ${err instanceof Error ? err.message : err}`,
