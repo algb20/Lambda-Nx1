@@ -28,6 +28,8 @@ import { TimeStamp } from '@/components/time-stamp'
 import { Badge } from '@/components/ui/badge'
 import { ErrorBoundary } from '@/components/error-boundary'
 import { WorldSurface, type SurfacePoint } from '@/components/world-surface'
+import { useWorldReport } from '@/hooks/use-world-report'
+import { loadWorld } from '@/lib/world/report-store'
 import type { ViewMode } from '@/lib/geo/projection'
 import type { ChainRadarReport } from '@/lib/modules/chain-radar'
 import {
@@ -79,12 +81,11 @@ import {
  * window are removed rather than dimmed — a faded dot still occupies its pixels
  * and still has to be mentally subtracted by the reader.
  *
- * Refreshes on an interval, but only while the tab is visible: an intelligence
- * page left open in a background tab must not keep hitting public agencies'
- * endpoints, which is both rude and a rate-limit risk (charter §3).
+ * The refresh clock lives in the shared store (lib/world/report-store), which
+ * polls only while the tab is visible: an intelligence page left open in a
+ * background tab must not keep hitting public agencies' endpoints, which is both
+ * rude and a rate-limit risk (charter §3).
  */
-
-const REFRESH_MS = 5 * 60 * 1000
 
 type Layer = 'events' | 'corroboration' | 'latency' | 'coverage' | 'liquidity'
 
@@ -155,7 +156,17 @@ function useSurfaceHeight(): number {
     const measure = () => {
       const w = window.innerWidth
       const h = window.innerHeight
-      // Never more than half the viewport height, and never taller than wide.
+      /**
+       * A phone gets a map it can see past; a monitor gets a display.
+       *
+       * The single rule was "never more than half the viewport height, never
+       * taller than wide", which is right on a phone — a full-height globe there
+       * pushes every event below the fold — and badly wrong on a desktop, where
+       * it produced a 450px map on a 900px screen with empty space under it. On
+       * a wide screen the globe *is* the page, so it takes the height and leaves
+       * only enough room for the controls above it.
+       */
+      if (w >= 1280) return setHeight(Math.round(Math.max(420, h - 260)))
       setHeight(Math.round(Math.max(240, Math.min(w * 0.9, h * 0.5, 460))))
     }
     measure()
@@ -207,11 +218,9 @@ function SweepProgress() {
 }
 
 export function GlobeView() {
-  const [report, setReport] = useState<WorldEventsReport | null>(null)
+  // One sweep for the whole screen — see the note beside `load` below.
+  const { report, loading, refreshing, error } = useWorldReport()
   const [chain, setChain] = useState<ChainRadarReport | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [refreshing, setRefreshing] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   /**
    * Five of these used to be plain component state, so switching tabs unmounted
    * the panel and threw every choice away. They are preferences now: written to
@@ -262,31 +271,20 @@ export function GlobeView() {
   const [playing, setPlaying] = useState(false)
   const height = useSurfaceHeight()
 
+  /**
+   * The world picture comes from the shared store, not from a fetch of our own.
+   *
+   * It used to be ours alone, which was fine while the globe was the only thing
+   * drawing it. The moment the columns beside the map were added, two components
+   * each polling `/api/world` meant two sweeps of a report thousands of events
+   * long — and worse, two sweeps landing at different moments, so the map and
+   * the list beside it would be drawn from two different pictures of the world.
+   * A dot with no row and a row with no dot, and no way for a reader to tell
+   * which was right. See lib/world/report-store.
+   */
   const load = useCallback(async (isRefresh: boolean) => {
-    if (isRefresh) setRefreshing(true)
-    try {
-      const res = await fetch('/api/world', { cache: 'no-store' })
-      const data = await res.json()
-      if (!res.ok || data?.error) throw new Error(data?.error ?? `Request failed (${res.status})`)
-      setReport(data as WorldEventsReport)
-      setError(null)
-    } catch (err) {
-      // Keep the last good picture on screen; say why it is not fresh.
-      setError(err instanceof Error ? err.message : 'Could not reach the live feeds')
-    } finally {
-      setLoading(false)
-      setRefreshing(false)
-    }
+    await loadWorld(isRefresh)
   }, [])
-
-  useEffect(() => {
-    load(false)
-    const tick = () => {
-      if (typeof document !== 'undefined' && document.visibilityState === 'visible') load(true)
-    }
-    const timer = window.setInterval(tick, REFRESH_MS)
-    return () => window.clearInterval(timer)
-  }, [load])
 
   // The liquidity layer is only fetched if someone actually asks for it.
   useEffect(() => {
