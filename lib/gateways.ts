@@ -32,6 +32,7 @@ export const ALL_MODES = [
   'board',
   'property',
   'companies',
+  'venues',
   'statements',
   'courts',
   'regulation',
@@ -62,7 +63,7 @@ export const GATEWAY_FAMILIES: ReadonlyArray<{ label: string; modes: readonly Mo
   { label: 'Start anywhere', modes: ['nexus', 'track'] },
   { label: 'Infrastructure', modes: ['domain', 'threat', 'geo'] },
   { label: 'People & accounts', modes: ['username', 'email'] },
-  { label: 'Money & entities', modes: ['finance', 'ownership', 'procurement', 'board', 'markets', 'property', 'companies'] },
+  { label: 'Money & entities', modes: ['finance', 'ownership', 'procurement', 'board', 'markets', 'property', 'companies', 'venues'] },
   { label: 'Law & the state', modes: ['statements', 'courts', 'regulation', 'officials'] },
   { label: 'Earth & systems', modes: ['resources', 'grid', 'space-weather', 'orbital'] },
   { label: 'Knowledge & record', modes: ['research', 'reference', 'open-data', 'news', 'media'] },
@@ -155,6 +156,13 @@ export const GATEWAY_GUIDANCE: Record<Mode, GatewayGuidance> = {
     example: 'sanctions',
     limit:
       'Nine press offices, read directly. The ranking is our own analysis of four things a document *is* — who issued it, what instrument it is, how many independent institutions are addressing the same subject, and how old it is — and every factor is shown. It is never a forecast and never a sentiment reading.',
+  },
+  venues: {
+    answers:
+      'Every trading venue on earth that has been assigned a Market Identifier Code — exchanges, MTFs, dark pools, clearing venues and registered crypto providers — searchable by name, country, city or MIC, with the legal entity that operates each one and its LEI.',
+    example: 'nigeria',
+    limit:
+      'Registration is not endorsement: a venue is listed because an authority assigned it a code, not because anyone vouched for it. Crypto venues from the market index are not registry entries and are labelled separately. A venue with no LEI cannot be traced to an owner from here.',
   },
   courts: {
     answers:

@@ -365,6 +365,20 @@ export const API_GROUPS: ApiGroup[] = [
         returns: ['sections', 'summary', 'findings'],
       },
       {
+        path: '/api/intelligence/venues',
+        route: 'intelligence/venues',
+        method: 'POST',
+        title: 'Trading venues — every exchange on earth',
+        description:
+          'The ISO 10383 registry itself: every exchange, MTF, dark pool, clearing venue and registered crypto provider that holds a Market Identifier Code, searchable by name, country, city or MIC — plus the crypto exchange index, labelled separately because a market index is not a registry. Send no query and the answer is the registry\u2019s operating venues.',
+        returns: [
+          'groups — regulated markets, crypto venues, and reporting infrastructure',
+          'each venue with its MIC, legal entity, LEI, country, city and category',
+          'summary.withLei — how many can be traced to an owner through GLEIF',
+          'limits — registration is not endorsement, stated on every response',
+        ],
+      },
+      {
         path: '/api/intelligence/companies',
         route: 'intelligence/companies',
         method: 'POST',

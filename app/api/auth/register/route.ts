@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     )
   }
 
-  let body: { email?: unknown; password?: unknown; username?: unknown }
+  let body: { email?: unknown; password?: unknown; username?: unknown; fullName?: unknown }
   try {
     body = await request.json()
   } catch {
@@ -40,9 +40,29 @@ export async function POST(request: Request) {
   const email = typeof body.email === 'string' ? body.email : ''
   const password = typeof body.password === 'string' ? body.password : ''
   const username = typeof body.username === 'string' ? body.username : ''
+  /**
+   * The real name, which this route was silently dropping.
+   *
+   * `registerUser` accepts it, `normalizeFullName` validates it and
+   * `createUserAndCredential` writes it — the whole feature was built and this
+   * one line was missing, so every account created since carried no name and
+   * nothing anywhere said so. Found by registering an account against a real
+   * database and reading the row back, not by any test: every layer below was
+   * tested in isolation and each one passed.
+   *
+   * Stored, never shown: `showRealName` defaults to false, so giving a name
+   * here publishes nothing until its owner opens the eye.
+   */
+  const fullName = typeof body.fullName === 'string' ? body.fullName : ''
 
   try {
-    const { userId } = await registerUser(email, password, username, defaultStandaloneDeps)
+    const { userId } = await registerUser(
+      email,
+      password,
+      username,
+      defaultStandaloneDeps,
+      fullName,
+    )
     const res = NextResponse.json({ id: userId, username: normalizeUsername(username) })
     attachSession(res, userId)
     return res
