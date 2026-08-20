@@ -488,6 +488,7 @@ export const INTERNAL_ROUTES: Record<string, string> = {
   preferences: 'a person’s own layout — which panels they opened and which gateways they pinned',
   'auth/pi/claim': 'Pi Network authentication',
   'auth/register': 'authentication',
+  'mail/test': 'secret-gated administration — sends a real message and reports the provider’s verdict',
   'auth/verify/confirm': 'sign-up, spending a code we mailed',
   'auth/verify/request': 'sign-up — sends a code to an address, so it is rate-limited hard',
   follow: 'asks to be sent the brief — mails one confirmation and nothing else until it is clicked',

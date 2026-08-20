@@ -430,9 +430,18 @@ export function AuthForm({
       )}
 
       {emailFlowsOff ? (
+        /*
+          Do not tell a web visitor to "sign in with Pi instead". The Pi
+          handshake only completes inside the Pi Browser, so on this surface
+          that is advice nobody can follow — it reads as a second broken thing
+          rather than as an explanation of the first. Say what is true: the
+          operator has to add one setting, and nothing the reader does will
+          change it.
+        */
         <p className="text-[11px] leading-relaxed text-muted-foreground">
-          This deployment has no mail provider configured, so email sign-up and password reset are
-          unavailable. Sign in with Pi Network instead.
+          Email sign-up is not switched on here yet — this deployment has no mail provider, so a
+          verification code has nowhere to be sent. Everything on the platform still works without
+          an account.
         </p>
       ) : null}
 

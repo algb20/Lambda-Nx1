@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          'Email sign-up is not available on this deployment — no mail provider is configured. Sign in with Pi Network instead.',
+          'Email sign-up is not available yet on this deployment: no mail provider is configured, so the verification code has nowhere to be sent. This is a setting the operator has to add, not something you can work around.',
       },
       { status: 503 },
     )

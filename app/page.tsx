@@ -8,6 +8,7 @@ import { CalibrationScoreboard } from "@/components/calibration-scoreboard"
 import { GlobeView } from "@/components/globe-view"
 import { StandingBriefPanel } from "@/components/standing-brief"
 import { FollowByEmail } from "@/components/follow-by-email"
+import { LiveColumns } from "@/components/live-columns"
 import { UserPreferences } from "@/components/user-preferences"
 import { BottomNav } from "@/components/bottom-nav"
 import { CommandPalette } from '@/components/command-palette'
@@ -119,7 +120,26 @@ export default function HomePage() {
         nothing on either side. A wide screen is a different arrangement, not a
         tall screen with more room.
       */}
-      <div className="container mx-auto flex gap-6 px-4 py-4 lg:max-w-[88rem] lg:gap-8 lg:py-6 2xl:max-w-[104rem]">
+      {/*
+        The globe tab is a workspace, not an article.
+
+        Every other tab is reading — a feed, a report, a settings page — and
+        reading wants a measured column, because a 200-character line is a line
+        nobody finishes. The world surface is the opposite: it is a display
+        somebody watches, and on a wide screen a centred column leaves half the
+        monitor empty while the map is squeezed and the live rows sit below the
+        fold. So this tab drops the container entirely and takes the viewport.
+
+        The cap stays for everything else, and that is deliberate rather than
+        lazy: width is earned by what a screen is *for*.
+      */}
+      <div
+        className={
+          activeTab === "globe"
+            ? "flex w-full gap-0 px-0 py-0"
+            : "container mx-auto flex gap-6 px-4 py-4 lg:max-w-[88rem] lg:gap-8 lg:py-6 2xl:max-w-[104rem]"
+        }
+      >
         <SideNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
         {/*
@@ -132,11 +152,32 @@ export default function HomePage() {
           pushes the flex row past the viewport and the whole page scrolls
           sideways.
         */}
-        <main className="mx-auto w-full min-w-0 max-w-2xl lg:mx-0 lg:max-w-none">
+        <main
+          className={
+            activeTab === "globe"
+              ? "w-full min-w-0"
+              : "mx-auto w-full min-w-0 max-w-2xl lg:mx-0 lg:max-w-none"
+          }
+        >
           <ErrorBoundary key={activeTab} label={tabDef(activeTab).label}>
             {activeTab === "feed" && <HomeFeed onNavigate={navigate} />}
             {activeTab === "globe" && (
-              <div className="space-y-6">
+              /*
+                Two panes on a wide screen, stacked on a narrow one.
+
+                The columns run beside the map rather than beneath it because a
+                globe answers "where" and cannot answer "what happened" — a dot
+                has no headline. On a monitor there is room for both, and putting
+                the reading below the map wastes half the display and makes
+                learning anything a scroll. Below `xl` the panes stack, because
+                two columns on a phone is two unreadable columns.
+
+                Both panes read one sweep from the shared store, so a dot and the
+                row describing it can never come from two different pictures of
+                the world.
+              */
+              <div className="flex min-h-[calc(100vh-3.5rem)] flex-col xl:flex-row">
+                <div className="min-w-0 flex-1 space-y-6 px-4 py-4 xl:max-w-[38rem] xl:overflow-y-auto">
                 {/*
                   The brief leads the map rather than sitting behind a button.
                   It reads the same world picture the globe draws, and the
@@ -172,6 +213,17 @@ export default function HomePage() {
                   not seen yet, which is how it gets ignored.
                 */}
                 <FollowByEmail />
+                </div>
+
+                {/*
+                  The live columns. `sticky` on the tall pane rather than the
+                  short one: the reading scrolls, the world stays put, which is
+                  how an operations display behaves and the opposite of how an
+                  article does.
+                */}
+                <aside className="min-w-0 flex-1 border-t border-border xl:sticky xl:top-14 xl:h-[calc(100vh-3.5rem)] xl:min-w-[28rem] xl:border-l xl:border-t-0">
+                  <LiveColumns />
+                </aside>
               </div>
             )}
             {activeTab === "intelligence" && <IntelligenceDashboard />}
@@ -190,9 +242,17 @@ export default function HomePage() {
           </ErrorBoundary>
         </main>
 
-        {/* Mounts only above 1280px — gated on a real media query rather than
-            hidden with CSS, so a laptop does not pay for the fetch. */}
-        <ContextRail onNavigate={navigate} />
+        {/*
+          Mounts only above 1280px — gated on a real media query rather than
+          hidden with CSS, so a laptop does not pay for the fetch.
+
+          Never on the globe tab. The rail exists to put context beside a page
+          that is being *read*; the world surface has its own live columns doing
+          that job better, and running both left the map 518px wide on a 1600px
+          monitor — three panes fighting over one screen, which is how a display
+          ends up smaller than the article next to it.
+        */}
+        {activeTab === "globe" ? null : <ContextRail onNavigate={navigate} />}
       </div>
 
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />

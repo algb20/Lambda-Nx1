@@ -158,7 +158,23 @@ export const INFRASTRUCTURE_SOURCES: CatalogSource[] = [
     minIntervalSec: 7200,
     keyless: true,
     map: { title: 'fqdn', lat: 'geometry.coordinates.1', lon: 'geometry.coordinates.0' },
-    note: 'Where the internet is actually measured from — the ground truth behind outage claims.',
+    /**
+     * Out of the sweep, and kept for the coverage layer.
+     *
+     * This is an *inventory* of measurement stations, not a stream of events: a
+     * row is a hostname like `at-klu-as1111.anchors.atlas.ripe.net`, with no
+     * time and no severity. Because it states no time, every row was placed by
+     * the moment we fetched it — which made all sixty-eight of them the freshest
+     * things on the board, so they took the top of the European column and read
+     * as breaking news about Austrian DNS.
+     *
+     * True, sourced, and not an event. The same distinction NOAA's bare "0.821"
+     * reading needed. It still belongs in the catalogue — knowing where the
+     * internet is measured from is exactly what the blind-spot layer is built on
+     * — it simply must not be swept into the world picture.
+     */
+    enabled: false,
+    note: 'Where the internet is actually measured from — the ground truth behind outage claims. An inventory, not an event stream: read by the coverage layer, not the sweep.',
   },
   {
     key: 'ripe_stat_announced',
@@ -179,9 +195,25 @@ export const INFRASTRUCTURE_SOURCES: CatalogSource[] = [
   },
   {
     key: 'ooni_measurements',
-    name: 'OONI — network interference measurements',
+    name: 'OONI — confirmed network blocking',
     publisher: 'Open Observatory of Network Interference',
-    url: 'https://api.ooni.io/api/v1/measurements?limit=50&order_by=measurement_start_time',
+    /**
+     * Confirmed blocking only, not every measurement OONI records.
+     *
+     * The endpoint was the raw log: fifty rows an hour of routine probes, most
+     * of them finding nothing, titled with a bare URL — and for the app tests
+     * (`signal`, `whatsapp`) `input` is null altogether, so those rows carried
+     * no headline at all and were silently dropped. A log of tests that found
+     * nothing is not intelligence; it is the absence of intelligence, published
+     * at fifty rows an hour.
+     *
+     * `confirmed=true` is OONI's own verdict that a site was *actually blocked*,
+     * not merely slow or unreachable. That is an event: a named site, a named
+     * country, at a stated time — the kind of thing this platform exists to put
+     * on a map. `order=desc` because without it the API returns the oldest
+     * confirmed blocks in its archive, which is the same trap NVD had.
+     */
+    url: 'https://api.ooni.io/api/v1/measurements?limit=50&confirmed=true&order_by=measurement_start_time&order=desc',
     kind: 'json',
     path: 'results',
     discipline: 'infra',
@@ -191,7 +223,18 @@ export const INFRASTRUCTURE_SOURCES: CatalogSource[] = [
     licence: ccBy('OONI', 'https://ooni.org/about/data-policy/'),
     minIntervalSec: 3600,
     keyless: true,
-    map: { title: 'input', time: 'measurement_start_time' },
+    /**
+     * A bare URL was not a headline. `https://fanack.com/` said nothing about
+     * what had been found, and a reader could not tell it from any other row.
+     * Now that every row is a confirmed block, the headline can say so — and it
+     * names the country, because "blocked" without "where" is not a fact anyone
+     * can use.
+     */
+    map: {
+      titleTemplate: 'Blocked in {probe_cc}: {input}',
+      title: 'input',
+      time: 'measurement_start_time',
+    },
     note: 'Censorship and blocking, measured by volunteers rather than asserted.',
   },
   {
