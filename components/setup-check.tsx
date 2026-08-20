@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { AlertTriangle, CheckCircle2, CircleHelp, Loader2, RefreshCw, XCircle } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { ALL_MODES } from '@/lib/gateways'
 import {
   diagnose,
   verdict,
@@ -145,8 +146,9 @@ export function SetupCheck() {
           <code>{'npm install\nnpm run build\nnpm start          # http://localhost:3000'}</code>
         </pre>
         <p className="mt-2 max-w-prose text-[13px] leading-relaxed text-muted-foreground">
-          The map, the panels, the news and all 26 gateways work immediately after that — no key, no
-          account, no database. Only accounts and cross-device preferences need one.
+          The map, the panels, the news and all {ALL_MODES.length} gateways work immediately after
+          that — no key, no account, no database. Only accounts and cross-device preferences need
+          one.
         </p>
       </Card>
     </div>

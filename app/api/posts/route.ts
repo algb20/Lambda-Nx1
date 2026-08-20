@@ -5,6 +5,7 @@ import { repo, isDbConfigured, type Post } from '@/lib/db'
 import { validatePostInput, postPermalink } from '@/lib/posts'
 import { toPublicPost } from '@/lib/post-mapper'
 import { broadcast, channelsForAutoPublish } from '@/lib/social/broadcast'
+import { publicNameFor } from '@/lib/users/public-name'
 import { considerPublishing } from '@/lib/modules/self-drive'
 import { runPublishJob } from '@/lib/modules/publish-job'
 
@@ -75,7 +76,7 @@ export async function POST(request: Request) {
 
   const created = await repo.posts.create({
     authorUserId: user.id,
-    authorName: user.displayName ?? user.externalId,
+    authorName: publicNameFor(user),
     kind: parsed.value.kind,
     title: parsed.value.title,
     body: parsed.value.body,

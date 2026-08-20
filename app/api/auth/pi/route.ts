@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { getAuthProvider } from '@/lib/auth'
 import { attachSession } from '@/lib/auth/cookie'
 import { repo } from '@/lib/db'
-import { normalizeUsername, usernameProblem } from '@/lib/auth/policy'
+import { isUsernameConflict, piHandleFor } from '@/lib/auth/pi-identity'
+import { publicNameFor } from '@/lib/users/public-name'
 
 /**
  * POST /api/auth/pi  { pi_auth_token }
@@ -39,26 +40,67 @@ export async function POST(request: Request) {
   /**
    * A pioneer never chooses a handle here — Pi already assigned them one, and
    * it arrives verified by Pi itself. Registration for a Pi user is therefore
-   * the sign-in: no form, no second name to invent.
+   * the sign-in: no form, no email, no second name to invent.
    *
-   * The handle is only offered if it fits our shape and is not reserved. If it
-   * does not, the account is still created and simply carries no handle, which
-   * is far better than refusing a verified pioneer entry over a name they did
-   * not pick and cannot change.
+   * The handle comes from `identity.username`, which is Pi's `username` field,
+   * **not** from `externalId`, which is Pi's opaque `uid`. Reading the uid here
+   * was a real defect with a silent symptom: a UUID is 36 characters and
+   * contains hyphens, so it failed the username rules, `handleUsable` was
+   * always false, and every pioneer got an account with no handle at all. They
+   * saw their Pi name (it came through `displayName`) and had no idea the thing
+   * that identifies them across the product was empty.
+   *
+   * The handle is still only taken if it fits our shape and is not reserved. If
+   * it does not, the account is created and carries no handle — far better than
+   * refusing a verified pioneer entry over a name they did not pick.
+   *
+   * Because `repo.users.upsert` fills a handle in and never overwrites one,
+   * pioneers whose accounts were created while the uid bug was live get their
+   * real handle on their next sign-in. No migration, no support request.
    */
-  const piHandle = normalizeUsername(identity.externalId)
-  const handleUsable = usernameProblem(piHandle) === null
+  const piHandle = piHandleFor(identity)
+  /**
+   * The display name is the *same* decision as the handle, deliberately.
+   *
+   * Two things a live run caught, both of which had the account carrying a
+   * name it should never have shown:
+   *
+   *  - A pioneer whose Pi username is `admin` was correctly refused the handle
+   *    and then displayed as "admin" anyway, through the display name. That
+   *    defeats the entire purpose of the reserved list, which exists because
+   *    someone appearing as `admin` is how an account-recovery scam starts.
+   *  - A Pi response with no `username` fell back to `externalId`, so the
+   *    account's public name became a raw UUID.
+   *
+   * If Pi's name cannot be held as a handle here, it is not shown as a name
+   * either. `publicNameFor` then falls through to a neutral word, which is
+   * honest — we do not have a name we can show for this account.
+   */
+  const displayName = piHandle
 
-  const user = await repo.users.upsert({
-    authProvider: identity.provider,
-    externalId: identity.externalId,
-    displayName: identity.displayName ?? identity.externalId,
-    ...(handleUsable ? { username: piHandle } : {}),
-  })
+  let user
+  try {
+    user = await repo.users.upsert({
+      authProvider: identity.provider,
+      externalId: identity.externalId,
+      displayName,
+      ...(piHandle ? { username: piHandle } : {}),
+    })
+  } catch (error) {
+    // Someone else already holds this handle — an off-Pi sign-up can take a name
+    // a pioneer holds on Pi. The pioneer is verified; the handle is a nicety.
+    // Let them in without it rather than failing a sign-in over a name.
+    if (!piHandle || !isUsernameConflict(error)) throw error
+    user = await repo.users.upsert({
+      authProvider: identity.provider,
+      externalId: identity.externalId,
+      displayName,
+    })
+  }
 
   const res = NextResponse.json({
     id: user.id,
-    username: user.username ?? user.displayName ?? identity.externalId,
+    username: publicNameFor(user),
   })
   attachSession(res, user.id)
   return res

@@ -25,8 +25,18 @@ export const piAuthProvider: AuthProvider = {
     }
     if (!res.ok) return null
     const me = (await res.json().catch(() => null)) as PiMe | null
+    /**
+     * `uid` first, because it is the fact that does not change. Pi's own
+     * documentation is explicit that the username can be changed by the
+     * pioneer while the uid is permanent, so keying an account on the username
+     * would make a rename look like a brand-new person.
+     *
+     * The username is carried separately rather than folded in here — see the
+     * note on `AuthIdentity.username` for what went wrong when it was not.
+     */
     const externalId = me?.uid ?? me?.username
     if (!externalId) return null
-    return { provider: 'pi', externalId, displayName: me?.username ?? null }
+    const username = typeof me?.username === 'string' && me.username.trim() ? me.username.trim() : null
+    return { provider: 'pi', externalId, username, displayName: username }
   },
 }

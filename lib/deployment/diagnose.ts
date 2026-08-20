@@ -30,6 +30,8 @@
  * follows. Pure and dependency-free so it can be tested without a browser.
  */
 
+import { ALL_MODES } from '../gateways'
+
 export type CheckState = 'ok' | 'warn' | 'fail' | 'unknown'
 
 export interface DiagnosisCheck {
@@ -43,10 +45,21 @@ export interface DiagnosisCheck {
   action: string | null
 }
 
+/**
+ * The health endpoint's shape, as it actually is.
+ *
+ * Written from `/api/health`'s real output rather than from memory, because
+ * this module originally read a boolean `ok` field that endpoint has never
+ * emitted. `Boolean(undefined)` is false, so the database check reported "Not
+ * configured" on a deployment with a healthy, connected database — a
+ * diagnostic tool confidently giving the wrong diagnosis, which is worse than
+ * having no diagnostic at all. Found by running the page against a live server
+ * and a real Postgres, not by reading the code.
+ */
 export interface HealthShape {
   status?: string
   version?: string
-  checks?: Array<{ id?: string; ok?: boolean; detail?: string; name?: string }>
+  checks?: Array<{ name?: string; status?: string; detail?: string; required?: boolean }>
 }
 
 export interface ProbeResult {
@@ -192,7 +205,10 @@ export function diagnose(input: {
       id: 'gateways',
       title: 'The gateways',
       state: 'ok',
-      detail: `A gateway returned ${boardRows} records. All 26 read public sources the same way.`,
+      // Counted, never typed. The literal that used to live here said 26 while
+      // the product shipped 27, because a gateway was added and the sentence
+      // was not.
+      detail: `A gateway returned ${boardRows} records. All ${ALL_MODES.length} read public sources the same way.`,
       action: null,
     })
   }
@@ -242,13 +258,19 @@ function countRows(body: unknown): number {
   return typeof shape.summary?.rows === 'number' ? shape.summary.rows : 0
 }
 
-/** `true`/`false` for a named health check, or `null` when it is not reported. */
-function findCheck(body: unknown, id: string): boolean | null {
+/**
+ * `true`/`false` for a named health check, or `null` when it is not reported.
+ *
+ * `status === 'ok'` and nothing else. The endpoint's other states — `degraded`,
+ * `off` — both mean "do not rely on this", so treating anything but `ok` as
+ * false is the honest reading rather than a convenience.
+ */
+function findCheck(body: unknown, name: string): boolean | null {
   if (!body || typeof body !== 'object') return null
   const checks = (body as HealthShape).checks
   if (!Array.isArray(checks)) return null
-  const found = checks.find((c) => c.id === id || c.name === id)
-  return found ? Boolean(found.ok) : null
+  const found = checks.find((c) => c.name === name)
+  return found ? found.status === 'ok' : null
 }
 
 /** The single sentence a person needs before reading the detail. */
