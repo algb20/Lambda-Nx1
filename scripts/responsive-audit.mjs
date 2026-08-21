@@ -25,7 +25,17 @@ const PAGES = [
 
 const findings = []
 
-const browser = await chromium.launch({ executablePath: EXEC, args: ['--no-sandbox'] })
+/**
+ * `--no-proxy-server` because this environment sets an outbound HTTP proxy for
+ * everything, and Chromium honours it even for 127.0.0.1. Without the flag the
+ * proxy answers `400 text/html` for every `/_next/static/*` asset — no styles,
+ * no JavaScript, no hydration — and the audit dutifully measures a page that
+ * never ran, reporting the harness as if it were the app.
+ */
+const browser = await chromium.launch({
+  executablePath: EXEC,
+  args: ['--no-sandbox', '--no-proxy-server'],
+})
 
 for (const vp of WIDTHS) {
   const ctx = await browser.newContext({

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AlertTriangle, Eye, Loader2, Radio, Ship } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { NameList } from '@/components/panel-section'
 import { TimeStamp } from '@/components/time-stamp'
 import type { CountryRisk } from '@/lib/analysis/country-risk'
 import type { CorridorWatch } from '@/lib/analysis/corridors'
@@ -112,7 +113,25 @@ export function CountryDossier() {
         </p>
       </Card>
 
-      {data.bands.map((band) => (
+      {/*
+        When no country is in any band there is one fact, not three.
+
+        The three bands each rendered a full card — heading, method note, and
+        "No country currently falls in this band" — so an empty run produced
+        three blocks of explanation about an empty result. The bands are a real
+        distinction and they come back the moment there is anything to put in
+        them; they are simply not worth three cards to say nothing.
+      */}
+      {data.bands.every((b) => b.countries.length === 0) ? (
+        <Card className="p-3">
+          <p className="text-[11px] text-muted-foreground">
+            No country has enough in the current feed to score. The three observability bands
+            appear here as soon as any country does — a low score in a thinly observed band means
+            we cannot see the country, never that it is calm.
+          </p>
+        </Card>
+      ) : (
+        data.bands.map((band) => (
         <Card key={band.label} className="p-3">
           <h4 className="text-xs font-semibold">{band.label}</h4>
           <p className="mt-0.5 max-w-prose text-[10px] leading-relaxed text-muted-foreground">
@@ -152,7 +171,8 @@ export function CountryDossier() {
             </ul>
           )}
         </Card>
-      ))}
+        ))
+      )}
 
       {data.corridors ? <Corridors watches={data.corridors} /> : null}
     </div>
@@ -238,6 +258,7 @@ function Detail({ risk, loading }: { risk: CountryRisk; loading: boolean }) {
 
 function Corridors({ watches }: { watches: CorridorWatch[] }) {
   const active = watches.filter((w) => w.signals.length > 0)
+  const quiet = watches.filter((w) => w.signals.length === 0)
   return (
     <Card className="p-3">
       <h4 className="flex items-center gap-1.5 text-xs font-semibold">
@@ -253,8 +274,21 @@ function Corridors({ watches }: { watches: CorridorWatch[] }) {
         transit count moves. A corridor can be badly disrupted with nothing here.
       </p>
 
+      {/*
+        Only the corridors that have something to report get a block.
+
+        All twelve used to render in full — name, what it carries, a summary
+        sentence — so a quiet day produced twelve paragraphs saying "No
+        published activity in the watch radius during this window," one after
+        another. That is the same fact twelve times, at the size of a finding,
+        and it buried the one corridor that might actually matter.
+
+        The silent ones are still named below, because "we watched these and saw
+        nothing" is itself worth knowing. It costs one line instead of twelve
+        blocks.
+      */}
       <ul className="mt-2 divide-y divide-border/60">
-        {watches.map((w) => (
+        {active.map((w) => (
           <li key={w.corridor.key} className="py-1.5">
             <div className="flex items-center gap-2">
               <span className="min-w-0 flex-1 truncate text-[11px] font-medium">
@@ -294,6 +328,22 @@ function Corridors({ watches }: { watches: CorridorWatch[] }) {
           </li>
         ))}
       </ul>
+
+      {active.length === 0 ? (
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          None of the {watches.length} corridors we watch has published activity in this window.
+        </p>
+      ) : null}
+
+      {quiet.length > 0 ? (
+        <div className="mt-2 border-t border-border/60 pt-2">
+          <NameList
+            names={quiet.map((w) => w.corridor.name)}
+            label="corridors watched with nothing published in this window — unobserved is not the same as clear"
+            limit={6}
+          />
+        </div>
+      ) : null}
 
       <p className="mt-2 flex items-center gap-1.5 text-[10px] text-muted-foreground">
         <Radio className="h-3 w-3" />

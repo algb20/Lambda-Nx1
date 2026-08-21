@@ -20,6 +20,13 @@ import {
   Pause,
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import {
+  NameList,
+  PanelSection,
+  SectionIndex,
+  useSectionCollapse,
+  type SectionState,
+} from '@/components/panel-section'
 import { usePrefs } from '@/components/prefs-provider'
 import { CategoryPanels } from '@/components/category-panels'
 import { CountryDossier } from '@/components/country-dossier'
@@ -441,6 +448,53 @@ export function GlobeView() {
   )
   const heldBack = useMemo(() => overflowSummary(board.overflow), [board.overflow])
 
+  /**
+   * How the board is ordered, and by whom.
+   *
+   * Significance is the default and the one the engine is built around — but a
+   * reader who wants "what came in last" was previously told to scroll and work
+   * it out from the age suffixes. An ordering a reader cannot change is a
+   * ranking imposed on them; these three are the orderings this data actually
+   * supports, and no others are offered because no others would be honest.
+   */
+  const [sort, setSort] = useState<'significance' | 'newest' | 'oldest'>('significance')
+
+  /**
+   * One publisher, or all of them.
+   *
+   * The board is capped at three rows per publisher, which stops a flood — and
+   * on a quiet run leaves a reader looking at ten advisories from one feed with
+   * no way to say "show me everything from this one" or "show me anything but".
+   */
+  const [publisher, setPublisher] = useState<string | null>(null)
+
+  const publishers = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const r of board.taken) {
+      counts.set(r.event.sourceKey, (counts.get(r.event.sourceKey) ?? 0) + 1)
+    }
+    return [...counts.entries()].sort((a, b) => b[1] - a[1])
+  }, [board.taken])
+
+  const rows = useMemo(() => {
+    const filtered = publisher ? board.taken.filter((r) => r.event.sourceKey === publisher) : board.taken
+    if (sort === 'significance') return filtered
+    // A row we cannot time cannot be ordered by time, so it goes last rather
+    // than being given an invented position at the top.
+    const timeOf = (r: (typeof filtered)[number]) => {
+      const t = Date.parse(r.event.observedAt ?? r.event.at ?? '')
+      return Number.isFinite(t) ? t : null
+    }
+    return [...filtered].sort((a, b) => {
+      const ta = timeOf(a)
+      const tb = timeOf(b)
+      if (ta === null && tb === null) return 0
+      if (ta === null) return 1
+      if (tb === null) return -1
+      return sort === 'newest' ? tb - ta : ta - tb
+    })
+  }, [board.taken, publisher, sort])
+
   const latency = useMemo(() => latencyProfile(inWindow), [inWindow])
   const receiptTimed = useMemo(() => inWindow.filter(timedByReceipt).length, [inWindow])
 
@@ -615,16 +669,61 @@ export function GlobeView() {
 
   const failedSources = report?.sourceHealth.filter((s) => s.status === 'failed') ?? []
   const emptySources = report?.sourceHealth.filter((s) => s.status === 'empty') ?? []
+  const okSources = report?.sourceHealth.filter((s) => s.status === 'ok') ?? []
+
+  const { isCollapsed, toggle } = useSectionCollapse()
+
+  /**
+   * What is on this page, in the order it appears, with live counts.
+   *
+   * Built from the same numbers the sections render, so the index can never
+   * promise a section something it does not contain. A zero is still listed:
+   * knowing a category is silent is a finding, and dropping it would make the
+   * page look shorter by making it less honest.
+   */
+  const sections: SectionState[] = useMemo(() => {
+    if (!report) return []
+    const list: SectionState[] = []
+    if (isEventLayer) {
+      list.push({ id: 'sec-significant', title: 'Most significant', count: rows.length })
+      list.push({ id: 'sec-unplaceable', title: 'Not placeable', count: report.unplaceable.length })
+    }
+    if (layer === 'coverage' && report.coverage) {
+      list.push({ id: 'sec-coverage', title: 'Blind spots', count: report.coverage.length })
+    }
+    if (report.fusion) {
+      list.push({ id: 'sec-fusion', title: 'Fusion', count: report.fusion.events })
+    }
+    list.push({ id: 'sec-sources', title: 'Sources', count: okSources.length })
+    return list
+  }, [report, isEventLayer, layer, rows.length, okSources.length])
 
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
         <Globe2 className="h-5 w-5 text-primary" />
         <h2 className="text-lg font-bold">Live world surface</h2>
+        {/*
+          It read `0/10` beside a green dot, and nothing else. A reader met two
+          numbers with no units, a healthy-looking dot, and an empty map — and
+          could only conclude the page was broken. Both numbers are real and
+          they mean different things: how many events could be drawn, and how
+          many arrived. Said in words, `0 of 10 on the map` is a finding; as
+          `0/10` it is a riddle.
+        */}
         {report ? (
-          <Badge variant="outline" className="gap-1 text-[10px]">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            {report.summary.placed}/{report.summary.total}
+          <Badge
+            variant="outline"
+            className="gap-1 text-[10px]"
+            title="Events with coordinates, out of every event in this run. The rest are listed under “Not placeable”."
+          >
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${
+                report.summary.placed > 0 ? 'bg-emerald-500' : 'bg-amber-500'
+              }`}
+            />
+            <span className="tabular-nums">{report.summary.placed}</span> of{' '}
+            <span className="tabular-nums">{report.summary.total}</span> on the map
           </Badge>
         ) : null}
         <button
@@ -714,6 +813,7 @@ export function GlobeView() {
           playing={playing}
           shown={inWindow.length}
           held={inScope.length}
+          unplaceable={report.unplaceable.length}
           receiptTimed={receiptTimed}
           onChooseWindow={chooseWindow}
           onScrub={(ms) => {
@@ -995,20 +1095,77 @@ export function GlobeView() {
         </Card>
       ) : null}
 
-      {isEventLayer && report && ranked.length > 0 ? (
-        <Card className="p-3">
-          <h4 className="mb-0.5 flex items-center gap-1.5 text-xs font-semibold">
-            <Radio className="h-3 w-3 text-primary" />
-            {windowHours === null ? 'Most significant now' : 'Most significant in this window'}
-          </h4>
-          <p className="mb-1.5 text-[10px] leading-relaxed text-muted-foreground">
-            Measured severity, halved every 72 hours of age, lifted where independent origins agree,
-            and lowered for a publisher that is sending a great many reports this run — a county
-            flood warning is one of forty, a magnitude 7.7 is one of two. No publisher may hold more
-            than three rows. Each line says why it sits where it sits.
-          </p>
+      {report && sections.length > 0 ? <SectionIndex sections={sections} /> : null}
+
+      {isEventLayer && report ? (
+        <PanelSection
+          id="sec-significant"
+          title={windowHours === null ? 'Most significant now' : 'Most significant in this window'}
+          count={rows.length}
+          collapsed={isCollapsed('sec-significant')}
+          onToggle={toggle}
+          emptyLabel={
+            publisher
+              ? `Nothing from ${publisher} in this window.`
+              : 'No events ranked in this window.'
+          }
+          controls={
+            <>
+              {/* Ordering the reader can change. Three, because these are the
+                  three this data honestly supports. */}
+              <span className="scroll-row flex items-center rounded-md ring-1 ring-border">
+                {(['significance', 'newest', 'oldest'] as const).map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setSort(s)}
+                    aria-pressed={sort === s}
+                    className={`shrink-0 whitespace-nowrap px-2 py-1 text-[10px] capitalize transition-colors ${
+                      sort === s
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-muted-foreground hover:bg-muted'
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </span>
+              {publishers.length > 1 ? (
+                <select
+                  value={publisher ?? ''}
+                  onChange={(e) => setPublisher(e.target.value || null)}
+                  aria-label="Filter by publisher"
+                  className="max-w-[9rem] rounded-md border border-border bg-background px-1.5 py-1 text-[10px] text-muted-foreground"
+                >
+                  <option value="">All publishers ({board.taken.length})</option>
+                  {publishers.map(([key, n]) => (
+                    <option key={key} value={key}>
+                      {key} ({n})
+                    </option>
+                  ))}
+                </select>
+              ) : null}
+            </>
+          }
+          hint={
+            <>
+              <span className="flex items-center gap-1.5 font-medium text-foreground">
+                <Radio className="h-3 w-3 text-primary" />
+                How this order is decided
+              </span>
+              Measured severity, halved every 72 hours of age, lifted where independent origins
+              agree, and lowered for a publisher that is sending a great many reports this run — a
+              county flood warning is one of forty, a magnitude 7.7 is one of two. No publisher may
+              hold more than three rows. Each line says why it sits where it sits.
+              {sort !== 'significance' ? (
+                <span className="mt-1 block text-amber-600 dark:text-amber-500">
+                  Sorted by time — the ranking above is not what you are looking at.
+                </span>
+              ) : null}
+            </>
+          }
+        >
           <ul className="divide-y divide-border/60">
-            {board.taken.map((r) => (
+            {rows.map((r) => (
               <li key={r.event.id}>
                 <button
                   onClick={() => setSelectedId(r.event.id)}
@@ -1059,8 +1216,13 @@ export function GlobeView() {
           </ul>
 
           {/* Counted and offered, never dropped. Silently hiding real events
-              would be a worse failure than the crowding it fixes. */}
-          {heldBack || board.diversified < board.taken.length ? (
+              would be a worse failure than the crowding it fixes.
+
+              Suppressed while a publisher filter is on: "4 more from ubuntu_usn
+              were held back so one publisher does not fill the board" is a
+              confusing thing to read directly underneath a list the reader has
+              deliberately narrowed to that one publisher. */}
+          {!publisher && (heldBack || board.diversified < board.taken.length) ? (
             <p className="mt-1.5 border-t border-border/60 pt-1.5 text-[10px] text-muted-foreground">
               {heldBack}
               {board.diversified < board.taken.length ? (
@@ -1072,15 +1234,19 @@ export function GlobeView() {
               ) : null}
             </p>
           ) : null}
-        </Card>
+        </PanelSection>
       ) : null}
 
-      {isEventLayer && report && report.unplaceable.length > 0 ? (
-        <Card className="p-3">
-          <h4 className="mb-0.5 text-xs font-semibold">Reported, but not placeable</h4>
-          <p className="mb-1.5 text-[10px] text-muted-foreground">
-            Real events whose source gave no location — listed here rather than plotted at a guess.
-          </p>
+      {isEventLayer && report ? (
+        <PanelSection
+          id="sec-unplaceable"
+          title="Reported, but not placeable"
+          count={report.unplaceable.length}
+          collapsed={isCollapsed('sec-unplaceable')}
+          onToggle={toggle}
+          emptyLabel="Every event in this run carried a location."
+          hint="Real events whose source gave no location — listed here rather than plotted at a guess."
+        >
           <ul className="space-y-1">
             {report.unplaceable.slice(0, 10).map((e) => (
               <li key={e.id} className="text-[11px]">
@@ -1100,7 +1266,12 @@ export function GlobeView() {
               </li>
             ))}
           </ul>
-        </Card>
+          {report.unplaceable.length > 10 ? (
+            <p className="text-[10px] text-muted-foreground">
+              Showing the 10 most recent of {report.unplaceable.length}.
+            </p>
+          ) : null}
+        </PanelSection>
       ) : null}
 
       {/*
@@ -1111,20 +1282,23 @@ export function GlobeView() {
         coverage warning for a hazard.
       */}
       {layer === 'coverage' && report?.coverage ? (
-        <Card className="space-y-2 p-3">
-          <h4 className="flex items-center gap-1.5 text-xs font-semibold">
-            <EyeOff className="h-3.5 w-3.5" />
-            Where we cannot see
-            <span className="font-normal text-muted-foreground">
-              {report.coverageSummary.trustworthyRegions} of{' '}
-              {report.coverageSummary.totalRegions} regions we can speak about
-            </span>
-          </h4>
-          <p className="text-[11px] leading-relaxed text-muted-foreground">
-            A region with no events may be <strong>quiet</strong> — covered, reporting nothing —
-            or <strong>dark</strong>, meaning nothing covers it and silence tells you nothing.
-            Every comparable map draws those the same way. This one does not.
-          </p>
+        <PanelSection
+          id="sec-coverage"
+          title="Where we cannot see"
+          count={report.coverage.length}
+          collapsed={isCollapsed('sec-coverage')}
+          onToggle={toggle}
+          emptyLabel="No region assessment for this run."
+          hint={
+            <>
+              {report.coverageSummary.trustworthyRegions} of {report.coverageSummary.totalRegions}{' '}
+              regions we can speak about. A region with no events may be{' '}
+              <strong>quiet</strong> — covered, reporting nothing — or <strong>dark</strong>,
+              meaning nothing covers it and silence tells you nothing. Every comparable map draws
+              those the same way. This one does not.
+            </>
+          }
+        >
           <div className="space-y-1">
             {report.coverage.map((r) => (
               <div key={r.region} className="flex items-start gap-2 text-[11px]">
@@ -1146,7 +1320,7 @@ export function GlobeView() {
               </div>
             ))}
           </div>
-        </Card>
+        </PanelSection>
       ) : null}
 
       {/*
@@ -1158,14 +1332,16 @@ export function GlobeView() {
         duplicate as a separate line. The contested count is the one that
         matters most: sources disagreeing is a finding, not an error to hide.
       */}
-      {report?.fusion && report.fusion.signals > 0 ? (
-        <Card className="p-3">
-          <h4 className="mb-1.5 text-xs font-semibold">
-            Event fusion{' '}
-            <span className="font-normal text-muted-foreground">
-              {report.fusion.signals} reports → {report.fusion.events} events
-            </span>
-          </h4>
+      {report?.fusion ? (
+        <PanelSection
+          id="sec-fusion"
+          title="Event fusion"
+          count={report.fusion.events}
+          collapsed={isCollapsed('sec-fusion')}
+          onToggle={toggle}
+          emptyLabel="No reports arrived to fuse in this window."
+          hint={`${report.fusion.signals} reports resolved to ${report.fusion.events} distinct events.`}
+        >
           <div className="flex flex-wrap gap-3 text-[11px] text-muted-foreground">
             <span>
               <span className="font-medium text-foreground">{report.fusion.corroborated}</span>{' '}
@@ -1205,63 +1381,75 @@ export function GlobeView() {
                 ))}
               </button>
             ))}
-        </Card>
+        </PanelSection>
       ) : null}
 
-      {/* Source integrity. A board that quietly loses a feed is a lying board. */}
+      {/*
+        Source integrity. A board that quietly loses a feed is a lying board —
+        so this cannot be dropped. But it printed all 167 feed keys as one
+        undifferentiated wall, and a wall is not a report: the seven that
+        *failed* are the finding, and they were indistinguishable from the 159
+        that simply had nothing to say.
+
+        Three counts first, then the names on request, worst first.
+      */}
       {report ? (
-        <Card className="p-3">
-          <h4 className="mb-1.5 text-xs font-semibold">
-            Source integrity{' '}
-            <span className="font-normal text-muted-foreground">
-              {report.summary.sourcesOk} of {report.sourceHealth.length} contributing
+        <PanelSection
+          id="sec-sources"
+          title="Source integrity"
+          count={okSources.length}
+          collapsed={isCollapsed('sec-sources')}
+          onToggle={toggle}
+          emptyLabel={`No feed contributed to this run — ${failedSources.length} failed and ${emptySources.length} answered with nothing.`}
+          hint={`${report.summary.sourcesOk} of ${report.sourceHealth.length} feeds contributed to this picture.`}
+        >
+          <div className="flex flex-wrap gap-3 text-[11px]">
+            <span>
+              <span className="font-medium text-emerald-600 dark:text-emerald-500">
+                {okSources.length}
+              </span>{' '}
+              <span className="text-muted-foreground">contributed</span>
             </span>
-          </h4>
-          <div className="flex flex-wrap gap-1">
-            {report.sourceHealth.map((s) => (
-              <span
-                key={s.sourceKey}
-                title={
-                  s.status === 'failed'
-                    ? (s.error ?? 'Did not answer')
-                    : s.status === 'empty'
-                      ? 'Answered, but reported nothing in this window'
-                      : `${s.count} event${s.count === 1 ? '' : 's'}`
-                }
-                className={`flex items-center gap-1 rounded border px-1.5 py-0.5 font-mono text-[10px] ${
-                  s.status === 'failed'
-                    ? 'border-destructive/40 text-destructive'
-                    : s.status === 'empty'
-                      ? 'border-amber-500/40 text-amber-600 dark:text-amber-500'
-                      : 'border-border text-muted-foreground'
-                }`}
-              >
-                <span
-                  className={`h-1 w-1 rounded-full ${
-                    s.status === 'failed'
-                      ? 'bg-destructive'
-                      : s.status === 'empty'
-                        ? 'bg-amber-500'
-                        : 'bg-emerald-500'
-                  }`}
-                />
-                {s.sourceKey}
-                {s.status === 'ok' ? <span className="opacity-60">{s.count}</span> : null}
-              </span>
-            ))}
+            <span>
+              <span className="font-medium text-amber-600 dark:text-amber-500">
+                {emptySources.length}
+              </span>{' '}
+              <span className="text-muted-foreground">answered, nothing to report</span>
+            </span>
+            <span>
+              <span className="font-medium text-destructive">{failedSources.length}</span>{' '}
+              <span className="text-muted-foreground">did not answer</span>
+            </span>
           </div>
-          {failedSources.length > 0 || emptySources.length > 0 ? (
-            <p className="mt-1.5 text-[10px] leading-relaxed text-muted-foreground">
-              {failedSources.length > 0
-                ? `${failedSources.length} feed${failedSources.length === 1 ? '' : 's'} did not answer. `
-                : ''}
-              {emptySources.length > 0
-                ? `${emptySources.length} answered but reported nothing. `
-                : ''}
-              This picture is therefore incomplete — hover a chip for the reason.
-            </p>
+
+          {/* Failures first and never folded away: this is the part that makes
+              the rest of the page incomplete, and it is short. */}
+          {failedSources.length > 0 ? (
+            <div className="space-y-1 rounded border border-destructive/30 p-2">
+              <p className="text-[11px] font-medium text-destructive">
+                {failedSources.length} feed{failedSources.length === 1 ? '' : 's'} could not be
+                reached — this picture is incomplete
+              </p>
+              <ul className="space-y-0.5">
+                {failedSources.map((s) => (
+                  <li key={s.sourceKey} className="font-mono text-[10px] text-muted-foreground">
+                    {s.sourceKey} — {s.error ?? 'no answer'}
+                  </li>
+                ))}
+              </ul>
+            </div>
           ) : null}
-        </Card>
+
+          <NameList
+            names={okSources.map((s) => `${s.sourceKey} ${s.count}`)}
+            label="feeds contributed events to this run"
+          />
+          <NameList
+            names={emptySources.map((s) => s.sourceKey)}
+            label="feeds answered but reported nothing — an absence of reports is not evidence that nothing happened"
+            tone="warn"
+          />
+        </PanelSection>
       ) : null}
 
       {/*
@@ -1280,31 +1468,41 @@ export function GlobeView() {
             Nothing is plotted right now — here is why
           </p>
 
-          {failedSources.length > 0 ? (
-            <div className="space-y-1 text-muted-foreground">
-              <p className="font-medium text-foreground">
-                {failedSources.length} feed{failedSources.length === 1 ? '' : 's'} could not be
-                reached:
-              </p>
-              <ul className="space-y-0.5">
-                {failedSources.map((s) => (
-                  <li key={s.sourceKey} className="font-mono text-[10px]">
-                    {s.sourceKey} — {s.error ?? 'no answer'}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
+          {/*
+            The counts and a pointer, not the names.
 
-          {emptySources.length > 0 ? (
+            This card used to reprint every failed key *and* all 159 empty ones
+            inside a paragraph — the same names the integrity section had just
+            listed above it. Roughly 330 monospace identifiers on one page, most
+            of them twice. Nobody reads that; they scroll past it, and whatever
+            is below is on the far side of the scroll.
+          */}
+          {failedSources.length > 0 ? (
+            <p className="text-muted-foreground">
+              <span className="font-medium text-destructive">
+                {failedSources.length} feed{failedSources.length === 1 ? '' : 's'} could not be
+                reached
+              </span>{' '}
+              and{' '}
+              <span className="font-medium text-foreground">
+                {emptySources.length} answered with nothing
+              </span>
+              . An absence of reports is not evidence that nothing happened — it means these feeds
+              are giving us no coverage of this window.{' '}
+              <a href="#sec-sources" className="text-primary hover:underline">
+                Which ones →
+              </a>
+            </p>
+          ) : emptySources.length > 0 ? (
             <p className="text-muted-foreground">
               <span className="font-medium text-foreground">
-                {emptySources.length} feed{emptySources.length === 1 ? '' : 's'} answered but
-                reported nothing
-              </span>{' '}
-              ({emptySources.map((s) => s.sourceKey).join(', ')}). An absence of reports is not
-              evidence that nothing happened — it means these feeds are giving us no coverage of
-              this window.
+                All {emptySources.length} feeds answered
+              </span>
+              , and none reported an event in this window. An absence of reports is not evidence
+              that nothing happened.{' '}
+              <a href="#sec-sources" className="text-primary hover:underline">
+                Which ones →
+              </a>
             </p>
           ) : null}
 
@@ -1357,6 +1555,7 @@ function TimeScrubber({
   playing,
   shown,
   held,
+  unplaceable,
   receiptTimed,
   onChooseWindow,
   onScrub,
@@ -1368,6 +1567,8 @@ function TimeScrubber({
   playing: boolean
   shown: number
   held: number
+  /** Events that arrived with no location — they cannot be plotted at all. */
+  unplaceable: number
   receiptTimed: number
   onChooseWindow: (hours: number | null) => void
   onScrub: (ms: number) => void
@@ -1447,9 +1648,24 @@ function TimeScrubber({
 
       <p className="text-[10px] leading-relaxed text-muted-foreground">
         {describeWindow(timeWindow)}{' '}
+        {/*
+          `0 of 0 shown` was printed directly above ten events listed further
+          down the page, and a reader is right to call that an error. It was not
+          wrong so much as unqualified: both numbers count *plottable* events,
+          and on a run where every report arrived without coordinates there are
+          genuinely none. The sentence has to say which population it is
+          counting, or it reads as a claim that nothing happened.
+        */}
         <span className="text-foreground">
-          {shown} of {held} shown.
+          {shown} of {held} shown on the map.
         </span>{' '}
+        {held === 0 && unplaceable > 0 ? (
+          <>
+            Every report in this run arrived without a location, so there is nothing to plot —{' '}
+            {unplaceable} {unplaceable === 1 ? 'is' : 'are'} listed under &ldquo;Not
+            placeable&rdquo;.{' '}
+          </>
+        ) : null}
         {receiptTimed > 0 ? (
           <>
             {receiptTimed} carr{receiptTimed === 1 ? 'ies' : 'y'} no published time and{' '}

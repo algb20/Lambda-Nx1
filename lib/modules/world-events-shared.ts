@@ -531,9 +531,23 @@ export function utcStamp(ms: number): string {
 /** A duration in the words a person would use. Never rounded up into a lie. */
 export function humanHours(hours: number): string {
   if (!Number.isFinite(hours)) return 'unknown'
-  if (hours < 1) return `${Math.max(1, Math.round(hours * 60))}m`
-  if (hours < 48) return `${Math.round(hours)}h`
-  return `${Math.round(hours / 24)}d`
+  /**
+   * **Floor, not round — and the reason is a bug the user found.**
+   *
+   * The same event was printed twice on the globe page with two different ages:
+   * "3h old" in the significance rows and "2 hours ago" in the unplaceable
+   * list, because this rounded and `lib/ui/time.ts` floors. A reader who sees
+   * one instant given two ages on one screen has no reason to trust any time on
+   * the page, and they are right not to.
+   *
+   * Flooring is also the honest direction. Rounding 2.6 hours up to "3h" claims
+   * more elapsed time than has actually passed — on a surface whose whole
+   * argument is freshness, overstating age is the error that misleads. And
+   * "2 hours ago" is what every reader already understands "ago" to mean.
+   */
+  if (hours < 1) return `${Math.max(1, Math.floor(hours * 60))}m`
+  if (hours < 48) return `${Math.floor(hours)}h`
+  return `${Math.floor(hours / 24)}d`
 }
 
 /** Is this event inside the window? Events we cannot time are never inside it. */
