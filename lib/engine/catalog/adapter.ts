@@ -61,7 +61,9 @@ function fromGeoJson(source: CatalogSource, body: unknown, retrievedAt: string):
 
   return features.flatMap((feature) => {
     const props = (feature.properties ?? {}) as Record<string, unknown>
-    const claim = str(props.title) ?? str(props.place) ?? str(props.headline) ?? str(props.name)
+    const claim = headline(
+      str(props.title) ?? str(props.place) ?? str(props.headline) ?? str(props.name),
+    )
     if (!claim) return []
 
     const coords = dig(feature, 'geometry.coordinates')
@@ -105,6 +107,104 @@ function fromGeoJson(source: CatalogSource, body: unknown, retrievedAt: string):
  * so a feed that changes shape falls back to the ordinary title lookup instead
  * of publishing "water level {v} m at ".
  */
+/**
+ * A headline fit to put on a board: one line, bounded.
+ *
+ * Publishers do not write headlines for machine feeds — they write *records*,
+ * and a record's descriptive field is whatever the clerk typed into a form.
+ * The World Bank's procurement notices are the clear case: `bid_description`
+ * routinely arrives as several lines with an embedded numbered list, so the
+ * board rendered `Bhutan: Selection of a consultant to conduct:\ni) A
+ * Comprehensive Needs and Capacities Assessment…` — one "headline" that was
+ * really a paragraph, breaking the row it sat in.
+ *
+ * Applied at every claim site rather than in one adapter, because the next feed
+ * to do this will not be a JSON one. Whitespace of every kind collapses to a
+ * single space, and the result is cut at a length a person actually reads —
+ * on a word boundary, with an ellipsis, so it reads as truncated rather than as
+ * a sentence that stops.
+ *
+ * It never invents and never reorders: what survives is the publisher's own
+ * opening words, which is the part a reader needs to decide whether to follow
+ * the link.
+ */
+export const MAX_HEADLINE = 180
+
+export function headline(text: string | null | undefined): string | null {
+  if (!text) return null
+  const flat = text.replace(/\s+/g, ' ').trim()
+  if (flat.length === 0) return null
+  if (flat.length <= MAX_HEADLINE) return flat
+  const cut = flat.slice(0, MAX_HEADLINE)
+  // Prefer the last word boundary, unless that would throw most of it away.
+  const space = cut.lastIndexOf(' ')
+  return `${(space > MAX_HEADLINE * 0.6 ? cut.slice(0, space) : cut).trimEnd()}…`
+}
+
+/**
+ * Decode a response body using the encoding the publisher actually declared.
+ *
+ * ## The bug this fixes
+ *
+ * `res.text()` assumes UTF-8 whenever the `Content-Type` header omits a
+ * charset. A great many feeds omit it and declare their encoding *inside the
+ * document* instead, which is legal and which fetch cannot see.
+ *
+ * Folha de S.Paulo is the case that exposed it. It answers
+ * `Content-Type: text/xml` — no charset — and opens with
+ * `<?xml version="1.0" encoding="ISO-8859-1" ?>`. Decoded as UTF-8, every
+ * accented Portuguese headline arrived corrupted:
+ *
+ *     as UTF-8    campanha do filho 01 se reduz �s redes
+ *     as declared campanha do filho 01 se reduz às redes
+ *
+ * Not a display glitch: the corrupted text is what got stored, deduplicated,
+ * ranked and published. Every non-English feed on a non-UTF-8 encoding — and
+ * they are common in Latin America, southern Europe and East Asia — was
+ * silently degraded, and nothing anywhere reported a problem because the
+ * request succeeded.
+ *
+ * ## Precedence
+ *
+ * The header wins when it names a charset, because HTTP says so: a server that
+ * states an encoding is authoritative over a document that guesses at its own.
+ * Only when the header is silent do we read the document's declaration — XML
+ * first, then an HTML `<meta charset>` — and only then do we fall back to
+ * UTF-8, which is the right default and the wrong assumption to make silently.
+ *
+ * An encoding label Node does not know falls back to UTF-8 rather than
+ * throwing. Mangled text beats an unreadable source: the feed still publishes,
+ * and the audit script shows the mangling to a human.
+ */
+export function declaredCharset(contentType: string | null, head: string): string {
+  const fromHeader = /charset=["']?([\w-]+)/i.exec(contentType ?? '')?.[1]
+  if (fromHeader) return fromHeader.toLowerCase()
+
+  const fromXml = /<\?xml[^>]*encoding=["']([\w-]+)["']/i.exec(head)?.[1]
+  if (fromXml) return fromXml.toLowerCase()
+
+  const fromMeta = /<meta[^>]+charset=["']?([\w-]+)/i.exec(head)?.[1]
+  if (fromMeta) return fromMeta.toLowerCase()
+
+  return 'utf-8'
+}
+
+export async function decodeBody(res: Response): Promise<string> {
+  const bytes = new Uint8Array(await res.arrayBuffer())
+  /**
+   * The declaration is ASCII and lives in the first line, so a Latin-1 read of
+   * the opening bytes is enough to find it — and Latin-1 cannot fail, which
+   * matters when the whole point is that we do not yet know the encoding.
+   */
+  const head = new TextDecoder('latin1').decode(bytes.subarray(0, 1024))
+  const label = declaredCharset(res.headers.get('content-type'), head)
+  try {
+    return new TextDecoder(label).decode(bytes)
+  } catch {
+    return new TextDecoder('utf-8').decode(bytes)
+  }
+}
+
 export function fillTemplate(template: string | undefined, row: unknown): string | null {
   if (!template) return null
   let missing = false
@@ -130,12 +230,13 @@ function fromJson(source: CatalogSource, body: unknown, retrievedAt: string): Ev
   const map = source.map ?? {}
 
   return list.flatMap((row) => {
-    const claim =
+    const claim = headline(
       fillTemplate(map.titleTemplate, row) ??
-      str(dig(row, map.title)) ??
-      str(dig(row, 'title')) ??
-      str(dig(row, 'name')) ??
-      str(dig(row, 'headline'))
+        str(dig(row, map.title)) ??
+        str(dig(row, 'title')) ??
+        str(dig(row, 'name')) ??
+        str(dig(row, 'headline')),
+    )
     if (!claim) return []
 
     return [
@@ -168,7 +269,7 @@ function fromFeed(source: CatalogSource, xml: string, retrievedAt: string): Evid
     if (!entry.title) return []
     return [
       {
-        claim: entry.title,
+        claim: headline(entry.title) ?? entry.title,
         sourceKey: source.key,
         sourceUrl: entry.link ?? source.url,
         retrievedAt,
@@ -293,7 +394,7 @@ export function catalogSource(entry: CatalogSource): Source {
           ? fromGeoJson(entry, await res.json(), new Date().toISOString())
           : entry.kind === 'json'
             ? fromJson(entry, await res.json(), new Date().toISOString())
-            : fromFeed(entry, await res.text(), new Date().toISOString())
+            : fromFeed(entry, await decodeBody(res), new Date().toISOString())
 
       // A cap, not a filter: one source flooding a run would crowd out every
       // other, turning breadth into a single provider's view of the world.

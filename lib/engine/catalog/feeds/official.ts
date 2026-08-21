@@ -267,6 +267,61 @@ export const OFFICIAL_SOURCES: CatalogSource[] = [
     keyless: true,
     map: { title: 'title', time: 'publicationDate' },
   },
+  /**
+   * World Bank procurement notices — the second independent origin for a topic
+   * that had exactly one.
+   *
+   * TED covers EU contracting. That is a large slice of the world and it is
+   * still one slice: nothing procured in Asia, Africa or Latin America appeared
+   * anywhere, and nothing TED published could be corroborated against a second
+   * publisher. The Bank's notices are a different origin over a different
+   * geography — Bhutan, Ethiopia, Peru — which is what makes it a second
+   * *origin* rather than a second copy (charter §2a).
+   *
+   * ## Two deliberate choices in the mapping
+   *
+   * `noticedate` is the publication date and is what `time` reads. The record
+   * also carries `submission_deadline_date`, which is ISO-formatted and
+   * therefore tempting — and it is a **deadline in the future**, not a time of
+   * publication. Pointing `time` at it would date every notice weeks ahead and
+   * corrupt every recency judgement on the board. `20-Aug-2026` parses
+   * correctly; verified rather than assumed.
+   *
+   * `titleTemplate` builds a headline from the country and the description,
+   * because no field on this record is a headline. The alternative — pointing
+   * `title` at `bid_description` — is how a tide gauge came to publish a world
+   * event called "0.821".
+   *
+   * **Nothing personal is mapped.** These records carry `contact_email` and
+   * `contact_address`, frequently a named individual's personal address. They
+   * are public, and publishing them would still be a purpose we cannot justify
+   * (charter §3, data minimisation). The mapping takes country, description and
+   * date, and nothing else.
+   *
+   * Verified live: 200, 20 notices, 724 ms.
+   */
+  {
+    key: 'worldbank_procurement',
+    name: 'World Bank — procurement notices',
+    publisher: 'The World Bank',
+    url: 'https://search.worldbank.org/api/v2/procnotices?format=json&rows=50',
+    kind: 'json',
+    path: 'procnotices',
+    discipline: 'fin',
+    topics: ['procurement'],
+    coverage: 'global',
+    admiralty: 'A',
+    independence: 'worldbank',
+    licence: ccBy('The World Bank', 'https://www.worldbank.org/en/about/legal/terms-of-use-for-datasets'),
+    minIntervalSec: 3600,
+    keyless: true,
+    map: {
+      titleTemplate: '{project_ctry_name}: {bid_description}',
+      title: 'notice_type',
+      time: 'noticedate',
+    },
+    note: 'Second independent origin for procurement, and the first outside the EU.',
+  },
 
   // ── Space ────────────────────────────────────────────────────────────────
   {

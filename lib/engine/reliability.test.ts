@@ -272,7 +272,7 @@ describe('the audit as a whole', () => {
       NOW,
     )
     expect(audit.states.healthy).toBe(1)
-    expect(audit.headline).toMatch(/1 sources observed: 1 healthy/)
+    expect(audit.headline).toMatch(/1 of 1 sources measured: 1 healthy/)
   })
 
   it('says so when the catalogue and the observations agree', () => {
@@ -293,5 +293,42 @@ describe('the audit as a whole', () => {
   it('stamps the day it was taken against, so a record is reproducible', () => {
     expect(todayKey(NOW)).toBe(TODAY)
     expect(selfAudit([], [], NOW).generatedAt).toBe(new Date(NOW).toISOString())
+  })
+})
+
+describe('the headline never omits the only number that is non-zero', () => {
+  /**
+   * The live failure, exactly. A deployment whose health table had just been
+   * created reported *"164 sources observed: 0 healthy, 0 degraded, 0 silent,
+   * 0 dead"* — four zeroes, and no mention of the 164 sources that had simply
+   * not been measured enough times to judge. Read one way that is a total
+   * outage; read another it is a contradiction. It was neither, and the fifth
+   * state said so all along.
+   */
+  it('says nothing has been measured yet, rather than listing four zeroes', () => {
+    // One run is below MIN_RUNS_TO_JUDGE, so the source is `unproven`.
+    const audit = selfAudit([source()], run('jma_quakes', 1, { ok: 1, items: 4 }), NOW)
+    expect(audit.states.unproven).toBe(1)
+    expect(audit.headline).not.toMatch(/0 healthy, 0 degraded/)
+    expect(audit.headline).toMatch(/none measured yet/i)
+  })
+
+  it('counts the unmeasured separately from the measured', () => {
+    const audit = selfAudit(
+      [source(), source({ key: 'other', independence: 'other' })],
+      [
+        ...run('jma_quakes', MIN_RUNS_TO_JUDGE, { ok: 1, items: 4 }),
+        ...run('other', 1, { ok: 1, items: 4 }),
+      ],
+      NOW,
+    )
+    // The total must not claim both were observed, because one was not.
+    expect(audit.headline).toMatch(/1 of 2 sources measured/)
+    expect(audit.headline).toMatch(/1 not yet measured/)
+  })
+
+  it('drops the "not yet measured" clause once everything is measured', () => {
+    const audit = selfAudit([source()], run('jma_quakes', MIN_RUNS_TO_JUDGE, { ok: 1, items: 4 }), NOW)
+    expect(audit.headline).not.toMatch(/not yet measured/)
   })
 })
