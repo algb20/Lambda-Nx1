@@ -728,4 +728,49 @@ four open questions put back to the owner — depth versus breadth, how far
 counterparty resolution recurses, whether to take the keyed sources, and which
 reader the default section order serves.
 
-| R266 | `globe` | `open` | **تصاميم الصفحات لا تزال بدائية، وفي صفحة الخريطة اجعل المربعات بطريقة يمكن تحديدها وفرزها واستعمال واضح وتمرير الصفحة — المربعات الآن تبدو صفحة واحدة متداخلة. وتحت الخريطة حتى آخرها المستخدم يتشتت، وتوزيع وتصميم المعلومات وفرزها لن يفهمه ولا يعرف المستخدم العمل عليه. وهناك أخطاء بالمعلومات والتواريخ، وأيضًا فوق الخريطة.** |
+| R266 | `globe` | `done` | **تصاميم الصفحات لا تزال بدائية، وفي صفحة الخريطة اجعل المربعات بطريقة يمكن تحديدها وفرزها واستعمال واضح وتمرير الصفحة — المربعات الآن تبدو صفحة واحدة متداخلة. وتحت الخريطة حتى آخرها المستخدم يتشتت، وتوزيع وتصميم المعلومات وفرزها لن يفهمه ولا يعرف المستخدم العمل عليه. وهناك أخطاء بالمعلومات والتواريخ، وأيضًا فوق الخريطة.** |
+
+**R266 — measured first, then rebuilt, then measured again.**
+
+The globe page was **11,439 pixels tall**. Past the map came a ranked list, an
+unplaceable list, a fusion count, 167 source names in a column, the *same 159
+names again* inside a paragraph, twelve shipping corridors each printing a full
+sentence to say nothing happened, and three country bands each saying "No
+country currently falls in this band." Almost none of it was information — it
+was the *absence* of information rendered at the size of information, which is
+exactly what makes a person say they cannot tell how to work a page.
+
+| | Before | After |
+|---|---|---|
+| Desktop | 11,439px | **5,851px** |
+| Phone | — | **3,214px** |
+
+**Times that disagreed with each other.** The same advisory read `3h old` in one
+list and `2 hours ago` in another, because `humanHours` rounded and
+`lib/ui/time` floored. The brief printed `The picture reaches back is 23 hours
+old` — two verbs — and `1 hours old`. All three were live. Both clocks floor
+now, and a test compares them against each other's arithmetic rather than
+against fixed strings.
+
+**Counts that read as errors.** `0/10` beside a green dot with no units, over an
+empty map, is a riddle; it says `0 of 10 on the map` now. `0 of 0 shown` sat
+directly above ten events listed below it — both numbers counted *plottable*
+events and were right, but the sentence never said which population it counted.
+
+**Then four workspaces** — Map, Brief, Countries, Categories — because those are
+four questions, not four sections of one document, and a reader arrives holding
+one of them. All four read one shared world picture, so switching costs no fetch
+and the tab counts can be trusted before the panel opens.
+
+**The other tabs were measured with the same instrument and are already sound:**
+markets 1,430px, investigate 1,339px, monitor 900px, feed 3,728px. The globe was
+the outlier, which is why it was the one to fix first.
+
+Two things the audit got wrong, recorded because the lesson is the point:
+
+- Its first version reported **crashed pages as "ok"**, since a page that fails
+  to render has no horizontal overflow either. It now treats a page error or a
+  failed asset as the loudest thing it can say.
+- Its repeat-detector flagged the home ticker as duplicated content. It is not:
+  `[...items, ...items.slice(0, rows)]` is the standard seamless loop. Measuring
+  finds candidates; only reading the code decides which are defects.
