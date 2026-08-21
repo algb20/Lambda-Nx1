@@ -32,6 +32,7 @@ import { useWorldReport } from '@/hooks/use-world-report'
 import { loadWorld } from '@/lib/world/report-store'
 import type { ViewMode } from '@/lib/geo/projection'
 import type { ChainRadarReport } from '@/lib/modules/chain-radar'
+import { originOf } from '@/lib/engine/catalog'
 import {
   CORROBORATION_BANDS,
   LAG_BANDS,
@@ -429,6 +430,8 @@ export function GlobeView() {
         ranked.map((r) => ({
           ...r,
           sourceKey: r.event.sourceKey,
+          // The publisher, not just the feed — see Rankable.origin.
+          origin: originOf(r.event.sourceKey),
           category: r.event.category as string,
           severity: r.event.severity,
         })),

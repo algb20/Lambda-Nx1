@@ -170,3 +170,25 @@ export function catalogSummary(usage: UsageContext = LAMBDA_USAGE) {
     topics: new Set(CATALOG.flatMap((s) => s.topics)).size,
   }
 }
+
+/**
+ * Which publisher a feed key really belongs to.
+ *
+ * The independence group is the catalogue's existing answer to "are these two
+ * records the same voice?" — it is what keeps a confidence grade from counting
+ * one publisher as several corroborating origins (charter §2a). The board needs
+ * exactly the same answer for a different purpose: to stop one publisher owning
+ * the page through many feeds.
+ *
+ * Reusing it means the two can never disagree about who is speaking. Built once
+ * and memoised; an unknown key is its own origin, which is the safe default —
+ * it constrains nothing that was not already constrained.
+ */
+let originIndex: Map<string, string> | null = null
+
+export function originOf(sourceKey: string): string {
+  if (!originIndex) {
+    originIndex = new Map(CATALOG.map((s) => [s.key, s.independence ?? s.key]))
+  }
+  return originIndex.get(sourceKey) ?? sourceKey
+}
