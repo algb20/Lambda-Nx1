@@ -458,3 +458,19 @@ Also: the audit script now applies the same normalisation the product does — a
 audit that reports what the product would never publish is measuring the
 instrument — and the adapter's test double is a real `Response` instead of an
 object shaped like the two methods it happened to call.
+
+### 2026-08-21 (evening) — verbatim
+
+| # | Area | Status | Request |
+|---|---|---|---|
+| R254 | `markets` | `open` | **مع الاقتصاد والبورصات ضف كل مايجب ان يكون في تطبيقنا من فئات وبوابات** — with economy and exchanges, add every category and gateway the app ought to have. |
+| R255 | `markets` | `open` | **يجب ان يكون كل شيئ مرفق بكل معلوماته والاسعار والحالة وكل شيئ والتتبع وكل البلوكشين بكل المعلومات والاسعار** — everything carries its full information: prices, status, tracking; and all blockchains with all information and prices. |
+| R256 | `design` | `open` | **يجب عرض بطريقة احترافية ومرتبة** — present it professionally and in order. |
+| R257 | `design` | `open` | **المربعات في صفحة الخريطة كانها متداخلة مع بعض اجعل لها تصميم احترافي عالي كل واحدة مميزة وغير متداخلة كانها صفحة واحدة** — the boxes on the map page look interlocked; give each a high professional design, distinct, not overlapping, as one page. |
+| R258 | `news` | `open` | **عالج امر الاخبار ازعجني الاخبار كلها ارصاد وتحذيرات جوية متنوعة** — fix the news: it is all meteorology and assorted weather warnings. |
+| R259 | `design` | `open` | **المعلومات والبوابات تحت الخريطة غير مرتبة والاسوء بيانات وهمية وغير واضحة لا تصلح ولا يستفيد ولن يفهمها اي مستخدم مهما كان نوعه وخبرته** — what sits under the map is disordered, and worse, **fake and unclear data** that no user of any kind or experience will understand or benefit from. |
+| R260 | `sources` | `open` | **هل وصل مصادرنا 200000 مصدر** — have our sources reached 200,000? |
+| R261 | `design` | `open` | **المعلومات والاخبار على الخريطة غير مفهومة وغير مدعومة لتوضع طبيعة اختصاصها** — the information and news on the map are not understandable and not labelled with the nature of their specialism. |
+
+**R259 is a charter breach if true.** §2 rule 1 forbids mock data outright. It is
+investigated first, ahead of every other item here.
