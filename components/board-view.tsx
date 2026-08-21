@@ -76,7 +76,7 @@ export function BoardView({
                   key={g.name}
                   onClick={() => toggle(g.name)}
                   aria-pressed={on}
-                  className={`rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                  className={`touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
                     on
                       ? 'border-primary bg-primary/10 font-medium text-primary'
                       : 'border-border text-muted-foreground hover:bg-muted'

@@ -145,7 +145,7 @@ export function FeedbackButton() {
                       key={k.key}
                       onClick={() => setKind(k.key)}
                       aria-pressed={kind === k.key}
-                      className={`rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                      className={`touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
                         kind === k.key
                           ? 'border-primary bg-primary/10 text-primary'
                           : 'border-border text-muted-foreground hover:bg-muted'

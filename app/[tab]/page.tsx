@@ -67,5 +67,14 @@ export default async function TabPage({ params }: { params: Promise<{ tab: strin
   // A path that is not a tab is not a tab. Rendering the shell for it would
   // make every mistyped URL a page that returns 200 and shows the feed.
   if (!(TABS as readonly string[]).includes(tab)) notFound()
-  return <HomePage />
+  /**
+   * The tab is handed to the shell rather than left for it to work out.
+   *
+   * The shell used to read `window.location.pathname` on its first render and
+   * fall back to `'feed'` where there is no window — so this page prerendered
+   * the feed, the browser hydrated the globe, and React threw the server HTML
+   * away and rebuilt the entire document (error #418). It is the route
+   * parameter; there is nothing to infer.
+   */
+  return <HomePage initialTab={tab as Tab} />
 }

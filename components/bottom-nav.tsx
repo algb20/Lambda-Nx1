@@ -39,6 +39,18 @@ export function BottomNav({ activeTab, setActiveTab }: BottomNavProps) {
   return (
     <nav
       aria-label="Sections"
+      /*
+        The bar sits on the very bottom edge, which on a phone is not the bottom
+        of the screen. iOS draws its home indicator over the last ~34px and
+        Android its gesture bar, so without the safe-area inset the tab labels
+        live underneath the system's own control — unreadable, and a tap there
+        goes to the operating system rather than to us. Pi Browser is a mobile
+        webview, so this is the app's primary surface, not an edge case.
+
+        `env()` is 0 on every device that has no inset, so this costs desktop
+        and older phones nothing.
+      */
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 lg:hidden"
     >
       <div className="container mx-auto max-w-2xl px-4">

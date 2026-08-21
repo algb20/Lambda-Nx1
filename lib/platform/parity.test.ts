@@ -183,3 +183,33 @@ describe('no page is built for one surface only', () => {
     expect(offenders, `these choose a rail without looking at the payer: ${offenders.join(', ')}`).toEqual([])
   })
 })
+
+/**
+ * Hydration — the failure that leaves no mark.
+ *
+ * A mismatch does not show an error to the user. React quietly throws the
+ * server's HTML away and rebuilds the whole document on the client, and the
+ * page then looks completely correct. The cost is paid on the slowest device in
+ * the audience, which for us is a phone inside Pi Browser, and it is invisible
+ * to anyone testing on a laptop. It has now happened twice in this codebase, so
+ * it gets a test rather than another comment.
+ */
+describe('the first render does not depend on there being a window', () => {
+  /**
+   * The shell read `window.location.pathname` in a `useState` initialiser and
+   * fell back to `'feed'` on the server. `/globe` therefore prerendered the
+   * feed and hydrated the globe — React error #418 on every tab URL there is.
+   * The route already knows the tab; it is passed in.
+   */
+  it('takes the active tab from the route rather than from the URL bar', () => {
+    const shell = readFileSync(join(process.cwd(), 'app/page.tsx'), 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/\/\/[^\n]*/g, '')
+    const initialiser = shell.slice(shell.indexOf('useState<Tab>'), shell.indexOf('useState<Tab>') + 120)
+    expect(initialiser).not.toContain('window.location')
+    expect(initialiser).toContain('initialTab')
+
+    const tabRoute = readFileSync(join(process.cwd(), 'app/[tab]/page.tsx'), 'utf8')
+    expect(tabRoute).toMatch(/<HomePage\s+initialTab=/)
+  })
+})

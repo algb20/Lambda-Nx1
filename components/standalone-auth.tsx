@@ -75,30 +75,53 @@ export function StandaloneSignInPrompt() {
         clip the first words of every line beneath it.
       */}
       {dismissed ? null : (
-        <div className="fixed inset-x-0 bottom-16 z-40 mx-auto w-full max-w-sm px-4 lg:inset-x-auto lg:bottom-4 lg:left-4 lg:mx-0 lg:w-56 lg:max-w-none lg:px-0">
-          <Card className="p-3 shadow-lg">
+        <div className="fixed inset-x-0 bottom-16 z-40 mx-auto w-full max-w-sm px-3 lg:inset-x-auto lg:bottom-4 lg:left-4 lg:mx-0 lg:w-56 lg:max-w-none lg:px-0">
+          <Card className="p-2.5 shadow-lg lg:p-3">
+            {/*
+              ## Why the pitch is folded away on a phone
+
+              It was a three-paragraph card, `fixed` above the tab bar, at every
+              width. Measured on a 320×640 screen it stood 180px tall — 28% of
+              everything the visitor could see, permanently covering the product
+              they came for, until they found the small × in its corner. On a
+              tablet it landed in the middle of the page and covered the globe's
+              legend.
+
+              So on a narrow screen it is one line: what it is, and a way in.
+              The full invitation is still there for anyone who taps, and the
+              whole card is unchanged from `lg` up, where there is room at the
+              foot of the navigation column for it to sit beside the product
+              rather than on top of it.
+            */}
             <div className="flex items-start gap-2">
               <Radar className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold">Keep your work</p>
-                <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">
-                  Everything here works without an account. One keeps your investigations, monitors
-                  and settings across devices.
-                </p>
-                {/*
-                  The word "email" belongs here, in the invitation, and nowhere
-                  near the input labels. A person deciding whether to bother
-                  needs to know what it will cost them; a person already typing
-                  does not need to be told twice.
-                */}
-                <p className="mt-0.5 text-[10px] text-muted-foreground/80">
-                  Takes an email address and about twenty seconds.
-                </p>
+                <div className={open ? '' : 'hidden lg:block'}>
+                  <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">
+                    Everything here works without an account. One keeps your investigations, monitors
+                    and settings across devices.
+                  </p>
+                  {/*
+                    The word "email" belongs here, in the invitation, and nowhere
+                    near the input labels. A person deciding whether to bother
+                    needs to know what it will cost them; a person already typing
+                    does not need to be told twice.
+                  */}
+                  <p className="mt-0.5 text-[10px] text-muted-foreground/80">
+                    Takes an email address and about twenty seconds.
+                  </p>
+                </div>
               </div>
+              {/*
+                22px of button is a third of what a thumb needs. The visual size
+                is right for an 11px card and the touch area is grown outwards
+                on a touch screen only — see `.touch-target` in globals.css.
+              */}
               <button
                 onClick={() => setDismissed(true)}
                 aria-label="Dismiss"
-                className="shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+                className="touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -115,7 +138,7 @@ export function StandaloneSignInPrompt() {
             ) : (
               <button
                 onClick={() => setOpen(true)}
-                className="mt-2 w-full rounded-md bg-primary px-3 py-1.5 text-[11px] font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                className="mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 lg:mt-2 lg:min-h-0 lg:py-1.5"
               >
                 Sign in or create an account
               </button>
