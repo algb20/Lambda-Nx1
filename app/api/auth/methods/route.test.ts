@@ -9,9 +9,24 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
  * mail provider is configured". Days were lost to that one missing distinction.
  */
 
-const state = { db: false, sessions: false, mail: false }
+/**
+ * `db` is "DATABASE_URL is set"; `live` is "the database answers". They are
+ * different questions, and conflating them is the second version of the same
+ * bug: with a URL set and the host unreachable, this endpoint said
+ * `accounts: true`, the form offered sign-up, and pressing the button returned
+ * an empty 500.
+ */
+const state = { db: false, live: true, sessions: false, mail: false }
 
-vi.mock('@/lib/db', () => ({ isDbConfigured: () => state.db }))
+vi.mock('@/lib/db', () => ({
+  isDbConfigured: () => state.db,
+  databaseAvailability: async () => ({
+    live: state.live,
+    detail: state.live ? null : 'connect ETIMEDOUT',
+    hint: state.live ? null : 'check the pooler host',
+    code: state.live ? null : 'ETIMEDOUT',
+  }),
+}))
 vi.mock('@/lib/auth/session', () => ({ canIssueSessions: () => state.sessions }))
 vi.mock('@/lib/mail', () => ({ mailConfigured: () => state.mail }))
 
@@ -26,12 +41,12 @@ type MethodsBody = {
 }
 
 async function methods(next: Partial<typeof state>): Promise<MethodsBody> {
-  Object.assign(state, { db: false, sessions: false, mail: false }, next)
+  Object.assign(state, { db: false, live: true, sessions: false, mail: false }, next)
   const { GET } = await import('./route')
   return (await (await GET()).json()) as MethodsBody
 }
 
-beforeEach(() => Object.assign(state, { db: false, sessions: false, mail: false }))
+beforeEach(() => Object.assign(state, { db: false, live: true, sessions: false, mail: false }))
 afterEach(() => vi.clearAllMocks())
 
 describe('naming the piece that is actually missing', () => {
@@ -71,5 +86,41 @@ describe('naming the piece that is actually missing', () => {
   /** Pi never needs mail: Pi vouches for the identity itself. */
   it('offers Pi sign-in whenever accounts work, mail or no mail', async () => {
     expect((await methods({ db: true, sessions: true })).pi).toBe(true)
+  })
+})
+
+describe('a database that is configured but not answering', () => {
+  /**
+   * The live failure, second edition. `DATABASE_URL` was set, the host was
+   * unreachable, and this endpoint reported `accounts: true` because a set
+   * string was the only thing it checked. The form then offered an account
+   * nobody could create.
+   */
+  it('does not offer accounts when the database does not answer', async () => {
+    const m = await methods({ db: true, live: false, sessions: true, mail: true })
+    expect(m.accounts).toBe(false)
+    expect(m.emailSignUp).toBe(false)
+    expect(m.pi).toBe(false)
+  })
+
+  /**
+   * A distinct reason, not the "no database" one. The two send an owner to
+   * completely different actions: one is "set this up", the other is "something
+   * you already set up has stopped answering".
+   */
+  it('says the database is unreachable rather than absent', async () => {
+    const m = await methods({ db: true, live: false, sessions: true, mail: true })
+    expect(m.emailSignUpOffBecause).toBe('database_unreachable')
+  })
+
+  it('still says "database" when there is genuinely no DATABASE_URL', async () => {
+    const m = await methods({ db: false, live: false, sessions: true, mail: true })
+    expect(m.emailSignUpOffBecause).toBe('database')
+  })
+
+  it('offers everything again the moment the database answers', async () => {
+    const m = await methods({ db: true, live: true, sessions: true, mail: true })
+    expect(m.accounts).toBe(true)
+    expect(m.emailSignUpOffBecause).toBeNull()
   })
 })

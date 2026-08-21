@@ -353,3 +353,30 @@ notes, because a repaired ledger that hides its repair is worse than none:
 | R246 | `markets` | `open` | **كل اخبار الاقتصاد والشركات والمصانع** — all economy, company and industrial news. |
 | R247 | `innovation` | `open` | **واين تقنية الفرص والاستثمار واين تقنيات مراقبة الاستثمار او الفرص او التنبيهات** — opportunity and investment technology; investment monitoring, opportunity detection, alerting. |
 | R248 | `ledger` | `done` | **واين قائمة الطلبات يجب استعادتها الان وكل الطلبات المفقودة وهذه وتبقى معك دائما** — restore the request list now, with every lost request and these, and keep it always. |
+
+### 2026-08-21 — verbatim
+
+| # | Area | Status | Request |
+|---|---|---|---|
+| R249 | `accounts` | `done` | **اتممت المهمة وجربت اختلفت الان صار عند طلب انشاء حساب وفي الضغط لارسال الرمز يقول حدث خطا** — `MAIL_FROM` was added and the behaviour changed: the form now offers email sign-up, and pressing "send code" says an error occurred. |
+
+**R249 — what it actually was.** Not mail. `/api/health?deep=1` on the live
+deployment answered `database: off`. `DATABASE_URL` was set and the database was
+not answering, so `issueCode` threw inside the route, nothing caught it, and the
+browser received `500` with a zero-length body — which the form could only
+render as "an error occurred".
+
+Three separate faults were fixed, each of which had independently hidden the
+cause:
+
+1. **The reason was being discarded.** Drizzle wraps every driver error, so the
+   health endpoint reported its wrapper — `Failed query: select version()` — and
+   the real cause sat one level down in `cause`. `lib/db/errors` now unwraps the
+   chain, classifies the code, and returns the fix with it.
+2. **"Configured" was standing in for "working".** Every gate read
+   `isDbConfigured()`, which is true for any non-empty string. `/api/auth/methods`
+   and the account routes now ask the database (`lib/db/availability`, memoised
+   30s healthy / 5s failed).
+3. **No route had a database-failure branch.** They now answer `503` with a
+   sentence naming the cause, and never blame the visitor's input — a login
+   failure caused by an outage used to come back as `401 Sign-in failed`.

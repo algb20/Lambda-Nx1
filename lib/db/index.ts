@@ -10,6 +10,16 @@ import { getDb, isDbConfigured } from './client'
 import * as s from '@/db/schema'
 
 export { isDbConfigured }
+/**
+ * `isDbConfigured` says a variable is set; `databaseAvailability` says the
+ * database answers. Anything that will *write* should ask the second — the
+ * first cannot tell a working deployment from a wrong host, and that gap is
+ * what turned a misconfigured URL into an empty 500 on the sign-up form.
+ */
+export { databaseAvailability, resetAvailabilityCache } from './availability'
+export type { DatabaseAvailability } from './availability'
+export { explainDatabaseError, isDatabaseUnavailable, describeDatabaseError } from './errors'
+export type { DatabaseFailure } from './errors'
 export * as schema from '@/db/schema'
 
 // Row types inferred from the schema (single source of truth).

@@ -20,6 +20,15 @@ type NavTab =
  */
 export function HomeFeed({ onNavigate }: { onNavigate: (tab: NavTab) => void }) {
   const [posts, setPosts] = useState<PublicPost[] | null>(null)
+  /**
+   * Why the feed is empty, when it is empty for a reason.
+   *
+   * Without this, an unreachable database and a brand-new deployment with
+   * nothing published look identical on screen — both say "No posts yet". One
+   * of those sentences is false, and it is the one that stops anybody
+   * investigating.
+   */
+  const [degraded, setDegraded] = useState<string | null>(null)
 
   useEffect(() => {
     let alive = true
@@ -27,8 +36,16 @@ export function HomeFeed({ onNavigate }: { onNavigate: (tab: NavTab) => void }) 
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       // Defensive: a provider or proxy returning an unexpected shape must not
       // crash the whole feed. An empty feed is a bad day; a blank page is a bug.
-      .then((d: { posts?: PublicPost[] }) => alive && setPosts(Array.isArray(d?.posts) ? d.posts : []))
-      .catch(() => alive && setPosts([]))
+      .then((d: { posts?: PublicPost[]; degraded?: boolean; detail?: string }) => {
+        if (!alive) return
+        setPosts(Array.isArray(d?.posts) ? d.posts : [])
+        setDegraded(d?.degraded ? (d.detail ?? 'The feed is temporarily unavailable.') : null)
+      })
+      .catch(() => {
+        if (!alive) return
+        setPosts([])
+        setDegraded('The feed could not be loaded. Everything else on this page is live.')
+      })
     return () => {
       alive = false
     }
@@ -65,7 +82,7 @@ export function HomeFeed({ onNavigate }: { onNavigate: (tab: NavTab) => void }) 
           </div>
         ) : posts.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-            No posts yet. Be the first to publish a finding or a short piece of research.
+            {degraded ?? 'No posts yet. Be the first to publish a finding or a short piece of research.'}
           </div>
         ) : (
           <div className="space-y-3">

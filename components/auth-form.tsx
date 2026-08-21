@@ -83,13 +83,21 @@ interface Methods {
    * user, which is a different missing piece — and it sent the owner chasing a
    * mail problem that did not exist. A boolean cannot carry a reason.
    */
-  emailSignUpOffBecause?: 'database' | 'sessions' | 'mail' | null
+  emailSignUpOffBecause?: 'database' | 'database_unreachable' | 'sessions' | 'mail' | null
 }
 
 /** What to tell the reader, given which piece is actually missing. */
-const OFF_BECAUSE: Record<'database' | 'sessions' | 'mail', string> = {
+const OFF_BECAUSE: Record<'database' | 'database_unreachable' | 'sessions' | 'mail', string> = {
   database:
     'Accounts are not switched on here yet — this deployment has no database, so there is nowhere to keep one. Everything on the platform still works without an account.',
+  /**
+   * Configured, and not answering. Deliberately worded as a fault rather than
+   * as a missing feature: this deployment *has* accounts, and saying "not
+   * switched on" would send its owner to set up something that already exists
+   * while the real fault — a database that stopped answering — went unnamed.
+   */
+  database_unreachable:
+    'Accounts are unavailable at the moment — this deployment cannot reach its database. This is a fault on our side, not a setting you are missing; everything else on the platform still works.',
   sessions:
     'Accounts are not switched on here yet — this deployment cannot sign sessions, so it cannot keep you signed in. Everything on the platform still works without an account.',
   mail: 'Email sign-up is not switched on here yet — this deployment has no mail provider, so a verification code has nowhere to be sent. Everything on the platform still works without an account.',

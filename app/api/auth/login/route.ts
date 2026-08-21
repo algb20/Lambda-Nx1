@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server'
 import { classifyIdentifier, loginUser } from '@/lib/auth/standalone'
 import { defaultStandaloneDeps } from '@/lib/auth/standalone-deps'
 import { attachSession } from '@/lib/auth/cookie'
-import { canIssueSessions } from '@/lib/auth/session'
-import { isDbConfigured } from '@/lib/db'
+import { accountsUnavailable, databaseUnavailable } from '@/lib/auth/code-flow'
 
 /**
  * POST /api/auth/login { identifier, password } — off-Pi sign-in.
@@ -17,15 +16,18 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
-  if (!isDbConfigured() || !canIssueSessions()) {
-    console.error(
-      `[auth/login] refusing sign-in — db configured: ${isDbConfigured()}, session secret usable: ${canIssueSessions()}`,
-    )
-    return NextResponse.json(
-      { error: 'Sign-in is temporarily unavailable on this deployment. Try again later.' },
-      { status: 503 },
-    )
-  }
+  /**
+   * Asks the database, not the environment.
+   *
+   * The old check was `isDbConfigured()`, which is true for any non-empty
+   * string. With an unreachable host it passed, `loginUser` threw, and the
+   * catch at the bottom of this function turned that into `401 Sign-in failed`
+   * — telling people their own password was wrong while the database was down.
+   * That is the worst possible lie for this endpoint to tell: it sends someone
+   * to reset a password that was never the problem.
+   */
+  const unavailable = await accountsUnavailable('auth/login')
+  if (unavailable) return unavailable
 
   let body: { identifier?: unknown; email?: unknown; password?: unknown }
   try {
@@ -51,6 +53,9 @@ export async function POST(request: Request) {
     attachSession(res, userId)
     return res
   } catch (err) {
+    // Never let an outage be reported as bad credentials. See above.
+    const down = databaseUnavailable('auth/login', err)
+    if (down) return down
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Sign-in failed' },
       { status: 401 },

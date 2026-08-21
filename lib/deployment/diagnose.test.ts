@@ -12,13 +12,29 @@ const json = (body: unknown, status = 200): ProbeResult => ({ status, json: true
  * has never emitted, and because `Boolean(undefined)` is false, a deployment
  * with a connected Postgres was told its database was not configured.
  */
-const health = (dbStatus: 'ok' | 'degraded' | 'off' | null) => ({
+const health = (
+  dbStatus: 'ok' | 'degraded' | 'off' | null,
+  /**
+   * The detail line, which carries the *reason* — and therefore decides which
+   * of two completely different situations this is. Defaulted to the endpoint's
+   * real "nothing configured" wording, because that is what the older tests in
+   * this file were describing when they only had a status to go on.
+   */
+  dbDetail = 'no DATABASE_URL — persistence-backed features are disabled (keyless intel still works)',
+) => ({
   status: 'degraded',
   version: '0.1.0',
   checks: [
     { name: 'session_secret', status: 'ok', detail: 'configured', required: true },
     ...(dbStatus
-      ? [{ name: 'database', status: dbStatus, detail: 'connected to PostgreSQL 16.13', required: false }]
+      ? [
+          {
+            name: 'database',
+            status: dbStatus,
+            detail: dbStatus === 'ok' ? 'connected to PostgreSQL 16.13' : dbDetail,
+            required: false,
+          },
+        ]
       : []),
   ],
 })
@@ -135,5 +151,42 @@ describe('a gateway that answers imperfectly', () => {
     const check = byId(diagnose({ ...healthy, board: board(0) }), 'gateways')
     expect(check.state).toBe('warn')
     expect(check.action).toContain('outbound check above')
+  })
+})
+
+describe('a database that is configured and broken', () => {
+  /**
+   * The live failure this branch exists for. `DATABASE_URL` was set, the host
+   * was unreachable, and this page said "Not configured. Set DATABASE_URL" —
+   * telling the owner to do the one thing they had already done, from the page
+   * whose whole purpose is to stop that guessing.
+   */
+  const broken = json(
+    health('off', 'connect ETIMEDOUT [ETIMEDOUT] — check you are using the connection pooler host'),
+  )
+
+  it('does not tell the owner to set a variable that is already set', () => {
+    const check = byId(diagnose({ ...healthy, health: broken }), 'database')
+    expect(check.action).not.toContain('Set DATABASE_URL')
+  })
+
+  it('relays the real cause and the fix, rather than re-deriving a worse one', () => {
+    const check = byId(diagnose({ ...healthy, health: broken }), 'database')
+    expect(check.detail).toContain('ETIMEDOUT')
+    expect(check.detail).toMatch(/pooler/i)
+  })
+
+  /**
+   * A fault, not an optional extra. On this deployment accounts are meant to
+   * work and do not — calling that a warning puts it below the reader's
+   * attention, which is where it sat for days.
+   */
+  it('calls it a failure', () => {
+    expect(byId(diagnose({ ...healthy, health: broken }), 'database').state).toBe('fail')
+  })
+
+  it('still says the rest of the product is unaffected', () => {
+    const check = byId(diagnose({ ...healthy, health: broken }), 'database')
+    expect(check.action).toMatch(/map|gateway/i)
   })
 })

@@ -45,6 +45,38 @@ persistence-backed features (archive, monitors, ontology memory, calibration,
 subscription tiers) need `DATABASE_URL`. The readiness probe (§6) tells you which
 mode you're in.
 
+> ### Serverless + Supabase: use the pooler host, not the direct one
+>
+> This is the single most common way a correct-looking `DATABASE_URL` fails, and
+> it cost days on the live deployment. Supabase gives two connection strings:
+>
+> | | Host | Port | Reachable from Vercel/Netlify functions |
+> |---|---|---|---|
+> | **Direct** | `db.<ref>.supabase.co` | 5432 | ❌ — IPv6-only |
+> | **Pooler** (use this) | `…pooler.supabase.com` | 6543 | ✅ |
+>
+> The direct host resolves only over IPv6, which serverless platforms do not
+> have. The URL is right, the password is right, and the host simply does not
+> exist from where the code runs — so it fails with `ENOTFOUND` and every
+> account feature goes down while every keyless gateway keeps working.
+>
+> Symptoms, and what they mean:
+>
+> | What you see | What it is |
+> |---|---|
+> | `/api/health` says `database ok` | Only that the variable is **set**. It is not a connection test. |
+> | `/api/health?deep=1` says `database off` | The real answer. The detail names the cause and the fix. |
+> | The sign-in form says "cannot reach its database" | The deployment asked, and got no answer. |
+>
+> **Always diagnose with `?deep=1`.** The shallow check reads the environment;
+> only the deep one asks the database. A password containing `@ : / ? #` must be
+> percent-encoded, which is the other frequent cause — it produces `28P01`
+> (`password authentication failed`) rather than `ENOTFOUND`.
+>
+> If the deep probe reports missing tables, the schema was never applied: paste
+> `db/schema.sql` into the provider's SQL editor. It is one file and it is safe
+> to run more than once.
+
 ---
 
 ## 2. Environment variables

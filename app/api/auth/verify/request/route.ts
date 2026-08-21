@@ -5,6 +5,7 @@ import { issueCode } from '@/lib/auth/verification'
 import {
   accountsUnavailable,
   codeRateLimit,
+  databaseUnavailable,
   deliverCode,
   readJson,
   str,
@@ -33,7 +34,7 @@ export const dynamic = 'force-dynamic'
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
 
 export async function POST(request: Request) {
-  const unavailable = accountsUnavailable('auth/verify/request')
+  const unavailable = await accountsUnavailable('auth/verify/request')
   if (unavailable) return unavailable
   const limited = codeRateLimit(request)
   if (limited) return limited
@@ -58,7 +59,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Enter a valid email address' }, { status: 400 })
   }
 
-  const issued = await issueCode(email, 'signup', { store: defaultVerificationStore })
+  /**
+   * The write, and the only thing between it and a blank 500.
+   *
+   * `issueCode` stores the hashed code, so it is the first line here that
+   * touches the database — and until this `catch` existed, a database that had
+   * stopped answering came back to the user as `500` with an empty body and the
+   * word "error". The gate above catches the ordinary case; this catches the
+   * one where the database fails *between* the check and the write, which is
+   * exactly when a person is most likely to be looking.
+   */
+  let issued: Awaited<ReturnType<typeof issueCode>>
+  try {
+    issued = await issueCode(email, 'signup', { store: defaultVerificationStore })
+  } catch (err) {
+    const down = databaseUnavailable('auth/verify/request', err)
+    if (down) return down
+    console.error('[auth/verify/request] could not issue a code:', err)
+    return NextResponse.json(
+      { error: 'We could not start the sign-up. Try again in a moment.' },
+      { status: 500 },
+    )
+  }
+
   if (issued.status === 'cooldown') {
     return NextResponse.json(
       {

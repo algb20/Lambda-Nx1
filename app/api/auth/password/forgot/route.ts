@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { normalizeEmail } from '@/lib/auth/standalone'
 import { defaultVerificationStore } from '@/lib/auth/standalone-deps'
 import { issueCode } from '@/lib/auth/verification'
-import { repo } from '@/lib/db'
+import { describeDatabaseError, repo } from '@/lib/db'
 import { accountsUnavailable, codeRateLimit, deliverCode, readJson, str } from '@/lib/auth/code-flow'
 import { mailConfigured } from '@/lib/mail'
 
@@ -31,7 +31,7 @@ const ACKNOWLEDGED = {
 }
 
 export async function POST(request: Request) {
-  const unavailable = accountsUnavailable('auth/password/forgot')
+  const unavailable = await accountsUnavailable('auth/password/forgot')
   if (unavailable) return unavailable
   const limited = codeRateLimit(request)
   if (limited) return limited
@@ -74,9 +74,16 @@ export async function POST(request: Request) {
       }
     }
   } catch (error) {
-    // Logged for the operator, invisible to the caller: a database failure that
-    // changed the answer would leak by its absence.
-    console.error(`[auth/password/forgot] ${error instanceof Error ? error.message : error}`)
+    /**
+     * Logged for the operator, invisible to the caller: a database failure that
+     * changed the answer would leak by its absence.
+     *
+     * The log line is the *unwrapped* cause, because the wrapper message
+     * ("Failed query: select …") describes our SQL and not the failure. This is
+     * the only place the reason can be seen at all, so it had better be the
+     * real one.
+     */
+    console.error(`[auth/password/forgot] ${describeDatabaseError(error)}`)
   }
 
   return NextResponse.json(ACKNOWLEDGED)

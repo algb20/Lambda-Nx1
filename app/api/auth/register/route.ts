@@ -2,9 +2,8 @@ import { NextResponse } from 'next/server'
 import { registerUser } from '@/lib/auth/standalone'
 import { defaultStandaloneDeps } from '@/lib/auth/standalone-deps'
 import { attachSession } from '@/lib/auth/cookie'
-import { canIssueSessions } from '@/lib/auth/session'
 import { normalizeUsername } from '@/lib/auth/policy'
-import { isDbConfigured } from '@/lib/db'
+import { accountsUnavailable, databaseUnavailable } from '@/lib/auth/code-flow'
 
 /**
  * POST /api/auth/register { email, password } — standalone (off-Pi) sign-up.
@@ -19,17 +18,14 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
-  if (!isDbConfigured() || !canIssueSessions()) {
-    // Deliberately vague to the client, loud in the logs: which piece of
-    // configuration is missing is an operator's business, not a visitor's.
-    console.error(
-      `[auth/register] refusing sign-up — db configured: ${isDbConfigured()}, session secret usable: ${canIssueSessions()}`,
-    )
-    return NextResponse.json(
-      { error: 'Accounts are temporarily unavailable on this deployment. Try again later.' },
-      { status: 503 },
-    )
-  }
+  /**
+   * Deliberately vague to the client, loud in the logs: which piece of
+   * configuration is missing is an operator's business, not a visitor's — but
+   * *that* something is missing is the visitor's business, and this now finds
+   * out by asking the database rather than by reading a variable.
+   */
+  const unavailable = await accountsUnavailable('auth/register')
+  if (unavailable) return unavailable
 
   let body: { email?: unknown; password?: unknown; username?: unknown; fullName?: unknown }
   try {
@@ -67,6 +63,11 @@ export async function POST(request: Request) {
     attachSession(res, userId)
     return res
   } catch (err) {
+    // Infrastructure before input, so an outage is never reported as a taken
+    // username or a rejected password.
+    const down = databaseUnavailable('auth/register', err)
+    if (down) return down
+
     const message = err instanceof Error ? err.message : 'Registration failed'
     // The unique constraint is the real arbiter of a free handle: the
     // availability check before it is advisory, so two sign-ups racing on one
