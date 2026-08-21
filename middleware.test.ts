@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { config } from './middleware'
 import { ALL_MODES } from './lib/gateways'
+import { isUnlimited } from './lib/api-scope'
 
 /**
  * The matcher is the whole safety of the rate limiter: a pattern that misses a
@@ -14,10 +15,23 @@ import { ALL_MODES } from './lib/gateways'
  */
 const matcher = new RegExp(`^${config.matcher[0]}$`)
 
-describe('the rate-limit matcher', () => {
+describe('the matcher', () => {
+  /**
+   * It spans everything under /api now, because the middleware has a second job
+   * the exclusions must not escape: `Cache-Control: no-store`. `/api/auth/me`
+   * returns a person's identity and was one of the excluded paths.
+   */
+  it('runs on every API route, including the ones exempt from the limit', () => {
+    for (const path of ['/api/auth/me', '/api/auth/methods', '/api/health', '/api/visit', '/api/cron/publish']) {
+      expect(matcher.test(path), path).toBe(true)
+    }
+  })
+})
+
+describe('the rate-limit exemptions', () => {
   it('covers every intelligence gateway, including ones added later', () => {
     for (const mode of ALL_MODES) {
-      expect(matcher.test(`/api/intelligence/${mode}`), mode).toBe(true)
+      expect(isUnlimited(`/api/intelligence/${mode}`), mode).toBe(false)
     }
   })
 
@@ -31,7 +45,7 @@ describe('the rate-limit matcher', () => {
       '/api/radar/run',
       '/api/translate',
     ]) {
-      expect(matcher.test(path), path).toBe(true)
+      expect(isUnlimited(path), path).toBe(false)
     }
   })
 
@@ -39,19 +53,19 @@ describe('the rate-limit matcher', () => {
     // Netlify's scheduled function and Vercel Cron both call from the platform's
     // own IP. Throttled together, the jobs would starve each other.
     for (const job of ['publish', 'radar', 'radar-monitors', 'radar-watch']) {
-      expect(matcher.test(`/api/cron/${job}`), job).toBe(false)
+      expect(isUnlimited(`/api/cron/${job}`), job).toBe(true)
     }
   })
 
   it('exempts auth, which needs its own tighter policy rather than this loose one', () => {
     for (const path of ['/api/auth/login', '/api/auth/register', '/api/auth/me', '/api/auth/pi/claim']) {
-      expect(matcher.test(path), path).toBe(false)
+      expect(isUnlimited(path), path).toBe(true)
     }
   })
 
   it('exempts the visit beacon and the health check', () => {
-    expect(matcher.test('/api/visit')).toBe(false)
-    expect(matcher.test('/api/health')).toBe(false)
+    expect(isUnlimited('/api/visit')).toBe(true)
+    expect(isUnlimited('/api/health')).toBe(true)
   })
 
   it('leaves pages alone — this is an API gate, not a site gate', () => {
@@ -62,7 +76,9 @@ describe('the rate-limit matcher', () => {
 
   it('does not let a path smuggle itself past an exemption prefix', () => {
     // `/api/cronx` is not the cron route and must not inherit its exemption.
-    expect(matcher.test('/api/cronx')).toBe(true)
-    expect(matcher.test('/api/authorize')).toBe(true)
+    expect(isUnlimited('/api/cronx')).toBe(false)
+    expect(isUnlimited('/api/authorize')).toBe(false)
+    expect(isUnlimited('/api/healthy')).toBe(false)
+    expect(isUnlimited('/api/visitors')).toBe(false)
   })
 })

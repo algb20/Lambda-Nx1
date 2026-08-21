@@ -15,17 +15,20 @@ vi.mock('@/lib/db', () => ({ isDbConfigured: () => state.db }))
 vi.mock('@/lib/auth/session', () => ({ canIssueSessions: () => state.sessions }))
 vi.mock('@/lib/mail', () => ({ mailConfigured: () => state.mail }))
 
-const { GET } = await import('./route')
+// Imported lazily inside the helper: a top-level await here is fine for vitest
+// but not for the project's tsc target, and the build must stay clean.
+type MethodsBody = {
+  accounts: boolean
+  emailSignUp: boolean
+  passwordReset: boolean
+  pi: boolean
+  emailSignUpOffBecause: string | null
+}
 
-async function methods(next: Partial<typeof state>) {
+async function methods(next: Partial<typeof state>): Promise<MethodsBody> {
   Object.assign(state, { db: false, sessions: false, mail: false }, next)
-  return (await (await GET()).json()) as {
-    accounts: boolean
-    emailSignUp: boolean
-    passwordReset: boolean
-    pi: boolean
-    emailSignUpOffBecause: string | null
-  }
+  const { GET } = await import('./route')
+  return (await (await GET()).json()) as MethodsBody
 }
 
 beforeEach(() => Object.assign(state, { db: false, sessions: false, mail: false }))
