@@ -40,7 +40,20 @@ const nextConfig = {
       process.env.COMMIT_REF ?? process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GITHUB_SHA ?? '',
     NEXT_PUBLIC_COMMIT_BRANCH:
       process.env.BRANCH ?? process.env.VERCEL_GIT_COMMIT_REF ?? '',
-    NEXT_PUBLIC_BUILT_AT: new Date().toISOString(),
+    /*
+      The build time deliberately does *not* live here.
+
+      This file is evaluated once per process, so `new Date()` here runs again
+      on `next start` and on every serverless cold start: the browser bundle
+      carried the build's time and the server carried its own boot time. That
+      made the stamp wrong — it answered "when did this server start", which is
+      the opposite of the question — and it made the two sides of every page
+      disagree on a piece of text, which is React error #418 on every page
+      carrying the footer.
+
+      It is generated into `lib/build-stamp.ts` instead, where the compiler
+      inlines the same characters into both bundles.
+    */
     NEXT_PUBLIC_APP_VERSION: packageVersion,
     NEXT_PUBLIC_REPO_URL: process.env.REPOSITORY_URL ?? 'https://github.com/algb20/Lambda-Nx1',
   },

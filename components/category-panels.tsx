@@ -198,7 +198,7 @@ export function CategoryPanels({ report }: { report: WorldEventsReport | null })
                    unrelated controls stacked by accident; the same size reads
                    as one idea shown twice, which is what they are. Smaller also
                    means twenty-two of them fit in two lines instead of four. */
-                className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] transition-colors ${
+                className={`touch-target flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] transition-colors ${
                   on ? 'border-primary bg-primary/10 font-medium text-primary' : 'border-border text-muted-foreground hover:bg-muted'
                 }`}
               >

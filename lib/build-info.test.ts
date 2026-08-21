@@ -1,5 +1,17 @@
-import { describe, it, expect, afterEach, beforeEach } from 'vitest'
+import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
 import { buildAgeHours, describeBuild, getBuildInfo } from './build-info'
+
+/**
+ * The generated stamp is emptied for this file.
+ *
+ * `lib/build-stamp.ts` is written at build time and always carries a real
+ * commit and time, so with it in place "no host said anything" is a state these
+ * tests could never reach. Emptying it restores that state, which is the thing
+ * being tested here: what the app reports when nothing identified the build.
+ * That the stamp is *preferred* when it does exist is tested in
+ * `build-stamp.test.ts`.
+ */
+vi.mock('./build-stamp', () => ({ BUILT_AT: '', BUILT_FROM: '' }))
 
 const KEYS = [
   'NEXT_PUBLIC_COMMIT_SHA',

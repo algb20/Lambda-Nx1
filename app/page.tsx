@@ -49,12 +49,26 @@ import { MarketsPanel } from "@/components/markets-panel"
  * bottom bar stretched across the whole monitor. Above `lg` a persistent rail
  * takes over and the content gets real width; below it, nothing changed.
  */
-export default function HomePage() {
-  // Read once, synchronously, so a deep link paints the right tab on the first
-  // frame instead of showing the feed and then jumping.
-  const [activeTab, setTab] = useState<Tab>(() =>
-    typeof window === 'undefined' ? 'feed' : resolveTab(window.location.pathname.slice(1)),
-  )
+export default function HomePage({ initialTab }: { initialTab?: Tab } = {}) {
+  /**
+   * The tab comes from the route, not from the window.
+   *
+   * It used to read `window.location.pathname` in the `useState` initialiser,
+   * with `'feed'` on the server — which is a hydration mismatch on every tab
+   * URL there is. `/globe` is prerendered at build time showing the *feed*,
+   * the client's first render shows the *globe*, React finds two different
+   * trees and throws **#418**: it discards the server HTML and re-renders the
+   * whole document on the client. Every deep link paid for that, silently,
+   * including on a phone in Pi Browser — and the page looked fine afterwards,
+   * which is why it survived.
+   *
+   * `app/[tab]/page.tsx` already knows which tab it is; it is the route
+   * parameter. Passing it down means the server and the client's first render
+   * agree by construction rather than by luck, and the deep link still paints
+   * the right panel on the first frame — which was the point of reading the
+   * window in the first place.
+   */
+  const [activeTab, setTab] = useState<Tab>(initialTab ?? 'feed')
 
   const setActiveTab = useCallback((id: Tab) => {
     setTab(id)
@@ -105,8 +119,19 @@ export default function HomePage() {
     setActiveTab(resolveTab(id))
   }
 
+  /*
+    The bottom padding clears the tab bar, and the tab bar itself now grows by
+    the phone's safe-area inset — so a fixed `pb-20` leaves the last row of
+    every page under the system's home indicator on the devices that have one.
+    The padding tracks the bar instead of guessing at it. `env()` is 0 wherever
+    there is no inset, so nothing else changes, and `lg:!pb-0` still wins on a
+    wide screen because an `!important` rule beats an inline style.
+  */
   return (
-    <div className="min-h-screen bg-background pb-20 lg:pb-0">
+    <div
+      style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
+      className="min-h-screen bg-background lg:!pb-0"
+    >
       <Header onNavigate={navigate} />
 
       {/* One keystroke to any of five tabs and twenty-seven gateways. Mounted

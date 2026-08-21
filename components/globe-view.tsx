@@ -638,11 +638,17 @@ export function GlobeView() {
       </div>
 
       {/* Layer + region controls, above the canvas so they are reachable on a
-          phone without scrolling past a full-height globe. The labels collapse
-          to icons on a narrow screen; the sentence underneath always names the
-          layer in full, so nothing depends on recognising a glyph. */}
+          phone without scrolling past a full-height globe.
+
+          The labels used to collapse to icons below 640px, on the reasoning
+          that the sentence underneath names the layer in full. It names the
+          *selected* one — so a phone reader saw five unlabelled glyphs and had
+          to tap each to find out what it was. A glyph is not a word, and it is
+          less of one for the majority of our readers, who never met this icon
+          set. The row scrolls sideways instead: every option stays readable and
+          the cost is one gesture. */}
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="flex items-center overflow-hidden rounded-md ring-1 ring-border">
+        <span className="scroll-row flex max-w-full items-center rounded-md ring-1 ring-border">
           {(Object.keys(LAYER_META) as Layer[]).map((l) => {
             const Icon = LAYER_META[l].icon
             return (
@@ -651,14 +657,14 @@ export function GlobeView() {
                 onClick={() => setLayer(l)}
                 aria-pressed={layer === l}
                 title={LAYER_META[l].label}
-                className={`flex items-center gap-1 px-2 py-1 text-[11px] transition-colors ${
+                className={`flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] transition-colors ${
                   layer === l
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:bg-muted'
                 }`}
               >
-                <Icon className="h-3 w-3" />
-                <span className="hidden sm:inline">{LAYER_META[l].label}</span>
+                <Icon className="h-3 w-3 shrink-0" />
+                <span>{LAYER_META[l].label}</span>
               </button>
             )
           })}
@@ -669,7 +675,7 @@ export function GlobeView() {
             <button
               onClick={() => setRegion('all')}
               aria-pressed={region === 'all'}
-              className={`rounded-full border px-2 py-0.5 text-[10px] transition-colors ${
+              className={`touch-target rounded-full border px-2 py-0.5 text-[10px] transition-colors ${
                 region === 'all'
                   ? 'border-primary bg-primary/10 text-primary'
                   : 'border-border text-muted-foreground hover:bg-muted'
@@ -682,7 +688,7 @@ export function GlobeView() {
                 key={r.region}
                 onClick={() => setRegion(r.region)}
                 aria-pressed={region === r.region}
-                className={`rounded-full border px-2 py-0.5 text-[10px] transition-colors ${
+                className={`touch-target rounded-full border px-2 py-0.5 text-[10px] transition-colors ${
                   region === r.region
                     ? 'border-primary bg-primary/10 text-primary'
                     : 'border-border text-muted-foreground hover:bg-muted'
@@ -1390,7 +1396,7 @@ function TimeScrubber({
             key={hours ?? 'all'}
             onClick={() => onChooseWindow(hours)}
             aria-pressed={timeWindow.hours === hours}
-            className={`rounded-full border px-2 py-0.5 text-[10px] transition-colors ${
+            className={`touch-target rounded-full border px-2 py-0.5 text-[10px] transition-colors ${
               timeWindow.hours === hours
                 ? 'border-primary bg-primary/10 text-primary'
                 : 'border-border text-muted-foreground hover:bg-muted'

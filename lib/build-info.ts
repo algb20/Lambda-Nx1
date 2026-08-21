@@ -12,6 +12,8 @@
  * no stamp can go stale — a value baked into a build describes that build, by
  * construction.
  */
+import { BUILT_AT, BUILT_FROM } from './build-stamp'
+
 export interface BuildInfo {
   /** Full commit SHA the build came from, or null if the host did not say. */
   commit: string | null
@@ -45,13 +47,29 @@ export function getBuildInfo(): BuildInfo {
     process.env.COMMIT_REF, // Netlify
     process.env.VERCEL_GIT_COMMIT_SHA, // Vercel
     process.env.GITHUB_SHA, // GitHub Actions
+    // Written by the build stamp, which falls back to `git rev-parse` — so a
+    // build made anywhere still says which commit it came from.
+    BUILT_FROM,
   )
   const branch = firstNonEmpty(
     process.env.NEXT_PUBLIC_COMMIT_BRANCH,
     process.env.BRANCH, // Netlify
     process.env.VERCEL_GIT_COMMIT_REF, // Vercel
   )
-  const builtAt = firstNonEmpty(process.env.NEXT_PUBLIC_BUILT_AT)
+  /**
+   * From the generated constant, not from the environment.
+   *
+   * `NEXT_PUBLIC_BUILT_AT` was set in `next.config.mjs` with `new Date()`, and
+   * that file is evaluated once per *process* — so the browser bundle carried
+   * the build's time and the server carried whenever it happened to boot. The
+   * stamp was therefore wrong, and the two sides of every page disagreed on a
+   * piece of text, which is a hydration mismatch (#418) on every page showing
+   * the footer. A compiled-in constant is the same characters on both sides.
+   *
+   * The environment variable is still read as a fallback so an operator can
+   * override the stamp for a build produced outside our own pipeline.
+   */
+  const builtAt = firstNonEmpty(BUILT_AT, process.env.NEXT_PUBLIC_BUILT_AT)
 
   const host: BuildInfo['host'] = process.env.NETLIFY
     ? 'netlify'

@@ -93,7 +93,7 @@ export function PinnedGateways({ onNavigate }: { onNavigate?: OpenIntelligence }
                   aria-pressed={on}
                   disabled={full}
                   title={full ? `Remove one of your ${MAX_HOME_GATEWAYS} first` : b.note}
-                  className={`rounded-full border px-2.5 py-1 text-[11px] transition-colors disabled:opacity-40 ${
+                  className={`touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disabled:opacity-40 ${
                     on
                       ? 'border-primary bg-primary/10 font-medium text-primary'
                       : 'border-border text-muted-foreground hover:bg-muted'

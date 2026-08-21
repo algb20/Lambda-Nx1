@@ -638,3 +638,50 @@ permanently — the exact opposite of the request. So the shield is *conditional
 `lib/i18n/shield.test.ts` holds the condition in place, including a source scan
 asserting that **no component hard-codes a bare `data-no-translate`** on a
 translated label. That test is the one that would have caught the half-fix.
+
+**R264/R265 — the two-surface promise, and what measuring found behind it.**
+
+R265 was a question before it was a request: *how does one codebase serve the Pi
+Browser app and the `.com` site at once?* `docs/ONE-CODEBASE.md` is the full
+answer. In short: one repository, one build, one deployment, reached through two
+front doors. Only sign-in and payment differ, and both are decided **where the
+visitor is** rather than when the code was built — so the site and the app can
+launch together or in either order with nothing to migrate.
+
+That answer was two-thirds true when it was written. Sign-in already worked this
+way; **payments did not.** `PAYMENT_PROVIDER` is read at deploy time, so one
+deployment could only ever take one kind of payment: set to `pi`, nobody on the
+website could buy anything; set to `standard`, no pioneer could pay with π. The
+rail now follows the payer (`lib/payments/rail.ts`), and
+`lib/platform/parity.test.ts` fails the build if that ever slides back.
+
+R264 asked for every page to fit every screen. Measuring 10 pages at 6 widths
+found no horizontal overflow anywhere — and three real defects that no amount of
+looking at a laptop would have shown:
+
+| Found | Why it mattered |
+|---|---|
+| The globe's five layer buttons dropped their labels below 640px | A phone reader saw five unlabelled glyphs, and the sentence beneath names only the *selected* layer. Worse for readers who never met this icon set, which is most of ours. The row scrolls now. |
+| The sign-in card stood 180px tall, `fixed`, on a 640px phone | 28% of the screen, permanently covering the product, until the small × was found. One line on a phone now; the full card from `lg` up. |
+| Controls of 16–28px where a finger needs 44 | `.touch-target` grows the *touch* area on coarse pointers only, so the desktop look is untouched and the guideline is met. |
+| The tab bar sat under the phone's home indicator | No safe-area inset and no `viewportFit: 'cover'`, so the insets read 0. Pi Browser is a mobile webview — this is the app's primary surface, not an edge case. |
+
+**Two bugs the audit found that were not about layout at all**, and would not
+have been found without it, because both leave a page looking perfectly correct:
+
+- **React #418 on every tab URL.** The shell read `window.location.pathname` in
+  a `useState` initialiser and fell back to `'feed'` on the server, so `/globe`
+  prerendered the feed and hydrated the globe. React threw the server HTML away
+  and rebuilt the whole document on the client — every deep link, including on a
+  phone in Pi Browser. The route already knows the tab; it is passed in now.
+- **A build stamp that was not a build stamp.** `next.config.mjs` set
+  `NEXT_PUBLIC_BUILT_AT: new Date()`, and that file is evaluated once per
+  *process* — so `next start` and every serverless cold start ran the clock
+  again. The footer reported when the server booted, and the two sides of every
+  page disagreed on a piece of text. It is a generated constant now
+  (`lib/build-stamp.ts`), compiled identically into both bundles.
+
+The audit itself was wrong first, and that is the lesson worth keeping: its first
+version reported the crashed pages as **ok**, because a page that fails to render
+has no horizontal overflow either. It now treats a page error or a failed asset
+as the loudest finding it can report. `npm run audit:responsive`.

@@ -1,0 +1,3301 @@
+[
+  {
+    "viewport": "phone-small",
+    "width": 320,
+    "path": "/",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 56,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 17,
+        "w": 56,
+        "text": "Choose",
+        "cls": "flex items-center gap-1 text-[11px] text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 168,
+        "text": "Statements that carry weight",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 111,
+        "text": "Courts & litigation",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 144,
+        "text": "Regulation & rulemaking",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 132,
+        "text": "Officials & statements",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 151,
+        "text": "Resources & commodities",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 76,
+        "text": "Power grid",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 98,
+        "text": "Space weather",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 95,
+        "text": "Orbital objects",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      }
+    ],
+    "smallCount": 12
+  },
+  {
+    "viewport": "phone-small",
+    "width": 320,
+    "path": "/globe",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 56,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 25,
+        "w": 55,
+        "text": "now",
+        "cls": "ml-auto flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-muted-fo"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 66,
+        "text": "Events",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 87,
+        "text": "Agreement",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 72,
+        "text": "Latency",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 88,
+        "text": "Blind spots",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 74,
+        "text": "Liquidity",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 21,
+        "w": 52,
+        "text": "All held",
+        "cls": "touch-target rounded-full border px-2 py-0.5 text-[10px] transition-colors borde"
+      },
+      {
+        "tag": "button",
+        "h": 21,
+        "w": 73,
+        "text": "72h window",
+        "cls": "touch-target rounded-full border px-2 py-0.5 text-[10px] transition-colors borde"
+      },
+      {
+        "tag": "button",
+        "h": 21,
+        "w": 74,
+        "text": "24h window",
+        "cls": "touch-target rounded-full border px-2 py-0.5 text-[10px] transition-colors borde"
+      }
+    ],
+    "smallCount": 38
+  },
+  {
+    "viewport": "phone-small",
+    "width": 320,
+    "path": "/markets",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 56,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 39,
+        "w": 23,
+        "text": "Feed",
+        "cls": "flex flex-col items-center gap-1 transition-colors text-muted-foreground hover:t"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 3
+  },
+  {
+    "viewport": "phone-small",
+    "width": 320,
+    "path": "/intelligence",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 56,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "absolute end-2 top-2 rounded p-1 text-muted-foreground transition-colors hover:b"
+      },
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 185,
+        "text": "Investigatewikipedia.org",
+        "cls": "inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-"
+      },
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 111,
+        "text": "I'll explore myself",
+        "cls": "rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:tex"
+      },
+      {
+        "tag": "button",
+        "h": 25,
+        "w": 82,
+        "text": "wikipedia.org",
+        "cls": "rounded-md px-2 py-1 font-mono text-[11px] ring-1 ring-border transition-colors "
+      },
+      {
+        "tag": "button",
+        "h": 39,
+        "w": 23,
+        "text": "Feed",
+        "cls": "flex flex-col items-center gap-1 transition-colors text-muted-foreground hover:t"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 7
+  },
+  {
+    "viewport": "phone-small",
+    "width": 320,
+    "path": "/monitor",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 56,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 39,
+        "w": 23,
+        "text": "Feed",
+        "cls": "flex flex-col items-center gap-1 transition-colors text-muted-foreground hover:t"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 3
+  },
+  {
+    "viewport": "phone-small",
+    "width": 320,
+    "path": "/account",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 56,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 16,
+        "w": 162,
+        "text": "New here? Create an account",
+        "cls": "text-xs text-primary hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 38,
+        "text": "Pricing",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 19,
+        "text": "API",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 40,
+        "text": "Privacy",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 70,
+        "text": "Terms of use",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 24,
+        "w": 171,
+        "text": "build 73cb57e · 2026-08-21 19:02",
+        "cls": "hover:text-foreground"
+      },
+      {
+        "tag": "button",
+        "h": 39,
+        "w": 23,
+        "text": "Feed",
+        "cls": "flex flex-col items-center gap-1 transition-colors text-muted-foreground hover:t"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 9
+  },
+  {
+    "viewport": "phone-small",
+    "width": 320,
+    "path": "/pricing",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 86,
+        "text": "API reference",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 105,
+        "text": "Back to Lambda",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 38,
+        "text": "Terms",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 47,
+        "text": "Privacy",
+        "cls": "underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 5
+  },
+  {
+    "viewport": "phone-small",
+    "width": 320,
+    "path": "/privacy",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 120,
+        "text": "← Back to Lambda",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 82,
+        "text": "Terms of use",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 3
+  },
+  {
+    "viewport": "phone-small",
+    "width": 320,
+    "path": "/terms",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 120,
+        "text": "← Back to Lambda",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 47,
+        "text": "Privacy",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 3
+  },
+  {
+    "viewport": "phone-small",
+    "width": 320,
+    "path": "/docs/api",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 105,
+        "text": "Back to Lambda",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 44,
+        "text": "Pricing",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 38,
+        "text": "Terms",
+        "cls": "underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 4
+  },
+  {
+    "viewport": "phone",
+    "width": 390,
+    "path": "/",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 56,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 17,
+        "w": 56,
+        "text": "Choose",
+        "cls": "flex items-center gap-1 text-[11px] text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 168,
+        "text": "Statements that carry weight",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 111,
+        "text": "Courts & litigation",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 144,
+        "text": "Regulation & rulemaking",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 132,
+        "text": "Officials & statements",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 151,
+        "text": "Resources & commodities",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 76,
+        "text": "Power grid",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 98,
+        "text": "Space weather",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 95,
+        "text": "Orbital objects",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      }
+    ],
+    "smallCount": 13
+  },
+  {
+    "viewport": "phone",
+    "width": 390,
+    "path": "/globe",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 56,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 25,
+        "w": 73,
+        "text": "Refresh",
+        "cls": "ml-auto flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-muted-fo"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 66,
+        "text": "Events",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 87,
+        "text": "Agreement",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 72,
+        "text": "Latency",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 88,
+        "text": "Blind spots",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 74,
+        "text": "Liquidity",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 63,
+        "text": "Map",
+        "cls": "absolute left-3 top-3 flex items-center gap-1.5 rounded-md bg-background/80 px-2"
+      },
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 28,
+        "text": "",
+        "cls": "flex h-7 w-7 items-center justify-center rounded-md bg-background/80 text-foregr"
+      },
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 28,
+        "text": "",
+        "cls": "flex h-7 w-7 items-center justify-center rounded-md bg-background/80 text-foregr"
+      }
+    ],
+    "smallCount": 13
+  },
+  {
+    "viewport": "phone",
+    "width": 390,
+    "path": "/markets",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 56,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 39,
+        "w": 23,
+        "text": "Feed",
+        "cls": "flex flex-col items-center gap-1 transition-colors text-muted-foreground hover:t"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 3
+  },
+  {
+    "viewport": "phone",
+    "width": 390,
+    "path": "/intelligence",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 56,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "absolute end-2 top-2 rounded p-1 text-muted-foreground transition-colors hover:b"
+      },
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 185,
+        "text": "Investigatewikipedia.org",
+        "cls": "inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-"
+      },
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 111,
+        "text": "I'll explore myself",
+        "cls": "rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:tex"
+      },
+      {
+        "tag": "button",
+        "h": 25,
+        "w": 82,
+        "text": "wikipedia.org",
+        "cls": "rounded-md px-2 py-1 font-mono text-[11px] ring-1 ring-border transition-colors "
+      },
+      {
+        "tag": "button",
+        "h": 39,
+        "w": 23,
+        "text": "Feed",
+        "cls": "flex flex-col items-center gap-1 transition-colors text-muted-foreground hover:t"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 7
+  },
+  {
+    "viewport": "phone",
+    "width": 390,
+    "path": "/monitor",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 56,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 24,
+        "w": 57,
+        "text": "Hourly",
+        "cls": "rounded-md px-2.5 py-1 text-xs font-medium transition-colors bg-muted/50 text-mu"
+      },
+      {
+        "tag": "button",
+        "h": 24,
+        "w": 48,
+        "text": "Daily",
+        "cls": "rounded-md px-2.5 py-1 text-xs font-medium transition-colors bg-primary text-pri"
+      },
+      {
+        "tag": "button",
+        "h": 24,
+        "w": 61,
+        "text": "Weekly",
+        "cls": "rounded-md px-2.5 py-1 text-xs font-medium transition-colors bg-muted/50 text-mu"
+      },
+      {
+        "tag": "button",
+        "h": 39,
+        "w": 23,
+        "text": "Feed",
+        "cls": "flex flex-col items-center gap-1 transition-colors text-muted-foreground hover:t"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 6
+  },
+  {
+    "viewport": "phone",
+    "width": 390,
+    "path": "/account",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 56,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 16,
+        "w": 162,
+        "text": "New here? Create an account",
+        "cls": "text-xs text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 30,
+        "w": 308,
+        "text": "Signed up through Pi Network? Use your P",
+        "cls": "block w-full rounded-md border border-border py-1.5 text-center text-xs text-mut"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 38,
+        "text": "Pricing",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 19,
+        "text": "API",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 40,
+        "text": "Privacy",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 70,
+        "text": "Terms of use",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 24,
+        "w": 171,
+        "text": "build 73cb57e · 2026-08-21 19:02",
+        "cls": "hover:text-foreground"
+      },
+      {
+        "tag": "button",
+        "h": 39,
+        "w": 23,
+        "text": "Feed",
+        "cls": "flex flex-col items-center gap-1 transition-colors text-muted-foreground hover:t"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 10
+  },
+  {
+    "viewport": "phone",
+    "width": 390,
+    "path": "/pricing",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 86,
+        "text": "API reference",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 105,
+        "text": "Back to Lambda",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 38,
+        "text": "Terms",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 47,
+        "text": "Privacy",
+        "cls": "underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 5
+  },
+  {
+    "viewport": "phone",
+    "width": 390,
+    "path": "/privacy",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 120,
+        "text": "← Back to Lambda",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 82,
+        "text": "Terms of use",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 3
+  },
+  {
+    "viewport": "phone",
+    "width": 390,
+    "path": "/terms",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 120,
+        "text": "← Back to Lambda",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 47,
+        "text": "Privacy",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 3
+  },
+  {
+    "viewport": "phone",
+    "width": 390,
+    "path": "/docs/api",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 105,
+        "text": "Back to Lambda",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 44,
+        "text": "Pricing",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 38,
+        "text": "Terms",
+        "cls": "underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 4
+  },
+  {
+    "viewport": "tablet",
+    "width": 768,
+    "path": "/",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 17,
+        "w": 56,
+        "text": "Choose",
+        "cls": "flex items-center gap-1 text-[11px] text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 168,
+        "text": "Statements that carry weight",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 111,
+        "text": "Courts & litigation",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 144,
+        "text": "Regulation & rulemaking",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 132,
+        "text": "Officials & statements",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 151,
+        "text": "Resources & commodities",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 76,
+        "text": "Power grid",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 98,
+        "text": "Space weather",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      }
+    ],
+    "smallCount": 13
+  },
+  {
+    "viewport": "tablet",
+    "width": 768,
+    "path": "/globe",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 25,
+        "w": 73,
+        "text": "Refresh",
+        "cls": "ml-auto flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-muted-fo"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 66,
+        "text": "Events",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 87,
+        "text": "Agreement",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 72,
+        "text": "Latency",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 88,
+        "text": "Blind spots",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 74,
+        "text": "Liquidity",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 63,
+        "text": "Map",
+        "cls": "absolute left-3 top-3 flex items-center gap-1.5 rounded-md bg-background/80 px-2"
+      },
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 28,
+        "text": "",
+        "cls": "flex h-7 w-7 items-center justify-center rounded-md bg-background/80 text-foregr"
+      }
+    ],
+    "smallCount": 15
+  },
+  {
+    "viewport": "tablet",
+    "width": 768,
+    "path": "/markets",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 39,
+        "w": 23,
+        "text": "Feed",
+        "cls": "flex flex-col items-center gap-1 transition-colors text-muted-foreground hover:t"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 4
+  },
+  {
+    "viewport": "tablet",
+    "width": 768,
+    "path": "/intelligence",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "absolute end-2 top-2 rounded p-1 text-muted-foreground transition-colors hover:b"
+      },
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 185,
+        "text": "Investigatewikipedia.org",
+        "cls": "inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-"
+      },
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 111,
+        "text": "I'll explore myself",
+        "cls": "rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:tex"
+      },
+      {
+        "tag": "button",
+        "h": 25,
+        "w": 82,
+        "text": "wikipedia.org",
+        "cls": "rounded-md px-2 py-1 font-mono text-[11px] ring-1 ring-border transition-colors "
+      },
+      {
+        "tag": "button",
+        "h": 39,
+        "w": 23,
+        "text": "Feed",
+        "cls": "flex flex-col items-center gap-1 transition-colors text-muted-foreground hover:t"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 8
+  },
+  {
+    "viewport": "tablet",
+    "width": 768,
+    "path": "/monitor",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 39,
+        "w": 23,
+        "text": "Feed",
+        "cls": "flex flex-col items-center gap-1 transition-colors text-muted-foreground hover:t"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 4
+  },
+  {
+    "viewport": "tablet",
+    "width": 768,
+    "path": "/account",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 16,
+        "w": 162,
+        "text": "New here? Create an account",
+        "cls": "text-xs text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 30,
+        "w": 622,
+        "text": "Signed up through Pi Network? Use your P",
+        "cls": "block w-full rounded-md border border-border py-1.5 text-center text-xs text-mut"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 38,
+        "text": "Pricing",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 19,
+        "text": "API",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 40,
+        "text": "Privacy",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 70,
+        "text": "Terms of use",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 24,
+        "w": 171,
+        "text": "build 73cb57e · 2026-08-21 19:02",
+        "cls": "hover:text-foreground"
+      },
+      {
+        "tag": "button",
+        "h": 39,
+        "w": 23,
+        "text": "Feed",
+        "cls": "flex flex-col items-center gap-1 transition-colors text-muted-foreground hover:t"
+      }
+    ],
+    "smallCount": 11
+  },
+  {
+    "viewport": "tablet",
+    "width": 768,
+    "path": "/pricing",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 86,
+        "text": "API reference",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 105,
+        "text": "Back to Lambda",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 38,
+        "text": "Terms",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 47,
+        "text": "Privacy",
+        "cls": "underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 5
+  },
+  {
+    "viewport": "tablet",
+    "width": 768,
+    "path": "/privacy",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 120,
+        "text": "← Back to Lambda",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 82,
+        "text": "Terms of use",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 3
+  },
+  {
+    "viewport": "tablet",
+    "width": 768,
+    "path": "/terms",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 120,
+        "text": "← Back to Lambda",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 47,
+        "text": "Privacy",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 3
+  },
+  {
+    "viewport": "tablet",
+    "width": 768,
+    "path": "/docs/api",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 105,
+        "text": "Back to Lambda",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 44,
+        "text": "Pricing",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 38,
+        "text": "Terms",
+        "cls": "underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 4
+  },
+  {
+    "viewport": "tablet-land",
+    "width": 1024,
+    "path": "/",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 17,
+        "w": 56,
+        "text": "Choose",
+        "cls": "flex items-center gap-1 text-[11px] text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 168,
+        "text": "Statements that carry weight",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 111,
+        "text": "Courts & litigation",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 144,
+        "text": "Regulation & rulemaking",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 132,
+        "text": "Officials & statements",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 151,
+        "text": "Resources & commodities",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 76,
+        "text": "Power grid",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 98,
+        "text": "Space weather",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      }
+    ],
+    "smallCount": 14
+  },
+  {
+    "viewport": "tablet-land",
+    "width": 1024,
+    "path": "/globe",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 25,
+        "w": 55,
+        "text": "now",
+        "cls": "ml-auto flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-muted-fo"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 66,
+        "text": "Events",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 87,
+        "text": "Agreement",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 72,
+        "text": "Latency",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 88,
+        "text": "Blind spots",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 74,
+        "text": "Liquidity",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 21,
+        "w": 52,
+        "text": "All held",
+        "cls": "touch-target rounded-full border px-2 py-0.5 text-[10px] transition-colors borde"
+      },
+      {
+        "tag": "button",
+        "h": 21,
+        "w": 73,
+        "text": "72h window",
+        "cls": "touch-target rounded-full border px-2 py-0.5 text-[10px] transition-colors borde"
+      }
+    ],
+    "smallCount": 48
+  },
+  {
+    "viewport": "tablet-land",
+    "width": 1024,
+    "path": "/markets",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 4
+  },
+  {
+    "viewport": "tablet-land",
+    "width": 1024,
+    "path": "/intelligence",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "absolute end-2 top-2 rounded p-1 text-muted-foreground transition-colors hover:b"
+      },
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 185,
+        "text": "Investigatewikipedia.org",
+        "cls": "inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-"
+      },
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 111,
+        "text": "I'll explore myself",
+        "cls": "rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:tex"
+      },
+      {
+        "tag": "button",
+        "h": 25,
+        "w": 82,
+        "text": "wikipedia.org",
+        "cls": "rounded-md px-2 py-1 font-mono text-[11px] ring-1 ring-border transition-colors "
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 8
+  },
+  {
+    "viewport": "tablet-land",
+    "width": 1024,
+    "path": "/monitor",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 4
+  },
+  {
+    "viewport": "tablet-land",
+    "width": 1024,
+    "path": "/account",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 16,
+        "w": 162,
+        "text": "New here? Create an account",
+        "cls": "text-xs text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 30,
+        "w": 670,
+        "text": "Signed up through Pi Network? Use your P",
+        "cls": "block w-full rounded-md border border-border py-1.5 text-center text-xs text-mut"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 38,
+        "text": "Pricing",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 19,
+        "text": "API",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 40,
+        "text": "Privacy",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 70,
+        "text": "Terms of use",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 24,
+        "w": 171,
+        "text": "build 73cb57e · 2026-08-21 19:02",
+        "cls": "hover:text-foreground"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 11
+  },
+  {
+    "viewport": "tablet-land",
+    "width": 1024,
+    "path": "/pricing",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 86,
+        "text": "API reference",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 105,
+        "text": "Back to Lambda",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 38,
+        "text": "Terms",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 47,
+        "text": "Privacy",
+        "cls": "underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 6
+  },
+  {
+    "viewport": "tablet-land",
+    "width": 1024,
+    "path": "/privacy",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 120,
+        "text": "← Back to Lambda",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 82,
+        "text": "Terms of use",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 4
+  },
+  {
+    "viewport": "tablet-land",
+    "width": 1024,
+    "path": "/terms",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 120,
+        "text": "← Back to Lambda",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 47,
+        "text": "Privacy",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 4
+  },
+  {
+    "viewport": "tablet-land",
+    "width": 1024,
+    "path": "/docs/api",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 105,
+        "text": "Back to Lambda",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 44,
+        "text": "Pricing",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 38,
+        "text": "Terms",
+        "cls": "underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 5
+  },
+  {
+    "viewport": "laptop",
+    "width": 1280,
+    "path": "/",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 17,
+        "w": 56,
+        "text": "Choose",
+        "cls": "flex items-center gap-1 text-[11px] text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 168,
+        "text": "Statements that carry weight",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 111,
+        "text": "Courts & litigation",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 144,
+        "text": "Regulation & rulemaking",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 132,
+        "text": "Officials & statements",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 151,
+        "text": "Resources & commodities",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 76,
+        "text": "Power grid",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 98,
+        "text": "Space weather",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      }
+    ],
+    "smallCount": 13
+  },
+  {
+    "viewport": "laptop",
+    "width": 1280,
+    "path": "/globe",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 25,
+        "w": 73,
+        "text": "Refresh",
+        "cls": "ml-auto flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-muted-fo"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 66,
+        "text": "Events",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 87,
+        "text": "Agreement",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 72,
+        "text": "Latency",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 88,
+        "text": "Blind spots",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 74,
+        "text": "Liquidity",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 63,
+        "text": "Map",
+        "cls": "absolute left-3 top-3 flex items-center gap-1.5 rounded-md bg-background/80 px-2"
+      },
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 28,
+        "text": "",
+        "cls": "flex h-7 w-7 items-center justify-center rounded-md bg-background/80 text-foregr"
+      }
+    ],
+    "smallCount": 15
+  },
+  {
+    "viewport": "laptop",
+    "width": 1280,
+    "path": "/markets",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 4
+  },
+  {
+    "viewport": "laptop",
+    "width": 1280,
+    "path": "/intelligence",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "absolute end-2 top-2 rounded p-1 text-muted-foreground transition-colors hover:b"
+      },
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 185,
+        "text": "Investigatewikipedia.org",
+        "cls": "inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-"
+      },
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 111,
+        "text": "I'll explore myself",
+        "cls": "rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:tex"
+      },
+      {
+        "tag": "button",
+        "h": 25,
+        "w": 82,
+        "text": "wikipedia.org",
+        "cls": "rounded-md px-2 py-1 font-mono text-[11px] ring-1 ring-border transition-colors "
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 8
+  },
+  {
+    "viewport": "laptop",
+    "width": 1280,
+    "path": "/monitor",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 24,
+        "w": 57,
+        "text": "Hourly",
+        "cls": "rounded-md px-2.5 py-1 text-xs font-medium transition-colors bg-muted/50 text-mu"
+      },
+      {
+        "tag": "button",
+        "h": 24,
+        "w": 48,
+        "text": "Daily",
+        "cls": "rounded-md px-2.5 py-1 text-xs font-medium transition-colors bg-primary text-pri"
+      },
+      {
+        "tag": "button",
+        "h": 24,
+        "w": 61,
+        "text": "Weekly",
+        "cls": "rounded-md px-2.5 py-1 text-xs font-medium transition-colors bg-muted/50 text-mu"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 7
+  },
+  {
+    "viewport": "laptop",
+    "width": 1280,
+    "path": "/account",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 16,
+        "w": 162,
+        "text": "New here? Create an account",
+        "cls": "text-xs text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 30,
+        "w": 606,
+        "text": "Signed up through Pi Network? Use your P",
+        "cls": "block w-full rounded-md border border-border py-1.5 text-center text-xs text-mut"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 38,
+        "text": "Pricing",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 19,
+        "text": "API",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 40,
+        "text": "Privacy",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 70,
+        "text": "Terms of use",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 24,
+        "w": 171,
+        "text": "build 73cb57e · 2026-08-21 19:02",
+        "cls": "hover:text-foreground"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 11
+  },
+  {
+    "viewport": "laptop",
+    "width": 1280,
+    "path": "/pricing",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 86,
+        "text": "API reference",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 105,
+        "text": "Back to Lambda",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 38,
+        "text": "Terms",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 47,
+        "text": "Privacy",
+        "cls": "underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 6
+  },
+  {
+    "viewport": "laptop",
+    "width": 1280,
+    "path": "/privacy",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 120,
+        "text": "← Back to Lambda",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 82,
+        "text": "Terms of use",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 4
+  },
+  {
+    "viewport": "laptop",
+    "width": 1280,
+    "path": "/terms",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 120,
+        "text": "← Back to Lambda",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 47,
+        "text": "Privacy",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 4
+  },
+  {
+    "viewport": "laptop",
+    "width": 1280,
+    "path": "/docs/api",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 105,
+        "text": "Back to Lambda",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 44,
+        "text": "Pricing",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 38,
+        "text": "Terms",
+        "cls": "underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 5
+  },
+  {
+    "viewport": "desktop",
+    "width": 1920,
+    "path": "/",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 17,
+        "w": 56,
+        "text": "Choose",
+        "cls": "flex items-center gap-1 text-[11px] text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 168,
+        "text": "Statements that carry weight",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 111,
+        "text": "Courts & litigation",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 144,
+        "text": "Regulation & rulemaking",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 132,
+        "text": "Officials & statements",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 151,
+        "text": "Resources & commodities",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 76,
+        "text": "Power grid",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 98,
+        "text": "Space weather",
+        "cls": "touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors disab"
+      }
+    ],
+    "smallCount": 14
+  },
+  {
+    "viewport": "desktop",
+    "width": 1920,
+    "path": "/globe",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 25,
+        "w": 55,
+        "text": "now",
+        "cls": "ml-auto flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-muted-fo"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 66,
+        "text": "Events",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 87,
+        "text": "Agreement",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 72,
+        "text": "Latency",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 88,
+        "text": "Blind spots",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 74,
+        "text": "Liquidity",
+        "cls": "flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] trans"
+      },
+      {
+        "tag": "button",
+        "h": 21,
+        "w": 52,
+        "text": "All held",
+        "cls": "touch-target rounded-full border px-2 py-0.5 text-[10px] transition-colors borde"
+      },
+      {
+        "tag": "button",
+        "h": 21,
+        "w": 73,
+        "text": "72h window",
+        "cls": "touch-target rounded-full border px-2 py-0.5 text-[10px] transition-colors borde"
+      }
+    ],
+    "smallCount": 48
+  },
+  {
+    "viewport": "desktop",
+    "width": 1920,
+    "path": "/markets",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 4
+  },
+  {
+    "viewport": "desktop",
+    "width": 1920,
+    "path": "/intelligence",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "absolute end-2 top-2 rounded p-1 text-muted-foreground transition-colors hover:b"
+      },
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 185,
+        "text": "Investigatewikipedia.org",
+        "cls": "inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-"
+      },
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 111,
+        "text": "I'll explore myself",
+        "cls": "rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:tex"
+      },
+      {
+        "tag": "button",
+        "h": 25,
+        "w": 82,
+        "text": "wikipedia.org",
+        "cls": "rounded-md px-2 py-1 font-mono text-[11px] ring-1 ring-border transition-colors "
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 8
+  },
+  {
+    "viewport": "desktop",
+    "width": 1920,
+    "path": "/monitor",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 4
+  },
+  {
+    "viewport": "desktop",
+    "width": 1920,
+    "path": "/account",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "button",
+        "h": 28,
+        "w": 110,
+        "text": "Pay with π",
+        "cls": "inline-flex items-center justify-center whitespace-nowrap font-medium transition"
+      },
+      {
+        "tag": "button",
+        "h": 27,
+        "w": 107,
+        "text": "SearchK",
+        "cls": "hidden items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px"
+      },
+      {
+        "tag": "button",
+        "h": 16,
+        "w": 162,
+        "text": "New here? Create an account",
+        "cls": "text-xs text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 30,
+        "w": 990,
+        "text": "Signed up through Pi Network? Use your P",
+        "cls": "block w-full rounded-md border border-border py-1.5 text-center text-xs text-mut"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 38,
+        "text": "Pricing",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 19,
+        "text": "API",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 40,
+        "text": "Privacy",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 16,
+        "w": 70,
+        "text": "Terms of use",
+        "cls": "hover:text-foreground hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 24,
+        "w": 171,
+        "text": "build 73cb57e · 2026-08-21 19:02",
+        "cls": "hover:text-foreground"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      }
+    ],
+    "smallCount": 11
+  },
+  {
+    "viewport": "desktop",
+    "width": 1920,
+    "path": "/pricing",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 86,
+        "text": "API reference",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 105,
+        "text": "Back to Lambda",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 38,
+        "text": "Terms",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 47,
+        "text": "Privacy",
+        "cls": "underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 6
+  },
+  {
+    "viewport": "desktop",
+    "width": 1920,
+    "path": "/privacy",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 120,
+        "text": "← Back to Lambda",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 82,
+        "text": "Terms of use",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 4
+  },
+  {
+    "viewport": "desktop",
+    "width": 1920,
+    "path": "/terms",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 120,
+        "text": "← Back to Lambda",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 47,
+        "text": "Privacy",
+        "cls": "text-primary hover:underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 4
+  },
+  {
+    "viewport": "desktop",
+    "width": 1920,
+    "path": "/docs/api",
+    "broke": [],
+    "overflow": 0,
+    "culprits": [],
+    "small": [
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 105,
+        "text": "Back to Lambda",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 44,
+        "text": "Pricing",
+        "cls": "underline"
+      },
+      {
+        "tag": "a",
+        "h": 18,
+        "w": 38,
+        "text": "Terms",
+        "cls": "underline"
+      },
+      {
+        "tag": "button",
+        "h": 22,
+        "w": 22,
+        "text": "",
+        "cls": "touch-target shrink-0 rounded p-1 text-muted-foreground hover:bg-muted"
+      },
+      {
+        "tag": "button",
+        "h": 29,
+        "w": 198,
+        "text": "Sign in or create an account",
+        "cls": "mt-2 min-h-11 w-full rounded-md bg-primary px-3 text-[11px] font-medium text-pri"
+      }
+    ],
+    "smallCount": 5
+  }
+]

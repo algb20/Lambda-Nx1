@@ -126,3 +126,55 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  /**
+   * A row that scrolls sideways instead of hiding what does not fit.
+   *
+   * The alternative a dense interface reaches for is `hidden sm:inline` on the
+   * labels, which on a phone leaves a row of unlabelled glyphs — and a glyph is
+   * not a word. It is worse in a language whose readers never met the icon set
+   * this one borrows from, which is most of ours. Scrolling keeps every option
+   * readable and costs one gesture.
+   *
+   * The scrollbar itself is hidden because the row is short and the bar would
+   * be most of its height; the overflowing content is its own affordance.
+   */
+  .scroll-row {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+  .scroll-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  /**
+   * A finger-sized target that does not change how anything looks.
+   *
+   * Apple asks for 44pt, Android for 48dp, and an analyst interface genuinely
+   * needs controls smaller than that — a 44px close button on an 11px chip
+   * would dominate the chip. So the *visual* size is left alone and the
+   * touchable area is grown outwards from the centre, which is what the
+   * guideline is actually about.
+   *
+   * Only on a coarse pointer. On a mouse the extra area would swallow clicks
+   * meant for whatever sits next to it, for a precision problem that does not
+   * exist there.
+   */
+  @media (pointer: coarse) {
+    .touch-target {
+      position: relative;
+    }
+    .touch-target::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: max(100%, 44px);
+      height: max(100%, 44px);
+      transform: translate(-50%, -50%);
+    }
+  }
+}

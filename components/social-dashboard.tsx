@@ -407,7 +407,7 @@ export function SocialDashboard() {
                 key={p.platform}
                 onClick={() => setPlatform(p.platform)}
                 aria-pressed={platform === p.platform}
-                className={`rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                className={`touch-target rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
                   platform === p.platform
                     ? 'border-primary bg-primary/10 text-primary'
                     : 'border-border text-muted-foreground hover:bg-muted'

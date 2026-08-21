@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getPaymentProvider } from '@/lib/payments'
+import { providerFor, railForRequest } from '@/lib/payments'
 import { piPaymentsConfigured } from '@/lib/payments/pi'
 import { decideGrant } from '@/lib/payments/checkout'
 import { getSessionUserId } from '@/lib/auth/server'
@@ -33,15 +33,20 @@ export async function POST(request: Request) {
   const paymentId = typeof body.paymentId === 'string' ? body.paymentId : ''
   if (!paymentId) return NextResponse.json({ error: 'Missing paymentId' }, { status: 400 })
 
-  const payments = getPaymentProvider()
+  // The rail follows the payer, not the deployment. A build serving both Pi
+  // Browser and the public website has to take π from one and a card from the
+  // other; choosing once at deploy time makes one of those two impossible.
+  // See lib/payments/rail.ts.
+  const payments = providerFor(railForRequest(request.headers))
 
-  // Refuse before the charge, not during it. Reaching Pi's API without a key
+  // Refuse before the charge, not during it. Reaching a provider without its key
   // used to surface as a 500 carrying the sentence "PI_API_KEY is not set" —
   // which both tells a stranger exactly how this deployment is misconfigured
   // and reads, to the user, as though their payment broke. Which environment
   // variable is missing is an operator's business.
-  if (payments.name === 'pi' && !piPaymentsConfigured()) {
-    console.error('[payments] PI_API_KEY is not set — Pi payments are unavailable')
+  const configured = payments.name === 'pi' ? piPaymentsConfigured() : Boolean(process.env.STRIPE_SECRET_KEY)
+  if (!configured) {
+    console.error(`[payments] the ${payments.name} rail has no key configured — payments are unavailable`)
     return NextResponse.json(
       { error: 'Payments are temporarily unavailable. Nothing has been charged.' },
       { status: 503 },
@@ -81,8 +86,15 @@ export async function POST(request: Request) {
     // describe our infrastructure and does not leave them wondering whether
     // they were charged.
     console.error('[payments] provider call failed:', err)
+    // Named by the rail the payer actually used. Telling a card payer that "Pi
+    // will be returned by the network" is a sentence about someone else's money.
     return NextResponse.json(
-      { error: 'The payment could not be processed. If Pi was deducted, it will be returned by the network.' },
+      {
+        error:
+          payments.name === 'pi'
+            ? 'The payment could not be processed. If Pi was deducted, it will be returned by the network.'
+            : 'The payment could not be processed. If your card was charged, the authorisation will be released.',
+      },
       { status: 502 },
     )
   }
