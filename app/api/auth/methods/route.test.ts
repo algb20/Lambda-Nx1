@@ -20,6 +20,9 @@ const state = { db: false, live: true, sessions: false, mail: false }
 
 vi.mock('@/lib/db', () => ({
   isDbConfigured: () => state.db,
+  // Self-healing is exercised in lib/db/apply-schema.test.ts and against a real
+  // database; here it only has to not be undefined.
+  ensureSchema: async () => true,
   databaseAvailability: async () => ({
     live: state.live,
     detail: state.live ? null : 'connect ETIMEDOUT',

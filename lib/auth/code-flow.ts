@@ -13,6 +13,7 @@ import { RateLimiter, callerKey, rateLimitHeaders, type RateLimitOptions } from 
 import {
   databaseAvailability,
   describeDatabaseError,
+  ensureSchema,
   explainDatabaseError,
   isDbConfigured,
 } from '@/lib/db'
@@ -60,7 +61,22 @@ export async function accountsUnavailable(route: string): Promise<NextResponse |
     )
   }
 
+  /**
+   * A connected database is not a ready one.
+   *
+   * This deployment ran for days with a live database whose tables had never
+   * been created — because the step that creates them belonged to a person,
+   * and every route by which a person could take it failed in turn. So the
+   * deployment takes it: at most once per process, only when tables are
+   * genuinely absent, and only ever creating. See `lib/db/apply-schema`.
+   *
+   * Deliberately not awaited *before* the liveness check below: if the database
+   * is unreachable there is nothing to create, and the error the visitor needs
+   * is the connection one.
+   */
   const database = await databaseAvailability()
+  if (database.live) await ensureSchema()
+
   if (!database.live) {
     console.error(
       `[${route}] refusing — database not answering: ${database.detail}${database.hint ? ` — ${database.hint}` : ''}`,

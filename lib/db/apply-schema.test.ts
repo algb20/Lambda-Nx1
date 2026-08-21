@@ -2,7 +2,13 @@ import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { SCHEMA_SQL } from '@/db/schema-sql'
-import { APPLY_TIMEOUT_MS } from './apply-schema'
+import {
+  APPLY_TIMEOUT_MS,
+  HEAL_RETRY_MS,
+  autoSchemaEnabled,
+  ensureSchema,
+  resetSchemaHealing,
+} from './apply-schema'
 
 /**
  * The schema installer.
@@ -118,5 +124,94 @@ describe('it reports rather than throws', () => {
 
   it('keeps its deadline under a serverless function ceiling', () => {
     expect(APPLY_TIMEOUT_MS).toBeLessThan(60_000)
+  })
+})
+
+describe('self-healing is safe to do unattended', () => {
+  /**
+   * The property the whole feature rests on. A deployment may create its own
+   * tables without being asked *only* because the file it applies cannot
+   * destroy anything — if a future migration ever introduced a destructive
+   * statement, it would be auto-applied to a production database at 3am with
+   * nobody watching. This test is what stops that reaching a database.
+   *
+   * `DROP NOT NULL` and `DROP DEFAULT` are permitted: they relax a constraint
+   * and remove no data. Everything else in the DROP family is forbidden.
+   */
+  it('contains nothing that can drop a table, a column or an index', () => {
+    const forbidden = SCHEMA_SQL.split('\n').filter((line) => {
+      // Relaxing a constraint removes no data; everything else in the family does.
+      if (/\bDROP\s+(NOT\s+NULL|DEFAULT)\b/i.test(line)) return false
+      return /\bDROP\s+(TABLE|COLUMN|DATABASE|SCHEMA|INDEX|TYPE|CONSTRAINT)\b/i.test(line)
+    })
+    expect(forbidden, `destructive: ${forbidden.join(' | ')}`).toHaveLength(0)
+  })
+
+  it('deletes nothing', () => {
+    expect(SCHEMA_SQL).not.toMatch(/\bTRUNCATE\b/i)
+    expect(SCHEMA_SQL).not.toMatch(/\bDELETE\s+FROM\b/i)
+  })
+
+  /**
+   * The migrations carry one data-modifying statement: a backfill that gives
+   * pre-existing Pi accounts the handle Pi already knew them by. It is safe
+   * because it writes **only where the column is NULL** — it cannot overwrite
+   * a value somebody chose.
+   *
+   * Rather than banning the keyword, this asserts the property that makes it
+   * safe, for every UPDATE in the file. A future migration that overwrote
+   * existing rows unconditionally would be auto-applied to production by
+   * `ensureSchema`, and this is the test that refuses to let that happen
+   * without a human looking at it.
+   */
+  it('only ever writes rows into columns that are still empty', () => {
+    const unguarded: string[] = []
+    const pattern = /^UPDATE\s+"/gim
+    let match: RegExpExecArray | null
+    while ((match = pattern.exec(SCHEMA_SQL)) !== null) {
+      const end = SCHEMA_SQL.indexOf(';', match.index)
+      const statement = SCHEMA_SQL.slice(match.index, end === -1 ? undefined : end)
+      if (!/WHERE[\s\S]*IS NULL/i.test(statement)) unguarded.push(statement.split('\n')[0])
+    }
+    expect(unguarded, `unguarded UPDATE: ${unguarded.join(' | ')}`).toHaveLength(0)
+  })
+
+  it('can be switched off for a shared database', () => {
+    const env = (value?: string) => ({ ...(value ? { AUTO_SCHEMA: value } : {}) }) as NodeJS.ProcessEnv
+    expect(autoSchemaEnabled(env('off'))).toBe(false)
+    expect(autoSchemaEnabled(env('OFF'))).toBe(false)
+    // On by default: a deployment that cannot create its own tables is not a
+    // safer deployment, it is a broken one.
+    expect(autoSchemaEnabled(env())).toBe(true)
+  })
+
+  it('does nothing at all without a database', async () => {
+    const original = process.env.DATABASE_URL
+    delete process.env.DATABASE_URL
+    resetSchemaHealing()
+    try {
+      expect(await ensureSchema()).toBe(false)
+    } finally {
+      if (original !== undefined) process.env.DATABASE_URL = original
+      resetSchemaHealing()
+    }
+  })
+
+  it('is single-flight, so concurrent cold requests do not all apply at once', () => {
+    const body = /export async function ensureSchema[\s\S]*?\n}/.exec(source)?.[0] ?? ''
+    expect(body).toContain('if (!healing)')
+    expect(body).toContain('if (healed) return true')
+  })
+
+  it('backs off after a failure rather than retrying every request', () => {
+    expect(HEAL_RETRY_MS).toBeGreaterThanOrEqual(30_000)
+  })
+})
+
+describe('the account gate brings the schema up', () => {
+  const gate = readFileSync(join(process.cwd(), 'lib/auth/code-flow.ts'), 'utf8')
+
+  it('calls ensureSchema once the database is known to answer', () => {
+    expect(gate).toMatch(/if \(database\.live\) await ensureSchema\(\)/)
   })
 })
