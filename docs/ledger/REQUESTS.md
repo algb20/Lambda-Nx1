@@ -727,3 +727,5 @@ Ten phases, ordered by what unlocks the most rather than by what is easiest, and
 four open questions put back to the owner — depth versus breadth, how far
 counterparty resolution recurses, whether to take the keyed sources, and which
 reader the default section order serves.
+
+| R266 | `globe` | `open` | **تصاميم الصفحات لا تزال بدائية، وفي صفحة الخريطة اجعل المربعات بطريقة يمكن تحديدها وفرزها واستعمال واضح وتمرير الصفحة — المربعات الآن تبدو صفحة واحدة متداخلة. وتحت الخريطة حتى آخرها المستخدم يتشتت، وتوزيع وتصميم المعلومات وفرزها لن يفهمه ولا يعرف المستخدم العمل عليه. وهناك أخطاء بالمعلومات والتواريخ، وأيضًا فوق الخريطة.** |
