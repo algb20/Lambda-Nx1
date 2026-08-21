@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { classifyMarket, investigateMarkets } from './markets'
+import { rankFindings } from './markets'
+import type { Evidence } from '../engine/types'
 
 function res(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
@@ -82,5 +84,81 @@ describe('investigateMarkets', () => {
 
   it('rejects too-short input', async () => {
     await expect(investigateMarkets('x')).rejects.toThrow(/asset, company, ticker or a currency pair/)
+  })
+})
+
+/**
+ * Ordering, from what the live gateway actually returned.
+ *
+ * There was no ordering at all — findings came out in whatever order the
+ * sources happened to answer in. Searching "Germany" led with an **E.ON filing
+ * from 2002**, then Allianz from 2002, then a Greek shipping company that
+ * mentions Germany; the country's current GDP was sixth. "Saudi Arabia" led
+ * with two American ETF prospectuses. The data was right and the reader would
+ * never reach it, which for them is the same as not having it.
+ */
+describe('rankFindings — the answer first, not the loudest source', () => {
+  const filing = (name: string, filedAt: string): Evidence =>
+    ({
+      claim: `SEC filing — ${name}`,
+      entity: { type: 'company', value: name },
+      sourceKey: 'sec_edgar_full_text',
+      sourceUrl: 'https://efts.sec.gov/',
+      retrievedAt: filedAt,
+      admiralty: { source: 'B', info: 2 },
+      confidence: 'probable',
+      data: { filedAt },
+    }) as Evidence
+
+  const indicator = (country: string): Evidence =>
+    ({
+      claim: `Economy — ${country} GDP (2025): $5.05T`,
+      entity: { type: 'other', value: country },
+      sourceKey: 'worldbank_economy',
+      sourceUrl: 'https://data.worldbank.org/',
+      retrievedAt: new Date().toISOString(),
+      admiralty: { source: 'A', info: 1 },
+      confidence: 'confirmed',
+      data: { indicator: 'NY.GDP.MKTP.CD', value: 5.05e12, year: '2025' },
+    }) as Evidence
+
+  it('puts what the subject *is* above what merely mentions it', () => {
+    const ranked = rankFindings(
+      [filing('E ON AG', '2002-07-01'), filing('ALLIANZ', '2002-06-25'), indicator('Germany')],
+      'Germany',
+    )
+    expect(ranked[0]?.claim).toContain('Economy — Germany GDP')
+  })
+
+  it('puts a recent filing above a twenty-year-old one', () => {
+    const ranked = rankFindings(
+      [filing('E ON AG', '2002-07-01'), filing('Castor Maritime Inc.', '2025-05-14')],
+      'Germany',
+    )
+    expect(ranked[0]?.claim).toContain('Castor Maritime')
+  })
+
+  /**
+   * An old filing is still evidence about 2002 and is never deleted — someone
+   * researching that year is entitled to find it. It simply stops being the
+   * first thing everyone else sees.
+   */
+  it('keeps every finding, and only changes their order', () => {
+    const input = [filing('A', '2002-01-01'), indicator('Germany'), filing('B', '2025-01-01')]
+    expect(rankFindings(input, 'Germany')).toHaveLength(input.length)
+  })
+
+  /**
+   * Two findings the ranking cannot separate must not swap places between runs:
+   * a list that reshuffles identical evidence looks broken to anyone watching.
+   */
+  it('is stable where it cannot tell two findings apart', () => {
+    const same = [filing('A', '2025-01-01'), filing('B', '2025-01-01')]
+    expect(rankFindings(same, 'x').map((e) => e.claim)).toEqual(same.map((e) => e.claim))
+  })
+
+  it('survives evidence with no usable date rather than dropping it', () => {
+    const undated = { ...filing('C', 'not a date') }
+    expect(rankFindings([undated], 'x')).toHaveLength(1)
   })
 })

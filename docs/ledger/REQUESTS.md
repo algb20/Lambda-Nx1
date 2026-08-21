@@ -41,7 +41,7 @@ The ones that **are** genuine standing work, named rather than buried:
 | R178 | 2026-08-20 | `security` | 3 | `done` | **قاعدة دائمة في كل مشاريعنا:** الأسرار والمفاتيح تُحفظ في مكان لا يصله أحد غير المالك — ولا المساعدون ولا أي مطوّر يُضاف للمستودع |
 | R179 | 2026-08-20 | `gateways` | | `open` | ابحث عن **كل** أنواع البوّابات وتخصّصاتها ومجالاتها، وأضفها بكل مميزاتها وإعداداتها وتقنياتها |
 | R180 | 2026-08-20 | `gateways` | | `done` | كل البورصات والأسهم بكل أنواعها |
-| R181 | 2026-08-20 | `gateways` | | `open` | اقتصادات الشركات والدول — أكبر وأهم الشركات: شراكاتها، أعمالها، معلوماتها، أسهمها |
+| R181 | 2026-08-20 | `gateways` | | `done` | اقتصادات الشركات والدول — أكبر وأهم الشركات: شراكاتها، أعمالها، معلوماتها، أسهمها |
 | R182 | 2026-08-20 | `gateways` | | `done` | بوّابة تُظهر **تصنيف** الشركات — ترتيب أكبر ٢٥ مُودِعًا بإجمالي الأصول من إطارات XBRL (٦١١٠ شركة)، والمقياس مُسمّى لا مُضمَر |
 | R183 | 2026-08-20 | `gateways` | | `open` | شركات ومصانع الدول والقطاع الخاص |
 | R184 | 2026-08-20 | `gateways` | | `open` | آليّة تعمل **تلقائيًا** لكل البوّابات |
@@ -859,3 +859,40 @@ exact code, country code, name prefix, whole word, substring — and the venue a
 query *names* outranks one that merely sits in that city. The query is escaped
 before it reaches a regular expression, so a reader typing `(` gets results
 rather than an error.
+
+**R181 — the country data was there; nobody could reach it.**
+
+Company economics were already built: SEC XBRL profiles, the assets ranking
+across 6,110 filers, ownership. National economies were built too —
+`lib/engine/sources/economy.ts` reads the World Bank and is wired into the
+markets gateway. Verified live: **Germany GDP $5.05T, population 83.5M,
+inflation 2.2%; Saudi Arabia $1.28T, 37.0M, 2.1%** — all current-year.
+
+**And a reader would never have seen any of it.** There was no ordering in the
+gateway at all: findings came out in whatever order the sources happened to
+answer in. Searching "Germany" led with an **E.ON filing from 2002**, then
+Allianz from 2002, then a Greek shipping company that mentions Germany. The
+GDP figure was sixth. "Saudi Arabia" led with two American ETF prospectuses.
+
+That is the shape of every "the tools give me nothing" report: the data is
+right, it is present, and it is below the noise. For the reader those are the
+same thing as not having it.
+
+`rankFindings` applies two rules, in order. **What the subject *is* beats what
+merely mentions it** — a country's own measured economy answers "Germany"; a
+filing containing the word is a mention, and full-text search is the widest net
+in the gateway. **Recent beats ancient** — a 2002 filing is not evidence about a
+company now. Nothing is deleted: someone researching 2002 still finds it, it
+simply stops being the first thing everyone else sees. The sort is stable, so
+evidence it cannot separate never reshuffles between runs.
+
+| Searching "Germany" | before | after |
+|---|---|---|
+| 1st | E.ON filing, 2002 | **GDP $5.05T (2025)** |
+| 2nd | Allianz filing, 2002 | Population 83.5M |
+| 3rd | Greek shipping company | Inflation 2.2% |
+
+One correction worth recording: my first measurement of this reported "0
+findings" for both countries and I nearly filed it as a bug. The gateway
+returns `findings`; my probe read `evidence`. The tool was wrong, not the app —
+the same lesson as the audit that called crashed pages "ok".
