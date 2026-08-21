@@ -11,6 +11,7 @@ import {
   rarityOf,
   rarityReason,
   type Rankable,
+  BACKFILL_RELAXATION,
 } from './significance'
 
 const item = (sourceKey: string, category: string, severity = 0.75): Rankable => ({
@@ -120,11 +121,25 @@ describe('diversity — the fix for one publisher owning the board', () => {
     expect(taken.length + overflow.length).toBe(realWorldRun.length)
   })
 
-  /** A list of four when twenty were asked for is its own defect. */
-  it('backfills from the overflow rather than returning a short list', () => {
+  /**
+   * This test previously asserted the opposite, and the assertion was wrong.
+   *
+   * It said: "a list of four when twenty were asked for is its own defect", and
+   * required the board to be filled to the limit from the overflow. That is how
+   * twenty identical NWS flood warnings reached the natural-hazards box on the
+   * live deployment — the caps held NWS to three, and then the backfill put
+   * seventeen more of them straight back.
+   *
+   * Both halves of the old rule were half right. A near-empty board *is* a
+   * defect, and a board filled by repeating one publisher is a worse one. The
+   * resolution is relaxed caps: fill the space from the next-best candidates,
+   * but never past a multiple of the rule that was just applied.
+   */
+  it('fills the space without repeating one publisher to the limit', () => {
     const oneSource = Array.from({ length: 20 }, () => item('nws_alerts', 'flood'))
     const { taken } = diversify(oneSource, 12)
-    expect(taken).toHaveLength(12)
+    expect(taken.length).toBeGreaterThan(DEFAULT_LIMITS.maxPerSource)
+    expect(taken.length).toBeLessThan(12)
   })
 
   it('returns everything when there is less than the limit', () => {
@@ -144,11 +159,60 @@ describe('diversity — the fix for one publisher owning the board', () => {
    */
   it('reports how many earned their place, so backfill is never silent', () => {
     const oneFamily = Array.from({ length: 30 }, (_, i) => item(`src_${i}`, 'flood'))
-    const { taken, diversified } = diversify(oneFamily, 20)
-    expect(taken).toHaveLength(20)
-    // Only the capped few earned it; the rest are filling space, and it shows.
+    const { diversified } = diversify(oneFamily, 20)
     expect(diversified).toBeLessThan(20)
     expect(diversified).toBeLessThanOrEqual(DEFAULT_LIMITS.maxPerFamily)
+  })
+
+  /**
+   * Naming the backfill was not enough — the wall of rows was still on screen.
+   *
+   * Measured on live data: the natural-hazards box earned 7 rows under caps
+   * that correctly held the US National Weather Service to 3, and the backfill
+   * then added **17 more NWS flood warnings**. The box read "Happened 4 ·
+   * Warned 20". The rule had been applied and then handed back.
+   *
+   * A short board is the lesser evil. Twenty rows from one publisher is not a
+   * fuller board, it is a worse one.
+   */
+  it('does not hand the board back to the publisher the caps just excluded', () => {
+    const flood = Array.from({ length: 40 }, (_, i) => ({
+      sourceKey: 'nws_alerts',
+      origin: 'noaa',
+      category: 'flood',
+      severity: 3,
+      id: `f${i}`,
+    }))
+    const { taken } = diversify(flood, 24)
+    expect(taken.length).toBeLessThan(24)
+    // Held to its cap times the relaxation, never to the whole board.
+    expect(taken.length).toBeLessThanOrEqual(DEFAULT_LIMITS.maxPerSource * BACKFILL_RELAXATION)
+  })
+
+  it('keeps what it could not fit, so a caller can summarise it in one line', () => {
+    const flood = Array.from({ length: 40 }, (_, i) => ({
+      sourceKey: 'nws_alerts',
+      origin: 'noaa',
+      category: 'flood',
+      severity: 3,
+      id: `f${i}`,
+    }))
+    const { taken, overflow } = diversify(flood, 24)
+    // Nothing is discarded: every row is either shown or available to summarise.
+    expect(taken.length + overflow.length).toBe(40)
+    expect(overflow.length).toBeGreaterThan(0)
+  })
+
+  it('still fills the board when the candidates are genuinely varied', () => {
+    const categories = ['cyber', 'economy', 'space', 'transport', 'health', 'research', 'world']
+    const varied = Array.from({ length: 40 }, (_, i) => ({
+      sourceKey: `src_${i}`,
+      category: categories[i % categories.length],
+      severity: 3,
+      id: String(i),
+    }))
+    // Relaxed caps exist so a varied run is not punished for the flood case.
+    expect(diversify(varied, 20).taken).toHaveLength(20)
   })
 
   it('marks the whole list as earned when the caps were never reached', () => {

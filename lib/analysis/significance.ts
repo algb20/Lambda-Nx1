@@ -200,6 +200,15 @@ export interface DiversityLimits {
   maxPerOrigin: number
 }
 
+/**
+ * How far the caps stretch when filling the remaining space.
+ *
+ * Two, so a publisher held to three rows on merit can reach six by filling —
+ * enough to keep a board from looking broken on a quiet run, nowhere near
+ * enough to let it become one publisher's page.
+ */
+export const BACKFILL_RELAXATION = 2
+
 export const DEFAULT_LIMITS: DiversityLimits = {
   maxPerSource: 3,
   maxPerCategory: 3,
@@ -282,12 +291,69 @@ export function diversify<T extends Rankable>(
   // Everything up to here earned its place under the caps.
   const diversified = taken.length
 
-  // Backfill only beyond that, and the count above records where it started.
-  while (taken.length < limit && overflow.length > 0) {
-    taken.push(overflow.shift() as T)
+  /**
+   * Backfill under *relaxed* caps — never under none.
+   *
+   * ## What the unbounded version did
+   *
+   * It took from the overflow in score order until the list was full. The
+   * overflow is, by construction, everything the caps just rejected — so on any
+   * run where one publisher dominates, the backfill handed the board straight
+   * back to that publisher.
+   *
+   * Measured on live data, the natural-hazards box: 7 rows earned a place under
+   * the caps, which correctly held the US National Weather Service to 3. The
+   * backfill then added **17 more NWS flood warnings**, and the box read
+   * "Happened 4 · Warned 20". The owner's complaint —
+   * *"الاخبار كلها ارصاد وتحذيرات جوية متنوعة"*, the news is all meteorology and
+   * assorted weather warnings — described this line of code.
+   *
+   * Labelling it was not enough. The previous fix reported how many rows had
+   * earned their place (`diversified`), which is honest and left the wall of
+   * warnings on the screen.
+   *
+   * ## Why relaxed rather than none
+   *
+   * Refusing to backfill at all returns four rows where twenty were asked for,
+   * and a box that empty reads as broken. Doubling the caps fills the space
+   * from the next-best candidates while keeping the shape of the rule: a
+   * publisher capped at 3 can reach 6, not 20.
+   *
+   * Whatever still does not fit stays in `overflow`, where a caller can offer
+   * it as one line — "34 more flood warnings from NWS" — instead of 34 rows.
+   */
+  const relaxed: DiversityLimits = {
+    maxPerSource: limits.maxPerSource * BACKFILL_RELAXATION,
+    maxPerOrigin: limits.maxPerOrigin * BACKFILL_RELAXATION,
+    maxPerCategory: limits.maxPerCategory * BACKFILL_RELAXATION,
+    maxPerFamily: limits.maxPerFamily * BACKFILL_RELAXATION,
   }
 
-  return { taken, overflow, diversified }
+  const stillHeld: T[] = []
+  for (const item of overflow) {
+    if (taken.length >= limit) {
+      stillHeld.push(item)
+      continue
+    }
+    const family = familyOf(item.category)
+    const origin = item.origin ?? item.sourceKey
+    if (
+      (bySource.get(item.sourceKey) ?? 0) >= relaxed.maxPerSource ||
+      (byOrigin.get(origin) ?? 0) >= relaxed.maxPerOrigin ||
+      (byCategory.get(item.category) ?? 0) >= relaxed.maxPerCategory ||
+      (byFamily.get(family) ?? 0) >= relaxed.maxPerFamily
+    ) {
+      stillHeld.push(item)
+      continue
+    }
+    taken.push(item)
+    bySource.set(item.sourceKey, (bySource.get(item.sourceKey) ?? 0) + 1)
+    byOrigin.set(origin, (byOrigin.get(origin) ?? 0) + 1)
+    byCategory.set(item.category, (byCategory.get(item.category) ?? 0) + 1)
+    byFamily.set(family, (byFamily.get(family) ?? 0) + 1)
+  }
+
+  return { taken, overflow: stillHeld, diversified }
 }
 
 /**

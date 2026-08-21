@@ -509,3 +509,23 @@ border, rounded, scrolling.
 
 **Still open: R254/R255** — the economy, exchanges and blockchain depth. Not
 started; called out rather than quietly counted as done.
+
+**R258 — the true cause, found by measuring rather than reasoning.** My first
+diagnosis (MeteoAlarm's 39 feeds slipping past a per-feed cap) was a real defect
+and **not** what the owner was seeing: measured against live data, MeteoAlarm
+reached 0 rows either way. The actual cause was the **backfill**. The caps
+correctly held the US National Weather Service to 3 rows — then `diversify`
+filled the remaining 17 slots from the overflow, which was almost entirely NWS
+flood warnings. The rule was applied and immediately handed back.
+
+Backfill now runs under caps relaxed by a factor of two rather than under none.
+Same live data, natural-hazards box:
+
+| | before | after |
+|---|---|---|
+| rows | 24 (17 backfill) | 14, across 5 publishers |
+| NWS flood warnings | 20 | 6 |
+| the box read | Happened 4 · Warned 20 | Happened 8 · Warned 6 |
+
+A test that asserted the *old* rule — "backfills from the overflow rather than
+returning a short list" — was the bug written down, and has been replaced.
