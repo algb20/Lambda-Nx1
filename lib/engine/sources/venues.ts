@@ -173,6 +173,38 @@ export function parseCsv(body: string): string[][] {
  * Everything longer is a substring search, which is what a person typing a
  * name or a city expects.
  */
+/**
+ * How well a venue answers the query — the kinds of match, ranked.
+ *
+ * `venueMatches` decides *whether* a row is a hit and is deliberately generous,
+ * which is right for a filter and useless for an order. Pooling every kind of
+ * hit and then sorting alphabetically is what put dealer desks above the
+ * exchange they trade on: the venue *named* Tokyo and a venue that merely sits
+ * in Tokyo are not equally good answers to "Tokyo".
+ *
+ * Zero means "matched by something weaker than any of these", which still
+ * ranks — below all of them.
+ */
+export function venueRelevance(v: VenuePoint, query: string): number {
+  const q = query.trim().toLowerCase()
+  if (!q) return 0
+  const name = v.name.toLowerCase()
+  const legal = (v.legalEntity ?? '').toLowerCase()
+
+  // An exact identifier is not a guess, so nothing outranks it.
+  if (v.mic.toLowerCase() === q) return 100
+  // A two-letter query is a country code — the rule `venueMatches` already
+  // applies — and every hit is then equally a country hit.
+  if (/^[a-z]{2}$/.test(q)) return 80
+  if (name.startsWith(q)) return 70
+  if (legal.startsWith(q)) return 60
+  // A whole word beats an accidental substring: "NASDAQ COPENHAGEN" over a
+  // company whose name merely contains those letters.
+  if (new RegExp(`\\b${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(name)) return 50
+  if (name.includes(q) || legal.includes(q)) return 20
+  return 0
+}
+
 export function venueMatches(v: VenuePoint, query: string): boolean {
   const q = query.trim().toLowerCase()
   if (!q) return true
@@ -309,9 +341,20 @@ export const micRegistrySource: Source = {
     const held = registryCache?.venues ?? []
     // The same rule the registry parser uses — one definition, no drift.
     const venues = q ? held.filter((v) => venueMatches(v, q)) : held
-    // Operating venues before their own segments: a reader searching "Euronext"
-    // wants the exchange, not its forty order books.
+    /**
+     * Operating venues before their own segments — a reader searching
+     * "Euronext" wants the exchange, not its forty order books — and, before
+     * that, the venue the query actually names.
+     *
+     * The second rule was missing, and it showed on the real register:
+     * searching **"TOKYO"** returned three Bank of America dealer desks above
+     * the **Tokyo Stock Exchange**, because all four sit in Tokyo, all four
+     * matched, and `B` sorts before `T`. Alphabetical order is not relevance;
+     * it only looks like it when the first answer happens to be right.
+     */
     venues.sort((a, b) => {
+      const relevance = venueRelevance(b, q) - venueRelevance(a, q)
+      if (relevance) return relevance
       if ((a.operatingMic === null) !== (b.operatingMic === null)) return a.operatingMic === null ? -1 : 1
       return a.name.localeCompare(b.name)
     })

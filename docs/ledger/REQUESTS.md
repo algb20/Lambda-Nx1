@@ -40,7 +40,7 @@ The ones that **are** genuine standing work, named rather than buried:
 | R160 | Every route takes ~13.4s to settle |
 | R178 | 2026-08-20 | `security` | 3 | `done` | **قاعدة دائمة في كل مشاريعنا:** الأسرار والمفاتيح تُحفظ في مكان لا يصله أحد غير المالك — ولا المساعدون ولا أي مطوّر يُضاف للمستودع |
 | R179 | 2026-08-20 | `gateways` | | `open` | ابحث عن **كل** أنواع البوّابات وتخصّصاتها ومجالاتها، وأضفها بكل مميزاتها وإعداداتها وتقنياتها |
-| R180 | 2026-08-20 | `gateways` | | `open` | كل البورصات والأسهم بكل أنواعها |
+| R180 | 2026-08-20 | `gateways` | | `done` | كل البورصات والأسهم بكل أنواعها |
 | R181 | 2026-08-20 | `gateways` | | `open` | اقتصادات الشركات والدول — أكبر وأهم الشركات: شراكاتها، أعمالها، معلوماتها، أسهمها |
 | R182 | 2026-08-20 | `gateways` | | `done` | بوّابة تُظهر **تصنيف** الشركات — ترتيب أكبر ٢٥ مُودِعًا بإجمالي الأصول من إطارات XBRL (٦١١٠ شركة)، والمقياس مُسمّى لا مُضمَر |
 | R183 | 2026-08-20 | `gateways` | | `open` | شركات ومصانع الدول والقطاع الخاص |
@@ -828,3 +828,34 @@ banner, the globe carrying every gateway, launch organisation, and the ~13s
 route settle time.
 
 R204 and R229 are standing rules, not items to close.
+
+**R180 — «كل البورصات» كانت مبنيّة، والخطأ كان أن أبنيها مرّة ثانية.**
+
+The register was already there. `lib/engine/sources/venues.ts` reads **ISO
+10383** — the register SWIFT maintains that assigns a Market Identifier Code to
+every regulated market, multilateral trading facility, systematic internaliser
+and off-book venue on earth — caches it, and fails loudly rather than reporting
+an empty register as a healthy one. A separate crypto-venue source sits beside
+it, labelled a market index rather than a registry, because presence in an
+aggregator is not registration by an authority.
+
+Verified live on 2026-08-21: **2,875 rows — 1,589 operating venues, 1,286
+market segments inside them, across 149 countries, 2,246 carrying a LEI.** Those
+numbers are reported separately and never added, per §2a: NYSE Arca is a market
+inside the New York Stock Exchange, not a second exchange.
+
+I began writing a second implementation of this before checking, and stopped
+when the existing one surfaced. The duplicate was deleted. **That near-miss is
+the reconciliation lesson repeating itself:** the row said `open`, so I believed
+the work was missing. Reading the code first is the cheaper habit.
+
+**What the check did find is a real relevance bug, now fixed.** Searching the
+live register for `TOKYO` returned three Bank of America dealer desks above the
+**Tokyo Stock Exchange** — all four sit in Tokyo, all four matched, and `B`
+sorts before `T`. The filter was generous, which is right, and the order was
+alphabetical, which is not relevance; it only looks like relevance when the
+first answer happens to be right. `venueRelevance` now ranks the kinds of match —
+exact code, country code, name prefix, whole word, substring — and the venue a
+query *names* outranks one that merely sits in that city. The query is escaped
+before it reaches a regular expression, so a reader typing `(` gets results
+rather than an error.
