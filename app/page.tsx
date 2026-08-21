@@ -136,9 +136,14 @@ export default function HomePage() {
       */}
       <div
         className={
+          // Markets is a workspace too, by the rule stated just above: width is
+          // earned by what a screen is for. A wall of tables in a reading
+          // column wastes the monitor and squeezes every number.
           activeTab === "globe"
             ? "flex w-full gap-0 px-0 py-0"
-            : "container mx-auto flex gap-6 px-4 py-4 lg:max-w-[88rem] lg:gap-8 lg:py-6 2xl:max-w-[104rem]"
+            : activeTab === "markets"
+              ? "container mx-auto flex gap-6 px-4 py-4 lg:max-w-none lg:gap-8 lg:py-6"
+              : "container mx-auto flex gap-6 px-4 py-4 lg:max-w-[88rem] lg:gap-8 lg:py-6 2xl:max-w-[104rem]"
         }
       >
         <SideNav activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -155,7 +160,7 @@ export default function HomePage() {
         */}
         <main
           className={
-            activeTab === "globe"
+            activeTab === "globe" || activeTab === "markets"
               ? "w-full min-w-0"
               : "mx-auto w-full min-w-0 max-w-2xl lg:mx-0 lg:max-w-none"
           }
@@ -265,7 +270,18 @@ export default function HomePage() {
           monitor — three panes fighting over one screen, which is how a display
           ends up smaller than the article next to it.
         */}
-        {activeTab === "globe" ? null : <ContextRail onNavigate={navigate} />}
+        {/*
+          Not on a dashboard either.
+
+          The rail puts context beside a page being *read*. Beside the markets
+          page it did the opposite: two short cards against a very long column
+          of tables, so most of that side of the screen was empty — the owner's
+          *"فراغات كثيرة غير مستغلة"*, a lot of unused blank space. The markets
+          page has its own context in every row.
+        */}
+        {activeTab === "globe" || activeTab === "markets" ? null : (
+          <ContextRail onNavigate={navigate} />
+        )}
       </div>
 
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />

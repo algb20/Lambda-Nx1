@@ -313,6 +313,8 @@ notes, because a repaired ledger that hides its repair is worse than none:
 | S6 | charter §2.8 | Study the field continuously; every capability a competitor has, we have and better. Never copy their code. |
 | S7 | charter §2a | Count sources honestly: integrations, publishers and independent origins are three different numbers. |
 | S8 | this ledger | **Every request is written here, in full, before work starts** — and stays until it is genuinely delivered. |
+| S9 | R265 | **One codebase, two products, no divergence.** Everything we build must work in the Pi Browser app *and* on the standalone `.com` site — launched together or one before the other, with no problem either way. Never build a surface that only one of them can run. |
+| S10 | R264 | **Every page fits every screen** — phone, tablet, laptop, desktop. A page is not done until it has been checked at each width. |
 
 ### R151–R236 — reconstructed
 
@@ -591,3 +593,48 @@ hand — which is exactly how that class of bug survives. Now one request for al
 three, matched by the dimension id the API returns rather than by position:
 `SR_2Y+SR_5Y+SR_10Y` was requested and `["SR_10Y","SR_2Y","SR_5Y"]` came back,
 so reading by position would have labelled the ten-year yield as the two-year.
+
+| R263 | `i18n` | `done` | **الترجمة اجعل ترجمة جوجل مباشرة متوفرة في مشروعنا ليكون فيها كل اللغات العالمية** — make Google Translate directly available so the project carries every world language. |
+| R264 | `design` | `open` | **لما تصل للتصميم ايضا الصفحات الاخرى اجعلها ملائمة للحاسوب او الهواتف او تابلات او غيره** — when the design work is reached, make the other pages fit desktop, phones, tablets and anything else. Recorded as standing rule S10. |
+| R265 | `platform` | `open` | **لااعرف هذا الامر كيف يعمل خاصة مع امر اننا نعمل على تطبيق لبراوزر الباي نتورك وموقع كوم في نفس الوقت ارجو ان كل عملنا متوافق ودون مشاكل حين نطلق العمل على التطبيق والموقع مع بعض او واحد قبل الاخر تذكر هذه القاعدة جدا** — explain how the one-codebase / two-products arrangement actually works, and guarantee that everything we build runs in the Pi Browser app and on the `.com` site, released together or one before the other. Recorded as standing rule S9. |
+
+**R263 — every language, and the bug that was eating the seven we wrote by hand.**
+
+The request was to open the product to every world language. The blocker was not
+coverage, it was collision. `components/auto-translate.tsx` walks every text node
+after render and translates it — which is right for engine content and wrong for
+a label the dictionary had *already* translated on purpose. Arabic was being
+translated twice, from Arabic:
+
+| Key | We wrote | The second pass produced |
+|---|---|---|
+| `nav.home` | `الرئيسية` | `فور` |
+| `nav.preferences` | `الإعدادات` | `جحيم` ("hell") |
+| `nav.monitor` | `مراقبة` | `حمى` ("fever") |
+| `mk.movers` | `Movers` | `شركات نقل الأثاث` (furniture removal companies) |
+
+`lib/i18n/translate.ts` already stated the rule — *a hand-written string always
+wins over a machine one* — but the DOM sweep runs after render, so the rule was
+true in the module and false on the screen.
+
+**The obvious fix is half a fix.** Marking those nodes `data-no-translate`
+protects the seven curated languages and freezes the other hundred in English
+permanently — the exact opposite of the request. So the shield is *conditional*:
+
+- `SUPPORTED_LOCALES` — ~110 languages, each labelled by its **endonym**
+  (`Deutsch`, `日本語`, `فارسی`), because a speaker scans the list for how they
+  write their language, not for what English calls it. RTL now covers
+  ar/he/fa/ur/ps/sd/ug/yi/dv/ckb, not Arabic alone.
+- `isCurated(locale, key)` lives in `lib/i18n/dictionaries.ts`, beside the data
+  it reads — a pure lookup a server component, a script or a test can ask
+  without loading React.
+- `<Label k="…" />` shields itself only when the current language actually has
+  the hand-written wording. Turkish keeps machine translation; Arabic keeps its
+  own words.
+- A finance glossary (20 `mk.*` terms) in all seven curated dictionaries, because
+  the isolated two-word label is exactly where machine translation fails —
+  `Movers` had no sentence around it to disambiguate.
+
+`lib/i18n/shield.test.ts` holds the condition in place, including a source scan
+asserting that **no component hard-codes a bare `data-no-translate`** on a
+translated label. That test is the one that would have caught the half-fix.

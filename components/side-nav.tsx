@@ -2,7 +2,7 @@
 
 import { Zap, Globe2, Brain, Radar, User, CandlestickChart} from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useT } from '@/lib/i18n'
+import { useT, useCurated } from '@/lib/i18n'
 import { TAB_DEFS, type Tab } from '@/lib/navigation'
 
 /**
@@ -35,6 +35,8 @@ export function SideNav({
   setActiveTab: (tab: Tab) => void
 }) {
   const t = useT()
+  // Shield only what we wrote for this language — see lib/i18n/dictionaries.
+  const curated = useCurated()
 
   return (
     <nav
@@ -61,7 +63,25 @@ export function SideNav({
               style={{ width: 18, height: 18 }}
             />
             <span className="min-w-0">
-              <span className="block text-sm font-medium leading-tight">{t(tab.i18nKey)}</span>
+              {/*
+                Curated, so the machine translator must not touch it.
+
+                `AutoTranslate` walks every text node on the page and rewrites
+                it. That is right for content the engine produced — a headline,
+                an agency name — and wrong for a label the dictionary already
+                translated deliberately. It re-translated `الرئيسية` into
+                `فور`, `الإعدادات` into `جحيم` ("hell") and `مراقبة` into
+                `حمى` ("fever"), because a two-word label out of context is
+                exactly what a machine translator gets wrong.
+
+                `lib/i18n/translate.ts` already states the rule — "a
+                hand-written string always wins over a machine one" — and the
+                DOM sweep runs after render, so without this attribute the
+                implementation contradicts it.
+              */}
+              <span data-no-translate={curated(tab.i18nKey) || undefined} className="block text-sm font-medium leading-tight">
+                {t(tab.i18nKey)}
+              </span>
               {/*
                 The description is the reason a rail beats a bar: a bottom bar
                 has room for a five-letter word, and "Radar" alone does not tell

@@ -7,7 +7,16 @@
  * out correctly without per-component work.
  */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { DICTIONARIES, LOCALES, RTL_LOCALES, type Locale } from './dictionaries'
+import {
+  DICTIONARIES,
+  LOCALES,
+  RTL_LOCALES,
+  SUPPORTED_LOCALES,
+  isCurated,
+  type Locale,
+} from './dictionaries'
+
+export { isCurated }
 
 interface I18nValue {
   locale: Locale
@@ -20,13 +29,30 @@ interface I18nValue {
    * since word order differs and concatenation cannot express that.
    */
   t: (key: string, paramsOrFallback?: string | Record<string, string | number>) => string
+  /**
+   * Whether `t(key)` returned wording we wrote for *this* language.
+   *
+   * A component uses it to decide whether to shield the node from the runtime
+   * translator: shield what we curated, let the machine handle the rest.
+   */
+  curated: (key: string) => boolean
 }
 
 const I18nContext = createContext<I18nValue | null>(null)
 
+/**
+ * Any language the provider supports, not only the seven we hand-wrote.
+ *
+ * Three-letter codes are real — `ceb`, `haw`, `hmn` — so the old
+ * `slice(0, 2)` silently turned Cebuano into `ce` and dropped it. A tagged
+ * locale (`pt-BR`) keeps only its language part, which is what the translator
+ * takes.
+ */
 function normalize(input: string | null | undefined): Locale {
-  const code = (input ?? '').slice(0, 2).toLowerCase()
-  return (LOCALES as readonly string[]).includes(code) ? (code as Locale) : 'en'
+  const raw = (input ?? '').trim().toLowerCase()
+  const code = raw.split(/[-_]/)[0]
+  if (SUPPORTED_LOCALES.includes(code)) return code
+  return 'en'
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {
@@ -69,7 +95,12 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     [locale],
   )
 
-  const value = useMemo<I18nValue>(() => ({ locale, dir, setLocale, t }), [locale, dir, setLocale, t])
+  const curated = useCallback((key: string) => isCurated(locale, key), [locale])
+
+  const value = useMemo<I18nValue>(
+    () => ({ locale, dir, setLocale, t, curated }),
+    [locale, dir, setLocale, t, curated],
+  )
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
 }
 
@@ -84,5 +115,39 @@ export function useT(): (key: string, fallback?: string) => string {
   return useI18n().t
 }
 
-export { LOCALES, LOCALE_LABELS } from './dictionaries'
+export { LOCALES, CURATED_LOCALES, SUPPORTED_LOCALES, LOCALE_LABELS } from './dictionaries'
+
+/** Shield-aware translator: `t` for the words, `curated` for whether we wrote them. */
+export function useCurated(): (key: string) => boolean {
+  return useI18n().curated
+}
+
+/**
+ * A translated label that shields itself correctly.
+ *
+ * Getting this right by hand at every call site is the kind of rule that holds
+ * for a week: the node needs the translated string *and* `data-no-translate`
+ * *and* that attribute must be present only when the string is curated for the
+ * current language. Three facts, one of which is invisible in the markup.
+ *
+ * So it is one component. Pass the key; it does all three.
+ *
+ *   <Label k="mk.networks" className="text-sm font-semibold" />
+ */
+export function Label({
+  k,
+  className,
+  as: Tag = 'span',
+}: {
+  k: string
+  className?: string
+  as?: 'span' | 'h1' | 'h2' | 'h3' | 'p' | 'dt' | 'th'
+}) {
+  const { t, curated } = useI18n()
+  return (
+    <Tag data-no-translate={curated(k) || undefined} className={className}>
+      {t(k)}
+    </Tag>
+  )
+}
 export type { Locale } from './dictionaries'

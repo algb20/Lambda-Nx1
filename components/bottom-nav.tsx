@@ -2,7 +2,7 @@
 
 import { Zap, Globe2, Brain, Radar, User, CandlestickChart } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useT } from "@/lib/i18n"
+import { useT, useCurated } from "@/lib/i18n"
 import { TAB_DEFS, type Tab } from "@/lib/navigation"
 
 /**
@@ -34,6 +34,8 @@ interface BottomNavProps {
 
 export function BottomNav({ activeTab, setActiveTab }: BottomNavProps) {
   const t = useT()
+  // Shield only what we wrote for this language — see lib/i18n/dictionaries.
+  const curated = useCurated()
   return (
     <nav
       aria-label="Sections"
@@ -55,7 +57,11 @@ export function BottomNav({ activeTab, setActiveTab }: BottomNavProps) {
                 )}
               >
                 <Icon className="h-5 w-5" />
-                <span className="text-[10px] font-medium">{t(tab.i18nKey)}</span>
+                {/* Curated by the dictionary — see side-nav for why the machine
+                    translator must not touch it. */}
+                <span data-no-translate={curated(tab.i18nKey) || undefined} className="text-[10px] font-medium">
+                  {t(tab.i18nKey)}
+                </span>
               </button>
             )
           })}

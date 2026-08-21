@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { AlertCircle, Loader2, RefreshCw } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { Label, useCurated, useT } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import type { ChainRadarReport } from '@/lib/modules/chain-radar'
 import {
@@ -66,6 +67,23 @@ const STATUS_TONE: Record<string, string> = {
 }
 
 export function MarketsPanel() {
+  /**
+   * Curated wording for every finance term on this page.
+   *
+   * `AutoTranslate` rewrites the rendered DOM, and a machine translator handed
+   * an isolated two-word label with no context gets finance vocabulary badly
+   * wrong: **"Movers" became "شركات نقل الأثاث"** — furniture removal companies
+   * — on the live page. The rule this establishes, and the one worth keeping:
+   *
+   *   **Curate the labels. Machine-translate the prose.**
+   *
+   * A full sentence carries its own context and machines handle it well; a
+   * label does not and they do not. So headings and column names come from the
+   * dictionary and are marked `data-no-translate`; the explanatory sentences
+   * under each heading are left for the translator.
+   */
+  const t = useT()
+  const curated = useCurated()
   const [report, setReport] = useState<ChainRadarReport | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -128,7 +146,9 @@ export function MarketsPanel() {
       <Card className="p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-lg font-bold">Markets &amp; chains</h1>
+            <h1 data-no-translate={curated('mk.title') || undefined} className="text-lg font-bold">
+              {t('mk.title')}
+            </h1>
             <p className="mt-1 max-w-prose text-sm text-muted-foreground">
               Live prices, network conditions and where the volume actually trades. Every figure
               carries the agency that measured it and when.
@@ -153,12 +173,12 @@ export function MarketsPanel() {
 
         {m ? (
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Stat label="Total market cap" value={usd(m.totalMarketCapUsd)} change={m.change24h} />
-            <Stat label="24h volume" value={usd(m.totalVolumeUsd)} />
+            <Stat labelKey="mk.marketCap" value={usd(m.totalMarketCapUsd)} change={m.change24h} />
+            <Stat labelKey="mk.volume24h" value={usd(m.totalVolumeUsd)} />
             {/* `percent`, not `share`: the source publishes these already as
                 percentages. Passing 59.31 through `share` printed 5931.1%. */}
-            <Stat label="BTC dominance" value={percent(m.btcDominance)} />
-            <Stat label="ETH dominance" value={percent(m.ethDominance)} />
+            <Stat labelKey="mk.btcDominance" value={percent(m.btcDominance)} />
+            <Stat labelKey="mk.ethDominance" value={percent(m.ethDominance)} />
           </div>
         ) : null}
       </Card>
@@ -166,13 +186,13 @@ export function MarketsPanel() {
       {/* ── Networks ─────────────────────────────────────────────────────── */}
       <Card className="p-4">
         <SectionHead
-          title="Networks"
+          titleKey="mk.networks"
           note="Height, cost to transact and how busy each chain is right now. A chain that publishes no congestion measure says so — it is not drawn as quiet."
         />
         {report.networks.length === 0 ? (
           <Empty what="No chain answered this sweep." />
         ) : null}
-        <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6">
           {report.networks.map((n) => {
             const status = networkStatus(n.congestion)
             return (
@@ -193,14 +213,14 @@ export function MarketsPanel() {
                   {STATUS_MEANING[status]}
                 </p>
                 <dl className="mt-3 space-y-1 text-[12px]">
-                  <Row label="Height" value={count(n.height)} />
+                  <Row labelKey="mk.height" value={count(n.height)} />
                   <Row
-                    label="Fee"
+                    labelKey="mk.fee"
                     value={n.fee === null ? UNKNOWN : `${n.fee} ${n.feeUnit ?? ''}`.trim()}
                   />
-                  <Row label="TPS" value={n.tps === null ? UNKNOWN : n.tps.toFixed(1)} />
-                  <Row label="Pending" value={count(n.pending)} />
-                  <Row label="Supply" value={count(n.totalSupply)} />
+                  <Row labelKey="mk.tps" value={n.tps === null ? UNKNOWN : n.tps.toFixed(1)} />
+                  <Row labelKey="mk.pending" value={count(n.pending)} />
+                  <Row labelKey="mk.supply" value={count(n.totalSupply)} />
                 </dl>
                 <Provenance sourceKey={n.sourceKey} sourceUrl={n.sourceUrl} at={n.at} />
               </div>
@@ -212,13 +232,13 @@ export function MarketsPanel() {
       {/* ── Rates ────────────────────────────────────────────────────────── */}
       <Card className="p-4">
         <SectionHead
-          title="Rates"
+          titleKey="mk.rates"
           note="What money costs: the central bank's policy rate, and what the market charges governments to borrow over two, five and ten years. The 2-year against the 10-year is the spread the whole bond market watches — it is the market's own forecast of the economy."
         />
         {report.rates.length === 0 ? (
           <Empty what="No rate was published in this sweep." />
         ) : (
-          <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6">
             {report.rates.map((r) => {
               // A yield move is quoted in basis points, because a 0.011% change
               // is how the bond market says "one basis point" and reading it as
@@ -253,14 +273,14 @@ export function MarketsPanel() {
       {/* ── Currencies ───────────────────────────────────────────────────── */}
       <Card className="p-4">
         <SectionHead
-          title="Currencies"
+          titleKey="mk.currencies"
           note="The ECB's daily reference fixing, quoted per US dollar — the rate contracts and accounts actually settle against, not a broker's quote."
         />
         {report.fx.length === 0 ? (
           <Empty what="No reference fixing was published in this sweep." />
         ) : (
           <>
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5 2xl:grid-cols-10">
               {report.fx.map((f) => (
                 <div key={f.quote} className="rounded-lg border border-border bg-card px-3 py-2">
                   <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -287,19 +307,19 @@ export function MarketsPanel() {
       {/* ── Movers ───────────────────────────────────────────────────────── */}
       <Card className="p-4">
         <SectionHead
-          title="Movers"
+          titleKey="mk.movers"
           note="Largest moves over 24 hours among the coins the source is tracking. A move under 0.05% is shown as flat rather than coloured — noise is not a direction."
         />
         <div className="mt-3 grid gap-4 md:grid-cols-2">
-          <MoverList title="Gaining" movers={report.gainers} />
-          <MoverList title="Falling" movers={report.losers} />
+          <MoverList titleKey="mk.gaining" movers={report.gainers} />
+          <MoverList titleKey="mk.falling" movers={report.losers} />
         </div>
       </Card>
 
       {/* ── Venues ───────────────────────────────────────────────────────── */}
       <Card className="p-4">
         <SectionHead
-          title="Exchanges"
+          titleKey="mk.exchanges"
           note="Where the volume actually trades, and under whose jurisdiction. Concentration matters: a market whose volume sits in one venue has one point of failure — and a price that one venue can move."
         />
         {report.venues.length === 0 ? (
@@ -319,11 +339,11 @@ export function MarketsPanel() {
           <table className="w-full min-w-[34rem] text-[12px]">
             <thead>
               <tr className="border-b border-border text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                <th className="py-1.5 pe-3 font-medium">Venue</th>
-                <th className="py-1.5 pe-3 font-medium">Jurisdiction</th>
+                <th data-no-translate={curated('mk.venue') || undefined} className="py-1.5 pe-3 font-medium">{t('mk.venue')}</th>
+                <th data-no-translate={curated('mk.jurisdiction') || undefined} className="py-1.5 pe-3 font-medium">{t('mk.jurisdiction')}</th>
                 <th className="py-1.5 pe-3 text-right font-medium">24h volume (BTC)</th>
-                <th className="py-1.5 pe-3 text-right font-medium">Share</th>
-                <th className="py-1.5 text-right font-medium">Trust</th>
+                <th data-no-translate={curated('mk.share') || undefined} className="py-1.5 pe-3 text-right font-medium">{t('mk.share')}</th>
+                <th data-no-translate={curated('mk.trust') || undefined} className="py-1.5 text-right font-medium">{t('mk.trust')}</th>
               </tr>
             </thead>
             <tbody>
@@ -418,28 +438,30 @@ function Spread({ rates }: { rates: ChainRadarReport['rates'] }) {
   )
 }
 
-function SectionHead({ title, note }: { title: string; note: string }) {
+function SectionHead({ titleKey, note }: { titleKey: string; note: string }) {
   return (
     <>
-      <h2 className="text-sm font-semibold">{title}</h2>
+      {/* The heading is curated; the note below it is prose and is left for
+          the machine, which handles a full sentence far better than a label. */}
+      <Label as="h2" k={titleKey} className="text-sm font-semibold" />
       <p className="mt-1 max-w-prose text-[12px] leading-relaxed text-muted-foreground">{note}</p>
     </>
   )
 }
 
 function Stat({
-  label,
+  labelKey,
   value,
   change,
 }: {
-  label: string
+  labelKey: string
   value: string
   change?: number | null
 }) {
   const dir = directionOf(change)
   return (
     <div className="rounded-lg border border-border bg-card p-3">
-      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
+      <Label as="p" k={labelKey} className="text-[11px] uppercase tracking-wide text-muted-foreground" />
       <p className="mt-1 text-lg font-semibold tabular-nums">{value}</p>
       {change !== undefined ? (
         <p className={`text-[12px] tabular-nums ${TONE[dir]}`}>{signedPercent(change)} · 24h</p>
@@ -448,21 +470,23 @@ function Stat({
   )
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Row({ labelKey, value }: { labelKey: string; value: string }) {
   return (
     <div className="flex items-baseline justify-between gap-2">
-      <dt className="text-muted-foreground">{label}</dt>
+      <Label as="dt" k={labelKey} className="text-muted-foreground" />
       <dd className="truncate tabular-nums">{value}</dd>
     </div>
   )
 }
 
-function MoverList({ title, movers }: { title: string; movers: ChainRadarReport['gainers'] }) {
+function MoverList({ titleKey, movers }: { titleKey: string; movers: ChainRadarReport['gainers'] }) {
   return (
     <div>
-      <h3 className="text-[12px] font-medium uppercase tracking-wide text-muted-foreground">
-        {title}
-      </h3>
+      <Label
+        as="h3"
+        k={titleKey}
+        className="text-[12px] font-medium uppercase tracking-wide text-muted-foreground"
+      />
       {movers.length === 0 ? (
         <p className="mt-2 text-[12px] text-muted-foreground">
           Nothing reported in this direction in the last reading.
