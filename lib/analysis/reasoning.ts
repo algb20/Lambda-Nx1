@@ -661,7 +661,7 @@ export function readTime(evidence: Evidence[], now: number): TemporalReading {
     const age = (now - newest) / 3_600_000
     parts.push(`Newest evidence ${describeAge(age)}.`)
     if (oldest !== null && oldest !== newest) {
-      parts.push(`The picture reaches back ${describeAge((now - oldest) / 3_600_000)}.`)
+      parts.push(`The picture reaches back ${describeSpan((now - oldest) / 3_600_000)}.`)
     }
     if (stale.length > 0) {
       parts.push(`${stale.length} of ${evidence.length} findings are over a month old.`)
@@ -696,13 +696,39 @@ export function readTime(evidence: Evidence[], now: number): TemporalReading {
 }
 
 /** Ages in the words a reader uses, not in decimal hours. */
+/**
+ * How long a span is, as a bare noun phrase: `2 hours`, `1 day`, `3 months`.
+ *
+ * Bare, because the two callers need different sentences around it and baking
+ * "is … old" into the phrase produced **"The picture reaches back is 23 hours
+ * old."** — a sentence with two verbs in it, printed on an intelligence brief.
+ *
+ * Singular is handled, because it printed **"1 hours old"**. Both were visible
+ * on the live page, and both are the kind of error that quietly tells a reader
+ * nobody proof-reads what this product asserts.
+ *
+ * Floored rather than rounded, to agree with every other clock in the product —
+ * see `humanHours`. Overstating an age on a surface whose argument is freshness
+ * is the error that misleads.
+ */
+function describeSpan(hours: number): string {
+  if (hours < 0) return 'a span dated in the future'
+  if (hours < 1) return 'under an hour'
+  if (hours < 48) {
+    const whole = Math.floor(hours)
+    return `${whole} ${whole === 1 ? 'hour' : 'hours'}`
+  }
+  const days = Math.floor(hours / 24)
+  if (days < 60) return `${days} ${days === 1 ? 'day' : 'days'}`
+  const months = Math.floor(days / 30)
+  return `${months} ${months === 1 ? 'month' : 'months'}`
+}
+
+/** The same span as a predicate: `is 2 hours old`. */
 function describeAge(hours: number): string {
   if (hours < 0) return 'is dated in the future'
   if (hours < 1) return 'is under an hour old'
-  if (hours < 48) return `is ${Math.round(hours)} hours old`
-  const days = Math.round(hours / 24)
-  if (days < 60) return `is ${days} days old`
-  return `is ${Math.round(days / 30)} months old`
+  return `is ${describeSpan(hours)} old`
 }
 
 // ── Source mix ──────────────────────────────────────────────────────────────

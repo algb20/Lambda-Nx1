@@ -168,6 +168,39 @@ describe('utcStamp and humanHours', () => {
     // Never rounds a real duration down to nothing.
     expect(humanHours(0.001)).toBe('1m')
   })
+
+  /**
+   * The bug a reader found on the globe page: one event, two ages.
+   *
+   * The significance rows read "3h old" while the unplaceable list read
+   * "2 hours ago" for the very same advisory, because this function rounded and
+   * `lib/ui/time.ts` floored. Someone shown one instant with two ages has no
+   * reason to trust any time on the page.
+   *
+   * Both clocks floor now, and this is the assertion that keeps them together —
+   * it compares against the arithmetic `relativeOrDate` actually performs
+   * rather than against a hard-coded string, so a change to either side has to
+   * be a deliberate change to both.
+   */
+  it('agrees with the relative clock on the same instant', () => {
+    for (const hours of [1.4, 2.6, 2.99, 5.5, 12.7, 23.9]) {
+      const flooredElsewhere = Math.floor(Math.floor(hours * 60) / 60)
+      expect(humanHours(hours), `${hours}h disagreed with the relative clock`).toBe(
+        `${flooredElsewhere}h`,
+      )
+    }
+  })
+
+  /**
+   * And the direction matters, not only the agreement. Rounding 2.6 hours up to
+   * "3h" claims more elapsed time than has passed — on a surface whose whole
+   * argument is freshness, overstating age is the error that misleads.
+   */
+  it('never claims more time has passed than actually has', () => {
+    expect(humanHours(2.9)).toBe('2h')
+    expect(humanHours(0.98)).toBe('58m')
+    expect(humanHours(47.9)).toBe('47h')
+  })
 })
 
 describe('timeExtent and timeHistogram', () => {

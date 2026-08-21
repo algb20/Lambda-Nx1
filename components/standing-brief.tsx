@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AlertTriangle, Brain, Clock, EyeOff, Loader2, Radio, Scale } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { NameList } from '@/components/panel-section'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { StandingBrief } from '@/lib/modules/brief-shared'
@@ -132,20 +133,34 @@ export function StandingBriefPanel() {
             </span>
           ) : null}
         </div>
-        <p className="text-sm leading-relaxed">{brief.verdict.summary}</p>
-        {reading && reading.bottomLine.length > 0 ? (
-          <ul className="mt-3 space-y-1.5">
-            {reading.bottomLine.map((line, i) => (
-              <li key={i} className="flex gap-2 text-xs text-muted-foreground">
-                <span className="text-primary">·</span>
-                <span>{line}</span>
-              </li>
-            ))}
-          </ul>
+        {/*
+          ## One copy of each sentence, not three
+
+          This card printed `verdict.summary`, then `reading.bottomLine` as
+          bullets, and the cards below then printed those same readings a third
+          time — because with no model running, the summary *is* the bottom line
+          joined into a paragraph, and each bottom-line entry *is* the reading
+          that Support / Age / What it rests on expand with their own numbers.
+
+          A reader met the same four sentences three times in a row and
+          reasonably concluded the page was repeating itself. It was.
+
+          So: when a model wrote the summary it is genuinely new prose and is
+          shown. When it was computed, the readings are left to the sections
+          that give them their numbers, and this card carries only the judgement
+          it exists for — the grade, and why.
+        */}
+        {brief.verdict.model ? (
+          <p className="text-sm leading-relaxed">{brief.verdict.summary}</p>
         ) : null}
         {reading ? (
-          <p className="mt-3 border-t border-border/40 pt-2 text-[11px] italic text-muted-foreground">
+          <p className={`text-[13px] leading-relaxed ${brief.verdict.model ? 'mt-3 border-t border-border/40 pt-2 italic text-muted-foreground' : ''}`}>
             {reading.strengthReason}
+          </p>
+        ) : null}
+        {reading && !brief.verdict.model ? (
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            What that rests on is set out below — support, age, and what the picture is made of.
           </p>
         ) : null}
       </Card>
@@ -264,13 +279,27 @@ export function StandingBriefPanel() {
               </p>
             </div>
           ))}
+          {/*
+            The count is the finding; the roll-call is a lookup.
+
+            This joined all 167 quiet feed keys into one sentence — a paragraph
+            of monospace identifiers running the width of the card, which nobody
+            reads and everybody scrolls past, putting the evidence below it on
+            the far side of that scroll. The names are still here, one tap away,
+            because which feed went quiet genuinely matters when you go looking.
+          */}
           {brief.quietSources.length > 0 ? (
-            <p className="mt-2 text-[11px] text-muted-foreground">
-              {brief.quietSources.length} feed
-              {brief.quietSources.length === 1 ? '' : 's'} contributed nothing this run:{' '}
-              {brief.quietSources.map((s) => s.sourceKey).join(', ')}. An empty region may be quiet
-              or may be unwatched, and those are not the same thing.
-            </p>
+            <div className="mt-2 space-y-1.5">
+              <NameList
+                names={brief.quietSources.map((s) => s.sourceKey)}
+                label="feeds contributed nothing this run"
+                tone="warn"
+                limit={8}
+              />
+              <p className="text-[11px] text-muted-foreground">
+                An empty region may be quiet or may be unwatched, and those are not the same thing.
+              </p>
+            </div>
           ) : null}
         </Card>
       ) : null}

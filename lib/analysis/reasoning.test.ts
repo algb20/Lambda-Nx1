@@ -459,3 +459,44 @@ describe('explainReading', () => {
     expect(text).toMatch(/What to check:/)
   })
 })
+
+/**
+ * Two sentences a reader found broken on the live brief.
+ *
+ * These are not typos in a comment — they are assertions the product makes
+ * about evidence, printed under a heading that says how much to trust it. A
+ * page that cannot conjugate a verb is a page whose numbers a reader has no
+ * reason to trust either.
+ */
+describe('the temporal sentence is a sentence', () => {
+  it('does not print "reaches back is … old", with two verbs', () => {
+    const reading = readTime(
+      [ev({ claim: 'newest', publishedAt: at(2) }), ev({ claim: 'oldest', publishedAt: at(23) })],
+      NOW,
+    )
+    expect(reading.reading).not.toMatch(/reaches back is/)
+    expect(reading.reading).toMatch(/reaches back \d+ hours\./)
+  })
+
+  it('says "1 hour", never "1 hours"', () => {
+    const reading = readTime(
+      [ev({ claim: 'newest', publishedAt: at(1) }), ev({ claim: 'oldest', publishedAt: at(2) })],
+      NOW,
+    )
+    expect(reading.reading).not.toMatch(/\b1 hours\b/)
+    expect(reading.reading).not.toMatch(/\b1 days\b/)
+    expect(reading.reading).not.toMatch(/\b1 months\b/)
+  })
+
+  /**
+   * And it agrees with every other clock in the product: floored, so an age is
+   * never reported as longer than it is.
+   */
+  it('never claims more time has passed than actually has', () => {
+    const reading = readTime(
+      [ev({ claim: 'newest', publishedAt: at(2.9) }), ev({ claim: 'oldest', publishedAt: at(4) })],
+      NOW,
+    )
+    expect(reading.reading).toMatch(/is 2 hours old/)
+  })
+})
