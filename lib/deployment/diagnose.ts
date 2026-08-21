@@ -214,6 +214,19 @@ export function diagnose(input: {
   }
 
   // ── 4. The database — and what actually needs it ─────────────────────────
+  /**
+   * Three outcomes, not two.
+   *
+   * This used to read one boolean and print either "Connected" or "Not
+   * configured". A deployment whose `DATABASE_URL` was set and whose host was
+   * unreachable therefore got "Not configured. Set DATABASE_URL" — advice to do
+   * the thing that had already been done, from the page whose entire purpose is
+   * to end that kind of guessing.
+   *
+   * The health endpoint now carries the real cause and the fix in its detail
+   * (see `lib/db/errors`), so the honest answer is to relay it rather than to
+   * re-derive a worse one here.
+   */
   const dbCheck = findCheck(input.health.body, 'database')
   if (dbCheck === null) {
     checks.push({
@@ -223,13 +236,27 @@ export function diagnose(input: {
       detail: 'The health report did not mention a database.',
       action: null,
     })
-  } else if (dbCheck) {
+  } else if (dbCheck.status === 'ok') {
     checks.push({
       id: 'database',
       title: 'Database',
       state: 'ok',
       detail: 'Connected. Accounts, saved investigations and cross-device preferences all work.',
       action: null,
+    })
+  } else if (dbCheck.configured) {
+    /**
+     * Configured and failing. A `fail`, not a `warn`: on this deployment
+     * accounts are meant to work and do not, which is a fault rather than an
+     * optional extra nobody switched on.
+     */
+    checks.push({
+      id: 'database',
+      title: 'Database',
+      state: 'fail',
+      detail: `DATABASE_URL is set, and the database is not usable: ${dbCheck.detail}`,
+      action:
+        'Fix the connection above, then reload this page. Nothing else on the platform is affected — the map, the panels, the news and every gateway read public sources and need no database.',
     })
   } else {
     checks.push({
@@ -265,12 +292,36 @@ function countRows(body: unknown): number {
  * `off` — both mean "do not rely on this", so treating anything but `ok` as
  * false is the honest reading rather than a convenience.
  */
-function findCheck(body: unknown, name: string): boolean | null {
+/**
+ * The named health check, with enough of it to tell three states apart.
+ *
+ * It used to collapse to a boolean, which is why a database that was
+ * configured-but-broken was reported as never configured at all. `configured`
+ * is read from the health detail, which says which of the two it is.
+ */
+function findCheck(
+  body: unknown,
+  name: string,
+): { status: string; detail: string; configured: boolean } | null {
   if (!body || typeof body !== 'object') return null
   const checks = (body as HealthShape).checks
   if (!Array.isArray(checks)) return null
   const found = checks.find((c) => c.name === name)
-  return found ? found.status === 'ok' : null
+  if (!found) return null
+  const detail = found.detail ?? ''
+  return {
+    status: found.status ?? '',
+    detail: detail || 'no detail reported',
+    /**
+     * Both wordings, because two endpoints produce this line: the shallow
+     * check says "no DATABASE_URL — persistence-backed features are disabled",
+     * and the deep probe says "DATABASE_URL is not set on this deployment".
+     * Matching only one of them would misread half the deployments — and the
+     * failure mode is the exact one being fixed here, telling an owner to set
+     * a variable they have already set.
+     */
+    configured: !/no DATABASE_URL|DATABASE_URL is not set/i.test(detail),
+  }
 }
 
 /** The single sentence a person needs before reading the detail. */

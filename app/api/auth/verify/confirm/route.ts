@@ -8,6 +8,7 @@ import {
   accountsUnavailable,
   codeFailureMessage,
   codeRateLimit,
+  databaseUnavailable,
   readJson,
   str,
 } from '@/lib/auth/code-flow'
@@ -27,7 +28,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
-  const unavailable = accountsUnavailable('auth/verify/confirm')
+  const unavailable = await accountsUnavailable('auth/verify/confirm')
   if (unavailable) return unavailable
   const limited = codeRateLimit(request)
   if (limited) return limited
@@ -46,7 +47,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Enter the six-digit code from the email' }, { status: 400 })
   }
 
-  const result = await checkCode(email, 'signup', code, { store: defaultVerificationStore })
+  // Reading the stored code is a database call, and a database that has gone
+  // away must not reach the user as "that code is not right" — which is what a
+  // thrown error looks like once it falls through to a generic handler.
+  let result: Awaited<ReturnType<typeof checkCode>>
+  try {
+    result = await checkCode(email, 'signup', code, { store: defaultVerificationStore })
+  } catch (err) {
+    const down = databaseUnavailable('auth/verify/confirm', err)
+    if (down) return down
+    throw err
+  }
+
   if (result.status !== 'ok') {
     return NextResponse.json(
       { error: codeFailureMessage(result.status, 'attemptsLeft' in result ? result.attemptsLeft : undefined) },
@@ -66,6 +78,17 @@ export async function POST(request: Request) {
     attachSession(res, userId)
     return res
   } catch (err) {
+    /**
+     * Infrastructure first, always.
+     *
+     * The branches below turn an error into "that username is taken" or into a
+     * 400 carrying the raw message — both of which blame the person typing. A
+     * database that stopped answering would have been reported to them as their
+     * own mistake, and they would have kept trying different usernames.
+     */
+    const down = databaseUnavailable('auth/verify/confirm', err)
+    if (down) return down
+
     const message = err instanceof Error ? err.message : 'Registration failed'
     if (/users_username_uq/i.test(message)) {
       return NextResponse.json({ error: 'That username is taken' }, { status: 409 })

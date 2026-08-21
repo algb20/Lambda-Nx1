@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { isDbConfigured } from '@/lib/db'
+import { databaseAvailability, isDbConfigured } from '@/lib/db'
 import { canIssueSessions } from '@/lib/auth/session'
 import { mailConfigured } from '@/lib/mail'
 
@@ -20,7 +20,21 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  const db = isDbConfigured()
+  /**
+   * A live round trip, not a variable.
+   *
+   * This endpoint decides what the sign-in form offers, so answering from
+   * `isDbConfigured()` alone means offering sign-up on a deployment whose
+   * database cannot be reached — and that is exactly what happened: the form
+   * showed "create an account", the button returned an empty 500, and the
+   * product looked broken in a way no message explained.
+   *
+   * The check is memoised per instance (thirty seconds when healthy, five when
+   * not), so a healthy deployment pays for it at most twice a minute, and a
+   * repaired one recovers within seconds of the fix.
+   */
+  const live = await databaseAvailability()
+  const db = isDbConfigured() && live.live
   const sessions = canIssueSessions()
   const accounts = db && sessions
   const mail = mailConfigured()
@@ -38,13 +52,25 @@ export async function GET() {
    *
    * A boolean cannot carry a reason. This can.
    */
-  const emailSignUpOffBecause: 'database' | 'sessions' | 'mail' | null = accounts && mail
+  const emailSignUpOffBecause:
+    | 'database'
+    | 'database_unreachable'
+    | 'sessions'
+    | 'mail'
+    | null = accounts && mail
     ? null
-    : !db
+    : !isDbConfigured()
       ? 'database'
-      : !sessions
-        ? 'sessions'
-        : 'mail'
+      : // Configured but not answering. A separate value because the two need
+        // different sentences and, more importantly, different people: one is
+        // "nothing has been set up here", the other is "something that was
+        // working has stopped", and telling an owner the first when the second
+        // is true sends them to build what they already built.
+        !live.live
+        ? 'database_unreachable'
+        : !sessions
+          ? 'sessions'
+          : 'mail'
 
   return NextResponse.json({
     /** Whether accounts work at all here. */

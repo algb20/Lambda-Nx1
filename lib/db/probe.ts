@@ -25,6 +25,7 @@
 import { getTableName, is, sql } from 'drizzle-orm'
 import { PgTable } from 'drizzle-orm/pg-core'
 import { getDb, isDbConfigured } from './client'
+import { explainDatabaseError } from './errors'
 import * as schema from '@/db/schema'
 
 export interface DatabaseProbe {
@@ -42,6 +43,18 @@ export interface DatabaseProbe {
   missingTables: string[]
   /** Scrubbed reason, when the probe could not complete. */
   error: string | null
+  /**
+   * What an operator should change, when the failure names a known cause.
+   *
+   * The reason this exists: the probe used to report Drizzle's wrapper message
+   * — `Failed query: select version() as version` — which says what we were
+   * doing and nothing about why it failed. The real cause sits one level down
+   * in `cause`, and with it comes a code that identifies the fix precisely.
+   * See `lib/db/errors`.
+   */
+  hint?: string | null
+  /** The driver code or SQLSTATE behind the failure, when there was one. */
+  code?: string | null
 }
 
 /** How long the database gets to answer before we call it unreachable. */
@@ -60,17 +73,12 @@ export function declaredTables(mod: Record<string, unknown> = schema): string[] 
 }
 
 /**
- * Remove anything credential-shaped from a provider's error text. Postgres
- * drivers happily put the host — and sometimes the whole connection string —
- * into the message, and this value is returned over HTTP.
+ * Re-exported from `./scrub`, where it now lives so the error explainer can use
+ * it without pulling in the schema and the driver. Kept exported here because
+ * "the probe scrubs its output" is a property of the probe, and callers and
+ * tests that already say so should not have to move.
  */
-export function scrubError(message: string): string {
-  return message
-    .replace(/postgres(?:ql)?:\/\/\S+/gi, '[connection string]')
-    .replace(/\/\/[^\s/@]+:[^\s/@]+@/g, '//[credentials]@')
-    .replace(/password[^\s,;]*/gi, 'password[redacted]')
-    .slice(0, 300)
-}
+export { scrubError } from './scrub'
 
 /** Reject after `ms`, so one unresponsive dependency cannot stall the probe. */
 function withDeadline<T>(work: Promise<T>, ms: number): Promise<T> {
@@ -92,7 +100,11 @@ function withDeadline<T>(work: Promise<T>, ms: number): Promise<T> {
   })
 }
 
-const unreachable = (error: string, expectedMigrations: number | null): DatabaseProbe => ({
+const unreachable = (
+  error: string,
+  expectedMigrations: number | null,
+  extra: { hint?: string | null; code?: string | null } = {},
+): DatabaseProbe => ({
   reachable: false,
   latencyMs: null,
   serverVersion: null,
@@ -100,6 +112,8 @@ const unreachable = (error: string, expectedMigrations: number | null): Database
   expectedMigrations,
   missingTables: [],
   error,
+  hint: extra.hint ?? null,
+  code: extra.code ?? null,
 })
 
 /**
@@ -171,12 +185,24 @@ export async function probeDatabase(
       expectedMigrations,
       missingTables,
       error: null,
+      hint: null,
+      code: null,
     }
   } catch (err) {
-    return unreachable(
-      scrubError(err instanceof Error ? err.message : 'database probe failed'),
-      expectedMigrations,
-    )
+    /**
+     * The whole cause chain, not the top of it.
+     *
+     * `db.execute()` rejects with Drizzle's wrapper, whose message is always
+     * `Failed query: <the sql>` — a sentence about our code that contains not
+     * one fact about the failure. Unwrapping it is the difference between
+     * "Failed query: select version()" and "ENOTFOUND — the Supabase direct
+     * host is IPv6-only, use the pooler", which is a fix.
+     */
+    const failure = explainDatabaseError(err)
+    return unreachable(failure.detail, expectedMigrations, {
+      hint: failure.hint,
+      code: failure.code,
+    })
   }
 }
 
@@ -189,7 +215,11 @@ export function describeProbe(probe: DatabaseProbe): {
   detail: string
 } {
   if (!probe.reachable) {
-    return { status: 'off', detail: probe.error ?? 'database unreachable' }
+    // The hint is the half an operator can act on, so it travels with the
+    // error rather than sitting in a field a dashboard may not render.
+    const cause = probe.error ?? 'database unreachable'
+    const code = probe.code ? ` [${probe.code}]` : ''
+    return { status: 'off', detail: probe.hint ? `${cause}${code} — ${probe.hint}` : `${cause}${code}` }
   }
   if (probe.missingTables.length > 0) {
     return {

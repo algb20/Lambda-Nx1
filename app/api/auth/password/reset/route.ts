@@ -7,6 +7,7 @@ import {
   accountsUnavailable,
   codeFailureMessage,
   codeRateLimit,
+  databaseUnavailable,
   readJson,
   str,
 } from '@/lib/auth/code-flow'
@@ -28,7 +29,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
-  const unavailable = accountsUnavailable('auth/password/reset')
+  const unavailable = await accountsUnavailable('auth/password/reset')
   if (unavailable) return unavailable
   const limited = codeRateLimit(request)
   if (limited) return limited
@@ -44,7 +45,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Enter the six-digit code from the email' }, { status: 400 })
   }
 
-  const result = await checkCode(email, 'reset', code, { store: defaultVerificationStore })
+  // A database that has gone away must not be reported as a wrong code: the
+  // person would ask for another, get the same answer, and conclude the reset
+  // is broken for their account specifically.
+  let result: Awaited<ReturnType<typeof checkCode>>
+  try {
+    result = await checkCode(email, 'reset', code, { store: defaultVerificationStore })
+  } catch (err) {
+    const down = databaseUnavailable('auth/password/reset', err)
+    if (down) return down
+    throw err
+  }
+
   if (result.status !== 'ok') {
     return NextResponse.json(
       { error: codeFailureMessage(result.status, 'attemptsLeft' in result ? result.attemptsLeft : undefined) },
@@ -59,6 +71,10 @@ export async function POST(request: Request) {
     attachSession(res, account.userId)
     return res
   } catch (err) {
+    // Infrastructure before input: a 400 here would tell someone their new
+    // password was rejected when in fact nothing was ever asked.
+    const down = databaseUnavailable('auth/password/reset', err)
+    if (down) return down
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Could not set the new password' },
       { status: 400 },

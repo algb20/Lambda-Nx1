@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { getSessionUserId } from '@/lib/auth/server'
-import { repo, isDbConfigured, type Post } from '@/lib/db'
+import { repo, isDbConfigured, describeDatabaseError, type Post } from '@/lib/db'
 import { validatePostInput, postPermalink } from '@/lib/posts'
 import { toPublicPost } from '@/lib/post-mapper'
 import { broadcast, channelsForAutoPublish } from '@/lib/social/broadcast'
@@ -20,11 +20,40 @@ export async function GET(request: Request) {
   const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 100) : 50
   const beforeRaw = url.searchParams.get('before')
   const before = beforeRaw ? new Date(beforeRaw) : undefined
-  const rows = await repo.posts.listPublic(limit, before && !isNaN(before.getTime()) ? before : undefined)
+
+  /**
+   * A feed that cannot be read is an empty feed, not a crashed page.
+   *
+   * This threw a bare 500 when the database was unreachable, and the home page
+   * — which fetches it on load — showed nothing and said nothing. The rest of
+   * the product does not need the database at all: the gateways, the board, the
+   * globe are all live public sources. Taking the whole front page down over
+   * the one component that does need it is the wrong trade.
+   *
+   * `degraded` is in the body so the surface can say *why* it is empty. An
+   * empty list with no explanation is the failure mode this project exists to
+   * avoid — it looks exactly like "nothing has been published".
+   */
+  let rows: Post[]
+  try {
+    rows = await repo.posts.listPublic(limit, before && !isNaN(before.getTime()) ? before : undefined)
+  } catch (err) {
+    console.error(`[api/posts] feed unavailable — ${describeDatabaseError(err)}`)
+    return NextResponse.json(
+      {
+        posts: [],
+        degraded: true,
+        detail: 'The feed is temporarily unavailable — this deployment cannot reach its database.',
+      },
+      { status: 200, headers: { 'Cache-Control': 'no-store' } },
+    )
+  }
+
   // One lookup for every author on the page rather than one per post.
-  const avatars = await repo.users.avatarsByIds(
-    rows.map((r) => r.authorUserId).filter((id): id is string => Boolean(id)),
-  )
+  // Never fatal: a feed with no avatars is a feed; a feed that 500s is not.
+  const avatars = await repo.users
+    .avatarsByIds(rows.map((r) => r.authorUserId).filter((id): id is string => Boolean(id)))
+    .catch(() => new Map<string, string | null>())
   /**
    * Keep the feed current without depending on a scheduler.
    *
