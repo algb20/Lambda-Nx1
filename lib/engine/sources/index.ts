@@ -58,6 +58,7 @@ import { faaAirspaceStatus } from './aviation'
 import { piNetworkChain, ethereumChain, solanaChain, exchangeVenues, multiChainSources } from './chains-multi'
 // Federation — open government data (one CKAN client, every national portal)
 import { ckanFederation, openDataActivePortalCount } from './opendata'
+import { ecbYieldCurve, ecbPolicyRate, referenceRates } from './rates'
 
 export const moduleOneSources: Source[] = [
   cloudflareDns,
@@ -106,7 +107,19 @@ export const worldEventsGatewaySources: Source[] = [
   faaAirspaceStatus,
 ]
 
-export const chainStateGatewaySources: Source[] = [...chainStateSources, ...multiChainSources]
+/**
+ * Rates and currencies ride with the chain sources rather than in a gateway of
+ * their own: the markets page reads one sweep, and a reader comparing a euro
+ * yield against Bitcoin's fee wants both measured at the same moment. Two
+ * sweeps would let the page show two different afternoons side by side.
+ */
+export const rateSources: Source[] = [ecbYieldCurve, ecbPolicyRate, referenceRates]
+
+export const chainStateGatewaySources: Source[] = [
+  ...chainStateSources,
+  ...multiChainSources,
+  ...rateSources,
+]
 
 export const openDataGatewaySources: Source[] = [ckanFederation]
 

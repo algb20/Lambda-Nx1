@@ -558,3 +558,36 @@ Every figure carries the agency that measured it and when (§6). Where a chain
 publishes no congestion measure the card says so, rather than drawing an empty
 bar — inventing a measurement is the same failure as printing `0` for "not
 reported".
+
+| R262 | `markets` | `done` | **اكمل بكل تفاصيلهم والمعلومات وايضا ضم ماتبقى** — complete them with all their detail and information, and include what remains (the traditional exchanges: equities, bonds, currencies). |
+
+**R262 — the traditional side, from the institutions that set it.**
+
+Added, each probed live before it was written down:
+
+| | Source | Live now |
+|---|---|---|
+| Sovereign yields 2Y/5Y/10Y | ECB euro-area yield curve (SDMX) | 2.791% / 2.934% / 3.279% |
+| Policy rate | ECB main refinancing rate | 2.400% |
+| Reference exchange rates | ECB daily fixing via Frankfurter | 10 currencies per USD |
+
+The **2s10s spread** is the one number computed rather than read, and it earns
+that: it is the question the two yields exist to answer together, and its sign
+is stated in words rather than left as a subtraction for the reader.
+
+**Equity index levels are absent, and that is a finding rather than a gap in
+effort.** Index levels are licensed intellectual property — S&P owns the S&P
+500's values, Deutsche Börse owns the DAX's. Stooq answered 404, ECB's FM
+equity series 404, Bundesbank 406. The unofficial endpoints that do exist are
+scrapes of a broker's site in breach of its terms, which §3 forbids. The honest
+answer is that this category needs a licensed feed, and to publish nothing
+rather than something we had no right to take.
+
+**One bug worth recording.** The yield curve first made three requests, one per
+tenor, and the engine dropped the whole source in silence: a source declaring
+`minIntervalMs` is rate-limited against its own previous call, so the second and
+third fetches inside a single run were refused. It worked perfectly when run by
+hand — which is exactly how that class of bug survives. Now one request for all
+three, matched by the dimension id the API returns rather than by position:
+`SR_2Y+SR_5Y+SR_10Y` was requested and `["SR_10Y","SR_2Y","SR_5Y"]` came back,
+so reading by position would have labelled the ten-year yield as the two-year.

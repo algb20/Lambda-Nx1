@@ -86,9 +86,42 @@ export interface VenueCountry {
   share: number
 }
 
+/**
+ * A rate an institution sets or publishes: a yield, a policy rate.
+ *
+ * `change` is against the previous published observation, and is null when
+ * there is only one — a rate that is not moving and a rate we cannot tell is
+ * moving must not look the same.
+ */
+export interface RateReading {
+  kind: 'yield' | 'policy'
+  label: string
+  tenor: string | null
+  value: number
+  unit: string
+  change: number | null
+  observedOn: string
+  sourceKey: string
+  sourceUrl: string | null
+}
+
+/** One currency against the US dollar, at the ECB's daily reference fixing. */
+export interface FxReading {
+  base: string
+  quote: string
+  value: number
+  observedOn: string
+  sourceKey: string
+  sourceUrl: string | null
+}
+
 export interface ChainRadarReport {
   generatedAt: string
   networks: ChainNetwork[]
+  /** Sovereign yields and the policy rate they sit above. */
+  rates: RateReading[]
+  /** Reference exchange rates, per US dollar. */
+  fx: FxReading[]
   market: {
     totalMarketCapUsd: number
     totalVolumeUsd: number | null
@@ -287,6 +320,50 @@ export async function chainRadar(): Promise<ChainRadarReport> {
   }
   networks.sort((a, b) => chainRank(a.chain) - chainRank(b.chain))
 
+  // ── Rates and currencies ───────────────────────────────────────────────────
+  const rates: RateReading[] = []
+  const fx: FxReading[] = []
+  for (const e of state.evidence) {
+    const d = (e.data ?? {}) as Record<string, unknown>
+    if (d.metric === 'rate') {
+      const value = num(d.value)
+      if (value === null) continue
+      rates.push({
+        kind: d.kind === 'policy' ? 'policy' : 'yield',
+        label: String(d.label ?? ''),
+        tenor: typeof d.tenor === 'string' ? d.tenor : null,
+        value,
+        unit: String(d.unit ?? '%'),
+        change: num(d.change),
+        observedOn: String(d.observedOn ?? ''),
+        sourceKey: e.sourceKey,
+        sourceUrl: e.sourceUrl ?? null,
+      })
+    } else if (d.metric === 'fx') {
+      const value = num(d.value)
+      if (value === null) continue
+      fx.push({
+        base: String(d.base ?? 'USD'),
+        quote: String(d.quote ?? ''),
+        value,
+        observedOn: String(d.observedOn ?? ''),
+        sourceKey: e.sourceKey,
+        sourceUrl: e.sourceUrl ?? null,
+      })
+    }
+  }
+  /**
+   * The policy rate leads, then the curve short-to-long. That is the order the
+   * numbers mean something in: the floor first, then how much more the market
+   * charges as the horizon lengthens.
+   */
+  const TENOR_ORDER = ['2Y', '5Y', '10Y']
+  rates.sort((a, b) => {
+    if (a.kind !== b.kind) return a.kind === 'policy' ? -1 : 1
+    return TENOR_ORDER.indexOf(a.tenor ?? '') - TENOR_ORDER.indexOf(b.tenor ?? '')
+  })
+  fx.sort((a, b) => a.quote.localeCompare(b.quote))
+
   // ── Market structure ───────────────────────────────────────────────────────
   let market: ChainRadarReport['market'] = null
   for (const e of state.evidence) {
@@ -390,6 +467,8 @@ export async function chainRadar(): Promise<ChainRadarReport> {
   return {
     generatedAt: new Date().toISOString(),
     networks,
+    rates,
+    fx,
     market,
     // Only genuine moves in each direction — padding to a fixed length would
     // produce a "top loser" that actually rose.
