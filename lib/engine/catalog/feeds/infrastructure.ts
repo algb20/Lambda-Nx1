@@ -286,7 +286,78 @@ export const INFRASTRUCTURE_SOURCES: CatalogSource[] = [
     note: 'Blocked by the licence registry until an agreement exists. The gap is real and named.',
   },
 
+  /**
+   * The UK's air accident investigator — added because aviation had **one**
+   * working independent origin.
+   *
+   * The self-audit named it: *"aviation has 1 working independent origin.
+   * Nothing on this topic can be corroborated beyond that."* One origin is not
+   * a source of intelligence, it is a single point of failure with a citation —
+   * if it is wrong, or quiet, the topic is wrong or quiet with it, and nothing
+   * in the confidence grade can tell you so (charter §2a).
+   *
+   * The AAIB is a genuinely separate origin from the FAA: a different state, a
+   * different legal regime, its own field investigations. It is not a
+   * republisher of anything already counted.
+   *
+   * The `.atom` suffix is a gov.uk platform convention — every organisation
+   * page serves one — which is why this is a stable URL rather than a feed path
+   * that a site redesign will move. Verified live: 200, 20 entries, 703 ms.
+   */
+  {
+    key: 'gov_uk_aaib',
+    name: 'AAIB — air accident investigations',
+    publisher: 'UK Air Accidents Investigation Branch',
+    url: 'https://www.gov.uk/government/organisations/air-accidents-investigation-branch.atom',
+    kind: 'rss',
+    discipline: 'geoint',
+    topics: ['aviation'],
+    coverage: ['GB'],
+    admiralty: 'A',
+    independence: 'uk-gov',
+    licence: ccBy(
+      'AAIB, Open Government Licence v3.0',
+      'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/',
+    ),
+    minIntervalSec: 3600,
+    keyless: true,
+    note: 'Second independent origin for aviation. Formal investigations and safety bulletins, not traffic data.',
+  },
+
   // ── Maritime ─────────────────────────────────────────────────────────────
+  /**
+   * The maritime counterpart, and for the same reason: the topic rested on one
+   * origin, and that origin was a NOAA tide gauge — an instrument, not an
+   * account of anything happening at sea.
+   *
+   * Grouped as `uk-gov` alongside the AAIB rather than given its own
+   * independence key. The two branches are separate investigators, but they
+   * are one government publishing through one platform, and counting them as
+   * two independent origins would inflate exactly the number this project
+   * refuses to inflate (charter §2a). Maritime still rises from one origin to
+   * two, honestly.
+   *
+   * Verified live: 200, 20 entries, 457 ms.
+   */
+  {
+    key: 'gov_uk_maib',
+    name: 'MAIB — marine accident investigations',
+    publisher: 'UK Marine Accident Investigation Branch',
+    url: 'https://www.gov.uk/government/organisations/marine-accident-investigation-branch.atom',
+    kind: 'rss',
+    discipline: 'geoint',
+    topics: ['maritime'],
+    coverage: ['GB'],
+    admiralty: 'A',
+    independence: 'uk-gov',
+    licence: ccBy(
+      'MAIB, Open Government Licence v3.0',
+      'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/',
+    ),
+    minIntervalSec: 3600,
+    keyless: true,
+    note: 'Second independent origin for maritime. Casualty investigations and safety bulletins.',
+  },
   {
     key: 'noaa_coops_water',
     name: 'NOAA CO-OPS — water levels and currents',

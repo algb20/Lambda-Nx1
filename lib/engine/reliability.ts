@@ -407,13 +407,43 @@ export function selfAudit(
   for (const r of records) states[r.state]++
 
   const high = findings.filter((f) => f.severity === 'high').length
+
+  /**
+   * The tail: how many findings, and how many of them matter.
+   *
+   * Split out because it is appended to three different openings and drifting
+   * copies of one sentence is how a report starts contradicting itself.
+   */
+  const tail =
+    findings.length === 0
+      ? ' Nothing in the catalogue contradicts what we have observed.'
+      : ` ${findings.length} finding${findings.length === 1 ? '' : 's'}${high > 0 ? `, ${high} of them material` : ''}.`
+
+  /**
+   * `unproven` is named, and when it dominates it leads.
+   *
+   * The old sentence listed four of the five states and silently dropped the
+   * fifth. On a deployment whose health table had just been created — every
+   * source unproven — it read *"164 sources observed: 0 healthy, 0 degraded,
+   * 0 silent, 0 dead"*, which is either a catastrophe or a contradiction
+   * depending on how you read it, and is neither: nothing had been measured
+   * yet. A report that omits the only non-zero number is worse than no report,
+   * because it is confidently wrong rather than absent.
+   *
+   * "Observed" was the second half of the same mistake. An unproven source has
+   * by definition *not* been observed, so counting it under that word made the
+   * total a claim we could not support.
+   */
+  const measured = records.length - states.unproven
   const headline =
     records.length === 0
       ? 'No observations yet — the platform has nothing to say about its own sources.'
-      : `${records.length} sources observed: ${states.healthy} healthy, ${states.degraded} degraded, ${states.silent} silent, ${states.dead} dead.` +
-        (findings.length === 0
-          ? ' Nothing in the catalogue contradicts what we have observed.'
-          : ` ${findings.length} finding${findings.length === 1 ? '' : 's'}${high > 0 ? `, ${high} of them material` : ''}.`)
+      : measured === 0
+        ? `${records.length} sources in the catalogue, none measured yet — the sweep has not recorded a result for any of them.` +
+          tail
+        : `${measured} of ${records.length} sources measured: ${states.healthy} healthy, ${states.degraded} degraded, ${states.silent} silent, ${states.dead} dead` +
+          (states.unproven > 0 ? `, ${states.unproven} not yet measured.` : '.') +
+          tail
 
   return {
     generatedAt: new Date(now).toISOString(),

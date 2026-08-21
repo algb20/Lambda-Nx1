@@ -341,7 +341,7 @@ notes, because a repaired ledger that hides its repair is worse than none:
 
 | # | Area | Status | Request |
 |---|---|---|---|
-| R237 | `mail` | `open` | **يزال هناك خطا في التحقق من الايميل** — email verification still errors. Fix first. |
+| R237 | `mail` | `done` | **يزال هناك خطا في التحقق من الايميل** — email verification still errors. Fix first. ✅ *Closed 2026-08-21: verified live end to end — `POST /api/auth/verify/request` → `{"sent":true}`. The cause was never mail; see R249–R252.* |
 | R238 | `design` | `open` | **هل ترى الفرق في التصميم اجعلها مثلها** — match the design in the two screenshots exactly. |
 | R239 | `design` | `open` | **اجعل المربعات اصغر وليس مستطيلات** — the boxes must be smaller and square, not rectangles. |
 | R240 | `design` | `open` | **كل الفئات يجب توفر مربع خاص بها والمعلومات والاخبار تتدفق داخلها** — every category gets its own box with its news flowing inside it. |
@@ -414,3 +414,47 @@ and only ever creating. `AUTO_SCHEMA=off` disables it.
 Proved end to end against a database rebuilt to the live deployment's exact
 state: a visitor pressing "send code" healed the database in 38 ms and received
 their code in the same request; the next request cost 0 ms.
+
+| R252 | `accounts` | `done` | **اكمل كل هذا وحدك** — complete all of it yourself. |
+
+**R252 — done, and verified on the live deployment.** Opened and merged PR #46,
+waited for the deploy (`a169560`), then drove the real path a visitor takes:
+
+```
+GET  /api/auth/methods        → accounts true, emailSignUp true,
+                                emailSignUpOffBecause null
+     (this request is what triggered the repair)
+GET  /api/health?deep=1       → reachable, PostgreSQL 17.6, missing tables: 0
+POST /api/auth/verify/request → {"sent":true}
+```
+
+The four missing tables were created by the deployment itself, with no secret,
+no paste and no shell. R237 — open since the session began — is closed by this.
+
+| R253 | `method` | `standing` | **اعمل كل شيئ وحدك حتى تصلح كل الاخطاء ويتفعل الايميل وكل شيئ الان انت المسؤول عن هذا وعن التطبيق والاصلاح والتطوير** — do everything yourself; you are responsible for the app, its repair and its development. |
+
+**R253 — ownership accepted, and exercised.** Email confirmed delivered
+end to end (the code reached the owner's inbox, in Arabic, not spam). Then a
+full sweep of the live deployment rather than a report that it looked fine.
+Four real defects found and fixed:
+
+1. **The self-audit headline omitted its only non-zero number.** It read
+   *"164 sources observed: 0 healthy, 0 degraded, 0 silent, 0 dead"* — four
+   zeroes, no mention of the 164 unproven. `unproven` is now named, and
+   "observed" no longer counts sources that were never measured.
+2. **Three topics could not be corroborated at all** — aviation, maritime and
+   procurement each had one independent origin. Added AAIB, MAIB and World Bank
+   procurement notices, each verified live through the engine's own reader
+   before entering the catalogue.
+3. **Record fields were being published as headlines.** World Bank descriptions
+   arrive as multi-line paragraphs; `headline()` now normalises at every claim
+   site — the general form of the "0.821" defect.
+4. **Non-UTF-8 feeds were silently corrupted.** Folha declares ISO-8859-1 inside
+   the document and sends no charset header, so every accented Portuguese
+   headline was stored as mojibake (`reduz �s redes`). `decodeBody()` honours
+   the declared encoding; header wins, then XML declaration, then meta.
+
+Also: the audit script now applies the same normalisation the product does — an
+audit that reports what the product would never publish is measuring the
+instrument — and the adapter's test double is a real `Response` instead of an
+object shaped like the two methods it happened to call.

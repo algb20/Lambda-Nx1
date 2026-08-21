@@ -26,7 +26,7 @@
  *   npx tsx scripts/audit-feeds.ts gdelt nvd_recent
  */
 import { CATALOG } from '../lib/engine/catalog/index'
-import { fillTemplate, requestUrl } from '../lib/engine/catalog/adapter'
+import { decodeBody, fillTemplate, headline, requestUrl } from '../lib/engine/catalog/adapter'
 import type { CatalogSource } from '../lib/engine/catalog/types'
 
 /** How long to wait on one publisher before moving on. */
@@ -65,13 +65,21 @@ function readJson(source: CatalogSource, text: string): { records: number; detai
   // The real headline, produced the way the adapter produces it — a template
   // that *looks* right but resolves to nothing is exactly the failure this
   // script exists to catch, so reporting the template itself would be useless.
-  const title =
+  /**
+   * `headline()` is applied here for the same reason this script uses the
+   * engine's own lookups and the engine's own headers: an audit that reports
+   * something the product would never publish is measuring the instrument, not
+   * the feed. Without it this printed a two-line title for a source the board
+   * renders on one.
+   */
+  const title = headline(
     fillTemplate(source.map?.titleTemplate, row) ??
     firstText(dig(row, source.map?.title)) ??
     firstText(dig(row, 'title')) ??
     firstText(dig(row, 'name')) ??
     firstText(dig(row, 'headline')) ??
-    firstText(dig(row, 'properties.title'))
+    firstText(dig(row, 'properties.title')),
+  )
   if (title) return { records: list.length, detail: `title: ${title.slice(0, 62)}` }
   const keys = Object.keys((row ?? {}) as Record<string, unknown>).join(', ')
   return { records: list.length, detail: `NO READABLE TITLE — record keys: ${keys.slice(0, 90)}` }
@@ -94,8 +102,9 @@ function readFeed(text: string): { records: number; detail: string } {
     ?.replace(/<!\[CDATA\[|\]\]>/g, '')
     .replace(/<[^>]+>/g, '')
     .trim()
-  return itemTitle
-    ? { records: items.length, detail: `title: ${itemTitle.slice(0, 62)}` }
+  const clean = headline(itemTitle)
+  return clean
+    ? { records: items.length, detail: `title: ${clean.slice(0, 62)}` }
     : { records: items.length, detail: 'NO READABLE TITLE — items carry no <title>' }
 }
 
@@ -120,7 +129,7 @@ async function discoverFeeds(pageUrl: string): Promise<string[]> {
       redirect: 'follow',
     })
     if (!res.ok) return []
-    const html = await res.text()
+    const html = await decodeBody(res)
     const found = new Set<string>()
     for (const tag of html.match(/<link[^>]+>/gi) ?? []) {
       if (!/rel=["']?alternate/i.test(tag)) continue
@@ -162,7 +171,7 @@ async function audit(source: CatalogSource): Promise<Finding> {
       },
       redirect: 'follow',
     })
-    const text = await res.text()
+    const text = await decodeBody(res)
     if (!res.ok) {
       // A 404 or 410 means it moved; ask the publisher where to. A 403 means we
       // are being refused, and no amount of discovery changes that.

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { catalogSource, fillTemplate, requestUrl } from './adapter'
+import { catalogSource, fillTemplate, requestUrl, headline, MAX_HEADLINE, declaredCharset, decodeBody } from './adapter'
 import type { CatalogSource } from './types'
 import { PUBLIC_DOMAIN } from './licence'
 
@@ -27,15 +27,31 @@ const base: CatalogSource = {
 }
 
 /** A context whose fetch returns a canned body, so no network is touched. */
+/**
+ * A real `Response`, not an object shaped like the two methods we happened to
+ * call.
+ *
+ * The hand-rolled double used to expose only `json()` and `text()`, and the
+ * `as unknown as Response` cast told the type checker to believe it. That held
+ * until the adapter started reading `arrayBuffer()` to honour a declared
+ * charset — at which point every test using this stub failed against a
+ * *correct* change, because the double had been lying about the interface all
+ * along.
+ *
+ * Constructing the real thing costs nothing and cannot drift: whatever the
+ * adapter reaches for next is already there, and behaves as it will in
+ * production.
+ */
 function ctxReturning(body: unknown, { ok = true, status = 200 } = {}) {
+  const text = typeof body === 'string' ? body : JSON.stringify(body)
   return {
     fetch: async () =>
-      ({
-        ok,
-        status,
-        json: async () => body,
-        text: async () => (typeof body === 'string' ? body : JSON.stringify(body)),
-      }) as unknown as Response,
+      new Response(text, {
+        status: ok ? status : status >= 400 ? status : 500,
+        headers: {
+          'content-type': typeof body === 'string' ? 'application/xml' : 'application/json',
+        },
+      }),
   }
 }
 
@@ -279,5 +295,104 @@ describe('a feed that has to ask for "now"', () => {
   it('falls back to the declared address rather than going silent on a bad window', () => {
     const url = requestUrl({ ...base, urlFor: () => 'not a url at all' }, at)
     expect(url).toBe(base.url)
+  })
+})
+
+describe('headline — a record field is not a headline', () => {
+  /**
+   * The live case. The World Bank publishes `bid_description` as several lines
+   * with an embedded numbered list, so the board rendered a paragraph where a
+   * one-line headline belonged and the row broke around it.
+   */
+  it('collapses newlines and runs of whitespace into single spaces', () => {
+    expect(headline('Bhutan: Selection of a consultant to conduct:\ni) A Comprehensive Assessment')).toBe(
+      'Bhutan: Selection of a consultant to conduct: i) A Comprehensive Assessment',
+    )
+    expect(headline('a\t\t b \r\n  c')).toBe('a b c')
+  })
+
+  it('leaves a normal headline exactly as the publisher wrote it', () => {
+    const real = 'Ocean Way preliminary assessment update'
+    expect(headline(real)).toBe(real)
+  })
+
+  it('truncates on a word boundary and marks that it did', () => {
+    const long = `${'word '.repeat(80)}end`
+    const out = headline(long)!
+    expect(out.length).toBeLessThanOrEqual(MAX_HEADLINE + 1)
+    expect(out.endsWith('…')).toBe(true)
+    // Cut between words, never through one.
+    expect(out).not.toMatch(/wor…$/)
+  })
+
+  it('does not truncate through a word when there is no space to cut at', () => {
+    // One enormous token: cutting at the last space would discard nearly all of
+    // it, so a hard cut is the lesser evil — but it still marks the truncation.
+    const out = headline('x'.repeat(400))!
+    expect(out.endsWith('…')).toBe(true)
+    expect(out.length).toBe(MAX_HEADLINE + 1)
+  })
+
+  it('treats an empty or whitespace-only field as no headline at all', () => {
+    expect(headline('   \n ')).toBeNull()
+    expect(headline('')).toBeNull()
+    expect(headline(null)).toBeNull()
+    expect(headline(undefined)).toBeNull()
+  })
+})
+
+describe('declaredCharset — publishers do not all speak UTF-8', () => {
+  /**
+   * The live bug. Folha de S.Paulo answers `Content-Type: text/xml` with no
+   * charset and declares ISO-8859-1 inside the document, so every accented
+   * Portuguese headline was stored corrupted — `reduz �s redes` instead of
+   * `reduz às redes`. The request succeeded, so nothing reported a fault.
+   */
+  it('reads the encoding from the XML declaration when the header is silent', () => {
+    expect(declaredCharset('text/xml', '<?xml version="1.0" encoding="ISO-8859-1" ?>')).toBe('iso-8859-1')
+  })
+
+  it('lets the header win, because HTTP says the server is authoritative', () => {
+    expect(
+      declaredCharset('text/xml; charset=utf-8', '<?xml version="1.0" encoding="ISO-8859-1" ?>'),
+    ).toBe('utf-8')
+  })
+
+  it('reads an HTML meta charset when there is no XML declaration', () => {
+    expect(declaredCharset(null, '<html><head><meta charset="windows-1252">')).toBe('windows-1252')
+  })
+
+  it('defaults to UTF-8 when nothing declares anything', () => {
+    expect(declaredCharset(null, '{"a":1}')).toBe('utf-8')
+    expect(declaredCharset('application/json', '')).toBe('utf-8')
+  })
+})
+
+describe('decodeBody', () => {
+  /** A Response over real Latin-1 bytes — the exact shape Folha returns. */
+  function latin1Response(text: string, contentType: string): Response {
+    const bytes = Uint8Array.from([...text].map((c) => c.charCodeAt(0)))
+    return new Response(bytes, { headers: { 'content-type': contentType } })
+  }
+
+  it('decodes a Latin-1 feed the way its own declaration asks', async () => {
+    const xml = '<?xml version="1.0" encoding="ISO-8859-1" ?><rss><title>reduz às redes</title></rss>'
+    const decoded = await decodeBody(latin1Response(xml, 'text/xml'))
+    expect(decoded).toContain('reduz às redes')
+    expect(decoded).not.toContain('�')
+  })
+
+  it('still decodes ordinary UTF-8 correctly', async () => {
+    const res = new Response(new TextEncoder().encode('<rss><title>زلزال</title></rss>'), {
+      headers: { 'content-type': 'application/rss+xml; charset=utf-8' },
+    })
+    expect(await decodeBody(res)).toContain('زلزال')
+  })
+
+  it('falls back to UTF-8 rather than throwing on an encoding nobody knows', async () => {
+    const res = new Response(new TextEncoder().encode('hello'), {
+      headers: { 'content-type': 'text/xml; charset=not-a-real-encoding' },
+    })
+    await expect(decodeBody(res)).resolves.toBe('hello')
   })
 })
