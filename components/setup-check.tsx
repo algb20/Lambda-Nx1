@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { AlertTriangle, CheckCircle2, CircleHelp, Loader2, RefreshCw, XCircle } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { SchemaInstaller } from '@/components/schema-installer'
 import { ALL_MODES } from '@/lib/gateways'
 import {
   diagnose,
@@ -135,6 +136,13 @@ export function SetupCheck() {
           ) : null}
         </Card>
       ))}
+
+      {/*
+        Directly under the checks, because the database check above is the one
+        that most often reports a fault an operator can fix from this page —
+        and the fix used to be "paste nine hundred lines somewhere else".
+      */}
+      <SchemaInstaller />
 
       <Card className="p-4">
         <h2 className="text-sm font-semibold">Running it yourself</h2>

@@ -474,6 +474,7 @@ export const API_GROUPS: ApiGroup[] = [
 export const INTERNAL_ROUTES: Record<string, string> = {
   account: 'a person’s own account',
   'admin/social': 'secret-gated administration',
+  'admin/schema': 'secret-gated administration — creates this deployment’s own database tables',
   'admin/social/test': 'secret-gated administration',
   'admin/visitors': 'secret-gated administration',
   alerts: 'per-user alert rules and signed webhook delivery',

@@ -43,10 +43,54 @@ export function getDb(): Database {
     max: Number.isFinite(poolMax) && poolMax > 0 ? Math.min(poolMax, 20) : 3,
     connect_timeout: 10,
     idle_timeout: 20,
+    onnotice: reportNotice,
   })
   const db = drizzle(client, { schema })
   cached = { client, db }
   return db
+}
+
+/**
+ * Postgres codes meaning "that already existed, so I skipped it".
+ *
+ * The schema is deliberately idempotent, so applying it to a database that is
+ * already complete raises one of these for nearly every statement — around
+ * sixty notices for a single run. The driver prints each as a multi-line object
+ * by default, which buries anything real in the function log and, on a metered
+ * host, is charged for.
+ */
+const ROUTINE_NOTICES = new Set(['42P07', '42701', '42710', '42P06', '42723'])
+
+/**
+ * Notices, filtered rather than silenced.
+ *
+ * Turning them off entirely would be the easy fix and the wrong one: a notice
+ * is how Postgres reports a truncated identifier or a cast it chose for you,
+ * and those are worth seeing. Only the "already exists, skipping" family — the
+ * expected consequence of an idempotent schema — is dropped, and what survives
+ * is printed as one line instead of a paragraph.
+ */
+function reportNotice(notice: { code?: string; message?: string }): void {
+  if (notice.code && ROUTINE_NOTICES.has(notice.code)) return
+  console.warn(`[db] ${notice.code ?? 'notice'}: ${notice.message ?? ''}`)
+}
+
+/**
+ * The raw driver handle, for the one job Drizzle cannot do.
+ *
+ * Applying the schema means sending a file of DDL — `CREATE TYPE`, `DO $$…$$`,
+ * `ALTER TYPE … ADD VALUE` — as *one* request. Drizzle's `execute` sends a
+ * single parameterised statement over the extended protocol, which rejects
+ * multi-statement input by design. The simple protocol accepts it, and the
+ * driver is the only thing that speaks it.
+ *
+ * **This is internal to `lib/db` and must stay that way** (charter rule #4): no
+ * route, component or engine module may import it, or the storage backend stops
+ * being swappable. `lib/db/apply-schema` is its only caller.
+ */
+export function getSqlClient(): postgres.Sql {
+  getDb()
+  return cached!.client
 }
 
 /** Whether a database connection is configured (used to degrade gracefully in dev). */

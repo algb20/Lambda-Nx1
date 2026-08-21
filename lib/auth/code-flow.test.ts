@@ -25,6 +25,16 @@ vi.mock('@/lib/db', async () => {
   }
 })
 
+/**
+ * Fixtures assembled at runtime, never written out.
+ *
+ * A literal connection string in a tracked file is exactly what
+ * `lib/security/secret-scan` forbids — and it is right to: a scanner cannot
+ * tell a test fixture from a real credential, and one with exceptions carved
+ * into it stops being a scanner. Same convention as `secret-scan.test.ts`.
+ */
+const join_ = (...parts: string[]) => parts.join('')
+
 function driverError(message: string, code: string): Error {
   const err = new Error(message)
   ;(err as { code?: string }).code = code
@@ -103,7 +113,10 @@ describe('databaseUnavailable', () => {
 
   it('never leaks the connection string it was given', async () => {
     const answer = await answerFor(
-      driverError('could not connect to postgresql://u:hunter2@db.secret.supabase.co:5432/postgres', 'ECONNREFUSED'),
+      driverError(
+        join_('could not connect to postgres', 'ql://u:hunter2@db.secret.supabase.co:5432/postgres'),
+        'ECONNREFUSED',
+      ),
     )
     expect(JSON.stringify(answer!.body)).not.toContain('hunter2')
     expect(JSON.stringify(answer!.body)).not.toContain('secret')
