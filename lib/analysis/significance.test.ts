@@ -162,6 +162,7 @@ describe('diversity — the fix for one publisher owning the board', () => {
       maxPerSource: 1,
       maxPerCategory: 1,
       maxPerFamily: 1,
+      maxPerOrigin: 1,
     })
     // Everything that earned its place under caps of one must be unique.
     const earned = taken.slice(0, diversified)
@@ -340,5 +341,70 @@ describe('what earns a breaking banner', () => {
     expect(verdict.breaking).toBe(true)
     expect(verdict.reasons.length).toBeGreaterThan(0)
     for (const reason of verdict.reasons) expect(reason.length).toBeGreaterThan(10)
+  })
+})
+
+describe('one publisher cannot own the board through many feeds', () => {
+  /**
+   * The live failure. EUMETNET's European warning system is read through 39
+   * country feeds — `meteoalarm_austria`, `meteoalarm_belgium`, and so on —
+   * which is the right way to read it and the wrong way to cap it. Keyed on
+   * `sourceKey`, MeteoAlarm cleared the per-source cap thirty-nine times over
+   * and the world board became a wall of European weather warnings.
+   *
+   * The owner: *"الاخبار كلها ارصاد وتحذيرات جوية متنوعة"* — the news is all
+   * meteorology and assorted weather warnings. The cause was this cap.
+   */
+  const meteoalarm = (country: string, i: number) => ({
+    sourceKey: `meteoalarm_${country}`,
+    origin: 'eumetnet-meteoalarm',
+    category: 'storm',
+    severity: 3,
+    id: `${country}-${i}`,
+  })
+
+  const COUNTRIES = ['austria', 'belgium', 'croatia', 'denmark', 'estonia', 'finland', 'france',
+    'germany', 'greece', 'hungary', 'iceland', 'ireland', 'italy', 'latvia', 'malta', 'norway',
+    'poland', 'portugal', 'serbia', 'slovakia', 'spain', 'sweden', 'switzerland', 'ukraine']
+
+  it('caps a publisher spread across many feeds', () => {
+    const flood = COUNTRIES.map((c, i) => meteoalarm(c, i))
+    const { diversified } = diversify(flood, 20)
+    // Every one is a distinct sourceKey, so the per-source cap never fires.
+    // Only the origin cap stands between the reader and 20 weather warnings.
+    expect(diversified).toBeLessThanOrEqual(DEFAULT_LIMITS.maxPerOrigin)
+  })
+
+  it('still lets genuinely different publishers through', () => {
+    const mixed = [
+      ...COUNTRIES.slice(0, 10).map((c, i) => meteoalarm(c, i)),
+      { sourceKey: 'usgs_quakes', origin: 'usgs', category: 'seismic', severity: 6, id: 'q' },
+      { sourceKey: 'cert_eu', origin: 'cert-eu', category: 'cyber', severity: 5, id: 'c' },
+      { sourceKey: 'sec_edgar', origin: 'sec', category: 'economy', severity: 4, id: 'e' },
+    ]
+    const { taken } = diversify(mixed, 20)
+    const origins = new Set(taken.map((t) => t.origin))
+    expect(origins.has('usgs')).toBe(true)
+    expect(origins.has('cert-eu')).toBe(true)
+    expect(origins.has('sec')).toBe(true)
+  })
+
+  /**
+   * A source that is its own publisher must not be constrained by this at all —
+   * the fallback has to be the source key, or every single-feed publisher would
+   * silently share one bucket named `undefined`.
+   */
+  it('treats a source with no declared origin as its own publisher', () => {
+    // Distinct categories as well as distinct sources, so the only cap that
+    // could bind here is the origin one — and it must not.
+    const categories = ['cyber', 'economy', 'space', 'transport', 'health', 'research']
+    const items = categories.map((category, i) => ({
+      sourceKey: `distinct_${i}`,
+      category,
+      severity: 3,
+      id: String(i),
+    }))
+    const { diversified } = diversify(items, 20)
+    expect(diversified).toBe(items.length)
   })
 })

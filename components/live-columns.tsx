@@ -12,6 +12,7 @@ import {
   type WorldEventsReport,
 } from '@/lib/modules/world-events-shared'
 import { diversify } from '@/lib/analysis/significance'
+import { originOf } from '@/lib/engine/catalog'
 import { isNaturalHazard, splitHazards } from '@/lib/analysis/hazards'
 
 /**
@@ -69,6 +70,9 @@ function topOf(events: WorldEvent[], limit: number): WorldEvent[] {
     ranked.map((r) => ({
       ...r,
       sourceKey: r.event.sourceKey,
+      // The publisher behind the feed — see Rankable.origin. Without it,
+      // MeteoAlarm's 39 country feeds each got their own allowance.
+      origin: originOf(r.event.sourceKey),
       category: r.event.category as string,
       severity: r.event.severity,
     })),
@@ -252,10 +256,29 @@ export function LiveColumns() {
         leftover width into *more subjects on screen* instead of fewer, wider
         ones. That is the whole difference between a dashboard and an article.
       */}
-      <div className="grid min-h-0 flex-1 auto-rows-[minmax(0,1fr)] grid-cols-[repeat(auto-fill,minmax(19rem,1fr))] gap-px overflow-y-auto bg-border">
+      {/*
+        Cards, not a grid of cells sharing hairlines.
+
+        This was `auto-rows-[minmax(0,1fr)]` over a `gap-px bg-border` grid,
+        which is a fine way to draw a dense table and the wrong way to draw
+        twelve independent subjects. In the narrow rail beside the map the row
+        sizing squeezed every box to an equal share of the available height —
+        about one headline each — and the 1px gaps read as table rules rather
+        than as edges. Twelve subjects became one undifferentiated block: the
+        owner's *"كانها متداخلة مع بعض"*, boxes that look interlocked.
+
+        `auto-rows-min` lets each card be as tall as it needs, a real gap
+        separates them, and a rounded border closes each one. The container
+        scrolls, so a tall stack in a short rail is a scroll rather than a
+        crush.
+      */}
+      <div className="grid min-h-0 flex-1 auto-rows-min grid-cols-[repeat(auto-fill,minmax(19rem,1fr))] gap-3 overflow-y-auto p-3">
         {boxes.map((box) => (
-          <section key={box.key} className="flex min-h-[16rem] min-w-0 flex-col bg-background">
-            <header className="flex items-baseline justify-between gap-2 border-b border-border px-2 py-1.5">
+          <section
+            key={box.key}
+            className="flex h-[15rem] min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-sm"
+          >
+            <header className="flex shrink-0 items-baseline justify-between gap-2 border-b border-border bg-muted/40 px-2.5 py-2">
               <h3 className="flex min-w-0 items-center gap-1.5 truncate text-[11px] font-semibold">
                 <span
                   className="h-2 w-2 shrink-0 rounded-sm"

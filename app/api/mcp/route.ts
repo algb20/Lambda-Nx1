@@ -16,6 +16,7 @@ import {
 } from '@/lib/mcp/server'
 import { ALL_MODES } from '@/lib/gateways'
 import { BOARDS } from '@/lib/modules/board-shared'
+import { originOf } from '@/lib/engine/catalog'
 
 /**
  * POST /api/mcp — the Model Context Protocol endpoint.
@@ -139,6 +140,8 @@ async function runTool(name: string, args: Record<string, unknown>, request: Req
         ranked.map((r) => ({
           ...r,
           sourceKey: r.event.sourceKey,
+          // The publisher, not just the feed — see Rankable.origin.
+          origin: originOf(r.event.sourceKey),
           category: r.event.category as string,
           severity: r.event.severity,
         })),

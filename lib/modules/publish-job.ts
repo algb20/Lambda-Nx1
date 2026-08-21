@@ -30,6 +30,7 @@ import {
 } from './autopublish'
 import { broadcast, channelsForAutoPublish } from '@/lib/social/broadcast'
 import { postPermalink } from '@/lib/posts'
+import { originOf } from '@/lib/engine/catalog'
 
 export interface PublishJobOptions {
   /** Decide and report, but write nothing. How thresholds get checked safely. */
@@ -92,6 +93,8 @@ export async function runPublishJob(options: PublishJobOptions = {}): Promise<Pu
       ranked.map((r) => ({
         ...r,
         sourceKey: r.event.sourceKey,
+        // The publisher, not just the feed — see Rankable.origin.
+        origin: originOf(r.event.sourceKey),
         category: r.event.category as string,
         severity: r.event.severity,
       })),

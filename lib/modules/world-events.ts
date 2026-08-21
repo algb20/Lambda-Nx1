@@ -50,6 +50,7 @@ import {
   type WorldEventsReport,
 } from './world-events-shared'
 import { recordSweep } from './self-audit'
+import { legibleTitle } from '@/lib/analysis/legible'
 
 /** Worst first, so the states an operator must act on sort to the top. */
 const STATUS_ORDER = { failed: 0, empty: 1, cached: 2, ok: 3 } as const
@@ -268,9 +269,30 @@ export function toEvent(e: Evidence, index: number): WorldEvent | null {
       ? assigned
       : severityOf(category, magnitude, unit, data.tsunami === true)
 
+  /**
+   * The headline a reader can act on.
+   *
+   * Applied here, at the one place every board's title comes from, rather than
+   * in four surfaces that would drift. It only ever restates what this record
+   * already carries — the category and the measurement — so `八丈島東方沖`
+   * becomes "Earthquake M4.7 — 八丈島東方沖" and `CME` becomes "Coronal mass
+   * ejection (CME)". The publisher's own words are always kept.
+   *
+   * The **id** is deliberately still built from the raw `title`: it is an
+   * identity, and rewriting it would break every reference to an event whose
+   * headline we later learned to expand.
+   */
+  const readable = legibleTitle({
+    title,
+    category,
+    magnitude,
+    magnitudeUnit: unit,
+    sourceKey: e.sourceKey,
+  })
+
   return {
     id: `${e.sourceKey}:${index}:${title.slice(0, 60)}`,
-    title,
+    title: readable,
     category,
     categoryLabel: str(data.categoryLabel) ?? CATEGORY_META[category].label,
     color: CATEGORY_META[category].color,

@@ -467,10 +467,45 @@ object shaped like the two methods it happened to call.
 | R255 | `markets` | `open` | **يجب ان يكون كل شيئ مرفق بكل معلوماته والاسعار والحالة وكل شيئ والتتبع وكل البلوكشين بكل المعلومات والاسعار** — everything carries its full information: prices, status, tracking; and all blockchains with all information and prices. |
 | R256 | `design` | `open` | **يجب عرض بطريقة احترافية ومرتبة** — present it professionally and in order. |
 | R257 | `design` | `open` | **المربعات في صفحة الخريطة كانها متداخلة مع بعض اجعل لها تصميم احترافي عالي كل واحدة مميزة وغير متداخلة كانها صفحة واحدة** — the boxes on the map page look interlocked; give each a high professional design, distinct, not overlapping, as one page. |
-| R258 | `news` | `open` | **عالج امر الاخبار ازعجني الاخبار كلها ارصاد وتحذيرات جوية متنوعة** — fix the news: it is all meteorology and assorted weather warnings. |
+| R258 | `news` | `done` | **عالج امر الاخبار ازعجني الاخبار كلها ارصاد وتحذيرات جوية متنوعة** — fix the news: it is all meteorology and assorted weather warnings. |
 | R259 | `design` | `open` | **المعلومات والبوابات تحت الخريطة غير مرتبة والاسوء بيانات وهمية وغير واضحة لا تصلح ولا يستفيد ولن يفهمها اي مستخدم مهما كان نوعه وخبرته** — what sits under the map is disordered, and worse, **fake and unclear data** that no user of any kind or experience will understand or benefit from. |
-| R260 | `sources` | `open` | **هل وصل مصادرنا 200000 مصدر** — have our sources reached 200,000? |
-| R261 | `design` | `open` | **المعلومات والاخبار على الخريطة غير مفهومة وغير مدعومة لتوضع طبيعة اختصاصها** — the information and news on the map are not understandable and not labelled with the nature of their specialism. |
+| R260 | `sources` | `answered` | **هل وصل مصادرنا 200000 مصدر** — have our sources reached 200,000? |
+| R261 | `design` | `done` | **المعلومات والاخبار على الخريطة غير مفهومة وغير مدعومة لتوضع طبيعة اختصاصها** — the information and news on the map are not understandable and not labelled with the nature of their specialism. |
 
 **R259 is a charter breach if true.** §2 rule 1 forbids mock data outright. It is
 investigated first, ahead of every other item here.
+
+**R258 — the cause, found and fixed.** The news was all weather because
+**39 of 208 enabled feeds are one publisher**: EUMETNET's MeteoAlarm, read
+through one feed per European country. The catalogue already grouped them
+honestly for §2a, but `diversify` capped on `sourceKey`, so MeteoAlarm cleared
+the per-publisher cap thirty-nine times over. `Rankable.origin` now carries the
+independence group and `maxPerOrigin` caps on it, on all four surfaces — with a
+test that fails if any surface forgets.
+
+**R260 — the honest count, per §2a.**
+
+| Tier | Count |
+|---|---|
+| **Integrations** (feeds we call and parse) | **227** catalogued, 208 enabled |
+| **Independent origins** (what a confidence grade may count) | **149** |
+| **Publishers** (outlets reachable *through* an integration) | millions — GDELT alone indexes ~100,000 outlets |
+
+So: **no**, we have not reached 200,000 *sources*, and we never claimed to.
+227 integrations. Quoting the publisher tier as a source count is precisely the
+dishonesty §2a exists to forbid.
+
+**R261/R259 — unreadable rows.** 37 of 4340 live events carried a headline
+that stated nothing: 31 bare Japanese sea areas from JMA, 4 NASA event codes,
+2 coin tickers. `lib/analysis/legible` restates only what the record already
+carries — the category and the measurement — so `八丈島東方沖` becomes
+"Earthquake M4.7 — 八丈島東方沖" and `CME` becomes "Coronal mass ejection (CME)".
+It never translates, never locates, never invents.
+
+**R257 — interlocked boxes.** The rail was a `gap-px` grid with rows forced to
+an equal share of the height, so twelve subjects were crushed to one headline
+each and the hairlines read as table rules. Now real cards: own height, gap,
+border, rounded, scrolling.
+
+**Still open: R254/R255** — the economy, exchanges and blockchain depth. Not
+started; called out rather than quietly counted as done.

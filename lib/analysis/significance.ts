@@ -50,6 +50,34 @@ export interface Rankable {
   sourceKey: string
   category: string
   severity: number
+  /**
+   * Which *publisher* this really came from, when that differs from the feed.
+   *
+   * ## Why a second identifier exists
+   *
+   * `sourceKey` identifies a feed, and one publisher can own many. MeteoAlarm
+   * is the case that forced this: EUMETNET's European warning system is read
+   * through **39 separate country feeds** — `meteoalarm_austria`,
+   * `meteoalarm_belgium`, and so on — which is the right way to read it and
+   * the wrong way to count it.
+   *
+   * The per-source cap is what stops one publisher owning the board. Keyed on
+   * `sourceKey`, MeteoAlarm passed that cap thirty-nine times over, and the
+   * result was a world board on which almost every row was a European weather
+   * warning. The owner's words: *"الاخبار كلها ارصاد وتحذيرات جوية متنوعة"* —
+   * the news is all meteorology and assorted weather warnings. Exactly right,
+   * and the cause was here.
+   *
+   * The catalogue already knows the answer: these feeds share the
+   * `eumetnet-meteoalarm` independence group, which is the same fact the
+   * confidence grade uses to avoid counting one publisher as thirty-nine
+   * corroborating origins (charter §2a). Capping on it makes the board and the
+   * confidence grade agree about who is speaking.
+   *
+   * Falls back to `sourceKey`, so a source that is its own origin needs to say
+   * nothing.
+   */
+  origin?: string
 }
 
 /**
@@ -162,12 +190,26 @@ export interface DiversityLimits {
   maxPerCategory: number
   /** The cap that stops eight hazard categories from filling a board. */
   maxPerFamily: number
+  /**
+   * The cap that stops one *publisher* filling a board through many feeds.
+   *
+   * `maxPerSource` counts feeds. This counts whoever owns them — see
+   * `Rankable.origin`. Without it, MeteoAlarm's 39 country feeds each got their
+   * own allowance and the board became a wall of European weather warnings.
+   */
+  maxPerOrigin: number
 }
 
 export const DEFAULT_LIMITS: DiversityLimits = {
   maxPerSource: 3,
   maxPerCategory: 3,
   maxPerFamily: 7,
+  /**
+   * Slightly above the per-source cap: a publisher that genuinely runs several
+   * distinct feeds should be able to place a little more than a single feed
+   * can, without being able to place thirty-nine times more.
+   */
+  maxPerOrigin: 4,
 }
 
 /**
@@ -205,6 +247,7 @@ export function diversify<T extends Rankable>(
   const taken: T[] = []
   const overflow: T[] = []
   const bySource = new Map<string, number>()
+  const byOrigin = new Map<string, number>()
   const byCategory = new Map<string, number>()
   const byFamily = new Map<string, number>()
 
@@ -214,11 +257,15 @@ export function diversify<T extends Rankable>(
       continue
     }
     const family = familyOf(item.category)
+    // The publisher behind the feed, which is what the cap is really about.
+    const origin = item.origin ?? item.sourceKey
+    const originCount = byOrigin.get(origin) ?? 0
     const sourceCount = bySource.get(item.sourceKey) ?? 0
     const categoryCount = byCategory.get(item.category) ?? 0
     const familyCount = byFamily.get(family) ?? 0
     if (
       sourceCount >= limits.maxPerSource ||
+      originCount >= limits.maxPerOrigin ||
       categoryCount >= limits.maxPerCategory ||
       familyCount >= limits.maxPerFamily
     ) {
@@ -227,6 +274,7 @@ export function diversify<T extends Rankable>(
     }
     taken.push(item)
     bySource.set(item.sourceKey, sourceCount + 1)
+    byOrigin.set(origin, originCount + 1)
     byCategory.set(item.category, categoryCount + 1)
     byFamily.set(family, familyCount + 1)
   }
