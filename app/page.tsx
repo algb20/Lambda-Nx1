@@ -17,6 +17,7 @@ import { ContextRail } from "@/components/context-rail"
 import { Header } from "@/components/header"
 import { ErrorBoundary } from "@/components/error-boundary"
 import { resolveTab, tabDef, type Tab } from "@/lib/navigation"
+import { MarketsPanel } from "@/components/markets-panel"
 
 /**
  * The shell.
@@ -224,6 +225,18 @@ export default function HomePage() {
                 <aside className="min-w-0 flex-1 border-t border-border xl:sticky xl:top-14 xl:h-[calc(100vh-3.5rem)] xl:min-w-[28rem] xl:border-l xl:border-t-0">
                   <LiveColumns />
                 </aside>
+              </div>
+            )}
+            {/*
+              A destination of its own, unlike the standing brief above — which
+              stays inside the globe tab precisely because it answers the same
+              question the map does, one layer up. "What are prices and markets
+              doing" is not that question, and the data behind it was already
+              complete and going nowhere. See lib/navigation.ts.
+            */}
+            {activeTab === "markets" && (
+              <div className="px-4 py-4">
+                <MarketsPanel />
               </div>
             )}
             {activeTab === "intelligence" && <IntelligenceDashboard />}

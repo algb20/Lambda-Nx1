@@ -31,7 +31,23 @@ import { ALL_MODES } from './gateways'
  * Keeping this list in one module is what makes the desktop sidebar and the
  * mobile bar impossible to disagree with each other.
  */
-export const TABS = ['feed', 'globe', 'intelligence', 'monitor', 'account'] as const
+/**
+ * `markets` was added as a sixth, and it had to earn the slot against the rule
+ * stated above: a tab must answer a question a user arrives with, and must lead
+ * to something real rather than to an apology.
+ *
+ * It does both. "What are prices and markets doing" is not a rephrasing of any
+ * of the other five, and the destination was already fully populated — four
+ * chains with height, fees, congestion and throughput; capitalisation and
+ * dominance; movers with prices; twenty-five exchanges with volumes and
+ * jurisdictions. All of it was being computed and then thrown away, because the
+ * only consumer was a map layer that wanted the coordinates. The owner's
+ * verdict was exactly right: no coins, no chains, no exchanges, nothing.
+ *
+ * Placed after `globe` because it is the same act — reading the world — over a
+ * different surface.
+ */
+export const TABS = ['feed', 'globe', 'markets', 'intelligence', 'monitor', 'account'] as const
 
 export type Tab = (typeof TABS)[number]
 
@@ -61,6 +77,13 @@ export const TAB_DEFS: readonly TabDef[] = [
     label: 'The world map',
     description: 'The standing brief, and live events on the globe with the agency that measured each',
     i18nKey: 'nav.globe',
+  },
+  {
+    id: 'markets',
+    short: 'Markets',
+    label: 'Markets & chains',
+    description: 'Live prices, network conditions, and where the volume actually trades',
+    i18nKey: 'nav.markets',
   },
   {
     id: 'intelligence',

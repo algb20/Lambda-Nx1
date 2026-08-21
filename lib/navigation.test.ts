@@ -26,9 +26,36 @@ describe('the tab list', () => {
     }
   })
 
-  it('stays small enough that every tab is reachable with one thumb', () => {
-    // The nine-tab bar is what this list replaced.
-    expect(TABS.length).toBeLessThanOrEqual(5)
+  /**
+   * This asserted `<= 5`, which was a proxy for the thing that actually
+   * matters and stopped being true of it.
+   *
+   * The constraint is not the number of tabs — it is whether each one is still
+   * a target a thumb can hit. That is a width divided by a count, measured
+   * against the platform minimum (44px on iOS, 48dp on Android), and it is
+   * worth stating directly: a magic number cannot explain itself, and the next
+   * person to need a tab has no way to tell a real limit from a stale one.
+   *
+   * At the narrowest phone we support, six tabs still clear the minimum with
+   * room to spare. Seven would not, and this test will say so.
+   */
+  it('leaves every tab a target a thumb can actually hit', () => {
+    const NARROWEST_PHONE_PX = 320
+    const MIN_TOUCH_TARGET_PX = 44
+    const perTab = NARROWEST_PHONE_PX / TABS.length
+    expect(
+      perTab,
+      `${TABS.length} tabs gives each ${perTab.toFixed(1)}px on a ${NARROWEST_PHONE_PX}px screen`,
+    ).toBeGreaterThanOrEqual(MIN_TOUCH_TARGET_PX)
+  })
+
+  /**
+   * A separate ceiling, because touch targets are not the only cost. Every tab
+   * spends a permanent slot in front of every user, and the list this replaced
+   * had nine — four of which led to placeholders.
+   */
+  it('does not grow without the growth being deliberate', () => {
+    expect(TABS.length).toBeLessThanOrEqual(6)
   })
 })
 

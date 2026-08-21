@@ -463,8 +463,8 @@ object shaped like the two methods it happened to call.
 
 | # | Area | Status | Request |
 |---|---|---|---|
-| R254 | `markets` | `open` | **مع الاقتصاد والبورصات ضف كل مايجب ان يكون في تطبيقنا من فئات وبوابات** — with economy and exchanges, add every category and gateway the app ought to have. |
-| R255 | `markets` | `open` | **يجب ان يكون كل شيئ مرفق بكل معلوماته والاسعار والحالة وكل شيئ والتتبع وكل البلوكشين بكل المعلومات والاسعار** — everything carries its full information: prices, status, tracking; and all blockchains with all information and prices. |
+| R254 | `markets` | `done` | **مع الاقتصاد والبورصات ضف كل مايجب ان يكون في تطبيقنا من فئات وبوابات** — with economy and exchanges, add every category and gateway the app ought to have. |
+| R255 | `markets` | `done` | **يجب ان يكون كل شيئ مرفق بكل معلوماته والاسعار والحالة وكل شيئ والتتبع وكل البلوكشين بكل المعلومات والاسعار** — everything carries its full information: prices, status, tracking; and all blockchains with all information and prices. |
 | R256 | `design` | `open` | **يجب عرض بطريقة احترافية ومرتبة** — present it professionally and in order. |
 | R257 | `design` | `open` | **المربعات في صفحة الخريطة كانها متداخلة مع بعض اجعل لها تصميم احترافي عالي كل واحدة مميزة وغير متداخلة كانها صفحة واحدة** — the boxes on the map page look interlocked; give each a high professional design, distinct, not overlapping, as one page. |
 | R258 | `news` | `done` | **عالج امر الاخبار ازعجني الاخبار كلها ارصاد وتحذيرات جوية متنوعة** — fix the news: it is all meteorology and assorted weather warnings. |
@@ -529,3 +529,32 @@ Same live data, natural-hazards box:
 
 A test that asserted the *old* rule — "backfills from the overflow rather than
 returning a short list" — was the bug written down, and has been replaced.
+
+**R254/R255 — the work was never to collect this. It was to show it.**
+
+The chain radar had been producing all of it for some time: four networks with
+height, fees, congestion, throughput and supply; capitalisation, volume and
+dominance; movers with prices; twenty-five exchanges with volumes, shares,
+jurisdictions and trust scores. The only consumer was a map layer that wanted
+the coordinates, so everything else was computed and thrown away — which is why
+the honest verdict was *"لا عملات ولا كل بلوكشين ولا بورصات ولا اي شيئ"*.
+
+**Markets & chains** is now a tab of its own, and had to earn the sixth slot
+against the rule in `lib/navigation.ts`: a tab must answer a question a user
+arrives with and lead somewhere real. The tab-count test was rewritten to assert
+the property that actually matters — every tab still clears the 44px minimum
+touch target at 320px — rather than a magic `<= 5`.
+
+Three defects were found by rendering it against live data and looking, and all
+three were fixed before it shipped:
+
+| Seen | Cause | Fix |
+|---|---|---|
+| `BTC dominance 5931.1%` | the source publishes `59.31`, already a percentage, and it went through `share()`, which multiplies by 100 | a separate `percent()`, and a test that a dominance can never print above 100% |
+| "100 venues counted" beside "15 largest of 25" | two true numbers on one card, contradicting each other | the index is stated as measured across 100; the table says it lists 15 of the 25 returned |
+| `FIGR_HELOCFigure Heloc` | a ten-character ticker in a `w-14` column | wider column, truncating |
+
+Every figure carries the agency that measured it and when (§6). Where a chain
+publishes no congestion measure the card says so, rather than drawing an empty
+bar — inventing a measurement is the same failure as printing `0` for "not
+reported".
