@@ -1,6 +1,6 @@
 "use client"
 
-import { Zap, Globe2, Brain, Radar, User } from "lucide-react"
+import { Zap, Globe2, Brain, Radar, User, CandlestickChart } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useT } from "@/lib/i18n"
 import { TAB_DEFS, type Tab } from "@/lib/navigation"
@@ -21,6 +21,7 @@ import { TAB_DEFS, type Tab } from "@/lib/navigation"
 const ICONS: Record<Tab, typeof Zap> = {
   feed: Zap,
   globe: Globe2,
+  markets: CandlestickChart,
   intelligence: Brain,
   monitor: Radar,
   account: User,
