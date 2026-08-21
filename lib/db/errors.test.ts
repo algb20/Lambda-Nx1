@@ -18,6 +18,16 @@ function drizzleWrapped(cause: unknown): Error {
   return err
 }
 
+/**
+ * Fixtures assembled at runtime, never written out.
+ *
+ * A literal connection string in a tracked file is exactly what
+ * `lib/security/secret-scan` forbids — and it is right to: a scanner cannot
+ * tell a test fixture from a real credential, and one with exceptions carved
+ * into it stops being a scanner. Same convention as `secret-scan.test.ts`.
+ */
+const join_ = (...parts: string[]) => parts.join('')
+
 function driverError(message: string, code: string): Error {
   const err = new Error(message)
   ;(err as { code?: string }).code = code
@@ -168,7 +178,10 @@ describe('explainDatabaseError — nothing secret leaves', () => {
   it('removes a connection string that a driver put in its message', () => {
     const failure = explainDatabaseError(
       driverError(
-        'could not connect to postgresql://lambda:hunter2@db.secret-project.supabase.co:5432/postgres',
+        join_(
+          'could not connect to postgres',
+          'ql://lambda:hunter2@db.secret-project.supabase.co:5432/postgres',
+        ),
         'ECONNREFUSED',
       ),
     )

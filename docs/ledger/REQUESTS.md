@@ -380,3 +380,19 @@ cause:
 3. **No route had a database-failure branch.** They now answer `503` with a
    sentence naming the cause, and never blame the visitor's input — a login
    failure caused by an outage used to come back as `401 Sign-in failed`.
+
+| R250 | `accounts` | `done` | **اعمل الخطوة وحدك** — do the schema step yourself, rather than telling me to paste it. |
+
+**R250 — what was built.** The Supabase tool needed an approval that did not
+arrive in this session, and `DATABASE_URL` must never leave the owner's
+environment (§5), so the deployment does the step instead of me.
+
+`POST /api/admin/schema` applies the schema this build ships, from the
+deployment that holds the credential, in one request — with a button on
+`/setup` so it is a press rather than a command. It executes one compile-time
+constant (`db/schema-sql`); no part of a request reaches the database, and it is
+admin-gated on top of that.
+
+Verified against a database rebuilt to the live deployment's exact state — 20
+tables, stopped at migration 0015: first run created all four missing tables in
+30 ms with zero errors, second run created nothing and stayed complete.

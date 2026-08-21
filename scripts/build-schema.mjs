@@ -34,6 +34,24 @@ import { join } from 'node:path'
 
 const DIR = 'db/migrations'
 const OUT = 'db/schema.sql'
+/**
+ * The same SQL, as a TypeScript module.
+ *
+ * ## Why a second output rather than reading the .sql at runtime
+ *
+ * The apply-schema endpoint runs inside a serverless function, and a function
+ * bundle contains what the bundler can *see* being imported — not whatever
+ * happens to sit in the repository. `readFileSync('db/schema.sql')` resolves at
+ * runtime against a working directory that, on Vercel, does not contain `db/`.
+ * It would work perfectly on a laptop and throw ENOENT in production, which is
+ * the worst kind of difference: the one that only appears where it matters.
+ *
+ * An import is a fact the bundler can act on. So the SQL is emitted as a string
+ * constant and imported like any other module, and `schema-sql.test.ts` asserts
+ * the two files still agree — generated together, they cannot drift apart
+ * without the test saying so.
+ */
+const OUT_TS = 'db/schema-sql.ts'
 
 /**
  * Wrap a statement so running it twice is a no-op.
@@ -150,5 +168,37 @@ for (const file of files) {
   }
 }
 
-writeFileSync(OUT, parts.join('\n'))
-console.log(`${OUT}: ${files.length} migrations folded into one file`)
+const sql = parts.join('\n')
+writeFileSync(OUT, sql)
+
+/**
+ * A backtick template literal, so the SQL stays readable in the generated file
+ * rather than becoming one unreadable escaped line. Only two characters can end
+ * a template literal early — a backtick and the `${` sequence — and both are
+ * escaped here. Everything else, including every quote the SQL uses, is safe.
+ */
+const escaped = sql.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${')
+writeFileSync(
+  OUT_TS,
+  [
+    '/**',
+    ' * The whole schema as one string — GENERATED, do not edit.',
+    ' *',
+    ' * Written by scripts/build-schema.mjs alongside db/schema.sql, from the',
+    ' * migrations in db/migrations. Edit a migration and regenerate; editing this',
+    ' * file by hand makes it disagree with the migrations, and db/schema-sql.test.ts',
+    ' * will fail rather than let that reach a database.',
+    ' *',
+    ' * It exists as TypeScript so the serverless bundler can see it. See the note',
+    ' * in scripts/build-schema.mjs.',
+    ' */',
+    '',
+    `export const SCHEMA_SQL = \`${escaped}\``,
+    '',
+    `/** How many migrations this schema was folded from. */`,
+    `export const SCHEMA_MIGRATION_COUNT = ${files.length}`,
+    '',
+  ].join('\n'),
+)
+
+console.log(`${OUT} + ${OUT_TS}: ${files.length} migrations folded into one file`)
