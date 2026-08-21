@@ -1,27 +1,89 @@
 /**
- * Translation dictionaries. Lambda NX is built to support every language: add a
- * locale by adding its code to LOCALES and a dictionary here — the provider,
- * switcher and RTL handling pick it up automatically. English is the fallback,
- * so a missing key never breaks the UI.
+ * Translation dictionaries, and the languages the product offers.
+ *
+ * ## Two layers, and why the distinction matters
+ *
+ * **Curated** — the seven languages below have hand-written dictionaries. Every
+ * word in them was chosen: the tone, the finance vocabulary, the difference
+ * between "Movers" and furniture removal.
+ *
+ * **Machine** — every other language in `SUPPORTED_LOCALES` is translated at
+ * runtime by the provider behind `lib/i18n/translate`. Nothing has to be
+ * written for a language to work; the interface simply arrives in it.
+ *
+ * The rule that joins them, and the one that was being broken:
+ *
+ *   **A curated string is shielded. A string we never curated is not.**
+ *
+ * `AutoTranslate` rewrites the rendered DOM, so a curated Arabic label was
+ * being machine-translated a second time — `الإعدادات` came back as `جحيم`
+ * ("hell") and `Movers` as `شركات نقل الأثاث` (furniture removal companies).
+ * Marking those nodes `data-no-translate` fixes it *for Arabic* and would break
+ * every machine language, freezing them in English forever. So the shield is
+ * conditional on `isCurated(locale, key)` — see `lib/i18n/index.tsx`.
  *
  * (User-generated and source content is already language-agnostic: the engine,
  * the AI analyst and the news/nexus gateways handle any language of input.)
  */
-export const LOCALES = ['en', 'ar', 'es', 'fr', 'zh', 'hi', 'id'] as const
-export type Locale = (typeof LOCALES)[number]
 
-/** Right-to-left locales. */
-export const RTL_LOCALES: ReadonlySet<Locale> = new Set<Locale>(['ar'])
+/** Languages with a hand-written dictionary in this file. */
+export const CURATED_LOCALES = ['en', 'ar', 'es', 'fr', 'zh', 'hi', 'id'] as const
+export type CuratedLocale = (typeof CURATED_LOCALES)[number]
 
-export const LOCALE_LABELS: Record<Locale, string> = {
-  en: 'English',
-  ar: 'العربية',
-  es: 'Español',
-  fr: 'Français',
-  zh: '中文',
-  hi: 'हिन्दी',
-  id: 'Bahasa Indonesia',
+/**
+ * Every language the product offers, by ISO-639 code.
+ *
+ * The full set the translation provider supports. A language here with no
+ * dictionary still works end to end — the interface is machine-translated and
+ * the engine's content was never language-bound in the first place.
+ *
+ * Labels are **endonyms**: a speaker looking for their own language scans for
+ * how they write it, not for what English calls it. "Deutsch", not "German".
+ */
+export const LOCALE_LABELS: Record<string, string> = {
+  en: 'English', ar: 'العربية', es: 'Español', fr: 'Français', zh: '中文',
+  hi: 'हिन्दी', id: 'Bahasa Indonesia', af: 'Afrikaans', sq: 'Shqip', am: 'አማርኛ',
+  hy: 'Հայերեն', az: 'Azərbaycan', eu: 'Euskara', be: 'Беларуская', bn: 'বাংলা',
+  bs: 'Bosanski', bg: 'Български', ca: 'Català', ceb: 'Cebuano', ny: 'Chichewa',
+  co: 'Corsu', hr: 'Hrvatski', cs: 'Čeština', da: 'Dansk', nl: 'Nederlands',
+  eo: 'Esperanto', et: 'Eesti', tl: 'Filipino', fi: 'Suomi', fy: 'Frysk',
+  gl: 'Galego', ka: 'ქართული', de: 'Deutsch', el: 'Ελληνικά', gu: 'ગુજરાતી',
+  ht: 'Kreyòl ayisyen', ha: 'Hausa', haw: 'ʻŌlelo Hawaiʻi', he: 'עברית',
+  hmn: 'Hmoob', hu: 'Magyar', is: 'Íslenska', ig: 'Igbo', ga: 'Gaeilge',
+  it: 'Italiano', ja: '日本語', jv: 'Basa Jawa', kn: 'ಕನ್ನಡ', kk: 'Қазақ',
+  km: 'ខ្មែរ', rw: 'Kinyarwanda', ko: '한국어', ku: 'Kurdî', ky: 'Кыргызча',
+  lo: 'ລາວ', la: 'Latina', lv: 'Latviešu', lt: 'Lietuvių', lb: 'Lëtzebuergesch',
+  mk: 'Македонски', mg: 'Malagasy', ms: 'Bahasa Melayu', ml: 'മലയാളം',
+  mt: 'Malti', mi: 'Māori', mr: 'मराठी', mn: 'Монгол', my: 'မြန်မာ',
+  ne: 'नेपाली', no: 'Norsk', or: 'ଓଡ଼ିଆ', ps: 'پښتو', fa: 'فارسی',
+  pl: 'Polski', pt: 'Português', pa: 'ਪੰਜਾਬੀ', ro: 'Română', ru: 'Русский',
+  sm: 'Gagana Sāmoa', gd: 'Gàidhlig', sr: 'Српски', st: 'Sesotho', sn: 'Shona',
+  sd: 'سنڌي', si: 'සිංහල', sk: 'Slovenčina', sl: 'Slovenščina', so: 'Soomaali',
+  su: 'Basa Sunda', sw: 'Kiswahili', sv: 'Svenska', tg: 'Тоҷикӣ', ta: 'தமிழ்',
+  tt: 'Татарча', te: 'తెలుగు', th: 'ไทย', tr: 'Türkçe', tk: 'Türkmen',
+  uk: 'Українська', ur: 'اردو', ug: 'ئۇيغۇرچە', uz: 'Oʻzbek', vi: 'Tiếng Việt',
+  cy: 'Cymraeg', xh: 'isiXhosa', yi: 'ייִדיש', yo: 'Yorùbá', zu: 'isiZulu',
 }
+
+export const SUPPORTED_LOCALES = Object.keys(LOCALE_LABELS)
+export type Locale = string
+
+/**
+ * Kept for the code that imported it before the split. It is the *curated*
+ * list, which is what every existing caller meant by it.
+ */
+export const LOCALES = CURATED_LOCALES
+
+/**
+ * Right-to-left languages.
+ *
+ * Not only Arabic. Opening the product to every language means a Persian,
+ * Urdu, Hebrew, Pashto, Sindhi, Uyghur or Yiddish speaker must get a mirrored
+ * layout, or the interface is broken for them in a way no translation fixes.
+ */
+export const RTL_LOCALES: ReadonlySet<string> = new Set([
+  'ar', 'he', 'fa', 'ur', 'ps', 'sd', 'ug', 'yi', 'dv', 'ckb',
+])
 
 type Dict = Record<string, string>
 
@@ -54,6 +116,27 @@ const en: Dict = {
   'nav.calibration': 'Score',
   'nav.globe': 'Globe',
   'nav.markets': 'Markets',
+  'mk.title': 'Markets & chains',
+  'mk.networks': 'Networks',
+  'mk.rates': 'Rates',
+  'mk.currencies': 'Currencies',
+  'mk.movers': 'Movers',
+  'mk.exchanges': 'Exchanges',
+  'mk.gaining': 'Gaining',
+  'mk.falling': 'Falling',
+  'mk.marketCap': 'Total market cap',
+  'mk.volume24h': '24h volume',
+  'mk.btcDominance': 'BTC dominance',
+  'mk.ethDominance': 'ETH dominance',
+  'mk.venue': 'Venue',
+  'mk.jurisdiction': 'Jurisdiction',
+  'mk.share': 'Share',
+  'mk.trust': 'Trust',
+  'mk.height': 'Height',
+  'mk.fee': 'Fee',
+  'mk.pending': 'Pending',
+  'mk.supply': 'Supply',
+  'mk.tps': 'TPS',
   'nav.feed': 'Feed',
   'nav.intelligence': 'Investigate',
   'nav.preferences': 'Preferences',
@@ -113,6 +196,27 @@ const ar: Dict = {
   'nav.calibration': 'الدقّة',
   'nav.globe': 'الكرة',
   'nav.markets': 'الأسواق',
+  'mk.title': 'الأسواق والسلاسل',
+  'mk.networks': 'الشبكات',
+  'mk.rates': 'الفائدة والعوائد',
+  'mk.currencies': 'العملات',
+  'mk.movers': 'أكبر التحركات',
+  'mk.exchanges': 'البورصات',
+  'mk.gaining': 'الرابحون',
+  'mk.falling': 'الخاسرون',
+  'mk.marketCap': 'القيمة السوقية الإجمالية',
+  'mk.volume24h': 'حجم التداول 24 ساعة',
+  'mk.btcDominance': 'هيمنة البيتكوين',
+  'mk.ethDominance': 'هيمنة الإيثيريوم',
+  'mk.venue': 'البورصة',
+  'mk.jurisdiction': 'الولاية القضائية',
+  'mk.share': 'الحصة',
+  'mk.trust': 'الثقة',
+  'mk.height': 'ارتفاع الكتلة',
+  'mk.fee': 'الرسوم',
+  'mk.pending': 'قيد الانتظار',
+  'mk.supply': 'المعروض',
+  'mk.tps': 'TPS',
   'nav.feed': 'الرئيسية',
   'nav.intelligence': 'تحقيق',
   'nav.preferences': 'الإعدادات',
@@ -172,6 +276,27 @@ const es: Dict = {
   'nav.calibration': 'Puntuación',
   'nav.globe': 'Globo',
   'nav.markets': 'Mercados',
+  'mk.title': 'Mercados y cadenas',
+  'mk.networks': 'Redes',
+  'mk.rates': 'Tipos',
+  'mk.currencies': 'Divisas',
+  'mk.movers': 'Mayores movimientos',
+  'mk.exchanges': 'Exchanges',
+  'mk.gaining': 'Al alza',
+  'mk.falling': 'A la baja',
+  'mk.marketCap': 'Capitalización total',
+  'mk.volume24h': 'Volumen 24 h',
+  'mk.btcDominance': 'Dominancia BTC',
+  'mk.ethDominance': 'Dominancia ETH',
+  'mk.venue': 'Plataforma',
+  'mk.jurisdiction': 'Jurisdicción',
+  'mk.share': 'Cuota',
+  'mk.trust': 'Confianza',
+  'mk.height': 'Altura',
+  'mk.fee': 'Comisión',
+  'mk.pending': 'Pendientes',
+  'mk.supply': 'Suministro',
+  'mk.tps': 'TPS',
   'nav.feed': 'Inicio',
   'nav.intelligence': 'Investigar',
   'nav.preferences': 'Ajustes',
@@ -230,6 +355,27 @@ const fr: Dict = {
   'nav.calibration': 'Score',
   'nav.globe': 'Globe',
   'nav.markets': 'Marchés',
+  'mk.title': 'Marchés et chaînes',
+  'mk.networks': 'Réseaux',
+  'mk.rates': 'Taux',
+  'mk.currencies': 'Devises',
+  'mk.movers': 'Plus fortes variations',
+  'mk.exchanges': 'Places de marché',
+  'mk.gaining': 'En hausse',
+  'mk.falling': 'En baisse',
+  'mk.marketCap': 'Capitalisation totale',
+  'mk.volume24h': 'Volume 24 h',
+  'mk.btcDominance': 'Dominance BTC',
+  'mk.ethDominance': 'Dominance ETH',
+  'mk.venue': 'Place',
+  'mk.jurisdiction': 'Juridiction',
+  'mk.share': 'Part',
+  'mk.trust': 'Confiance',
+  'mk.height': 'Hauteur',
+  'mk.fee': 'Frais',
+  'mk.pending': 'En attente',
+  'mk.supply': 'Offre',
+  'mk.tps': 'TPS',
   'nav.monitor': 'Veille',
   'nav.feed': 'Accueil',
   'nav.intelligence': 'Enquêter',
@@ -288,6 +434,27 @@ const zh: Dict = {
   'nav.calibration': '评分',
   'nav.globe': '地球',
   'nav.markets': '市场',
+  'mk.title': '市场与链',
+  'mk.networks': '网络',
+  'mk.rates': '利率',
+  'mk.currencies': '货币',
+  'mk.movers': '涨跌幅榜',
+  'mk.exchanges': '交易所',
+  'mk.gaining': '上涨',
+  'mk.falling': '下跌',
+  'mk.marketCap': '总市值',
+  'mk.volume24h': '24小时成交量',
+  'mk.btcDominance': 'BTC 占比',
+  'mk.ethDominance': 'ETH 占比',
+  'mk.venue': '交易平台',
+  'mk.jurisdiction': '司法管辖区',
+  'mk.share': '份额',
+  'mk.trust': '信任度',
+  'mk.height': '区块高度',
+  'mk.fee': '手续费',
+  'mk.pending': '待处理',
+  'mk.supply': '供应量',
+  'mk.tps': 'TPS',
   'nav.feed': '首页',
   'nav.intelligence': '调查',
   'nav.preferences': '设置',
@@ -346,6 +513,27 @@ const hi: Dict = {
   'nav.calibration': 'स्कोर',
   'nav.globe': 'ग्लोब',
   'nav.markets': 'बाज़ार',
+  'mk.title': 'बाज़ार और चेन',
+  'mk.networks': 'नेटवर्क',
+  'mk.rates': 'दरें',
+  'mk.currencies': 'मुद्राएँ',
+  'mk.movers': 'सबसे बड़े बदलाव',
+  'mk.exchanges': 'एक्सचेंज',
+  'mk.gaining': 'बढ़त',
+  'mk.falling': 'गिरावट',
+  'mk.marketCap': 'कुल मार्केट कैप',
+  'mk.volume24h': '24घं वॉल्यूम',
+  'mk.btcDominance': 'BTC प्रभुत्व',
+  'mk.ethDominance': 'ETH प्रभुत्व',
+  'mk.venue': 'प्लेटफ़ॉर्म',
+  'mk.jurisdiction': 'अधिकार क्षेत्र',
+  'mk.share': 'हिस्सा',
+  'mk.trust': 'भरोसा',
+  'mk.height': 'ब्लॉक ऊँचाई',
+  'mk.fee': 'शुल्क',
+  'mk.pending': 'लंबित',
+  'mk.supply': 'आपूर्ति',
+  'mk.tps': 'TPS',
   'nav.feed': 'मुख्य',
   'nav.intelligence': 'जाँच',
   'nav.preferences': 'सेटिंग्स',
@@ -404,6 +592,27 @@ const id: Dict = {
   'nav.calibration': 'Skor',
   'nav.globe': 'Globe',
   'nav.markets': 'Markets',
+  'mk.title': 'Pasar & rantai',
+  'mk.networks': 'Jaringan',
+  'mk.rates': 'Suku bunga',
+  'mk.currencies': 'Mata uang',
+  'mk.movers': 'Pergerakan terbesar',
+  'mk.exchanges': 'Bursa',
+  'mk.gaining': 'Naik',
+  'mk.falling': 'Turun',
+  'mk.marketCap': 'Kapitalisasi pasar',
+  'mk.volume24h': 'Volume 24 jam',
+  'mk.btcDominance': 'Dominasi BTC',
+  'mk.ethDominance': 'Dominasi ETH',
+  'mk.venue': 'Bursa',
+  'mk.jurisdiction': 'Yurisdiksi',
+  'mk.share': 'Pangsa',
+  'mk.trust': 'Kepercayaan',
+  'mk.height': 'Tinggi blok',
+  'mk.fee': 'Biaya',
+  'mk.pending': 'Tertunda',
+  'mk.supply': 'Pasokan',
+  'mk.tps': 'TPS',
   'nav.monitor': 'Pemantau',
   'nav.feed': 'Beranda',
   'nav.intelligence': 'Selidiki',
@@ -434,3 +643,19 @@ const id: Dict = {
 }
 
 export const DICTIONARIES: Record<Locale, Dict> = { en, ar, es, fr, zh, hi, id }
+
+/**
+ * Did *we* write this string in this language, or would a machine?
+ *
+ * The shield against double-translation has to be conditional on this. Marking
+ * a node `data-no-translate` unconditionally protects the seven curated
+ * languages and freezes the other hundred in English permanently — the exact
+ * opposite of opening the product to every language.
+ *
+ * It lives here, beside the data it reads, rather than in the provider: it is
+ * a pure lookup, and a server component, a test or a script has to be able to
+ * ask the question without loading React.
+ */
+export function isCurated(locale: Locale, key: string): boolean {
+  return Boolean(DICTIONARIES[locale]?.[key])
+}
