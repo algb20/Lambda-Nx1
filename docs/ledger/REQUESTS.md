@@ -685,3 +685,45 @@ The audit itself was wrong first, and that is the lesson worth keeping: its firs
 version reported the crashed pages as **ok**, because a page that fails to render
 has no horizontal overflow either. It now treats a page error or a failed asset
 as the loudest finding it can report. `npm run audit:responsive`.
+
+| R260 | `dossier` | `studied` | **اختار سهم أو عملة أو أي شيء … كل أخبار وأحداث وشراكات وخطط وأعمال من المصادر الرسمية … مع معلومات وإعلان الشريك … والمصادر … والأثر أو الاستنتاج … وأي شيء يعلن يذهب مباشرة إلى لوحة** — plus the classes still missing entirely: companies, all raw and processed materials, gold, silver, everything traded. Asked for as a **study before implementation**, awaiting development of the idea. |
+
+**R260 — the study, delivered: `docs/DOSSIER.md`.**
+
+The thesis in one line: every platform in this field aggregates **coverage** —
+what journalists and other aggregators said. We index the **primary act**: the
+8-K the company itself filed, the proposal its own holders voted, the auction
+price its own benchmark administrator set. Then we resolve the *counterparty*
+named in it to a real entity in our graph, extract the *terms*, and state the
+*consequence* with a grade on it.
+
+Every source in the plan was probed live on 2026-08-21 rather than assumed:
+
+| Verified | Result |
+|---|---|
+| SEC `data.sec.gov/submissions/CIK…json` | `200` — name, tickers, exchanges, EIN, **LEI**, SIC, addresses, former names, full filing index |
+| GLEIF LEI records | `200` |
+| **LBMA gold/silver auction prices** | `200` — 14,666 daily rows, latest 2026-08-20 at **$4,482.95/oz**. This closes *الذهب والفضة* with the actual benchmark, not an aggregator |
+| CoinGecko `/coins/{id}` official links | `200` — homepage, announcement URL, repos, handle: a *read list* of the issuer's own mouths |
+| Governance forums `/latest.json` | `200` |
+| World Bank / FAO / USGS | `200` |
+| Companies House · EIA · OPEC | `401` / `403` — keyed or blocked; two may be our egress and need re-checking from production |
+
+**Equity and index prices stay absent, deliberately.** Yahoo's `query1` endpoint
+answers `200` and we are not going to use it: it is a scrape of a broker's site
+in breach of its terms, and §3 forbids that route. SEC XBRL gives audited
+fundamentals lawfully and free, so a company dossier is rich without one price
+tick.
+
+Five additions beyond the ask, each cheap for us and expensive for anyone else
+because each depends on machinery this project already has: the **provenance
+ladder** on every official channel (A–C, how we know the mouth is theirs);
+**counterparty resolution** as a first-class graph edge; the **silence signal**
+(an issuer that files every eleven days and has filed nothing in ninety — no
+competitor reports absence, because absence has no press release);
+**contradiction between primary sources**; and the **dossier seal** for export.
+
+Ten phases, ordered by what unlocks the most rather than by what is easiest, and
+four open questions put back to the owner — depth versus breadth, how far
+counterparty resolution recurses, whether to take the keyed sources, and which
+reader the default section order serves.
