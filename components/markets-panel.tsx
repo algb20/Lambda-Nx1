@@ -209,6 +209,81 @@ export function MarketsPanel() {
         </div>
       </Card>
 
+      {/* ── Rates ────────────────────────────────────────────────────────── */}
+      <Card className="p-4">
+        <SectionHead
+          title="Rates"
+          note="What money costs: the central bank's policy rate, and what the market charges governments to borrow over two, five and ten years. The 2-year against the 10-year is the spread the whole bond market watches — it is the market's own forecast of the economy."
+        />
+        {report.rates.length === 0 ? (
+          <Empty what="No rate was published in this sweep." />
+        ) : (
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {report.rates.map((r) => {
+              // A yield move is quoted in basis points, because a 0.011% change
+              // is how the bond market says "one basis point" and reading it as
+              // a percentage makes every real move look like nothing.
+              const bp = r.change === null ? null : r.change * 100
+              const dir = directionOf(bp)
+              return (
+                <div key={`${r.kind}-${r.tenor ?? r.label}`} className="rounded-lg border border-border bg-card p-3">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{r.label}</p>
+                  <p className="mt-1 text-lg font-semibold tabular-nums">
+                    {r.value.toFixed(3)}
+                    <span className="text-sm font-normal text-muted-foreground">{r.unit}</span>
+                  </p>
+                  <p className={`text-[12px] tabular-nums ${TONE[dir]}`}>
+                    {bp === null
+                      ? 'no previous reading to compare'
+                      : `${bp >= 0 ? '+' : ''}${bp.toFixed(1)} bp on the day`}
+                  </p>
+                  <Provenance
+                    sourceKey={r.sourceKey}
+                    sourceUrl={r.sourceUrl}
+                    at={`${r.observedOn}T00:00:00.000Z`}
+                  />
+                </div>
+              )
+            })}
+          </div>
+        )}
+        <Spread rates={report.rates} />
+      </Card>
+
+      {/* ── Currencies ───────────────────────────────────────────────────── */}
+      <Card className="p-4">
+        <SectionHead
+          title="Currencies"
+          note="The ECB's daily reference fixing, quoted per US dollar — the rate contracts and accounts actually settle against, not a broker's quote."
+        />
+        {report.fx.length === 0 ? (
+          <Empty what="No reference fixing was published in this sweep." />
+        ) : (
+          <>
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+              {report.fx.map((f) => (
+                <div key={f.quote} className="rounded-lg border border-border bg-card px-3 py-2">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                    {f.base}/{f.quote}
+                  </p>
+                  <p className="mt-0.5 text-sm font-semibold tabular-nums">{f.value}</p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              Fixed {report.fx[0].observedOn} ·{' '}
+              {report.fx[0].sourceUrl ? (
+                <a href={report.fx[0].sourceUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                  {report.fx[0].sourceKey}
+                </a>
+              ) : (
+                report.fx[0].sourceKey
+              )}
+            </p>
+          </>
+        )}
+      </Card>
+
       {/* ── Movers ───────────────────────────────────────────────────────── */}
       <Card className="p-4">
         <SectionHead
@@ -306,6 +381,39 @@ function Empty({ what }: { what: string }) {
   return (
     <p className="mt-3 rounded-md border border-dashed border-border p-3 text-[12px] text-muted-foreground">
       {what} Nothing is being hidden — the sweep runs again in two minutes.
+    </p>
+  )
+}
+
+/**
+ * The 2s10s spread, and what its sign means.
+ *
+ * The one number on this page we compute rather than read, and it earns that
+ * because it is the question the two yields exist to answer together. A
+ * negative spread — the market charging *less* to lend for ten years than for
+ * two — has preceded most modern recessions, and that is worth a sentence
+ * rather than leaving a reader to subtract two numbers themselves.
+ *
+ * Shown only when both legs are present. Half a spread is not a spread.
+ */
+function Spread({ rates }: { rates: ChainRadarReport['rates'] }) {
+  const two = rates.find((r) => r.tenor === '2Y')
+  const ten = rates.find((r) => r.tenor === '10Y')
+  if (!two || !ten) return null
+  const bp = (ten.value - two.value) * 100
+  const inverted = bp < 0
+  return (
+    <p className="mt-3 rounded-md bg-muted/50 p-2.5 text-[12px] leading-relaxed">
+      <span className="font-medium">
+        2s10s spread {bp >= 0 ? '+' : ''}
+        {bp.toFixed(0)} bp
+      </span>
+      <span className="text-muted-foreground">
+        {' — '}
+        {inverted
+          ? 'inverted: the market charges less to lend for ten years than for two, which has preceded most modern recessions.'
+          : 'positive: lending for longer costs more, which is the ordinary shape of a curve.'}
+      </span>
     </p>
   )
 }
