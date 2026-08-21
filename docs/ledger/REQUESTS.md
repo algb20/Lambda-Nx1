@@ -341,7 +341,7 @@ notes, because a repaired ledger that hides its repair is worse than none:
 
 | # | Area | Status | Request |
 |---|---|---|---|
-| R237 | `mail` | `open` | **يزال هناك خطا في التحقق من الايميل** — email verification still errors. Fix first. |
+| R237 | `mail` | `done` | **يزال هناك خطا في التحقق من الايميل** — email verification still errors. Fix first. ✅ *Closed 2026-08-21: verified live end to end — `POST /api/auth/verify/request` → `{"sent":true}`. The cause was never mail; see R249–R252.* |
 | R238 | `design` | `open` | **هل ترى الفرق في التصميم اجعلها مثلها** — match the design in the two screenshots exactly. |
 | R239 | `design` | `open` | **اجعل المربعات اصغر وليس مستطيلات** — the boxes must be smaller and square, not rectangles. |
 | R240 | `design` | `open` | **كل الفئات يجب توفر مربع خاص بها والمعلومات والاخبار تتدفق داخلها** — every category gets its own box with its news flowing inside it. |
@@ -414,3 +414,19 @@ and only ever creating. `AUTO_SCHEMA=off` disables it.
 Proved end to end against a database rebuilt to the live deployment's exact
 state: a visitor pressing "send code" healed the database in 38 ms and received
 their code in the same request; the next request cost 0 ms.
+
+| R252 | `accounts` | `done` | **اكمل كل هذا وحدك** — complete all of it yourself. |
+
+**R252 — done, and verified on the live deployment.** Opened and merged PR #46,
+waited for the deploy (`a169560`), then drove the real path a visitor takes:
+
+```
+GET  /api/auth/methods        → accounts true, emailSignUp true,
+                                emailSignUpOffBecause null
+     (this request is what triggered the repair)
+GET  /api/health?deep=1       → reachable, PostgreSQL 17.6, missing tables: 0
+POST /api/auth/verify/request → {"sent":true}
+```
+
+The four missing tables were created by the deployment itself, with no secret,
+no paste and no shell. R237 — open since the session began — is closed by this.
