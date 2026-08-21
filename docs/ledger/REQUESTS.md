@@ -396,3 +396,21 @@ admin-gated on top of that.
 Verified against a database rebuilt to the live deployment's exact state — 20
 tables, stopped at migration 0015: first run created all four missing tables in
 30 ms with zero errors, second run created nothing and stayed complete.
+
+| R251 | `accounts` | `done` | **لم انجح باي طريقة لنسخ الكود هل هناك طريقة اخرى** — I could not copy the secret by any means; is there another way? |
+
+**R251 — the obstacle removed rather than worked around.** Vercel stores a
+variable marked *Sensitive* write-only: it cannot be revealed or copied after
+saving. That was the third route to a complete schema to fail in turn — the
+shell was unavailable, the nine-hundred-line paste stopped at migration 0015,
+and now the operator secret could not be read back.
+
+Three failures, one shape: the step does not belong to a person. It belongs to
+the deployment, which is the only party already holding both the credential and
+the schema. `ensureSchema()` now creates any missing tables on the first request
+that needs an account — once per process, only when they are genuinely absent,
+and only ever creating. `AUTO_SCHEMA=off` disables it.
+
+Proved end to end against a database rebuilt to the live deployment's exact
+state: a visitor pressing "send code" healed the database in 38 ms and received
+their code in the same request; the next request cost 0 ms.

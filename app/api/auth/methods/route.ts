@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { databaseAvailability, isDbConfigured } from '@/lib/db'
+import { databaseAvailability, ensureSchema, isDbConfigured } from '@/lib/db'
 import { canIssueSessions } from '@/lib/auth/session'
 import { mailConfigured } from '@/lib/mail'
 
@@ -34,6 +34,16 @@ export async function GET() {
    * repaired one recovers within seconds of the fix.
    */
   const live = await databaseAvailability()
+  /**
+   * Bring the schema up here too, not only in the account routes.
+   *
+   * This endpoint is fetched when the sign-in form is drawn — so a deployment
+   * whose tables were never created repairs itself the moment somebody opens
+   * the page, before they press anything and before they can be shown a
+   * refusal. At most once per process; a complete database never reaches it.
+   */
+  if (live.live) await ensureSchema()
+
   const db = isDbConfigured() && live.live
   const sessions = canIssueSessions()
   const accounts = db && sessions

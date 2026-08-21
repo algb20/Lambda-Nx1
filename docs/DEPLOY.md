@@ -73,9 +73,29 @@ mode you're in.
 > percent-encoded, which is the other frequent cause — it produces `28P01`
 > (`password authentication failed`) rather than `ENOTFOUND`.
 >
-> If the deep probe reports missing tables, the schema was never applied: paste
-> `db/schema.sql` into the provider's SQL editor. It is one file and it is safe
-> to run more than once.
+> ### The schema applies itself
+>
+> If the database is reachable and its tables are missing, the deployment
+> creates them — at most once per process, on the first request that needs an
+> account. There is nothing to paste and no secret to find.
+>
+> This is safe because of what the schema file can do: every statement is a
+> guarded `CREATE` or an additive `ALTER`, the only `DROP` in it is
+> `DROP NOT NULL`, and the single `UPDATE` writes only where a column is still
+> `NULL`. `lib/db/apply-schema.test.ts` asserts all three, so a migration that
+> ever introduced a destructive statement fails the suite instead of being
+> applied to a production database unattended.
+>
+> Two other routes to the same place:
+>
+> - **A button.** `/setup` → *Create the database tables* → paste `ADMIN_SECRET`
+>   → *Apply the schema*. Reports exactly which tables it created.
+> - **By hand.** Paste `db/schema.sql` into the provider's SQL editor. One file,
+>   safe to run more than once. Watch for a truncated paste — a run that stops
+>   partway leaves the database incomplete and says nothing.
+>
+> `AUTO_SCHEMA=off` disables the automatic path, which is the right choice on a
+> database shared with something else.
 
 ---
 

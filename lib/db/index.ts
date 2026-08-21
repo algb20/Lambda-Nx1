@@ -19,6 +19,12 @@ export { isDbConfigured }
 export { databaseAvailability, resetAvailabilityCache } from './availability'
 export type { DatabaseAvailability } from './availability'
 export { explainDatabaseError, isDatabaseUnavailable, describeDatabaseError } from './errors'
+/**
+ * Creating the schema is part of `lib/db`, not of any route: it is a property
+ * of the storage layer that it can bring itself up. `ensureSchema` is the
+ * automatic path, `applySchema` the operator-driven one.
+ */
+export { ensureSchema, applySchema, schemaStatus, autoSchemaEnabled } from './apply-schema'
 export type { DatabaseFailure } from './errors'
 export * as schema from '@/db/schema'
 
