@@ -1,7 +1,9 @@
 import { describe, it, expect, vi } from 'vitest'
 import { Registry } from './registry'
 import { collect } from './orchestrator'
-import { Guardrail, PassiveGuardrailError } from './guardrail'
+import { Guardrail, PassiveGuardrailError, USER_AGENT } from './guardrail'
+import { readFileSync, globSync } from 'node:fs'
+import { join } from 'node:path'
 import { gradeConfidence, dedupeEvidence, buildGraph, formatAdmiralty } from './analysis'
 import type { Admiralty, Capability, Evidence, Source } from './types'
 
@@ -254,5 +256,60 @@ describe('orchestrator — parallelism and deadlines', () => {
     expect(out.evidence.map((e) => e.claim)).toEqual(['from second'])
     // It stopped at the first source that answered; the third never ran.
     expect(out.results.map((r) => r.sourceKey)).toEqual(['empty', 'second'])
+  })
+})
+
+/**
+ * The engine says who it is once, in `guardrail.ts`, and every request inherits
+ * it. This is the test that keeps that true, because it stopped being true
+ * quietly: thirteen request paths had grown **four different** identities —
+ * `Lambda NX OSINT (research; contact via app)` (no reachable contact),
+ * `Lambda-NX-OSINT` (no contact at all), `LambdaNX/1.0 (+https://github.com/…)`
+ * (the URL form `guardrail.ts` records as measured to draw a 403 from the SEC's
+ * edge filter), and a hand-copied duplicate of the canonical string.
+ *
+ * The copies were not merely untidy. `USER_AGENT` reads `ENGINE_CONTACT`, so a
+ * deployment that sets its own operator address was still sending ours from
+ * every one of those thirteen paths — and the SEC, which is the one provider
+ * whose requirement was actually measured, was being sent the form it refuses
+ * from the catalogue adapter's default.
+ *
+ * One exception is deliberate and named: `CatalogSource.userAgent`, for a
+ * publisher that mandates a particular string. It lives in the adapter, applies
+ * per record, and falls back to `USER_AGENT`.
+ */
+describe('the engine has one identity', () => {
+  const files = globSync('lib/engine/**/*.ts', { cwd: process.cwd() })
+    .filter((f) => !f.endsWith('.test.ts'))
+    .filter((f) => f !== 'lib/engine/guardrail.ts')
+
+  it('is set in exactly one place, plus the documented per-record override', () => {
+    const offenders: string[] = []
+    for (const f of files) {
+      const code = readFileSync(join(process.cwd(), f), 'utf8')
+        .replace(/^[ \t]*\/\*[\s\S]*?\*\//gm, '')
+        .replace(/^[ \t]*\/\/.*$/gm, '')
+      // A key, not prose: `'User-Agent':` or `"User-Agent":`.
+      for (const m of code.matchAll(/['"]User-Agent['"]\s*:\s*([^\n]*)/gi)) {
+        // The one sanctioned form: a record's own override, falling back to ours.
+        if (/entry\.userAgent \?\? USER_AGENT/.test(m[1])) continue
+        offenders.push(`${f}: ${m[1].trim()}`)
+      }
+    }
+    expect(offenders, 'a second User-Agent for the engine').toEqual([])
+  })
+
+  it('carries a contact address and no URL', () => {
+    // Both halves measured: providers require a way to reach us, and the SEC
+    // refuses a User-Agent containing a link however it is phrased.
+    expect(USER_AGENT).toMatch(/@/)
+    expect(USER_AGENT).not.toMatch(/https?:\/\//)
+  })
+
+  it('lets a deployment name its own operator', () => {
+    // The reason the copies mattered: this switch could never reach them.
+    expect(readFileSync(join(process.cwd(), 'lib/engine/guardrail.ts'), 'utf8')).toContain(
+      'ENGINE_CONTACT',
+    )
   })
 })

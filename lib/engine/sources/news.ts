@@ -203,7 +203,6 @@ function stripHtml(s: string): string {
 }
 
 const WIKI_HEADERS = {
-  'User-Agent': 'Lambda NX OSINT (research; contact via app)',
   Accept: 'application/json',
 }
 

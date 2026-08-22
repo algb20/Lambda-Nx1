@@ -210,8 +210,8 @@ export const nwsAlerts: Source = {
     const url = 'https://api.weather.gov/alerts/active?severity=Extreme,Severe'
     const res = await ctx.fetch(url, {
       headers: {
-        // The NWS asks every client to identify itself.
-        'User-Agent': 'Lambda NX OSINT (research; contact via app)',
+        // The NWS asks every client to identify itself; the guarded fetch
+        // sends the engine's `USER_AGENT` on every request.
         Accept: 'application/geo+json',
       },
     })

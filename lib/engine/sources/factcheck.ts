@@ -163,7 +163,6 @@ export const factChecks: Source = {
       feeds.map(async (feed) => {
         const res = await ctx.fetch(feed.url, {
           headers: {
-            'User-Agent': 'LambdaNX/1.0 (+https://github.com/algb20/Lambda-Nx1)',
             Accept: 'application/rss+xml, application/atom+xml, application/xml;q=0.9, */*;q=0.5',
           },
         })

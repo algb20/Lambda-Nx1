@@ -53,34 +53,46 @@ export interface BoardPoint {
 }
 
 /**
- * Every request from this file, named.
+ * Every request from this file, made the same way.
  *
  * ## The failure this exists for, measured
  *
- * The courts board reported **`ok: 1, failed: 0` and zero rows**. Called by
- * hand with a name in the User-Agent, the same URL answers `200` with 8.3
- * million results. Called the way this file called it — anonymously — it
- * answers:
+ * The courts board reported **`ok: 1, failed: 0` and zero rows**. CourtListener
+ * was in fact answering:
  *
  * ```
  * 429 {"detail":"Request was throttled. Expected available in 5040 seconds."}
  * ```
  *
  * Ninety minutes of throttling, swallowed by `if (!res.ok) return []`, and
- * presented to the reader as a healthy source with nothing to say. Two
- * separate mistakes, and both are fixed here rather than at nine call sites:
+ * presented to the reader as a healthy source with nothing to say. That is what
+ * `boardFetch` fixes: `expectOk` turns a refusal into a thrown error the
+ * orchestrator records, so the board says one source failed instead of quietly
+ * showing an empty page. The same trap cost the markets board two of its four
+ * sections when Stooq began answering with a challenge page.
  *
- *  1. **Say who we are.** Providers throttle anonymous clients and they are
- *     right to; §3 is explicit that a source which will not identify itself has
- *     no standing to complain about being refused. The catalogue adapter has
- *     always sent a name — the hand-written sources in this file never did.
- *  2. **Fail out loud.** `expectOk` turns a refusal into a thrown error the
- *     orchestrator records, so the board says one source failed instead of
- *     quietly showing an empty page. The same trap cost the markets board two
- *     of its four sections when Stooq began answering with a challenge page.
+ * ## Why there is no User-Agent here, having briefly had one
+ *
+ * The first version of this block set its own. That was wrong twice over, and
+ * the correction is worth keeping because the reasoning was plausible.
+ *
+ * First, it was not needed: `Guardrail.createFetch` already puts `USER_AGENT`
+ * on every request the engine makes, so nothing in this file was ever
+ * anonymous. The throttle was a spent quota, not a refusal to identify — and
+ * "we were anonymous" was a diagnosis reached by reasoning rather than by
+ * reading the code that sends the header.
+ *
+ * Second, the string chosen — `LambdaNX/1.0 (+https://github.com/…)` — is the
+ * exact form `guardrail.ts` records as **measured to be refused with a 403 by
+ * the SEC's edge filter**, whichever way it is phrased. None of these nine
+ * endpoints is the SEC, so nothing broke; a later board reading an SEC host
+ * would have inherited a header this codebase already knew was harmful.
+ *
+ * The engine has one identity and one place that decides it. A source may
+ * still override it for a provider that demands a specific string — but it
+ * must be because that provider demanded it, and measured.
  */
 const BOARD_HEADERS = {
-  'User-Agent': 'LambdaNX/1.0 (+https://github.com/algb20/Lambda-Nx1)',
   Accept: 'application/json, application/rss+xml, application/xml;q=0.9, */*;q=0.5',
 }
 
@@ -96,7 +108,7 @@ async function boardFetch(ctx: SourceContext, sourceKey: string, url: string): P
  * API refuses, and must say so — that is `boardFetch`. A board reading nine
  * press offices, eighteen FRED series or three CelesTrak groups loses one of
  * many, and killing the whole run for it would turn a partial answer into no
- * answer. So this one carries the name and lets the caller skip.
+ * answer. So this one returns the response as it came and lets the caller skip.
  *
  * What it must never become is the swallowed failure it replaces: the caller
  * skips a *known* absence, and the board's own summary still counts what came

@@ -158,15 +158,21 @@ describe('board sources say who they are, and fail out loud', () => {
     .replace(/^[ \t]*\/\/.*$/gm, '')
 
   it('never calls ctx.fetch directly outside the two helpers', () => {
-    // Nine call sites, each previously anonymous. CourtListener answered the
-    // named request with 8.3 million results and the anonymous one with
-    // `429 throttled, available in 5040 seconds`.
+    // Nine call sites, each with its own idea of how to ask and what to do
+    // when refused. One of them swallowed a `429 throttled, available in 5040
+    // seconds` and reported a healthy board.
     const direct = [...boards.matchAll(/ctx\.fetch\(/g)].length
     expect(direct, 'a call site bypassing boardFetch/boardTry').toBeLessThanOrEqual(2)
   })
 
-  it('sends a name with a contact route', () => {
-    expect(boards).toContain("'User-Agent': 'LambdaNX/1.0 (+https://github.com/algb20/Lambda-Nx1)'")
+  /**
+   * The engine has one identity, set once in `Guardrail.createFetch`. This file
+   * briefly set its own — unnecessary, since nothing here was ever anonymous,
+   * and in the one form `guardrail.ts` records as measured to draw a 403 from
+   * the SEC's edge filter. A second identity is a second thing to get wrong.
+   */
+  it('does not invent a second identity for the engine', () => {
+    expect(boards.toLowerCase()).not.toContain('user-agent')
   })
 
   it('turns a refusal into a recorded failure for a single-source board', () => {

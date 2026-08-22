@@ -13,8 +13,7 @@
  */
 import type { Evidence, EntityType, Source } from '../types'
 
-const WIKI_UA = {
-  'User-Agent': 'Lambda NX OSINT (research; contact via app)',
+const WIKI_HEADERS = {
   Accept: 'application/json',
 }
 
@@ -60,7 +59,7 @@ export const wikidata: Source = {
     const searchUrl =
       `https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json` +
       `&language=en&limit=1&origin=*&search=${encodeURIComponent(q)}`
-    const sRes = await ctx.fetch(searchUrl, { headers: WIKI_UA })
+    const sRes = await ctx.fetch(searchUrl, { headers: WIKI_HEADERS })
     if (!sRes.ok) return []
     const sJson = (await sRes.json().catch(() => null)) as SearchResponse | null
     const qid = sJson?.search?.[0]?.id
@@ -68,7 +67,7 @@ export const wikidata: Source = {
 
     // 2) claims for the resolved entity
     const dataUrl = `https://www.wikidata.org/wiki/Special:EntityData/${qid}.json`
-    const dRes = await ctx.fetch(dataUrl, { headers: WIKI_UA })
+    const dRes = await ctx.fetch(dataUrl, { headers: WIKI_HEADERS })
     if (!dRes.ok) return []
     const dJson = (await dRes.json().catch(() => null)) as EntitiesResponse | null
     const entity = dJson?.entities?.[qid]
@@ -90,7 +89,7 @@ export const wikidata: Source = {
       const labelsUrl =
         `https://www.wikidata.org/w/api.php?action=wbgetentities&format=json` +
         `&props=labels&languages=en&origin=*&ids=${uniqueIds.join('|')}`
-      const lRes = await ctx.fetch(labelsUrl, { headers: WIKI_UA })
+      const lRes = await ctx.fetch(labelsUrl, { headers: WIKI_HEADERS })
       if (lRes.ok) {
         const lJson = (await lRes.json().catch(() => null)) as EntitiesResponse | null
         for (const [id, ent] of Object.entries(lJson?.entities ?? {})) {
