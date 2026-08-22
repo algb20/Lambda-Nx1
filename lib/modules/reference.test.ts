@@ -40,7 +40,11 @@ describe('investigateReference', () => {
       }),
     )
     const r = await investigateReference('Google')
-    expect(r.summary.facts).toBe(2)
+    // Three, not two: the two relations plus the identity of the entity itself.
+    // Resolving a name to a specific, citable entity is an answer, and leaving
+    // it out is what made a person's page come back blank.
+    expect(r.summary.facts).toBe(3)
+    expect(r.facts.some((f) => (f.data as { relation?: string }).relation === 'identity')).toBe(true)
     expect(r.facts.some((f) => f.claim === 'Parent organization: Alphabet Inc.')).toBe(true)
     const preds = new Set(r.ontology.edges.map((e) => e.predicate))
     expect(preds.has('owned_by')).toBe(true)

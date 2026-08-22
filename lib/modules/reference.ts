@@ -12,7 +12,7 @@ import { collect } from '../engine/orchestrator'
 import { registry } from '../engine/registry'
 import { registerReferenceGateway } from '../engine/sources'
 import { buildOntology, type Ontology } from '../engine/ontology'
-import type { Evidence } from '../engine/types'
+import type { Evidence, EntityType } from '../engine/types'
 
 export interface ReferenceReport {
   subject: string
@@ -30,7 +30,23 @@ export async function investigateReference(input: string): Promise<ReferenceRepo
 
   const r = await collect({ capability: 'reference', value: subject }, { registry, mode: 'all' })
   const facts = [...r.evidence]
-  const ontology = buildOntology({ type: 'company', value: subject }, facts)
+
+  /**
+   * What the subject *is*, from the source rather than from this line.
+   *
+   * This used to read `{ type: 'company', value: subject }`, hard-coded, and it
+   * put `company:Marie Curie` into the knowledge graph — a person recorded as a
+   * company, stated with the same confidence as everything else. The gateway
+   * whose whole purpose is turning a name into a correctly typed node was the
+   * one generating the wrong type.
+   *
+   * The source reads Wikidata's own `P31` and returns it on the identity
+   * finding. `other` is the honest fallback when nothing resolved: not knowing
+   * what something is beats asserting the wrong thing about it.
+   */
+  const identity = facts.find((f) => (f.data as { relation?: string } | undefined)?.relation === 'identity')
+  const subjectType: EntityType = identity?.entity?.type ?? 'other'
+  const ontology = buildOntology({ type: subjectType, value: subject }, facts)
 
   return {
     subject,

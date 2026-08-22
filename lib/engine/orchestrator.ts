@@ -91,6 +91,23 @@ async function runSource(
     return { sourceKey: source.key, ok: true, evidence }
   } catch (err) {
     /**
+     * Why a source produced nothing, on demand.
+     *
+     * Every branch below turns a thrown error into a *result*, which is right —
+     * one dead provider must not kill a run. The cost is that from outside,
+     * "rate-limited and holding nothing", "the provider refused" and "there is
+     * genuinely nothing to report" all arrive as a source that answered with an
+     * empty list. Diagnosing the reference gateway's blank page meant guessing
+     * between those three for an hour.
+     *
+     * Off unless `LAMBDA_DEBUG_SOURCES` is set, so it costs a production
+     * deployment nothing and is one environment variable away when a gateway
+     * goes quiet.
+     */
+    if (process.env.LAMBDA_DEBUG_SOURCES) {
+      console.error('[source]', source.key, (err as Error)?.name, (err as Error)?.message)
+    }
+    /**
      * A source inside its own quiet interval.
      *
      * Not a failure: we chose not to fetch it, because the publisher asked us
