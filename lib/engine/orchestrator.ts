@@ -58,8 +58,29 @@ class SourceTimeoutError extends Error {
   }
 }
 
-/** Run one source under the guardrail, bounded by a deadline. */
+/**
+ * `runSource`, with the clock on it.
+ *
+ * A wrapper rather than a `Date.now()` at each of the five return sites: those
+ * five are the branches this file has spent the most care distinguishing —
+ * fresh, rate-limited-with-cache, rate-limited-empty, failed-with-cache,
+ * failed-empty — and every one of them costs wall-clock time that a caller may
+ * need to account for. Timing them in one place means a new branch is timed the
+ * day it is written rather than the day somebody notices it is not.
+ */
 async function runSource(
+  source: Source,
+  input: SourceInput,
+  reg: Registry,
+  timeoutMs: number,
+): Promise<SourceResult> {
+  const began = Date.now()
+  const result = await runSourceUntimed(source, input, reg, timeoutMs)
+  return { ...result, durationMs: Date.now() - began }
+}
+
+/** Run one source under the guardrail, bounded by a deadline. */
+async function runSourceUntimed(
   source: Source,
   input: SourceInput,
   reg: Registry,

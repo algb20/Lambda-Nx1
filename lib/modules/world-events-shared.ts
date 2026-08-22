@@ -200,6 +200,19 @@ export interface SourceHealth {
   /** Age of the replayed answer in ms, when `status` is `cached`. */
   cacheAgeMs?: number | null
   /**
+   * How long this feed took, in ms.
+   *
+   * A fan-out is as slow as its slowest member, and until now nothing recorded
+   * which member that was. The world picture runs 135 sources at once and
+   * returns when the last of them does, so one feed taking five seconds costs
+   * every reader five seconds — including the reader on a cold serverless
+   * instance who has already waited for the process to start.
+   *
+   * `status` says whether a feed works. This says what it costs, which is the
+   * other half of deciding whether to keep it.
+   */
+  durationMs?: number | null
+  /**
    * Kept for callers written against the old shape. It is deliberately *not*
    * the same as `status === 'ok'`: a feed that answered empty reports
    * `ok: true` here (it did answer) and `status: 'empty'` there (it gave

@@ -123,6 +123,62 @@ describe('guardrail — passive-only enforcement', () => {
   })
 })
 
+/**
+ * A fan-out returns when its slowest member does, so one slow source sets the
+ * latency every reader pays. Nothing recorded which member that was: `ok` and
+ * `error` say whether a source works and said nothing about what it costs, so
+ * a source that answers reliably and slowly never appears in any failure list
+ * and is never noticed. Measured 2026-08-22: the world picture ran 4.9s over
+ * 135 sources, of which one took 4,891ms and contributed nothing.
+ */
+describe('the orchestrator reports what each source cost', () => {
+  it('times a source that answers', async () => {
+    const reg = new Registry()
+    reg.registerAll([makeSource({ key: 'slow', run: async () => {
+      await new Promise((r) => setTimeout(r, 25))
+      return [ev('answered')]
+    } })])
+    const out = await collect({ capability: 'dns', value: 'example.com' }, { registry: reg })
+    const result = out.results.find((r) => r.sourceKey === 'slow')
+    expect(result?.durationMs, 'a source with no cost recorded cannot be compared').toBeGreaterThanOrEqual(20)
+  })
+
+  /**
+   * The failing branch matters more than the succeeding one: a source that
+   * fails *slowly* is the worst kind, since it costs the full wait and returns
+   * nothing for it.
+   */
+  it('times a source that fails, not only one that works', async () => {
+    const reg = new Registry()
+    reg.registerAll([
+      makeSource({ key: 'slow-fail', run: async () => {
+        await new Promise((r) => setTimeout(r, 25))
+        throw new Error('provider down')
+      } }),
+      makeSource({ key: 'ok', run: async () => [ev('fine')] }),
+    ])
+    const out = await collect({ capability: 'dns', value: 'x.com' }, { registry: reg, mode: 'all' })
+    const failed = out.results.find((r) => r.sourceKey === 'slow-fail')
+    expect(failed?.ok).toBe(false)
+    expect(failed?.durationMs).toBeGreaterThanOrEqual(20)
+  })
+
+  it('times every source in a fan-out, so the slowest can be named', async () => {
+    const reg = new Registry()
+    reg.registerAll([
+      makeSource({ key: 'quick', run: async () => [ev('a')] }),
+      makeSource({ key: 'slower', run: async () => {
+        await new Promise((r) => setTimeout(r, 30))
+        return [ev('b')]
+      } }),
+    ])
+    const out = await collect({ capability: 'dns', value: 'x.com' }, { registry: reg, mode: 'all' })
+    for (const r of out.results) expect(typeof r.durationMs).toBe('number')
+    const slowest = [...out.results].sort((a, b) => (b.durationMs ?? 0) - (a.durationMs ?? 0))[0]
+    expect(slowest.sourceKey).toBe('slower')
+  })
+})
+
 describe('orchestrator — multi-source fallback', () => {
   it('falls back to the next source when one errors', async () => {
     const reg = new Registry()

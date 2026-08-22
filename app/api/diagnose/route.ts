@@ -66,6 +66,34 @@ export async function GET() {
   const empty = health.filter((h) => h.status === 'empty').map((h) => h.sourceKey)
   const cached = health.filter((h) => h.status === 'cached')
 
+  /**
+   * What the world picture is waiting for.
+   *
+   * The fan-out runs its sources at once and returns when the last one does, so
+   * a single slow feed sets the latency every reader pays — and on a cold
+   * serverless instance that reader has already waited for the process to
+   * start. Measured 2026-08-22: two runs at 4.9s and 8.0s over 135 sources,
+   * with `kma_korea` the tail both times — 4,891ms, then the full 8s deadline.
+   *
+   * **And it is not a slow publisher.** Fetched on its own, three times, the
+   * same feed answered `200` with 52KB in 4.1s, 3.0s and 0.7s. It is slow
+   * *inside a 135-way concurrent fan-out* and quick outside one, which means
+   * the tail is the run contending with itself — DNS, TLS and parsing for 135
+   * origins at once — not a provider failing us.
+   *
+   * That distinction is the whole reason to measure before acting: the obvious
+   * move was to quarantine the slowest source, and it would have removed a
+   * healthy national weather authority to fix a problem it did not cause.
+   *
+   * Reporting the tail rather than an average, because an average over 135
+   * sources hides exactly the entry worth looking at.
+   */
+  const slowest = [...health]
+    .filter((h) => typeof h.durationMs === 'number')
+    .sort((a, b) => (b.durationMs ?? 0) - (a.durationMs ?? 0))
+    .slice(0, 8)
+    .map((h) => ({ source: h.sourceKey, ms: h.durationMs, status: h.status, items: h.count }))
+
   // ── Is one category drowning the board? ───────────────────────────────────
   const byCategory = (world?.categories ?? [])
     .map((c) => ({ category: c.category, count: c.count }))
@@ -106,6 +134,12 @@ export async function GET() {
       /** Capped, because a hundred identical timeouts teach nothing new. */
       failures: failed.slice(0, 40),
       emptySources: empty.slice(0, 40),
+      /**
+       * The tail that sets the whole board's latency — see `slowest` above.
+       * A source that answers reliably and slowly is not a failure and will
+       * never appear in `failures`, which is exactly why it goes unnoticed.
+       */
+      slowest,
     },
 
     /** The second question: is the board one category wearing a costume? */
