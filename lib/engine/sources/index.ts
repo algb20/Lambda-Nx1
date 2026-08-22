@@ -40,6 +40,8 @@ import { COMPANY_SOURCES } from './companies'
 import { BOARD_SOURCES } from './boards'
 // Gateway — Crypto & blockchain (every listed asset, plus the networks' own news)
 import { CRYPTO_GATEWAY_SOURCES } from './crypto'
+// Gateway — Maritime & ocean (NOAA buoy network: the other half of transport)
+import { MARITIME_SOURCES } from './maritime'
 // Gateway — Geospatial (places + flights)
 import { nominatim, opensky } from './geo'
 // Gateway — Research & tech-trend
@@ -387,7 +389,7 @@ export function registerBoards(): void {
   // board shape, but its two sources have real logic — a relevance ranking over
   // eighteen thousand assets, and a fan-out across the crypto feed catalogue —
   // which is what earns a file of their own.
-  registry.registerAll([...BOARD_SOURCES, ...CRYPTO_GATEWAY_SOURCES])
+  registry.registerAll([...BOARD_SOURCES, ...CRYPTO_GATEWAY_SOURCES, ...MARITIME_SOURCES])
   registeredBoards = true
 }
 

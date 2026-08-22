@@ -108,6 +108,13 @@ export const BOARDS: BoardDefinition[] = [
     searchable: true,
   },
   {
+    key: 'maritime',
+    capability: 'maritime',
+    title: 'Maritime & ocean',
+    note: 'The sea as its instruments report it — NOAA’s buoy network, 1,351 active stations and around 850 reporting at any moment: wave height and period, wind and gust, pressure, sea and air temperature, grouped by ocean with the roughest first. Search a station, a sea area or the body that owns the instrument.',
+    searchable: true,
+  },
+  {
     key: 'resources',
     capability: 'resources',
     title: 'Resources & commodities',

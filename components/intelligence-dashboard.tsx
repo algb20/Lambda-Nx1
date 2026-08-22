@@ -26,7 +26,7 @@ import {
   BookOpen,
   Library,
 } from 'lucide-react'
-import { Sparkles, Building2, Scale, FileText, Mic, Pickaxe, Sun, Satellite, Megaphone, Coins } from 'lucide-react'
+import { Sparkles, Building2, Scale, FileText, Mic, Pickaxe, Sun, Satellite, Megaphone, Coins, Waves } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -113,6 +113,7 @@ const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: s
   { id: 'grid', label: 'Grid', icon: Gauge, placeholder: 'live electricity generation — press Load' },
   { id: 'space-weather', label: 'Space weather', icon: Sun, placeholder: 'solar and geomagnetic conditions — press Load' },
   { id: 'orbital', label: 'Orbital', icon: Satellite, placeholder: 'an object name — or press Load' },
+  { id: 'maritime', label: 'Maritime', icon: Waves, placeholder: 'a sea area, a station or its owner — or press Load for the roughest seas' },
   { id: 'markets', label: 'Markets', icon: LineChart, placeholder: 'BTC, AAPL, or USD/EUR' },
   { id: 'procurement', label: 'Contracts', icon: Gavel, placeholder: 'company, agency or project name' },
   { id: 'ownership', label: 'Ownership', icon: Network, placeholder: 'company / legal-entity name' },

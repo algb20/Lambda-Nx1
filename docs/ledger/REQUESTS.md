@@ -47,7 +47,7 @@ The ones that **are** genuine standing work, named rather than buried:
 | R184 | 2026-08-20 | `gateways` | | `open` | آليّة تعمل **تلقائيًا** لكل البوّابات |
 | R185 | 2026-08-20 | `gateways` | | `done` | بوّابة **العملات الرقمية والبلوكشين** — `crypto`: أيّ أصل من **١٨٬٦١٠** بسجلّه الكامل (السعر، العرض مقابل السقف، البُعد عن القمّة، السلاسل التي يعمل عليها)، وأخباره من **٧ ناشرين** أربعة منهم الشبكات نفسها (Pi Core Team · Ethereum Foundation · Solana · Bitcoin Optech) |
 | R186 | 2026-08-20 | `gateways` | | `done` | بوّابة **المعادن والثروات** — `resources`: ١٨ سلسلة أسعار من صندوق النقد عبر FRED (نحاس، ألمنيوم، نيكل، زنك، رصاص، قصدير، حديد، يورانيوم، فحم، غاز + غذاء + ٣ مؤشرات) |
-| R187 | 2026-08-20 | `gateways` | | `open` | اعمل بحثًا وحدّد **قائمة بكل البوّابات** ثم أنجزها |
+| R187 | 2026-08-20 | `gateways` | | `done` | **`docs/GATEWAY-MAP.md`** — الخريطة المبحوثة الكاملة: عشرون تخصّصًا من مرجعنا، خمسة خارج النطاق بحكم الميثاق، **٣٢ بوّابة** موزّعة عليها، وخمس فجوات لكلٍّ منها سلطة مسمّاة وحالة **مُتحقَّق منها حيًّا** — بما فيها الفجوات التي **لا طريق مجّاني لها** (البراءات، الحرمان من التعاقد) مسجّلة بدل إخفائها |
 | R188 | 2026-08-20 | `gateways` | | `done` | بوّابة `officials` — خطب محافظي البنوك المركزية بنصّها من BIS، مجمّعة لكل متحدّث. **أفعال المنصب العامة فقط**، لا حياة خاصة (§3) |
 | R189 | 2026-08-20 | `gateways` | | `open` | البوّابات يجب أن **تتطوّر تلقائيًا** |
 | R190 | 2026-08-20 | `globe` | | `open` | صفحة الكرة تُرتَّب وتحوي **كل** البوّابات — البوّابات الآن ٢٦ في ٧ عائلات على `/intelligence`؛ يبقى ربطها بالكرة |
@@ -727,6 +727,34 @@ Ten phases, ordered by what unlocks the most rather than by what is easiest, and
 four open questions put back to the owner — depth versus breadth, how far
 counterparty resolution recurses, whether to take the keyed sources, and which
 reader the default section order serves.
+
+| R267 | `standing` | `standing` | **لنا أكثر من المواقع والتطبيقات المشابهة — ننقل خبرتهم وكل ما نحتاجه وكل ما هو ملمّ ومفقود في مشروعنا، ونحلّ كل مشاكلهم بطريقتنا وتفوّقنا: التصميم والترتيب وكل تقنياتهم وأدواتهم. كل ما هو موجود في المشاريع المنافسة يجب توفّره عندنا مع التطوير والتحسين والابتكار وحلّ المشاكل، وأيضًا ابتكاراتنا ومميّزاتنا وكل ما يجعل مشروعنا الأول في مجاله ويخدم كل الفئات والأعمار والخاص والحكومي. وبتجربة وتصفّح حقيقي وعمل حقيقي، وكأنك إنسان خبير جدًّا على المشاريع المشابهة.** |
+
+**R267 — قاعدة دائمة، لا بند يُغلق.**
+
+This is §2 rule 8 restated by the owner, and it is recorded as `standing`
+rather than as a task precisely because it can never be "done". Four things it
+adds to how the work is judged, from now on and without being asked again:
+
+1. **Parity is the floor, not the goal.** Every capability a competing platform
+   has, we have — and better. Their weaknesses are our specification. The
+   living record is `docs/COMPETITORS.md`; the gap list that turns it into work
+   is `docs/GATEWAY-MAP.md`.
+2. **Design and arrangement count as capability.** "It is in there somewhere"
+   is the failure this project keeps being told about — R266's globe page,
+   R181's buried GDP figure, R185's asset record landing seventh. A finding a
+   reader cannot find is a finding we do not have.
+3. **Real browsing, real work.** A claim about the interface is checked in a
+   real browser at real viewport sizes before it is made. `user-walker` and
+   `scripts/responsive-audit.mjs` exist for this; "it should work" is not a
+   verification.
+4. **Every audience.** Private and government, every age, every device. That is
+   why the two-surface guarantee (R265) and the fit-every-screen rule (R264)
+   are enforced by tests rather than by intention.
+
+What it does **not** change: §2 rule 8's last line. We study their
+architecture, we never copy their code — most are proprietary, and World
+Monitor is AGPL-3.0, which would force our whole product open.
 
 | R266 | `globe` | `done` | **تصاميم الصفحات لا تزال بدائية، وفي صفحة الخريطة اجعل المربعات بطريقة يمكن تحديدها وفرزها واستعمال واضح وتمرير الصفحة — المربعات الآن تبدو صفحة واحدة متداخلة. وتحت الخريطة حتى آخرها المستخدم يتشتت، وتوزيع وتصميم المعلومات وفرزها لن يفهمه ولا يعرف المستخدم العمل عليه. وهناك أخطاء بالمعلومات والتواريخ، وأيضًا فوق الخريطة.** |
 
