@@ -218,7 +218,40 @@ export async function collect(
   let results: SourceResult[]
 
   if (mode === 'all') {
-    // Independent sources — run them at once and keep whatever arrives.
+    /**
+     * Independent sources — run them at once and keep whatever arrives.
+     *
+     * ## Bounded concurrency was tried here, and measured, and rejected
+     *
+     * The world fan-out runs 164 active sources at once, and per-source timing
+     * showed each one taking far longer inside the run than outside it: a
+     * national weather feed that answers alone in 0.7–4.1s took 4.9s and then
+     * the full 8s deadline inside the fan-out. The run contends with itself
+     * over DNS, TLS and parsing, which makes a worker pool the obvious fix.
+     *
+     * It is not the fix. Three passes over the real catalogue at each setting,
+     * spaced, on the same network:
+     *
+     * | concurrency | total | median per source | max | hit the deadline |
+     * |---|---|---|---|---|
+     * | unbounded | 8.0s / 4.1s / 4.3s | 1822–2069ms | 4108–8000ms | 1 of 3 |
+     * | 32 | 6.2s / 6.8s / 9.6s | 594–642ms | 2942–6343ms | 0 of 3 |
+     * | 12 | 14.6s | 492ms | 8001ms | 1 of 1 |
+     *
+     * A pool of 32 does exactly what it promises — each source roughly three
+     * times faster, and not one run to the deadline — and makes **the number
+     * the reader waits for worse** in two of the three pairs. Individual
+     * latency is not what a reader experiences; the total is, and 164 sources
+     * finishing together beat 164 sources finishing in waves.
+     *
+     * Note also the spread within one setting: 8.0s, 4.1s, 4.3s for identical
+     * work. The fan-out's total is dominated by network variance, not by this
+     * scheduling choice, so tuning the choice is tuning the wrong term.
+     *
+     * The tidier per-source numbers were tempting and would have bought a
+     * slower product. Left unbounded, deliberately, with the measurement
+     * written down so the next person does not re-derive it.
+     */
     results = await Promise.all(sources.map((s) => runSource(s, input, reg, timeoutMs)))
   } else {
     // A fallback chain is ordered by definition: stop at the first that answers.

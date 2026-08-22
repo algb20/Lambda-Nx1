@@ -85,6 +85,10 @@ export async function GET() {
    * move was to quarantine the slowest source, and it would have removed a
    * healthy national weather authority to fix a problem it did not cause.
    *
+   * The second obvious move — bounding the fan-out's concurrency — was also
+   * measured, and also rejected: it makes each source three times faster and
+   * the total the reader waits for *worse*. The table is in `orchestrator.ts`.
+   *
    * Reporting the tail rather than an average, because an average over 135
    * sources hides exactly the entry worth looking at.
    */
