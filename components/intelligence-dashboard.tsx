@@ -900,6 +900,44 @@ function StoryRow({ story }: { story: Story }) {
   )
 }
 
+/**
+ * Stories shown before the list collapses.
+ *
+ * The whole list used to render, always. Walked on a 390px phone, the news
+ * gateway came out **95,255 pixels tall with 917 tap targets** — eight times
+ * the globe page this project was already told nobody could use, and by a wide
+ * margin the longest page in the product. Nothing was wrong with the data; the
+ * page simply printed all of it.
+ *
+ * Ten is a reading. The rest is one press away, and the press says how many.
+ */
+const STORIES_BEFORE_COLLAPSE = 10
+
+function StoryList({ stories }: { stories: NewsReport['stories'] }) {
+  const [open, setOpen] = useState(false)
+  const visible = open ? stories : stories.slice(0, STORIES_BEFORE_COLLAPSE)
+
+  return (
+    <>
+      {visible.map((story) => (
+        <StoryRow key={story.id} story={story} />
+      ))}
+      {stories.length > STORIES_BEFORE_COLLAPSE ? (
+        <button
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          className="touch-target mt-2 w-full rounded-md border border-border/60 px-2 py-1.5 text-[11px] text-muted-foreground transition-colors hover:bg-muted"
+        >
+          {open ? 'Show fewer stories' : `Show all ${stories.length} stories`}
+          {open ? null : (
+            <span className="ml-1 opacity-60">({stories.length - STORIES_BEFORE_COLLAPSE} more)</span>
+          )}
+        </button>
+      ) : null}
+    </>
+  )
+}
+
 function NewsView({ r, onReload, loading }: { r: NewsReport; onReload: () => void; loading: boolean }) {
   const [auto, setAuto] = useState(true)
   const reloadRef = useRef(onReload)
@@ -969,7 +1007,7 @@ function NewsView({ r, onReload, loading }: { r: NewsReport; onReload: () => voi
             No signals right now. Sources may be rate-limited — Live will retry.
           </p>
         ) : (
-          r.stories.map((story) => <StoryRow key={story.id} story={story} />)
+          <StoryList stories={r.stories} />
         )}
       </Card>
       <p className="px-1 text-[11px] text-muted-foreground">
