@@ -70,6 +70,20 @@ describe('the phone-shaped rules survive in the stylesheet', () => {
   it('offers a row that scrolls rather than one that hides what does not fit', () => {
     expect(css).toContain('.scroll-row')
   })
+
+  /**
+   * The open-data gateway scrolled sideways on a 390px phone because a national
+   * catalogue returned a dataset title that is one unbroken token. Every
+   * gateway renders text it did not write, so this belongs on `body` once
+   * rather than on each view — and it must be `anywhere`, not `break-word`.
+   * Only `anywhere` counts toward min-content width, which is what lets a flex
+   * or grid item holding an unbreakable word shrink instead of widening the
+   * page. Swapping it for `break-word` would look equivalent, wrap the text,
+   * and leave the page overflowing exactly as before.
+   */
+  it('lets an unbreakable word shrink instead of widening the page', () => {
+    expect(css).toMatch(/overflow-wrap:\s*anywhere/)
+  })
 })
 
 describe('nothing sits under the phone’s own controls', () => {
