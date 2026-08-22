@@ -17,6 +17,14 @@ import type { Config } from '@netlify/functions'
  * the Radar fingerprints its findings — so an extra run costs time and never
  * duplicates. That is what makes a short interval safe (see `config` below).
  */
+import { dueJobs } from '../../lib/ops/schedule'
+
+/**
+ * How often Netlify wakes this function. Every scheduled job's cadence is a
+ * multiple of it, so a job is due when the tick lands on its interval.
+ */
+const TICK_MINUTES = 20
+
 export const config: Config = {
   /**
    * Every twenty minutes, not every six hours.
@@ -27,23 +35,24 @@ export const config: Config = {
    * is roughly the interval at which the underlying publishers themselves
    * update — going faster would spend their goodwill for nothing new.
    */
-  schedule: '*/20 * * * *',
+  schedule: `*/${TICK_MINUTES} * * * *`,
 }
 
 /**
- * Jobs to run, in order. A failure in one must not skip the others.
+ * What runs on this tick comes from `lib/ops/schedule.ts`, not from here.
  *
- * The Radar is not on every tick: it sweeps a watchlist that changes on the
- * scale of days, so running it three times an hour would be work nobody reads.
- * It is triggered on the hour instead — see `shouldRunRadar`.
+ * This file used to hold its own arrays — `ALWAYS = ['publish']`, `HOURLY =
+ * ['radar-watch']` — while `vercel.json` held a different pair. Two
+ * declarations of one schedule, and nothing comparing them, so the two hosts
+ * ran different work for months. `netlify.toml` says in its own comment that
+ * this scheduler exists *"so both hosts drive identical code"*; it did not.
+ *
+ * Worse, `radar-monitors` appeared in neither, so the monitors users saved
+ * never swept on their own on this host at all.
+ *
+ * Both hosts now derive from the one declaration, and a test fails if a job
+ * exists with no schedule or a schedule names a job that does not exist.
  */
-const ALWAYS = ['publish'] as const
-const HOURLY = ['radar-watch'] as const
-
-/** True near the top of the hour, which is when the 20-minute tick lands on :00. */
-function shouldRunRadar(now = new Date()): boolean {
-  return now.getUTCMinutes() < 20
-}
 
 export default async function handler(): Promise<Response> {
   const secret = process.env.CRON_SECRET
@@ -63,7 +72,7 @@ export default async function handler(): Promise<Response> {
 
   const outcomes: Record<string, string> = {}
 
-  const jobs = [...ALWAYS, ...(shouldRunRadar() ? HOURLY : [])]
+  const jobs = dueJobs(new Date(), TICK_MINUTES)
 
   for (const job of jobs) {
     try {

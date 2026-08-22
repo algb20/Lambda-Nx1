@@ -227,12 +227,27 @@ send. The earlier design — `POST` with a bespoke header — could not be drive
 Vercel Cron at all, which meant the "automatic" publishing was automatic only
 when a human remembered to trigger it by hand.
 
-| Job | Does | Suggested cadence |
-|---|---|---|
-| `GET /api/cron/publish` | turns the strongest of today's graded findings into real posts on the front page | every 20 min |
-| `GET /api/cron/radar-monitors` | runs the product monitors that are due | every 15–60 min |
-| `GET /api/cron/radar-watch` | reads the internal ⭐ watchlist (`docs/RADAR.md`) | daily |
-| `GET /api/cron/radar` | both Radar halves; one half failing does not abort the other | — |
+The cadences live in **`lib/ops/schedule.ts`**, which both hosts read. This
+table describes them; it does not define them, so the two can no longer
+disagree — and they did. Until 2026-08-22 `radar-monitors` was scheduled on
+neither host, so the monitors users saved never swept on their own on Netlify at
+all. A test now fails if a job exists with no cadence and no stated reason.
+
+| Job | Does | Netlify (default) | Vercel (capped) |
+|---|---|---|---|
+| `GET /api/cron/publish` | turns the strongest of today's graded findings into real posts on the front page | every 20 min | daily 06:00 |
+| `GET /api/cron/radar-monitors` | runs the product monitors that are due | every 20 min | via `radar` |
+| `GET /api/cron/radar-watch` | reads the internal ⭐ watchlist (`docs/RADAR.md`) | hourly | via `radar` |
+| `GET /api/cron/radar` | both Radar halves; one half failing does not abort the other | — | daily 07:30 |
+
+**Why the two columns differ, and why that is not a bug to fix.** Vercel's plan
+allows **two cron jobs, each at most once a day**; exceeding it fails the whole
+deployment while the site keeps serving the old code, which cost a previous
+session most of a day to diagnose. So Netlify is the scheduler and Vercel is a
+degraded fallback whose cost is written down beside it in `VERCEL_FALLBACK`: the
+front page renews daily instead of three times an hour, and a saved monitor can
+be most of a day behind. A deployment that needs the real cadence runs on
+Netlify, or on a Vercel plan without the cap.
 
 Authentication — either header, both compared in constant time:
 
