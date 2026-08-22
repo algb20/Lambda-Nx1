@@ -389,6 +389,27 @@ one gateway, and two panels have not been moved onto it. That is a smaller and
 much better-specified piece of work than "build streaming", and the difference
 between the two is a session.
 
+**Done 2026-08-22, and one thing about it is still unverified.** Both panels now
+read a shared channel (`lib/stream/broadcast.ts`): one producer per topic per
+process rather than `/api/track`'s one per connection. Proven locally — three
+simultaneous readers of `/api/chain/stream` were served the same production,
+which the stream shows as an identical `id`.
+
+What is **not** verified is that a held-open connection survives on the hosting
+default. Charter §4 names Netlify, whose serverless functions have an execution
+ceiling measured in seconds; `maxDuration = 300` on a Node route is a
+Vercel-shaped assumption. Streaming on Netlify wants an Edge Function, which is
+a different runtime with different constraints. Neither preview deployment is
+reachable from the environment this was built in — Netlify's answers nothing
+through the egress proxy and Vercel's redirects to deployment protection — so
+this is an **open question, not a passing test**.
+
+The product is not broken either way: `useLive` falls back to polling after
+three consecutive transport failures, so a host that closes the connection
+degrades to exactly the behaviour that existed before. But "it degrades safely"
+is not "it works", and the row above will not claim **Ahead** until someone has
+watched an event arrive over a real deployment.
+
 **Why this belongs in the file rather than being quietly fixed.** A wrong claim
 about a competitor costs a paragraph. A wrong claim about *ourselves* in the
 document that decides what to build next costs the work — it very nearly bought
