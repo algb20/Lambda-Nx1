@@ -49,7 +49,13 @@
  */
 
 /** Every job `/api/cron/[job]` can run. The route's own list is the authority. */
-export const SCHEDULED_JOBS = ['publish', 'radar', 'radar-monitors', 'radar-watch'] as const
+export const SCHEDULED_JOBS = [
+  'publish',
+  'radar',
+  'radar-monitors',
+  'radar-watch',
+  'sources',
+] as const
 export type ScheduledJob = (typeof SCHEDULED_JOBS)[number]
 
 export interface JobSchedule {
@@ -89,6 +95,12 @@ export const SCHEDULE: JobSchedule[] = [
     why:
       'The curated watchlist changes on the scale of days, so sweeping it three times an hour would be work nobody reads. Hourly keeps it current without pretending it moves faster than it does.',
   },
+  {
+    job: 'sources',
+    everyMinutes: 1440,
+    why:
+      "Re-asks the quarantined sources whether they work again. Coverage that only heals when somebody remembers is coverage that decays: eight days after the quarantine was written, six of its fifty-one entries were back and nothing in the platform knew. Daily, because a publisher that fixes its feed does not fix it twice in an afternoon, and because these are hosts that have already refused us once.",
+  },
   /**
    * `radar` is deliberately absent from the Netlify clock — see `UNSCHEDULED`.
    */
@@ -111,15 +123,27 @@ export const UNSCHEDULED: Partial<Record<ScheduledJob, string>> = {
 /**
  * Which jobs are due on a tick.
  *
- * Netlify's scheduler fires every `tickMinutes`; a job runs when the minutes
- * elapsed in the hour land on its interval. `publish` at 20 runs three times an
- * hour, `radar-watch` at 60 runs once — at the top, which is where a tick and
- * an hourly interval coincide.
+ * Netlify's scheduler fires every `tickMinutes`; a job runs when the ticks
+ * elapsed land on its interval. `publish` at 20 runs three times an hour,
+ * `radar-watch` at 60 runs once — at the top, which is where a tick and an
+ * hourly interval coincide.
+ *
+ * ## Why the tick counts the day and not the hour
+ *
+ * It counted the hour, which silently capped every cadence at sixty minutes: a
+ * job asking for 1,440 got `everyTicks = 72`, and against a tick that only ever
+ * reached 2 the modulo matched at minute 0 of **every hour**. A daily job would
+ * have run twenty-four times a day while the number beside it said once — the
+ * schedule lying about itself, which is the whole class of fault this file was
+ * written to end.
+ *
+ * Counting ticks since midnight makes the arithmetic mean what it reads as, at
+ * every cadence from one tick to one day.
  */
 export function dueJobs(now: Date, tickMinutes = 20): ScheduledJob[] {
-  const minuteOfHour = now.getUTCMinutes()
-  // Which tick of the hour this is: 0, 1, 2 … for a 20-minute cadence.
-  const tick = Math.floor(minuteOfHour / tickMinutes)
+  const minuteOfDay = now.getUTCHours() * 60 + now.getUTCMinutes()
+  // Which tick of the day this is: 0, 1, 2 … 71 for a 20-minute cadence.
+  const tick = Math.floor(minuteOfDay / tickMinutes)
   return SCHEDULE.filter((s) => {
     const everyTicks = Math.max(1, Math.round(s.everyMinutes / tickMinutes))
     return tick % everyTicks === 0

@@ -121,6 +121,30 @@ describe('what is due on a tick', () => {
     expect(dueJobs(at(40))).not.toContain('radar-watch')
   })
 
+  /**
+   * The tick counted the hour, so `everyMinutes: 1440` produced `everyTicks =
+   * 72` against a tick that never exceeded 2 — matching at minute 0 of every
+   * hour. A daily job would have run twenty-four times a day with the number
+   * beside it saying once: the schedule lying about itself, which is the exact
+   * fault this module was written to end.
+   */
+  it('runs a daily job once a day, not once an hour', () => {
+    const ticks: Date[] = []
+    for (let hour = 0; hour < 24; hour++) {
+      for (const minute of [0, 20, 40]) ticks.push(new Date(Date.UTC(2026, 7, 22, hour, minute)))
+    }
+    const due = ticks.filter((t) => dueJobs(t).includes('sources'))
+    expect(due, 'a daily cadence that fires more than once a day').toHaveLength(1)
+    expect(due[0].getUTCHours()).toBe(0)
+  })
+
+  it('still runs the hourly job every hour, at the top', () => {
+    for (let hour = 0; hour < 24; hour++) {
+      expect(dueJobs(new Date(Date.UTC(2026, 7, 22, hour, 0)))).toContain('radar-watch')
+      expect(dueJobs(new Date(Date.UTC(2026, 7, 22, hour, 20)))).not.toContain('radar-watch')
+    }
+  })
+
   it('never returns a job that is not on the schedule', () => {
     const scheduled = new Set(SCHEDULE.map((s) => s.job))
     for (const minute of [0, 20, 40]) {

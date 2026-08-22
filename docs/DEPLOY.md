@@ -239,6 +239,7 @@ all. A test now fails if a job exists with no cadence and no stated reason.
 | `GET /api/cron/radar-monitors` | runs the product monitors that are due | every 20 min | via `radar` |
 | `GET /api/cron/radar-watch` | reads the internal ⭐ watchlist (`docs/RADAR.md`) | hourly | via `radar` |
 | `GET /api/cron/radar` | both Radar halves; one half failing does not abort the other | — | daily 07:30 |
+| `GET /api/cron/sources` | re-asks the quarantined sources whether they answer again, and reads what they return before believing them | daily 00:00 | — |
 
 **Why the two columns differ, and why that is not a bug to fix.** Vercel's plan
 allows **two cron jobs, each at most once a day**; exceeding it fails the whole
@@ -248,6 +249,17 @@ degraded fallback whose cost is written down beside it in `VERCEL_FALLBACK`: the
 front page renews daily instead of three times an hour, and a saved monitor can
 be most of a day behind. A deployment that needs the real cadence runs on
 Netlify, or on a Vercel plan without the cap.
+
+**Why `sources` is daily, and bounded.** It re-probes the quarantine — the
+sources withheld because they were *observed* broken. Coverage that only heals
+when somebody remembers is coverage that decays: eight days after the list was
+written, six of its fifty-one entries were back and nothing in the platform
+knew. It runs under a 45-second budget inside a 60-second function, because a
+run the runtime kills reports nothing at all, and the list rotates by the day so
+what today's budget did not reach leads tomorrow's run. A source is released
+only when the document it returns *parses, holds items, and carries a recent
+one* — two of that day's eight answered `200` and deserved no release, one of
+them with reporting 1,492 days old.
 
 Authentication — either header, both compared in constant time:
 

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { cronGate } from '@/lib/cron/auth'
 import { PublishJobUnavailableError, runPublishJob } from '@/lib/modules/publish-job'
+import { recheckQuarantine } from '@/lib/engine/catalog/recheck'
 import { runFullRadar, runInternalRadarSweep, runRadarSweep } from '@/lib/radar'
 
 /**
@@ -18,9 +19,11 @@ import { runFullRadar, runInternalRadarSweep, runRadarSweep } from '@/lib/radar'
  *  - `radar`           — a full Radar pass (due monitors + the standing watchlist).
  *  - `radar-monitors`  — the users' monitors only.
  *  - `radar-watch`     — the curated watchlist only.
+ *  - `sources`         — re-ask the quarantined sources whether they work again.
  *
- * All four are idempotent: publishing skips anything already out, and the Radar
- * fingerprints its findings. Running one twice costs time, never duplicates.
+ * All five are idempotent: publishing skips anything already out, the Radar
+ * fingerprints its findings, and `sources` only reads. Running one twice costs
+ * time, never duplicates.
  *
  * Guarded by CRON_SECRET (`Authorization: Bearer …`, which is what hosted cron
  * sends, or `x-cron-secret`). An unauthenticated caller can learn only that the
@@ -30,7 +33,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 
-const JOBS = ['publish', 'radar', 'radar-monitors', 'radar-watch'] as const
+const JOBS = ['publish', 'radar', 'radar-monitors', 'radar-watch', 'sources'] as const
 type Job = (typeof JOBS)[number]
 
 const isJob = (value: string): value is Job => (JOBS as readonly string[]).includes(value)
@@ -98,5 +101,24 @@ async function run(job: Job): Promise<unknown> {
       return { monitors: await runRadarSweep() }
     case 'radar-watch':
       return { watch: await runInternalRadarSweep() }
+    case 'sources': {
+      /**
+       * Coverage that only heals when a person remembers is coverage that
+       * decays. Eight days after the quarantine was written, six of its
+       * fifty-one entries were back and nothing in the platform knew.
+       *
+       * The budget is well under this route's own `maxDuration`, because a run
+       * the runtime kills reports nothing at all — see `BUDGET_MS`.
+       */
+      const report = await recheckQuarantine({ budgetMs: 45_000 })
+      return {
+        quarantined: report.quarantined,
+        checked: report.checked,
+        skipped: report.skipped.length,
+        recovered: report.recovered.map((r) => ({ key: r.key, detail: r.detail })),
+        orphaned: report.orphaned,
+        advice: report.advice,
+      }
+    }
   }
 }

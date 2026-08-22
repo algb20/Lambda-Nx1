@@ -82,6 +82,45 @@ describe('guardrail — passive-only enforcement', () => {
       vi.unstubAllGlobals()
     }
   })
+
+  /**
+   * The orchestrator's `Promise.race` deadline settles our promise and leaves
+   * the request running. What reaches `fetch` has to carry a signal, or a
+   * provider that accepts a connection and never answers holds it for undici's
+   * five-minute ceiling — inside unattended jobs that have no orchestrator and
+   * no deadline of their own.
+   */
+  it('passes a real abort signal to every request, not just a settled promise', async () => {
+    const g = new Guardrail()
+    g.allowHosts(['api.good.test'])
+    const fetchMock = vi.fn().mockResolvedValue(new Response('ok'))
+    vi.stubGlobal('fetch', fetchMock)
+    try {
+      await g.createFetch('s')('https://api.good.test/x')
+      const init = fetchMock.mock.calls[0][1] as RequestInit
+      expect(init.signal, 'a request with no signal cannot be abandoned').toBeInstanceOf(AbortSignal)
+      expect(init.signal?.aborted).toBe(false)
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it("keeps the caller's own signal working alongside the deadline", async () => {
+    const g = new Guardrail()
+    g.allowHosts(['api.good.test'])
+    const fetchMock = vi.fn().mockResolvedValue(new Response('ok'))
+    vi.stubGlobal('fetch', fetchMock)
+    try {
+      const mine = new AbortController()
+      await g.createFetch('s')('https://api.good.test/x', { signal: mine.signal })
+      const init = fetchMock.mock.calls[0][1] as RequestInit
+      expect(init.signal?.aborted).toBe(false)
+      mine.abort()
+      expect(init.signal?.aborted, "the caller's cancellation must still reach the request").toBe(true)
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
 })
 
 describe('orchestrator — multi-source fallback', () => {

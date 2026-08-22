@@ -17,7 +17,11 @@
  *
  * So the records stay exactly as they were, and what we *observed* lives here,
  * dated, one line per source, with the status the provider actually returned.
- * Re-running the probe against this list is how a source gets released.
+ * Re-running the probe against this list is how a source gets released — and
+ * since 2026-08-22 that runs on a clock rather than on somebody's memory:
+ * `recheck.ts`, driven daily by `/api/cron/sources`. It reports which entries
+ * to release; the edit to this file stays a human one, because removing a line
+ * from the record of what we observed should be a decision, not a side effect.
  *
  * ## The re-probe of 2026-08-22, and why a status code is not enough
  *

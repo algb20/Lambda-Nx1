@@ -31,6 +31,32 @@ export class PassiveGuardrailError extends Error {
 export const MAX_POLITE_WAIT_MS = 3_500
 
 /**
+ * The longest we will wait for a provider to answer before abandoning it.
+ *
+ * ## Why the orchestrator's deadline was not this
+ *
+ * `orchestrator.ts` already bounds a source at `SOURCE_TIMEOUT_MS` — but it
+ * does it with `Promise.race`, which settles *our* promise and does nothing at
+ * all to the request. The socket stays open, the body keeps arriving, and the
+ * connection is held until the runtime tears the process down. Under a sweep
+ * that is dozens of abandoned sockets belonging to work whose result has
+ * already been declared a timeout, competing for the same connection pool as
+ * the sources still being read.
+ *
+ * Worse, the paths with no orchestrator are the ones that run unattended: the
+ * cron jobs, the catalogue sweep, the quarantine re-probe. There, a provider
+ * that accepts a connection and never answers stalls the whole job — undici's
+ * own ceiling is five minutes, which is longer than any function budget this
+ * platform deploys under. So the job dies with no result, and a scheduler that
+ * sees a dead function cannot tell it from a dead platform.
+ *
+ * A real abort belongs at the one place every engine request passes through.
+ * Above the orchestrator's 8s so nothing about its behaviour changes; far below
+ * any function budget so an unattended job survives a silent host.
+ */
+export const REQUEST_TIMEOUT_MS = 10_000
+
+/**
  * How the engine identifies itself to every provider it reads.
  *
  * A contact address is part of it because several providers — the SEC most
@@ -171,7 +197,15 @@ export class Guardrail {
        */
       const headers = new Headers(init?.headers)
       if (!headers.has('user-agent')) headers.set('user-agent', USER_AGENT)
-      return fetch(url, { ...init, method, headers })
+
+      /**
+       * A caller's own signal still wins; the deadline is added to it, never
+       * substituted for it. A source that cancels for its own reasons — a user
+       * navigating away, a deadline shorter than ours — must keep working.
+       */
+      const deadline = AbortSignal.timeout(REQUEST_TIMEOUT_MS)
+      const signal = init?.signal ? AbortSignal.any([init.signal, deadline]) : deadline
+      return fetch(url, { ...init, method, headers, signal })
     }
   }
 }
