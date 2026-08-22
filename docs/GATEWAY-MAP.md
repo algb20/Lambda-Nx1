@@ -237,8 +237,46 @@ unregistered until a credential exists, so the gap is one environment variable
 away rather than a project. **We will not substitute a scraped mirror for a
 register**, and we will not ship a search that always returns nothing.
 
-**Status: partially open.** The date board is buildable now; applicant search
-is keyed.
+**Second correction, same session — the date board is not worth building
+either, and this is the more useful finding.**
+
+Fetching an actual list showed what the earlier probe did not, because the
+earlier probe only counted items:
+
+```
+GB 2642383 A · application 202513655 · publicationAuthority GB · Wed, 07 Jan 2026
+```
+
+That is the **whole** item. The list endpoint returns publication number,
+application number, authority, date and kind — **no title, no applicant, no
+abstract.** Those fields exist only on the individual record fetch, so a board
+would need one request per patent, which is the N+1 rate-limit trap this
+codebase has already paid for three times.
+
+A board of patent numbers is not thin information — it is *no* information
+rendered at the size of information, which is precisely what the globe page was
+told off for. Nobody can read `GB 2642383 A` and learn anything.
+
+**So the honest ledger for patents, keyless, is:**
+
+| Capability | Status |
+|---|---|
+| Look up a patent you can already name (`EP1000000`) | **Real** — full record, keyless, primary registry |
+| "What was published this week" | **Not worth building** — numbers only |
+| "What has this company patented" | **Keyed** — EPO OPS, USPTO ODP, Lens |
+
+The lookup belongs inside `nexus`/`reference` as a selector the engine
+recognises, not as a gateway of its own — a gateway whose only question is
+"paste a number you already have" is a lookup, and calling it a gateway would
+overstate it.
+
+**Before any EPO source ships, its terms must be read.** `epo.org/en/legal/
+terms-use` returns 404 and the LOD landing page is a JavaScript application, so
+the licence is not yet verified — and §3 does not let us register a source
+whose terms we have not read.
+
+**Status: narrowed and honest.** No board. A lookup worth wiring into the
+selector layer. Search stays keyed.
 
 ### 3.5 GEOINT — earth observation
 
@@ -308,7 +346,7 @@ reason this file exists.
    DART tsunami network called out, and inland waters separated from seas.
 2. ~~**Verification / claim record**~~ **Built** 2026-08-22: the `verify` gateway.
 3. **Debarment** — re-probe; no route today.
-4. **Patents** — build the EPO Linked Open Data publication board (keyless,
-   date-filtered, primary registry); catalogue EPO OPS and USPTO as keyed for
-   the applicant search that needs a credential.
+4. **Patents** — wire EPO patent-number lookup into the selector layer once its
+   terms are verified; catalogue EPO OPS and USPTO as keyed for applicant
+   search. No publication board: the list endpoint returns numbers only.
 5. **Earth observation** — after the globe can carry a raster layer.
