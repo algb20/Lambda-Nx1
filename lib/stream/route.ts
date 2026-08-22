@@ -26,6 +26,21 @@ import { formatSse, sseComment, SSE_HEADERS } from './sse'
  *
  * The heartbeat is an SSE comment. `EventSource` ignores it; proxies and load
  * balancers see traffic and leave the connection alone.
+ *
+ * ## How long a connection actually lasts, measured
+ *
+ * The routes declare `maxDuration = 300`. **The deployed Netlify preview cut
+ * both streams at 30.6 seconds** on 2026-08-22 — twice, on both endpoints, with
+ * the heartbeat running and traffic flowing. The declaration is a request, and
+ * on this host it is not granted; a five-minute connection is a thing only a
+ * host that honours it will give.
+ *
+ * That is not a fault to fix here, because the client already handles it: the
+ * browser reconnects after `retryMs` and is handed the channel's kept reading
+ * on arrival, so a reader sees data continuously across a connection it never
+ * knew was replaced. What it *did* break is the channel's economy — see
+ * `broadcast.ts`, where stopping eagerly turned every host-imposed cut into a
+ * fresh upstream fetch.
  */
 export function streamChannel<T>(request: Request, channel: Channel<T>, options?: { heartbeatMs?: number; retryMs?: number }): Response {
   const heartbeatMs = options?.heartbeatMs ?? 15_000

@@ -14,12 +14,28 @@
  * however many readers are attached. The tenth reader costs a `Set.add` and
  * nothing upstream at all.
  *
- * ## Why it starts and stops with its readers
+ * ## Why it starts and stops with its readers — and why it waits before stopping
  *
  * A channel with no subscribers does no work. The producer starts on the first
  * subscriber and stops when the last one leaves, so an idle deployment makes no
  * requests — which matters because the alternative is a server quietly fetching
  * a publisher's feed forever because someone once opened a page.
+ *
+ * Stopping *the instant* the last reader leaves was measured to invert that.
+ * **On 2026-08-22 the deployed Netlify preview severed both SSE connections at
+ * 30.6 seconds** — twice, on both endpoints, ignoring the routes' declared
+ * `maxDuration = 300`. The browser reconnects three seconds later, and with an
+ * eager stop that sequence read: last reader leaves → producer stops → producer
+ * starts → **produce immediately**. One reader watching a 120-second channel
+ * therefore fetched every ~33 seconds. Not a small regression: **3.6× the
+ * upstream requests**, in the module written to make a reader cost nothing
+ * upstream, against publishers whose goodwill is the whole bargain.
+ *
+ * So the channel lingers after its last reader, long enough to outlast a
+ * reconnect by an order of magnitude, and a restart that still holds a current
+ * reading does not re-fetch to produce one it already has. The idle guarantee
+ * survives: with nobody watching, the channel stops one linger later, having
+ * produced at most one extra reading.
  *
  * ## Why the latest value is kept
  *
@@ -68,10 +84,23 @@ export interface ChannelOptions<T> {
    * from a different situation.
    */
   maxAgeMs?: number
+  /**
+   * How long the producer keeps running after the last reader leaves.
+   *
+   * Sized against a measurement, not a guess: the deployed host cuts an SSE
+   * connection at ~30 seconds and `EventSource` reconnects 3 seconds later. A
+   * linger shorter than that gap turns every platform-imposed cut into a full
+   * stop/start cycle with an immediate fetch. Thirty seconds clears the gap ten
+   * times over while bounding what an idle deployment costs to a single extra
+   * reading.
+   */
+  lingerMs?: number
   /** Injectable clock and timers, so the tests do not sleep. */
   now?: () => number
   setTimer?: (fn: () => void, ms: number) => unknown
   clearTimer?: (handle: unknown) => void
+  setLinger?: (fn: () => void, ms: number) => unknown
+  clearLinger?: (handle: unknown) => void
 }
 
 export function createChannel<T>(options: ChannelOptions<T>): Channel<T> {
@@ -79,9 +108,12 @@ export function createChannel<T>(options: ChannelOptions<T>): Channel<T> {
     intervalMs,
     produce,
     maxAgeMs = intervalMs * 3,
+    lingerMs = 30_000,
     now = () => Date.now(),
     setTimer = (fn, ms) => setInterval(fn, ms),
     clearTimer = (h) => clearInterval(h as ReturnType<typeof setInterval>),
+    setLinger = (fn, ms) => setTimeout(fn, ms),
+    clearLinger = (h) => clearTimeout(h as ReturnType<typeof setTimeout>),
   } = options
 
   type Reader = { onReading: (r: Reading<T>) => void; onError?: (m: string) => void }
@@ -114,7 +146,17 @@ export function createChannel<T>(options: ChannelOptions<T>): Channel<T> {
   const start = () => {
     if (timer !== undefined) return
     timer = setTimer(() => void run(), intervalMs)
-    void run()
+    /**
+     * Produce now only when there is nothing current to hand over.
+     *
+     * A restart that already holds a reading younger than one interval is not
+     * behind on anything, and fetching to replace it makes a reconnect cost an
+     * upstream request — which is the cost this module exists to remove. The
+     * timer covers it, so the worst case after such a restart is one interval
+     * later than it would otherwise have been, and no publisher is asked twice
+     * for what we are already holding.
+     */
+    if (!held || now() - held.producedAtMs >= intervalMs) void run()
   }
 
   const stop = () => {
@@ -123,10 +165,20 @@ export function createChannel<T>(options: ChannelOptions<T>): Channel<T> {
     timer = undefined
   }
 
+  let linger: unknown
+  const cancelLinger = () => {
+    if (linger === undefined) return
+    clearLinger(linger)
+    linger = undefined
+  }
+
   return {
     subscribe(onReading, onError) {
       const reader: Reader = { onReading, onError }
       readers.add(reader)
+      // A reader arriving inside the linger window rejoins the channel that is
+      // still running, which is the whole point of the window.
+      cancelLinger()
       start()
 
       // Hand over what we hold, if it is still worth holding.
@@ -138,7 +190,15 @@ export function createChannel<T>(options: ChannelOptions<T>): Channel<T> {
         if (detached) return
         detached = true
         readers.delete(reader)
-        if (readers.size === 0) stop()
+        if (readers.size > 0) return
+        // Not stopped here: the host severs connections on its own clock, and a
+        // browser that reconnects three seconds later must find the channel
+        // still running rather than restart it.
+        cancelLinger()
+        linger = setLinger(() => {
+          linger = undefined
+          if (readers.size === 0) stop()
+        }, lingerMs)
       }
     },
     latest() {

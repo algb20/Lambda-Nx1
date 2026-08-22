@@ -350,7 +350,7 @@ we do not, ranked by how visible their absence is to a reader.
 | Source transparency | Built — every finding carries source, timestamp, Admiralty grade, confidence | **Ahead**, and it is the product's whole argument |
 | Honest source counting | §2a — integrations vs publishers vs independent origins, never added | **Ahead**, and unique. The field quotes the middle column as the first |
 | Mobile / PWA / desktop clients | Web + Pi Browser, one codebase (R265), fits every screen (R264) | **Parity on reach**, no installable desktop client yet |
-| Streaming / real-time push | SSE channel built and proven (`lib/stream/sse.ts`, `/api/track`); two panels still poll on a 120s timer | **Partial** — see the correction below |
+| Streaming / real-time push | SSE channel built, wired to three surfaces, and **verified pushing real readings from the deployed host** (`lib/stream/`); the host cuts a connection at ~30s and the client reconnects into the same running channel | **Parity**, with the host's ceiling measured rather than assumed — see below |
 | Saved workspaces, collaboration | History and groups exist; no shared workspace | **Behind** |
 | Earth-observation imagery | Not built — §3.5 | **Behind**, with a stated reason |
 | Ship tracking (AIS) | No keyless route; §3.1 | **Behind by licence, not by effort** |
@@ -395,20 +395,39 @@ process rather than `/api/track`'s one per connection. Proven locally — three
 simultaneous readers of `/api/chain/stream` were served the same production,
 which the stream shows as an identical `id`.
 
-What is **not** verified is that a held-open connection survives on the hosting
-default. Charter §4 names Netlify, whose serverless functions have an execution
-ceiling measured in seconds; `maxDuration = 300` on a Node route is a
-Vercel-shaped assumption. Streaming on Netlify wants an Edge Function, which is
-a different runtime with different constraints. Neither preview deployment is
-reachable from the environment this was built in — Netlify's answers nothing
-through the egress proxy and Vercel's redirects to deployment protection — so
-this is an **open question, not a passing test**.
+**Verified on the deployed host, 2026-08-22 — and it found a real defect.**
 
-The product is not broken either way: `useLive` falls back to polling after
-three consecutive transport failures, so a host that closes the connection
-degrades to exactly the behaviour that existed before. But "it degrades safely"
-is not "it works", and the row above will not claim **Ahead** until someone has
-watched an event arrive over a real deployment.
+The open question was whether a held-open connection survives on the hosting
+default, since `maxDuration = 300` on a Node route is a Vercel-shaped
+assumption and Netlify's function ceiling is measured in seconds. It is no
+longer open. Both endpoints were read from the live Netlify deploy preview:
+
+```
+GET /api/world/stream   → 200, event: open, event: reading (real NWS + USGS
+                          events, graded, with observedAt), cut at 30.68s
+GET /api/chain/stream   → 200, event: open, event: reading, cut at 30.60s
+```
+
+So: **server-push works on the deployed host, and the host severs the
+connection at ~30 seconds regardless of what the route declares.** The browser
+reconnects three seconds later and the channel hands it the kept reading on
+arrival, so a reader sees data continuously across a connection it never knew
+was replaced. That part needed no fixing.
+
+What did need fixing was the economy underneath it. `broadcast.ts` stopped the
+producer the instant its last reader left and produced immediately on every
+start — so each host-imposed cut became a full stop/start cycle with a fresh
+upstream fetch, and **one reader of a 120-second channel fetched every ~33
+seconds: 3.6× the requests**, in the module written so that a reader costs
+nothing upstream. The channel now lingers past a reconnect and does not
+re-fetch to replace a reading it already holds; an unwatched channel still
+stops, one linger later.
+
+The earlier note here said neither preview was reachable from the build
+environment. That was wrong — the Netlify preview answers normally through the
+egress proxy. The measurement was available the whole time it was recorded as
+unavailable, which is its own lesson about the difference between "I could not
+reach it" and "I tried once and stopped".
 
 **Why this belongs in the file rather than being quietly fixed.** A wrong claim
 about a competitor costs a paragraph. A wrong claim about *ourselves* in the
