@@ -279,7 +279,14 @@ describe('orchestrator — parallelism and deadlines', () => {
  * per record, and falls back to `USER_AGENT`.
  */
 describe('the engine has one identity', () => {
-  const files = globSync('lib/engine/**/*.ts', { cwd: process.cwd() })
+  const files = [
+    ...globSync('lib/engine/**/*.ts', { cwd: process.cwd() }),
+    // The feed audit too. Its own doc comment says it must send "the engine's
+    // headers, character for character" — and it held a hand-copy of the old
+    // string, so the moment the engine consolidated, an audit still claiming
+    // to measure the product would have gone back to measuring itself.
+    ...globSync('scripts/**/*.ts', { cwd: process.cwd() }),
+  ]
     .filter((f) => !f.endsWith('.test.ts'))
     .filter((f) => f !== 'lib/engine/guardrail.ts')
 
@@ -291,8 +298,9 @@ describe('the engine has one identity', () => {
         .replace(/^[ \t]*\/\/.*$/gm, '')
       // A key, not prose: `'User-Agent':` or `"User-Agent":`.
       for (const m of code.matchAll(/['"]User-Agent['"]\s*:\s*([^\n]*)/gi)) {
-        // The one sanctioned form: a record's own override, falling back to ours.
-        if (/entry\.userAgent \?\? USER_AGENT/.test(m[1])) continue
+        // Passing the engine's constant through is the point, not a violation —
+        // on its own, or behind a record's documented override.
+        if (/\bUSER_AGENT\b/.test(m[1])) continue
         offenders.push(`${f}: ${m[1].trim()}`)
       }
     }
