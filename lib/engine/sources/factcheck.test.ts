@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import { byTopic } from '../catalog'
 import {
   claimOf,
   factChecks,
@@ -240,5 +241,45 @@ describe('the gateway', () => {
 
   it('reads passively', () => {
     expect(factChecks.passive).toBe(true)
+  })
+})
+
+/**
+ * A gap in the catalogue must never be counted as a source.
+ *
+ * The verification gateway's headline figure is **how many independent
+ * checkers addressed this claim**, and it reads its publishers from the
+ * catalogue by topic. The moment Google's Fact Check Tools was catalogued as a
+ * keyed, inactive record — a route that exists and needs a credential we do
+ * not have — the gateway counted it and reported six independent checkers
+ * where five had spoken.
+ *
+ * That is the §2a discipline at its sharpest. Counting a source we cannot read
+ * is the same inflation as counting a mirror as an independent origin, and it
+ * lands in the one number this gateway exists to produce.
+ */
+describe('a catalogued gap is not a checker', () => {
+  it('reads only publishers it can actually reach', () => {
+    const keyed = byTopic('factcheck').filter((f) => !f.keyless)
+    expect(keyed.length, 'the keyed fact-check route is catalogued as a visible gap').toBeGreaterThan(0)
+    for (const f of keyed) {
+      expect(
+        factcheckFeeds().map((x) => x.key),
+        `${f.key} needs ${f.keyEnv} and must not be counted without it`,
+      ).not.toContain(f.key)
+    }
+  })
+
+  /**
+   * And the exclusion is about the credential alone. These five publishers are
+   * all `enabled: false` because the gateway drives them instead of the
+   * ambient sweep — a fact-check has no coordinates and does not belong on a
+   * map. Filtering on that flag as well removed every publisher and left the
+   * gateway with nothing, which is how this test earned its second half.
+   */
+  it('still reads the publishers the sweep deliberately skips', () => {
+    const keys = factcheckFeeds().map((f) => f.key)
+    expect(keys).toContain('snopes')
+    expect(keys.length, 'enabled:false means gateway-driven, not unusable').toBeGreaterThanOrEqual(5)
   })
 })

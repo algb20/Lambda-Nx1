@@ -307,6 +307,28 @@ rules decided every line above, and each one cost us a candidate:
    so the gap is visible and the fix is one environment variable — rather than
    quietly absent, which is how a platform ends up not knowing what it lacks.
 
+   **Applied 2026-08-22.** This rule was written down and half-kept: seven keyed
+   records existed and the routes named in §3.2–§3.5 lived only in this file,
+   which meant the *running* platform could not report them. They are now
+   catalogue records in `lib/engine/catalog/feeds/keyed.ts` — **14 keyed routes
+   recorded, none active** — so `coverage()` reports the gap and the remedy is
+   the environment variable each one names.
+
+   Two things that came out of doing it:
+
+   - **AIS is deliberately absent even from that file.** Its only channel is
+     `wss://`, and every catalogue record is a promise the adapter can fetch it
+     over HTTPS; `catalog.test.ts` enforces that and caught the entry. Bending
+     an invariant to make a gap visible trades one honesty for another. The AIS
+     gap stays stated in §3.1, where it needs a streaming adapter before it
+     needs a key.
+   - **A catalogued gap must never become evidence.** The verification gateway
+     reads its publishers by topic, so cataloguing Google Fact Check Tools made
+     it report **six independent checkers where five had spoken** — the §2a
+     inflation this project refuses, landing in the one figure that gateway
+     exists to produce. `factcheckFeeds()` now filters on the credential, and a
+     test fails if a keyed record is ever counted again.
+
 ---
 
 ## 5. The second axis: what the field has that we do not

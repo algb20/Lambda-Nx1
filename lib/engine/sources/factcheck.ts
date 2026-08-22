@@ -138,8 +138,33 @@ export function looksLikeReference(categories: string[], title = ''): boolean {
   return categories.some((c) => /players guide/i.test(c)) || /^players guide\b/i.test(title.trim())
 }
 
+/**
+ * The publishers this gateway actually reads.
+ *
+ * `byTopic('factcheck')` alone is not that. It returns every catalogue record
+ * carrying the topic, including ones that cannot run — a keyed route with no
+ * credential, or a record explicitly disabled. The moment Google's Fact Check
+ * Tools was catalogued as a keyed, inactive gap, this gateway counted it as a
+ * sixth checker and reported **"6 independent fact-checkers have addressed
+ * this"** when five had.
+ *
+ * That is not a display bug. Independent-checker count is the one figure this
+ * gateway exists to produce and the §2a discipline applied where it matters
+ * most: counting a source we cannot read is exactly the inflation this project
+ * refuses in its source numbers. A catalogued gap must never become evidence.
+ *
+ * The filter is only the credential test, and that limit is deliberate. My
+ * first version also excluded `enabled: false`, which removed **every**
+ * publisher — because these five are `enabled: false` on purpose. That flag
+ * means "driven by this gateway rather than by the ambient sweep", not
+ * "unusable"; a fact-check has no coordinates and does not belong on a map.
+ * Two different facts share one catalogue, and only one of them is about
+ * whether we can read the source.
+ */
 export function factcheckFeeds(): CatalogSource[] {
-  return byTopic('factcheck')
+  return byTopic('factcheck').filter(
+    (f) => f.keyless || (f.keyEnv ? Boolean(process.env[f.keyEnv]) : false),
+  )
 }
 
 const HOSTS = [...new Set(factcheckFeeds().map((f) => new URL(f.url).hostname.toLowerCase()))]
