@@ -320,4 +320,32 @@ describe('the engine has one identity', () => {
       'ENGINE_CONTACT',
     )
   })
+
+  /**
+   * And the address it gives out is never a person's.
+   *
+   * Four catalogue records carried the project owner's personal Gmail address
+   * as their SEC contact — in the source, so in every clone, every fork and
+   * every deploy preview. It worked, which is why it survived: the SEC accepted
+   * it and the feeds came through. It is still a private detail written into a
+   * file that anyone contributing to this repository can read, which this
+   * project's standing rule forbids outright.
+   *
+   * The scan is for the shape rather than for that one address: any literal
+   * consumer-mailbox contact in engine source is the same mistake with a
+   * different spelling. A deployment's real operator belongs in
+   * `ENGINE_CONTACT`, which is an environment variable precisely so it is not
+   * this.
+   */
+  const PERSONAL_MAILBOX = /@(gmail|googlemail|outlook|hotmail|yahoo|proton(mail)?|icloud|gmx|mail)\./i
+
+  it('never hard-codes a person as the contact', () => {
+    const offenders: string[] = []
+    for (const f of files) {
+      for (const [i, line] of readFileSync(join(process.cwd(), f), 'utf8').split('\n').entries()) {
+        if (PERSONAL_MAILBOX.test(line)) offenders.push(`${f}:${i + 1}`)
+      }
+    }
+    expect(offenders, 'a personal mailbox committed as a contact address').toEqual([])
+  })
 })
