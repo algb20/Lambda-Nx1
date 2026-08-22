@@ -60,18 +60,40 @@ describe('investigateMarkets', () => {
     expect(r.findings[0].claim).toMatch(/1 USD = 0\.92 EUR/)
   })
 
+  /**
+   * One response carrying every indicator, which is what the API returns.
+   *
+   * This stub used to branch on which indicator code appeared in the path,
+   * because the source made one request per indicator — twelve round trips to
+   * one institution about one country. It asks once now, so the fixture is a
+   * single multi-indicator response, and each row carries the `indicator.id`
+   * the reader is matched on. Matching by position is the bug that once printed
+   * the ECB's ten-year yield under the two-year's name.
+   */
   it('reports World Bank macro indicators for a country', async () => {
+    const row = (id: string, value: number) => ({
+      indicator: { id, value: id },
+      country: { value: 'France' },
+      date: '2023',
+      value,
+    })
     vi.stubGlobal(
       'fetch',
       vi.fn((u: string) => {
         const url = new URL(u)
         if (url.hostname === 'api.worldbank.org') {
-          const ind = url.pathname.includes('NY.GDP.MKTP.CD')
-            ? { indicator: { value: 'GDP' }, country: { value: 'France' }, date: '2023', value: 3.05e12 }
-            : url.pathname.includes('SP.POP.TOTL')
-              ? { indicator: { value: 'Population' }, country: { value: 'France' }, date: '2023', value: 68_000_000 }
-              : { indicator: { value: 'Inflation' }, country: { value: 'France' }, date: '2023', value: 4.9 }
-          return Promise.resolve(res([{ page: 1 }, [ind]]))
+          return Promise.resolve(
+            res([
+              { page: 1 },
+              [
+                // Deliberately not the order they are asked for.
+                row('SP.POP.TOTL', 68_000_000),
+                row('NV.IND.MANF.ZS', 9.8),
+                row('NY.GDP.MKTP.CD', 3.05e12),
+                row('FP.CPI.TOTL.ZG', 4.9),
+              ],
+            ]),
+          )
         }
         return Promise.resolve(res({}, 404))
       }),
@@ -80,6 +102,8 @@ describe('investigateMarkets', () => {
     expect(r.findings.some((f) => /Economy — France GDP \(2023\): \$3\.05T/.test(f.claim))).toBe(true)
     expect(r.findings.some((f) => /Population \(2023\): 68\.0M/.test(f.claim))).toBe(true)
     expect(r.findings.some((f) => /Inflation \(2023\): 4\.9%/.test(f.claim))).toBe(true)
+    // The half that was missing entirely: what the country actually makes.
+    expect(r.findings.some((f) => /Manufacturing \(share of GDP\) \(2023\): 9\.8%/.test(f.claim))).toBe(true)
   })
 
   it('rejects too-short input', async () => {

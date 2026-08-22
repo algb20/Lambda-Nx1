@@ -43,7 +43,7 @@ The ones that **are** genuine standing work, named rather than buried:
 | R180 | 2026-08-20 | `gateways` | | `done` | كل البورصات والأسهم بكل أنواعها |
 | R181 | 2026-08-20 | `gateways` | | `done` | اقتصادات الشركات والدول — أكبر وأهم الشركات: شراكاتها، أعمالها، معلوماتها، أسهمها |
 | R182 | 2026-08-20 | `gateways` | | `done` | بوّابة تُظهر **تصنيف** الشركات — ترتيب أكبر ٢٥ مُودِعًا بإجمالي الأصول من إطارات XBRL (٦١١٠ شركة)، والمقياس مُسمّى لا مُضمَر |
-| R183 | 2026-08-20 | `gateways` | | `open` | شركات ومصانع الدول والقطاع الخاص |
+| R183 | 2026-08-20 | `gateways` | | `done` | شركات ومصانع الدول والقطاع الخاص |
 | R184 | 2026-08-20 | `gateways` | | `open` | آليّة تعمل **تلقائيًا** لكل البوّابات |
 | R185 | 2026-08-20 | `gateways` | | `open` | كل العملات الرقمية والبلوكشين بكل معلوماته وأهم أخباره |
 | R186 | 2026-08-20 | `gateways` | | `done` | بوّابة **المعادن والثروات** — `resources`: ١٨ سلسلة أسعار من صندوق النقد عبر FRED (نحاس، ألمنيوم، نيكل، زنك، رصاص، قصدير، حديد، يورانيوم، فحم، غاز + غذاء + ٣ مؤشرات) |
@@ -896,3 +896,38 @@ One correction worth recording: my first measurement of this reported "0
 findings" for both countries and I nearly filed it as a bug. The gateway
 returns `findings`; my probe read `evidence`. The tool was wrong, not the app —
 the same lesson as the audit that called crashed pages "ok".
+
+**R183 — the economy source knew how big a country was and nothing about what it makes.**
+
+Three indicators: GDP, population, inflation. That answers "how large and how
+expensive" and stops. A reader asking about a country's **industry**, its
+**factories** or the size of its **private sector** got nothing — not a gap in
+the data, a gap in what was ever requested. The source also had **no tests at
+all**, which is how it stayed that way without anything saying so.
+
+Nine indicators added, each requested live before it was written down and each
+answering with a current figure:
+
+| | Germany | Saudi Arabia |
+|---|---|---|
+| Manufacturing, share of GDP | **17.6%** | **15.8%** |
+| Industry incl. construction | 25.2% | **43.0%** |
+| Services | 64.5% | — |
+| Credit to the private sector | 77.3% | — |
+| Unemployment | 3.7% | 3.0% |
+| GDP per person | $60,496 | $34,537 |
+
+Saudi Arabia's 43% industry against 15.8% manufacturing is the oil sector, and
+the contrast between those two numbers is itself the finding — which is the
+argument for shares of GDP over absolute figures: they compare between
+countries of wildly different size.
+
+**Twelve indicators, one request.** It was one request per indicator, which was
+survivable at three and rude at twelve — and is the exact shape of a bug this
+codebase already paid for in the ECB yield curve, where a source declaring
+`minIntervalMs` had its own fan-out silently refused and produced nothing while
+looking healthy. The World Bank answers `indicator/A;B;C` in a single response,
+and figures are matched to indicators **by id, never by position** — the other
+half of that same lesson.
+
+Live: Germany went from 3 findings to **16**, Saudi Arabia to 15.
