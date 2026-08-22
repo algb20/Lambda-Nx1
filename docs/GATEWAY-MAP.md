@@ -207,11 +207,38 @@ half of discovery is the patent record, and we have none of it.
 | EPO Open Patent Services | Free tier, **but keyed**. |
 | Lens.org, Google Patents BigQuery | Keyed. |
 
-**Status: gap, and honestly, no keyless route.** Every primary patent authority
-now gates its API. The catalogue supports keyed records that stay unregistered
-until a credential exists (`envVar`), and that is where EPO OPS belongs — so
-the day a key exists, the gateway is a record, not a project. **We will not
-substitute a scraped mirror for a register.**
+**Correction, 2026-08-22 — a keyless route does exist, and this file said it
+did not.** Re-probing turned up **EPO Linked Open Data** (`data.epo.org`),
+which is the European Patent Office publishing its own register as JSON with no
+key at all:
+
+| | Verified 2026-08-22 |
+|---|---|
+| `data.epo.org/linked-data/data/publication/EP/1000000/A1/-.json` | `200 application/json` ✅ — full record: abstract, applicant, inventor, agent, application number, filing date, priority, languages |
+| `…/data/publication.json?publicationDate=2026-01-07&_pageSize=3` | `200` ✅ — **the date filter genuinely filters**; returns publications from exactly that day |
+| `…?_search=Siemens` · `?title=battery` | `200` and **zero items** ✗ |
+| `?applicant=Siemens` | `400 unknown shortname` ✗ |
+
+**What that means, precisely.** It answers *"what was published on this date"*
+and it cannot answer *"what has this company patented"*. Text and applicant
+search are accepted by the endpoint and silently return nothing — which is the
+same shape as the Stooq failure that cost this product two board sections while
+every health check stayed green. A "patent search" built on it would look like
+it worked and return empty for every query a reader actually types.
+
+So the honest statement is not "no keyless route" and not "patents solved". It
+is: **a keyless primary-registry patent-publication feed exists, filterable by
+date only.** That earns a board — *what the patent offices published this week*
+— and does not earn a search gateway.
+
+Keyed routes remain the only way to search: EPO OPS, USPTO's Open Data Portal,
+Lens.org. They belong in the catalogue as `keyEnv` records that stay
+unregistered until a credential exists, so the gap is one environment variable
+away rather than a project. **We will not substitute a scraped mirror for a
+register**, and we will not ship a search that always returns nothing.
+
+**Status: partially open.** The date board is buildable now; applicant search
+is keyed.
 
 ### 3.5 GEOINT — earth observation
 
@@ -281,5 +308,7 @@ reason this file exists.
    DART tsunami network called out, and inland waters separated from seas.
 2. ~~**Verification / claim record**~~ **Built** 2026-08-22: the `verify` gateway.
 3. **Debarment** — re-probe; no route today.
-4. **Patents** — catalogue EPO OPS as keyed; build the moment a key exists.
+4. **Patents** — build the EPO Linked Open Data publication board (keyless,
+   date-filtered, primary registry); catalogue EPO OPS and USPTO as keyed for
+   the applicant search that needs a credential.
 5. **Earth observation** — after the globe can carry a raster layer.
