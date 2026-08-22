@@ -34,6 +34,7 @@ export const ALL_MODES = [
   'companies',
   'venues',
   'filings',
+  'crypto',
   'statements',
   'courts',
   'regulation',
@@ -65,7 +66,7 @@ export const GATEWAY_FAMILIES: ReadonlyArray<{ label: string; modes: readonly Mo
   { label: 'Start anywhere', modes: ['nexus', 'track'] },
   { label: 'Infrastructure', modes: ['domain', 'threat', 'geo'] },
   { label: 'People & accounts', modes: ['username', 'email'] },
-  { label: 'Money & entities', modes: ['finance', 'ownership', 'procurement', 'board', 'markets', 'property', 'companies', 'venues', 'filings'] },
+  { label: 'Money & entities', modes: ['finance', 'ownership', 'procurement', 'board', 'markets', 'crypto', 'property', 'companies', 'venues', 'filings'] },
   { label: 'Law & the state', modes: ['statements', 'courts', 'regulation', 'officials'] },
   { label: 'Earth & systems', modes: ['resources', 'grid', 'space-weather', 'orbital'] },
   { label: 'Knowledge & record', modes: ['research', 'reference', 'open-data', 'news', 'media', 'broadcasts'] },
@@ -200,6 +201,13 @@ export const GATEWAY_GUIDANCE: Record<Mode, GatewayGuidance> = {
     example: 'inflation',
     limit:
       'Public acts of office — a policy speech, on the record. This never follows a person, and it holds nothing about anyone’s private life (charter §3). Central banks only; other officials are not in this feed.',
+  },
+  crypto: {
+    answers:
+      'Any of the 18,610 listed digital assets with its whole record — price, supply against its cap, distance from its all-time high, the chains it actually runs on — beside what the networks are announcing themselves and what the specialist press is reporting.',
+    example: 'pi network',
+    limit:
+      'Prices come from one aggregator, so they are one origin however many assets they cover — never treat two of its rows as corroboration. It reads assets and announcements, never wallets or holders: whose coins these are is not a question this product will answer.',
   },
   resources: {
     answers:

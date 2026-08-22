@@ -26,7 +26,7 @@ import {
   BookOpen,
   Library,
 } from 'lucide-react'
-import { Sparkles, Building2, Scale, FileText, Mic, Pickaxe, Sun, Satellite, Megaphone } from 'lucide-react'
+import { Sparkles, Building2, Scale, FileText, Mic, Pickaxe, Sun, Satellite, Megaphone, Coins } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -104,6 +104,7 @@ const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: s
   { id: 'broadcasts', label: 'Broadcasts', icon: Radio, placeholder: 'a country code, a station name — or press Load for what the world is listening to' },
   { id: 'filings', label: 'Filings', icon: FileText, placeholder: 'a phrase to find in filings — or press Load for the disclosure tape' },
   { id: 'venues', label: 'Exchanges', icon: Landmark, placeholder: 'an exchange, a country or a MIC — or press Load for the registry' },
+  { id: 'crypto', label: 'Crypto', icon: Coins, placeholder: 'a coin, a token or a ticker — or press Load for the largest' },
   { id: 'statements', label: 'Statements', icon: Megaphone, placeholder: 'a subject — or press Load for what has just been said' },
   { id: 'courts', label: 'Courts', icon: Scale, placeholder: 'a party, a subject or a doctrine — or press Load' },
   { id: 'regulation', label: 'Regulation', icon: FileText, placeholder: 'a subject — or press Load for today’s journal' },

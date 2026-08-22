@@ -101,6 +101,13 @@ export const BOARDS: BoardDefinition[] = [
     searchable: true,
   },
   {
+    key: 'crypto',
+    capability: 'crypto',
+    title: 'Crypto & blockchain',
+    note: 'Any of the 18,610 listed digital assets — its price, its supply against its cap, how far it is from its record, which chains it actually runs on — beside what the networks themselves are announcing and what the specialist press is reporting. Type a name or a ticker; leave it blank for the largest by market capitalisation.',
+    searchable: true,
+  },
+  {
     key: 'resources',
     capability: 'resources',
     title: 'Resources & commodities',

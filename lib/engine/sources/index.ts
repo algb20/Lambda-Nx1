@@ -38,6 +38,8 @@ import { FILING_SOURCES } from './filings'
 import { BROADCAST_SOURCES } from './broadcasts'
 import { COMPANY_SOURCES } from './companies'
 import { BOARD_SOURCES } from './boards'
+// Gateway — Crypto & blockchain (every listed asset, plus the networks' own news)
+import { CRYPTO_GATEWAY_SOURCES } from './crypto'
 // Gateway — Geospatial (places + flights)
 import { nominatim, opensky } from './geo'
 // Gateway — Research & tech-trend
@@ -381,7 +383,11 @@ let registeredBoards = false
 /** The seven single-authority boards: courts, regulation, officials, resources, grid, space weather, orbital. */
 export function registerBoards(): void {
   if (registeredBoards) return
-  registry.registerAll(BOARD_SOURCES)
+  // The crypto gateway rides here rather than in `boards.ts`: it is the same
+  // board shape, but its two sources have real logic — a relevance ranking over
+  // eighteen thousand assets, and a fan-out across the crypto feed catalogue —
+  // which is what earns a file of their own.
+  registry.registerAll([...BOARD_SOURCES, ...CRYPTO_GATEWAY_SOURCES])
   registeredBoards = true
 }
 

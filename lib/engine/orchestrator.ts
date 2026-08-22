@@ -117,11 +117,48 @@ async function runSource(
       return { sourceKey: source.key, ok: true, evidence: [], cached: true, cacheAgeMs: null }
     }
 
+    /**
+     * The provider failed — but we may still be holding what it last said.
+     *
+     * Until now the cache was consulted only when *we* declined to fetch
+     * (`RateLimitedError`), and a failure on the provider's side threw the
+     * last good answer away. Those two cases are indistinguishable to a
+     * reader: either way the source was not fetched just now, and either way
+     * a ninety-second-old answer beats an empty panel.
+     *
+     * This is not hypothetical and it is not niche. CoinGecko throttles
+     * keyless callers, so the crypto gateway's asset half would vanish the
+     * moment two people searched in the same minute — while the identical rows
+     * sat in memory. The same is true of every provider that has a bad ten
+     * seconds.
+     *
+     * Two things keep it honest, and both matter more than the resilience:
+     *
+     *  - `ok` stays **false** and `error` still carries the reason, so the
+     *    health panel counts a failed fetch, because a fetch did fail. A
+     *    product that serves a cached answer and reports itself perfectly
+     *    healthy is lying about its own reliability.
+     *  - The evidence keeps its original `retrievedAt`, and `cacheAgeMs` says
+     *    exactly how old it is. Nothing here makes stale data look live.
+     */
+    const message = err instanceof Error ? err.message : String(err)
+    const cached = cachedSourceResult(source.key, input.value)
+    if (cached) {
+      return {
+        sourceKey: source.key,
+        ok: false,
+        evidence: cached.evidence,
+        error: message,
+        cached: true,
+        cacheAgeMs: cached.ageMs,
+      }
+    }
+
     return {
       sourceKey: source.key,
       ok: false,
       evidence: [],
-      error: err instanceof Error ? err.message : String(err),
+      error: message,
     }
   } finally {
     if (timer) clearTimeout(timer)

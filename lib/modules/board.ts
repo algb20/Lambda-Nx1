@@ -43,6 +43,7 @@ interface RowData {
   at?: string | null
   url?: string
   weight?: number
+  groupWeight?: number
 }
 
 /**
@@ -56,13 +57,31 @@ export async function boardReport(
   board: string,
   capability: Capability,
   subject = '',
+  /**
+   * Which registry to read. The shared one in every real call; a test seam so
+   * the arrangement rules below — grouping, ordering, the sort — can be
+   * exercised against a known set of rows instead of against whatever eight
+   * live publishers happen to be saying today.
+   */
+  sources = registry,
 ): Promise<BoardReport> {
-  registerBoards()
+  if (sources === registry) registerBoards()
   const generatedAt = new Date().toISOString()
 
-  const r = await collect({ capability, value: subject.trim() }, { registry, mode: 'all' })
+  const r = await collect({ capability, value: subject.trim() }, { registry: sources, mode: 'all' })
 
   const byGroup = new Map<string, Array<BoardRow & { weight: number }>>()
+  /**
+   * A source's own view of where its groups belong, when it has one.
+   *
+   * Size is the default proxy for importance and it is a good one — until a
+   * board answers a specific question. Search the crypto gateway for one asset
+   * and it returns seven rows about that asset beside seventy headlines about
+   * the sector: ordering by size puts what was asked for below two walls of
+   * what was not. A source that knows better may now say so, and every board
+   * that does not is unaffected.
+   */
+  const groupWeights = new Map<string, number>()
   let newestAt: string | null = null
 
   for (const e of r.evidence) {
@@ -80,6 +99,11 @@ export async function boardReport(
       weight: typeof d.weight === 'number' ? d.weight : 0,
     }
     if (row.at && (!newestAt || row.at > newestAt)) newestAt = row.at
+    if (typeof d.groupWeight === 'number') {
+      // The strongest claim any row makes about its group wins, so one
+      // unweighted row cannot drag a group back down to the default.
+      groupWeights.set(d.group, Math.max(groupWeights.get(d.group) ?? 0, d.groupWeight))
+    }
     const list = byGroup.get(d.group)
     if (list) list.push(row)
     else byGroup.set(d.group, [row])
@@ -99,10 +123,21 @@ export async function boardReport(
         )
         .map(({ weight: _weight, ...row }) => row),
     }))
-    // Bigger groups first: a group of one is a footnote, and making the reader
-    // scroll past twelve of them to reach the substance is the arrangement
-    // failure this platform keeps being told about.
-    .sort((a, b) => b.rows.length - a.rows.length || a.name.localeCompare(b.name))
+    /**
+     * A declared order wins; otherwise bigger groups first.
+     *
+     * A group of one is usually a footnote, and making the reader scroll past
+     * twelve of them to reach the substance is the arrangement failure this
+     * platform keeps being told about. But "usually" is doing work there — when
+     * a source has said where a group belongs, it knows something size does
+     * not, and every board that says nothing keeps exactly the old ordering.
+     */
+    .sort(
+      (a, b) =>
+        (groupWeights.get(b.name) ?? 0) - (groupWeights.get(a.name) ?? 0) ||
+        b.rows.length - a.rows.length ||
+        a.name.localeCompare(b.name),
+    )
 
   return {
     generatedAt,

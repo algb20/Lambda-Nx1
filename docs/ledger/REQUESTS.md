@@ -45,7 +45,7 @@ The ones that **are** genuine standing work, named rather than buried:
 | R182 | 2026-08-20 | `gateways` | | `done` | بوّابة تُظهر **تصنيف** الشركات — ترتيب أكبر ٢٥ مُودِعًا بإجمالي الأصول من إطارات XBRL (٦١١٠ شركة)، والمقياس مُسمّى لا مُضمَر |
 | R183 | 2026-08-20 | `gateways` | | `done` | شركات ومصانع الدول والقطاع الخاص |
 | R184 | 2026-08-20 | `gateways` | | `open` | آليّة تعمل **تلقائيًا** لكل البوّابات |
-| R185 | 2026-08-20 | `gateways` | | `open` | كل العملات الرقمية والبلوكشين بكل معلوماته وأهم أخباره |
+| R185 | 2026-08-20 | `gateways` | | `done` | بوّابة **العملات الرقمية والبلوكشين** — `crypto`: أيّ أصل من **١٨٬٦١٠** بسجلّه الكامل (السعر، العرض مقابل السقف، البُعد عن القمّة، السلاسل التي يعمل عليها)، وأخباره من **٧ ناشرين** أربعة منهم الشبكات نفسها (Pi Core Team · Ethereum Foundation · Solana · Bitcoin Optech) |
 | R186 | 2026-08-20 | `gateways` | | `done` | بوّابة **المعادن والثروات** — `resources`: ١٨ سلسلة أسعار من صندوق النقد عبر FRED (نحاس، ألمنيوم، نيكل، زنك، رصاص، قصدير، حديد، يورانيوم، فحم، غاز + غذاء + ٣ مؤشرات) |
 | R187 | 2026-08-20 | `gateways` | | `open` | اعمل بحثًا وحدّد **قائمة بكل البوّابات** ثم أنجزها |
 | R188 | 2026-08-20 | `gateways` | | `done` | بوّابة `officials` — خطب محافظي البنوك المركزية بنصّها من BIS، مجمّعة لكل متحدّث. **أفعال المنصب العامة فقط**، لا حياة خاصة (§3) |
@@ -828,6 +828,62 @@ banner, the globe carrying every gateway, launch organisation, and the ~13s
 route settle time.
 
 R204 and R229 are standing rules, not items to close.
+
+**R185 — الأصول كانت عشرة، والأخبار كانت صفرًا.**
+
+I checked the code before writing any, as R180 taught. What was there: four
+chains read from their own nodes, Bitcoin's mempool, and the **top ten** coins
+by market capitalisation. What was not there, and was not there *at all*:
+
+1. **The other 18,600 assets.** Ten of eighteen thousand is a leaderboard, not
+   coverage. Anyone asking about the asset they actually hold got nothing.
+2. **The record itself.** Supply against its cap, the distance from the
+   all-time high, which chains an asset runs on, what it is classified as —
+   none of it existed anywhere in the product.
+3. **Crypto news.** Not a thin feed: none. Zero words about any of it.
+
+The gateway `crypto` now answers all three, and it cost one board row plus two
+sources — no route, no view, no branch, because the board shape from the seven
+earlier gateways held. Verified live on 2026-08-22: `pi network` returns
+**19 rows** — price $0.0973 (+6.95% 24h), rank #70, 11.09B PI in circulation
+against a 100B cap (11.1% issued), all-time high $2.99 on 2025-02-26 and now
+96.7% below it — beside **78 headlines from all seven publishers**, every one
+dated by its publisher.
+
+**Counting honestly (§2a).** Two integrations. 18,610 assets is *reach* through
+one of them and is never a source count; CoinGecko is **one** independent
+origin however many assets it covers, which is why a price here is graded B and
+a chain reading from the network's own node is graded A. Four of the seven
+publishers are the networks announcing their own decisions — an A — and three
+are the specialist press at C, kept because a network's own blog will not tell
+you the network is being sued.
+
+**Three real defects surfaced while building it, all fixed.**
+
+*The search returned the biggest, not the best.* CoinGecko answers `pi` with a
+euro money-market fund first, because that fund is larger than Pi Network. That
+is the exact bug the exchange register had a day earlier, and the fix belongs in
+our code, not the provider's: `coinRelevance` ranks the **kind** of match —
+exact ticker, exact name, prefix, whole word, substring — and only uses size to
+break ties.
+
+*A throttled provider reported itself healthy.* `if (!res.ok) return []` made a
+429 indistinguishable from "nothing to say", so the board would show *2 sources
+ok* while missing half its answer. Now it throws through `fetch-guard`, and the
+count says one failed, because one did.
+
+*Which led to a general engine fix.* The source cache was consulted only when
+**we** declined to fetch, never when the **provider** fell over — so a
+ninety-second-old answer sitting in memory was thrown away on a 429. It is now
+served on any failure, with `ok: false` and the error kept, because a product
+that serves stale data and calls itself healthy is lying about its own
+reliability. This helps every source in the platform, not the crypto one.
+
+*And the answer arrived seventh.* The board orders groups by size, which is a
+good default until a board answers a **specific** question: seven rows about the
+asset landed beneath seventy headlines about the sector. A source may now
+declare where its groups belong; every board that declares nothing keeps exactly
+the old order.
 
 **R180 — «كل البورصات» كانت مبنيّة، والخطأ كان أن أبنيها مرّة ثانية.**
 
