@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { BOARDS, boardByKey, boardReport } from './board'
 import { Registry } from '@/lib/engine/registry'
 import type { Source } from '@/lib/engine/types'
@@ -125,5 +127,61 @@ describe('the order the boxes are read in', () => {
     ])
     const report = await boardReport('crypto', CAP, '', reg)
     expect(report.groups.map((g) => g.name)).toEqual(['Large', 'Small'])
+  })
+})
+
+/**
+ * Requests from the board sources, after the courts gateway was found
+ * reporting `ok: 1, failed: 0` with zero rows for ninety minutes at a time.
+ *
+ * Read from the source rather than executed, for the same reason as the
+ * gateway assertions above: this pulls the orchestrator, and the point here is
+ * a property of how the file is written.
+ */
+describe('board sources say who they are, and fail out loud', () => {
+  const raw = readFileSync(join(process.cwd(), 'lib/engine/sources/boards.ts'), 'utf8')
+  /**
+   * Comments stripped before matching. The doc comment on `boardFetch` quotes
+   * the very pattern being banned, and a naive search finds its own
+   * explanation — a trap this codebase has now sprung three times.
+   *
+   * Both strippers are anchored to the start of a line, and both anchors were
+   * paid for. A blanket `//` strip eats the `//` in `https://github.com/…`
+   * inside the User-Agent string and reports the User-Agent as missing. A
+   * blanket `/* … *\/` strip is worse: the `Accept` header ends in `*\/*;q=0.5`,
+   * whose `/` + `*` opens a comment that runs to the end of the next doc block
+   * and swallows the `expectOk(` call this file exists to protect. Every
+   * comment in `boards.ts` starts its own line; no string literal does.
+   */
+  const boards = raw
+    .replace(/^[ \t]*\/\*[\s\S]*?\*\//gm, '')
+    .replace(/^[ \t]*\/\/.*$/gm, '')
+
+  it('never calls ctx.fetch directly outside the two helpers', () => {
+    // Nine call sites, each previously anonymous. CourtListener answered the
+    // named request with 8.3 million results and the anonymous one with
+    // `429 throttled, available in 5040 seconds`.
+    const direct = [...boards.matchAll(/ctx\.fetch\(/g)].length
+    expect(direct, 'a call site bypassing boardFetch/boardTry').toBeLessThanOrEqual(2)
+  })
+
+  it('sends a name with a contact route', () => {
+    expect(boards).toContain("'User-Agent': 'LambdaNX/1.0 (+https://github.com/algb20/Lambda-Nx1)'")
+  })
+
+  it('turns a refusal into a recorded failure for a single-source board', () => {
+    // `if (!res.ok) return []` is what made a throttled provider look like a
+    // healthy source with nothing to say.
+    expect(boards).toContain('expectOk(')
+    expect(boards).not.toContain('if (!res.ok) return []')
+  })
+
+  it('still lets one of many endpoints fail without killing the run', () => {
+    // Nine press offices, eighteen FRED series, three CelesTrak groups: losing
+    // one must not turn a partial answer into no answer. Collapsing this into
+    // the strict helper would be a bug in the other direction.
+    expect(boards).toContain('async function boardTry(')
+    expect(boards).toMatch(/boardTry\(/)
+    expect(boards).toMatch(/if \(!res\.ok\) continue/)
   })
 })
