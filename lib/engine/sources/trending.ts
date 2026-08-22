@@ -22,7 +22,6 @@
 import type { Evidence, Source, SourceContext } from '../types'
 
 const WIKI_HEADERS = {
-  'User-Agent': 'Lambda NX OSINT (research; contact via app)',
   Accept: 'application/json',
 }
 

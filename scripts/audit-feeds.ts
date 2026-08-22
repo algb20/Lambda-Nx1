@@ -28,6 +28,7 @@
 import { CATALOG } from '../lib/engine/catalog/index'
 import { decodeBody, fillTemplate, headline, requestUrl } from '../lib/engine/catalog/adapter'
 import type { CatalogSource } from '../lib/engine/catalog/types'
+import { USER_AGENT } from '../lib/engine/guardrail'
 
 /** How long to wait on one publisher before moving on. */
 const TIMEOUT_MS = 25_000
@@ -125,7 +126,7 @@ async function discoverFeeds(pageUrl: string): Promise<string[]> {
   try {
     const origin = new URL(pageUrl).origin
     const res = await fetch(origin, {
-      headers: { 'User-Agent': 'LambdaNX/1.0 (+https://github.com/algb20/Lambda-Nx1)' },
+      headers: { 'User-Agent': USER_AGENT },
       redirect: 'follow',
     })
     if (!res.ok) return []
@@ -156,6 +157,12 @@ async function audit(source: CatalogSource): Promise<Finding> {
      * recognise and accept the one the engine actually presents. An audit taken
      * with a different instrument from the thing being audited measures the
      * instrument.
+     *
+     * Which is why this **imports** `USER_AGENT` rather than repeating it. The
+     * copy that used to sit here was true when written and became false the
+     * moment the engine consolidated its identity — the same audit, still
+     * claiming to send the engine's headers, would have gone back to measuring
+     * itself without a line of it changing.
      */
     const res = await fetch(requestUrl(source, new Date()), {
       signal: controller.signal,
@@ -163,7 +170,7 @@ async function audit(source: CatalogSource): Promise<Finding> {
         // The record's own agent where it declares one — the SEC mandates a
         // contact address and 403s anything else, so an audit that ignored the
         // override would report a working feed as dead.
-        'User-Agent': source.userAgent ?? 'LambdaNX/1.0 (+https://github.com/algb20/Lambda-Nx1)',
+        'User-Agent': source.userAgent ?? USER_AGENT,
         Accept:
           source.kind === 'geojson' || source.kind === 'json'
             ? 'application/json, application/geo+json;q=0.9, */*;q=0.5'

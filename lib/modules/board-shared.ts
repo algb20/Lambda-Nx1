@@ -101,6 +101,27 @@ export const BOARDS: BoardDefinition[] = [
     searchable: true,
   },
   {
+    key: 'crypto',
+    capability: 'crypto',
+    title: 'Crypto & blockchain',
+    note: 'Any of the 18,610 listed digital assets — its price, its supply against its cap, how far it is from its record, which chains it actually runs on — beside what the networks themselves are announcing and what the specialist press is reporting. Type a name or a ticker; leave it blank for the largest by market capitalisation.',
+    searchable: true,
+  },
+  {
+    key: 'verify',
+    capability: 'verification',
+    title: 'Fact-checks & claims',
+    note: 'Whether a claim has already been checked, by five independent IFCN-signatory newsrooms — Snopes, Full Fact, PolitiFact, FactCheck.org and Lead Stories. Search a subject and it reports how many INDEPENDENT checkers examined it, which is a corroboration reading and never a verdict. Where a publisher states its finding in the feed it is shown; where it does not, the row says so and links to the check.',
+    searchable: true,
+  },
+  {
+    key: 'maritime',
+    capability: 'maritime',
+    title: 'Maritime & ocean',
+    note: 'The sea as its instruments report it — NOAA’s buoy network, 1,351 active stations and around 850 reporting at any moment: wave height and period, wind and gust, pressure, sea and air temperature, grouped by ocean with the roughest first. Search a station, a sea area or the body that owns the instrument.',
+    searchable: true,
+  },
+  {
     key: 'resources',
     capability: 'resources',
     title: 'Resources & commodities',

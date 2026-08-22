@@ -124,6 +124,36 @@
   }
   body {
     @apply bg-background text-foreground;
+
+    /*
+     * No single word may widen the page.
+     *
+     * Walked on a 390px phone, the open-data gateway scrolled sideways. Nothing
+     * was wrong with its layout: a national catalogue had returned a dataset
+     * whose title is one unbroken token — `water-quality-monitoring-results-
+     * 2019-2024-provisional` — and an unbreakable word is laid out at its full
+     * intrinsic width no matter what the container says. Every gateway this
+     * project will ever add renders text it did not write, from registries,
+     * courts, catalogues and feeds, so this is a property of the product and
+     * not of one view. Fixing it per component means finding it again on the
+     * thirty-fourth gateway.
+     *
+     * `anywhere` rather than `break-word`, and the difference is the whole
+     * point: both break a too-long word onto the next line, but only `anywhere`
+     * is counted in an element's min-content width. A flex or grid item keeps
+     * `min-width: auto`, so under `break-word` the item is still *sized* to the
+     * unbreakable word and the row still overflows — the text wraps and the page
+     * scrolls anyway. Under `anywhere` the item may shrink, which is what makes
+     * the page fit.
+     *
+     * It costs nothing on ordinary prose: a break is only taken when the word
+     * would otherwise overflow its line. Anything that must stay on one line
+     * says so itself — `whitespace-nowrap`, `tabular-nums` columns, `<pre>` —
+     * and those declarations still win.
+     *
+     * Charter §S10: every page fits a phone, a tablet, a laptop and a desktop.
+     */
+    overflow-wrap: anywhere;
   }
 }
 

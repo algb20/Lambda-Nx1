@@ -9,6 +9,7 @@ import {
   nwsSeverity,
   whoOutbreaks,
 } from './hazard'
+import { Guardrail, USER_AGENT } from '../guardrail'
 
 const input = { capability: 'world_events' as const, value: '' }
 
@@ -128,16 +129,30 @@ describe('nwsCentroid', () => {
 })
 
 describe('nwsAlerts', () => {
+  /**
+   * The NWS asks every client to identify itself, and this used to be checked
+   * by reading the header the *source* set — which passed while the source
+   * carried one of four different hand-written identities, none of them the
+   * engine's. The header now comes from `Guardrail.createFetch`, so the test
+   * that means anything runs the source through a real guardrail and reads
+   * what actually left the process.
+   */
   it('identifies itself to the agency, as the NWS requires', async () => {
-    const ctx = {
-      fetch: vi.fn(async (_url: string, init?: RequestInit) => {
-        void init
-        return ok({ features: [] })
-      }),
-    }
-    await nwsAlerts.run(input, ctx)
-    const init = ctx.fetch.mock.calls[0][1] as RequestInit
-    expect((init.headers as Record<string, string>)['User-Agent']).toContain('Lambda NX')
+    const guardrail = new Guardrail()
+    guardrail.allowHosts(nwsAlerts.hosts)
+    const spy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockImplementation(async () => ok({ features: [] }))
+
+    await nwsAlerts.run(input, { fetch: guardrail.createFetch(nwsAlerts.key) })
+
+    const sent = new Headers(spy.mock.calls[0][1]?.headers)
+    expect(sent.get('user-agent')).toBe(USER_AGENT)
+    // Both halves are measured requirements, not preferences: a provider needs
+    // a way to reach us, and the SEC refuses a User-Agent containing a link.
+    expect(USER_AGENT).toMatch(/@/)
+    expect(USER_AGENT).not.toMatch(/https?:\/\//)
+    spy.mockRestore()
   })
 
   it('maps an active warning with the agency severity', async () => {

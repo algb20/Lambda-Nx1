@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useLive } from '@/lib/stream/use-live'
 import { Activity, AlertTriangle, CircleCheck, Radio } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { TimeStamp } from '@/components/time-stamp'
@@ -63,26 +64,23 @@ interface WorldSummary {
 }
 
 function EngineState({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
-  const [data, setData] = useState<WorldSummary | null>(null)
-  const [failed, setFailed] = useState(false)
-
-  useEffect(() => {
-    let live = true
-    const load = () => {
-      fetch('/api/world')
-        .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-        .then((d: WorldSummary) => live && (setData(d), setFailed(false)))
-        .catch(() => live && setFailed(true))
-    }
-    load()
-    // Slow on purpose. The rail is peripheral; polling it hard would spend the
-    // provider budget the main panel needs.
-    const timer = setInterval(load, 120_000)
-    return () => {
-      live = false
-      clearInterval(timer)
-    }
-  }, [])
+  /**
+   * Pushed, not polled — and this rail is the clearest case for it.
+   *
+   * It used to poll on its own two-minute timer, deliberately slow because "the
+   * rail is peripheral; polling it hard would spend the provider budget the
+   * main panel needs". That reasoning was right and the trade-off it accepted
+   * is now unnecessary: the rail and the globe read the *same* world picture,
+   * one producer serves both, and a second reader costs nothing upstream. The
+   * rail can be current without competing for anyone's budget.
+   */
+  const live = useLive<WorldSummary>({
+    streamUrl: '/api/world/stream',
+    pollUrl: '/api/world',
+    pollMs: 120_000,
+  })
+  const data = live.value
+  const failed = live.error !== null && live.value === null
 
   const health = data?.sourceHealth ?? []
   const ok = health.filter((s) => s.status === 'ok' || s.status === 'cached').length

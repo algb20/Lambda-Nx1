@@ -17,7 +17,31 @@
  *
  * So the records stay exactly as they were, and what we *observed* lives here,
  * dated, one line per source, with the status the provider actually returned.
- * Re-running the probe against this list is how a source gets released.
+ * Re-running the probe against this list is how a source gets released — and
+ * since 2026-08-22 that runs on a clock rather than on somebody's memory:
+ * `recheck.ts`, driven daily by `/api/cron/sources`. It reports which entries
+ * to release; the edit to this file stays a human one, because removing a line
+ * from the record of what we observed should be a decision, not a side effect.
+ *
+ * ## The re-probe of 2026-08-22, and why a status code is not enough
+ *
+ * The list was retaken. **Eight of fifty-one answered `200`; six were released
+ * and two were not**, and the two are the reason this paragraph exists.
+ *
+ * `thedailystar_bd` answered 200 with ten well-formed items, exactly as it does
+ * every time — and its newest item is dated 2022-07-22, silent for 1,492 days.
+ * Releasing on the status code would have put four-year-old reporting back onto
+ * a live board looking like today's. `saws_south_africa` answered 200 with zero
+ * items parsed, which is the same trap wearing different clothes.
+ *
+ * So a release now requires the document to be *read*: it must parse, contain
+ * items, and carry a recent one. The six that passed — `bls_us`,
+ * `sec_litigation`, `cisa_advisories`, `nsidc_news`, `redhat_security`,
+ * `kyivindependent` — each had an item within two days.
+ *
+ * Two entries also named keys that no longer exist in the catalogue at all
+ * (`sec_edgar_filings`, `meteoalarm_europe`). A quarantine entry for a record
+ * nobody holds withholds nothing; they are gone.
  *
  * ## The three reasons a source is here, and why only one is our fault
  *
@@ -64,8 +88,16 @@ export interface QuarantinedSource {
   note?: string
 }
 
-/** The date the sweep below was taken. Every entry shares it. */
+/**
+ * The date of the sweep an entry was last observed in.
+ *
+ * There are two now, and there will be more. A quarantine entry is an
+ * observation with a date on it, so re-probing does not overwrite history — it
+ * adds a newer observation, and an entry that has not been re-checked keeps the
+ * older date and says so.
+ */
 const PROBED = '2026-08-14'
+const REPROBED = '2026-08-22'
 
 const q = (
   key: string,
@@ -76,10 +108,6 @@ const q = (
 
 export const QUARANTINE: QuarantinedSource[] = [
   // ── Answered with a challenge page. Their terms, and we respect them. ─────
-  q('bls_us', 'bot-blocked', 403, 'Akamai "Access Denied". A browser reaches it; we will not claim to be one.'),
-  q('sec_edgar_filings', 'bot-blocked', 403, 'SEC requires a declared contact in the User-Agent per its access policy — fixable by agreement, not by disguise.'),
-  q('sec_litigation', 'bot-blocked', 403, 'Same SEC policy as sec_edgar_filings.'),
-  q('cisa_advisories', 'bot-blocked', 403, 'Answered 403 to our agent; the JSON KEV catalogue is unaffected and still active.'),
   q('github_advisories', 'bot-blocked', 403),
   q('usda_reports', 'bot-blocked', 403),
   q('iea_news', 'bot-blocked', 403, 'Cloudflare interstitial.'),
@@ -91,7 +119,8 @@ export const QUARANTINE: QuarantinedSource[] = [
   q('eu_sanctions_map', 'bot-blocked', 403, 'Returns HTML rather than the declared feed; the Council press feed covers the same designations.'),
   q('alarabiya', 'bot-blocked', 403),
   q('ahram_egypt', 'bot-blocked', 403),
-  q('scmp_news', 'bot-blocked', 403),
+  { key: 'scmp_news', reason: 'bot-blocked', status: 405, observedOn: REPROBED,
+    note: 'Now 405 Method Not Allowed rather than 403 — a different refusal, still a refusal.' },
   q('nation_kenya', 'bot-blocked', 403),
   q('map_morocco', 'bot-blocked', 403),
   q('ethiopia_addisstandard', 'bot-blocked', 403),
@@ -101,9 +130,11 @@ export const QUARANTINE: QuarantinedSource[] = [
     key: 'thedailystar_bd',
     reason: 'frozen',
     status: 200,
-    observedOn: '2026-08-15',
+    observedOn: REPROBED,
     note:
-      'Returns a valid RSS document whose newest item is dated 2022-07-22 — silent 1,484 days. It ' +
+      'Returns a valid RSS document whose newest item is dated 2022-07-22 — silent 1,492 days as of the ' +
+      '2026-08-22 re-probe, which is the point: it answered 200 with 10 items that day too. A status ' +
+      'code cannot see this class, and a release decided on one would have re-admitted it. It ' +
       'was contributing 10 items to every news sweep, all four years old, and every health check we ' +
       'had called it healthy because it answered. Bangladesh coverage is now thinner by one outlet; ' +
       'release it if the publisher restores the feed.',
@@ -114,29 +145,26 @@ export const QUARANTINE: QuarantinedSource[] = [
     key: 'saws_south_africa',
     reason: 'moved',
     status: 200,
-    observedOn: '2026-08-15',
+    observedOn: REPROBED,
     note:
-      'Rebuilt as a single-page app; /home/rssfeed and every other path we tried answer 200 with the ' +
+      'Re-probed 2026-08-22: still 200, still zero items parsed. Rebuilt as a single-page app; /home/rssfeed and every other path we tried answer 200 with the ' +
       'HTML shell and no feed anywhere. A 200 that is not the document is worse than a 404 — it fails ' +
       'the parser rather than the request. Southern African weather now reaches the board only through ' +
       'GDACS, which is a real coverage gap, not a solved one.',
   },
   q('reuters_world', 'moved', 404, 'Reuters withdrew its public RSS entirely. No first-party replacement exists.'),
   q('reliefweb_reports', 'moved', 410, 'ReliefWeb retired the v1 API. v2 answers 403 to our agent; needs the appname registration their terms describe.'),
-  q('reliefweb_disasters', 'moved', 410, 'Same v1 retirement.'),
+  { key: 'reliefweb_disasters', reason: 'moved', status: 403, observedOn: REPROBED,
+    note: 'Same v1 retirement. Now answers 403 rather than 410 — the endpoint exists again and refuses us, which is the appname registration their terms describe.' },
   q('who_don', 'moved', 404, 'WHO reorganised its Disease Outbreak News feed.'),
   q('who_afro', 'moved', 404),
   q('paho_alerts', 'moved', 404, 'Superseded by the paho_news record, which was verified answering.'),
   q('ecdc_threats', 'moved', 404),
-  q('nsidc_news', 'moved', 404),
-  q('meteoalarm_europe', 'moved', 404, 'Meteoalarm moved to a CAP endpoint with a different shape; needs a new adapter, not a new URL.'),
   q('fao_giews', 'moved', 404),
   q('bis_press', 'moved', 404),
   q('finra_actions', 'moved', 404),
   q('treasury_press', 'moved', 404),
   q('urlhaus_recent', 'moved', 404, 'abuse.ch moved to an authenticated API; the coded urlhaus source is unaffected.'),
-  q('redhat_security', 'moved', 404),
-  q('kyivindependent', 'moved', 404),
   q('jakartapost', 'moved', 404),
   q('infobae', 'moved', 404),
   q('eluniversal_mx', 'moved', 404),
@@ -150,9 +178,11 @@ export const QUARANTINE: QuarantinedSource[] = [
   q('cbc_world', 'unreachable', 0),
   q('news24_za', 'unreachable', 0),
   q('acsc_australia', 'unreachable', 0),
-  q('afp_via_gdelt', 'unreachable', 0, 'GDELT rate-limited the probe (429 earlier in the same sweep). Likely to recover on its own interval.'),
+  { key: 'afp_via_gdelt', reason: 'unreachable', status: 429, observedOn: REPROBED,
+    note: 'GDELT rate-limits the probe. Re-checked 2026-08-22 and still 429, so this is their standing limit for us rather than one bad sweep.' },
   q('smn_mexico', 'unreachable', 500),
-  q('ted_europa', 'unreachable', 202, 'Answers 202 Accepted with no body — an async endpoint that needs a different call pattern.'),
+  { key: 'ted_europa', reason: 'moved', status: 404, observedOn: REPROBED,
+    note: 'Was 202 Accepted with no body; now 404. The async endpoint we were calling is gone, so this is a moved record needing a new URL, not an unreachable one waiting to recover.' },
 ]
 
 const KEYS = new Set(QUARANTINE.map((entry) => entry.key))
@@ -170,7 +200,7 @@ export function quarantineFor(key: string): QuarantinedSource | undefined {
  * The quarantine broken down by cause.
  *
  * Reported rather than summed into one number, because the three causes call
- * for three different actions and a single "49 broken" tells an operator none
+ * for three different actions and a single "43 broken" tells an operator none
  * of them. Only `moved` is work we can simply do.
  */
 export function quarantineSummary() {

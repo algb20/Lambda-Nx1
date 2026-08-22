@@ -110,9 +110,10 @@ interface EftsResponse {
   hits?: { total?: { value?: number }; hits?: EftsHit[] }
 }
 
-// SEC asks every automated client to send a descriptive User-Agent (else 403).
+// The SEC asks every automated client to send a descriptive User-Agent with a
+// contact address, and answers 403 without one. `Guardrail.createFetch` sends
+// the engine's on every request, which is exactly that form.
 const SEC_HEADERS = {
-  'User-Agent': 'Lambda NX OSINT (research; contact via app)',
   Accept: 'application/json',
 }
 

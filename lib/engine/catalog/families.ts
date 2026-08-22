@@ -144,6 +144,26 @@ export const SOURCE_FAMILIES: SourceFamily[] = [
     status: 'planned',
   },
 
+  // ── Digital assets ───────────────────────────────────────────────────────
+  {
+    key: 'coingecko_assets',
+    name: 'CoinGecko — the listed digital-asset universe',
+    publisher: 'CoinGecko',
+    endpoint: 'https://api.coingecko.com/api/v3/coins',
+    discipline: 'fin',
+    topics: ['crypto', 'markets'],
+    publishers: 18_610,
+    basis: 'The `/coins/list` endpoint enumerated 18,610 listed assets when the crypto gateway was built and verified against it (2026-08-22). It is a floor: the list only grows.',
+    licence: publicFeed('CoinGecko', 'https://www.coingecko.com/en/terms'),
+    keyless: true,
+    status: 'live',
+    // The distinction §2a exists to protect. Eighteen thousand assets is reach
+    // through **one** integration, and one aggregator is one independent
+    // origin. Two rows from it are never corroboration of each other, which is
+    // why the chains are read from their own nodes as well.
+    note: 'Reach, not sources: one integration, one independent origin. Quoting 18,610 as a source count would be the exact inflation §2a forbids.',
+  },
+
   // ── Knowledge and reference ──────────────────────────────────────────────
   {
     key: 'wikidata_entities',

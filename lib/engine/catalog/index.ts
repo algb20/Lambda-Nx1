@@ -10,6 +10,9 @@ import { REGIONAL_EXTRA_SOURCES } from './feeds/regional-extra'
 import { NATIONAL_SOURCES } from './feeds/national'
 import { SCIENCE_SOURCES } from './feeds/science'
 import { MARKET_SOURCES } from './feeds/markets'
+import { CRYPTO_SOURCES } from './feeds/crypto'
+import { FACTCHECK_SOURCES } from './feeds/factcheck'
+import { KEYED_SOURCES } from './feeds/keyed'
 import { partitionByLicence, requiredAttributions, LAMBDA_USAGE, type UsageContext } from './licence'
 import { SOURCE_FAMILIES, livePublisherReach, plannedPublisherReach } from './families'
 import { isQuarantined } from './quarantine'
@@ -33,6 +36,8 @@ export const CATALOG: CatalogSource[] = [
   ...NATIONAL_SOURCES,
   ...INFRASTRUCTURE_SOURCES,
   ...MARKET_SOURCES,
+  ...CRYPTO_SOURCES,
+  ...FACTCHECK_SOURCES,
   ...OFFICIAL_SOURCES,
   ...CYBER_SOURCES,
   ...RESEARCH_SOURCES,
@@ -40,6 +45,14 @@ export const CATALOG: CatalogSource[] = [
   ...VERIFIED_NEWS_SOURCES,
   ...REGIONAL_SOURCES,
   ...REGIONAL_EXTRA_SOURCES,
+  /**
+   * Last, and never active: routes that work and need a credential we do not
+   * hold. They sort at the end because `rankSources` orders by how directly a
+   * source observed the world and these observed nothing — but they are *in*
+   * the catalogue so `coverage()` can report them. A gap recorded only in a
+   * document is a gap the running platform is blind to.
+   */
+  ...KEYED_SOURCES,
 ]
 
 /** Sources this deployment may lawfully use, and the ones it may not. */

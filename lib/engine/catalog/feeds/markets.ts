@@ -1,5 +1,6 @@
 import type { CatalogSource } from '../types'
 import { PUBLIC_DOMAIN, ccBy, publicFeed } from '../licence'
+import { USER_AGENT } from '../../guardrail'
 
 /**
  * Markets, energy and commodities.
@@ -33,8 +34,19 @@ export const MARKET_SOURCES: CatalogSource[] = [
      * to disclose *promptly* — a resignation, a bankruptcy, a material
      * agreement, a restatement. It is the highest-grade corporate signal that
      * exists, and it is public the moment it is filed.
+     *
+     * The contact used to be the project owner's personal Gmail address,
+     * written into this file four times and therefore into every clone, every
+     * fork and every deploy preview. It satisfied the SEC and broke a standing
+     * rule of this project: private details do not live in files where
+     * contributors — or anyone reading the repository — can reach them.
+     *
+     * `USER_AGENT` is the same shape and the right one: a role address by
+     * default, and `ENGINE_CONTACT` for a deployment that wants its own
+     * operator named. The address a regulator is given is then an
+     * infrastructure setting, which is what it always was.
      */
-    userAgent: 'LambdaNX Intelligence maskmal088@gmail.com',
+    userAgent: USER_AGENT,
     kind: 'atom',
     discipline: 'fin',
     topics: ['corporate', 'markets'],
@@ -145,7 +157,7 @@ export const MARKET_SOURCES: CatalogSource[] = [
     name: 'SEC EDGAR — annual reports as they are filed',
     publisher: 'US Securities and Exchange Commission',
     url: 'https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=10-K&company=&dateb=&owner=include&count=40&output=atom',
-    userAgent: 'LambdaNX Intelligence maskmal088@gmail.com',
+    userAgent: USER_AGENT,
     kind: 'atom',
     discipline: 'fin',
     topics: ['corporate', 'markets'],
@@ -220,7 +232,7 @@ export const MARKET_SOURCES: CatalogSource[] = [
     // publishes litigation releases now.
     url: 'https://www.sec.gov/enforcement-litigation/litigation-releases/rss',
     // The SEC 403s any agent without a contact address (see sec_edgar_current).
-    userAgent: 'LambdaNX Intelligence maskmal088@gmail.com',
+    userAgent: USER_AGENT,
     kind: 'rss',
     discipline: 'fin',
     topics: ['corporate', 'markets', 'official'],
@@ -239,7 +251,7 @@ export const MARKET_SOURCES: CatalogSource[] = [
     url: 'https://www.sec.gov/news/pressreleases.rss',
     // The SEC answers 403 to any agent without a contact address. This entry
     // had been catalogued and refused for its whole life over that one rule.
-    userAgent: 'LambdaNX Intelligence maskmal088@gmail.com',
+    userAgent: USER_AGENT,
     kind: 'rss',
     discipline: 'fin',
     topics: ['markets', 'official'],

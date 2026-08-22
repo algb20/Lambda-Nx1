@@ -265,3 +265,82 @@ describe('collect, on a warm container', () => {
     expect(second.results[0].error).toBeUndefined()
   })
 })
+
+/**
+ * A failure on the *provider's* side, which is a different thing from our own
+ * politeness refusing to fetch — and used to be treated far worse.
+ */
+describe('collect, when the provider itself fails', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  function flakySource(fail: { now: boolean }): Source {
+    return {
+      key: 'flaky_provider',
+      capability: 'news',
+      passive: true,
+      hosts: ['example.com'],
+      async run() {
+        if (fail.now) throw new Error('flaky_provider: provider answered 429')
+        return [evidence('a real finding')]
+      },
+    }
+  }
+
+  it('still answers from the last good reading, and still calls the fetch a failure', async () => {
+    // CoinGecko throttles keyless callers, so the crypto gateway's asset half
+    // would vanish the moment two readers searched inside a minute — while the
+    // identical rows sat in memory. The cache was consulted only when *we*
+    // declined to fetch, never when the provider fell over.
+    const fail = { now: false }
+    const reg = new Registry()
+    reg.registerAll([flakySource(fail)])
+
+    const first = await collect({ capability: 'news', value: 'q' }, { registry: reg, mode: 'all' })
+    expect(first.evidence).toHaveLength(1)
+
+    fail.now = true
+    const second = await collect({ capability: 'news', value: 'q' }, { registry: reg, mode: 'all' })
+
+    // The reader is not shown an empty panel.
+    expect(second.evidence).toHaveLength(1)
+    expect(second.evidence[0].retrievedAt).toBe('2026-08-15T00:00:00.000Z')
+    expect(second.results[0].cached).toBe(true)
+    // And the product does not report itself healthy while serving stale data:
+    // a fetch failed, the count says so, and the reason is carried.
+    expect(second.results[0].ok).toBe(false)
+    expect(second.results[0].error).toContain('429')
+    expect(second.results[0].cacheAgeMs).toBeTypeOf('number')
+  })
+
+  it('reports an empty failure when nothing was ever held', async () => {
+    const reg = new Registry()
+    reg.registerAll([flakySource({ now: true })])
+    const r = await collect({ capability: 'news', value: 'cold' }, { registry: reg, mode: 'all' })
+    expect(r.results[0].ok).toBe(false)
+    expect(r.results[0].cached).toBeUndefined()
+    expect(r.evidence).toEqual([])
+  })
+
+  it('prefers a live sibling over our stale copy in a fallback chain', async () => {
+    const reg = new Registry()
+    const healthy: Source = {
+      key: 'healthy_provider',
+      capability: 'news',
+      passive: true,
+      hosts: ['example.org'],
+      async run() {
+        return [{ ...evidence('fresh'), sourceKey: 'healthy_provider' }]
+      },
+    }
+    reg.registerAll([flakySource({ now: false }), healthy])
+    await collect({ capability: 'news', value: 'chain' }, { registry: reg, mode: 'first' })
+
+    const reg2 = new Registry()
+    reg2.registerAll([flakySource({ now: true }), healthy])
+    const r = await collect({ capability: 'news', value: 'chain' }, { registry: reg2, mode: 'first' })
+    // A cached-after-failure result does not stop the chain: the ordered
+    // fallback exists precisely so a live sibling can answer instead.
+    expect(r.results.map((x) => x.sourceKey)).toContain('healthy_provider')
+    expect(r.evidence.some((e) => e.claim === 'fresh')).toBe(true)
+  })
+})

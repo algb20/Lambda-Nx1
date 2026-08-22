@@ -34,6 +34,21 @@ export interface FeedEntry {
   /** The feed's own identifier for the item (Atom `<id>` / RSS `<guid>`). */
   id?: string
   authors: string[]
+  /**
+   * The publisher's own categories for the item.
+   *
+   * RSS puts the label in the element's text, Atom in a `term` attribute, and
+   * both are read here. This is the publisher classifying its **own** content,
+   * which makes it the honest way to tell one kind of item from another —
+   * always better than us pattern-matching a title.
+   *
+   * The gap it closes was live: FactCheck.org's feed carries encyclopaedia
+   * entries about organisations alongside its fact-checks, distinguished only
+   * by a `Players Guide` category. With categories dropped, the verification
+   * gateway listed *"Americans for Prosperity"* as a checked claim — a
+   * reference page presented as a debunking.
+   */
+  categories: string[]
 }
 
 const NAMED_ENTITIES: Record<string, string> = {
@@ -150,6 +165,24 @@ function entryLink(block: string): string | undefined {
   return fallback
 }
 
+/**
+ * The publisher's categories for an item.
+ *
+ * `<category>Politics</category>` is RSS; `<category term="Politics"/>` is
+ * Atom, and it is self-closing, so a matcher written only for paired tags
+ * silently returns nothing on every Atom feed.
+ */
+function entryCategories(block: string): string[] {
+  const out: string[] = []
+  for (const m of block.matchAll(/<category(?:\s([^>]*?))?\s*(?:\/>|>([\s\S]*?)<\/category>)/gi)) {
+    const term = m[1]?.match(/\bterm\s*=\s*"([^"]*)"/i)?.[1]
+    const inner = m[2] === undefined ? null : stripHtml(decodeXmlText(m[2]))
+    const value = (term ?? inner ?? '').trim()
+    if (value && !out.includes(value)) out.push(value)
+  }
+  return out
+}
+
 function entryAuthors(block: string): string[] {
   const names: string[] = []
   for (const author of block.match(/<author(?:\s[^>]*)?>[\s\S]*?<\/author>/gi) ?? []) {
@@ -197,6 +230,7 @@ export function parseFeed(xml: string, opts: { summaryMax?: number } = {}): Feed
       ...feedTime(firstTagText(block, ['published', 'pubDate', 'dc:date', 'updated'])),
       id: firstTagText(block, ['id', 'guid']) ?? undefined,
       authors: entryAuthors(block),
+      categories: entryCategories(block),
     })
   }
   return entries

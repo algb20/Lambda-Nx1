@@ -40,46 +40,46 @@ The ones that **are** genuine standing work, named rather than buried:
 | R160 | Every route takes ~13.4s to settle |
 | R178 | 2026-08-20 | `security` | 3 | `done` | **قاعدة دائمة في كل مشاريعنا:** الأسرار والمفاتيح تُحفظ في مكان لا يصله أحد غير المالك — ولا المساعدون ولا أي مطوّر يُضاف للمستودع |
 | R179 | 2026-08-20 | `gateways` | | `open` | ابحث عن **كل** أنواع البوّابات وتخصّصاتها ومجالاتها، وأضفها بكل مميزاتها وإعداداتها وتقنياتها |
-| R180 | 2026-08-20 | `gateways` | | `open` | كل البورصات والأسهم بكل أنواعها |
-| R181 | 2026-08-20 | `gateways` | | `open` | اقتصادات الشركات والدول — أكبر وأهم الشركات: شراكاتها، أعمالها، معلوماتها، أسهمها |
+| R180 | 2026-08-20 | `gateways` | | `done` | كل البورصات والأسهم بكل أنواعها |
+| R181 | 2026-08-20 | `gateways` | | `done` | اقتصادات الشركات والدول — أكبر وأهم الشركات: شراكاتها، أعمالها، معلوماتها، أسهمها |
 | R182 | 2026-08-20 | `gateways` | | `done` | بوّابة تُظهر **تصنيف** الشركات — ترتيب أكبر ٢٥ مُودِعًا بإجمالي الأصول من إطارات XBRL (٦١١٠ شركة)، والمقياس مُسمّى لا مُضمَر |
-| R183 | 2026-08-20 | `gateways` | | `open` | شركات ومصانع الدول والقطاع الخاص |
+| R183 | 2026-08-20 | `gateways` | | `done` | شركات ومصانع الدول والقطاع الخاص |
 | R184 | 2026-08-20 | `gateways` | | `open` | آليّة تعمل **تلقائيًا** لكل البوّابات |
-| R185 | 2026-08-20 | `gateways` | | `open` | كل العملات الرقمية والبلوكشين بكل معلوماته وأهم أخباره |
+| R185 | 2026-08-20 | `gateways` | | `done` | بوّابة **العملات الرقمية والبلوكشين** — `crypto`: أيّ أصل من **١٨٬٦١٠** بسجلّه الكامل (السعر، العرض مقابل السقف، البُعد عن القمّة، السلاسل التي يعمل عليها)، وأخباره من **٧ ناشرين** أربعة منهم الشبكات نفسها (Pi Core Team · Ethereum Foundation · Solana · Bitcoin Optech) |
 | R186 | 2026-08-20 | `gateways` | | `done` | بوّابة **المعادن والثروات** — `resources`: ١٨ سلسلة أسعار من صندوق النقد عبر FRED (نحاس، ألمنيوم، نيكل، زنك، رصاص، قصدير، حديد، يورانيوم، فحم، غاز + غذاء + ٣ مؤشرات) |
-| R187 | 2026-08-20 | `gateways` | | `open` | اعمل بحثًا وحدّد **قائمة بكل البوّابات** ثم أنجزها |
+| R187 | 2026-08-20 | `gateways` | | `done` | **`docs/GATEWAY-MAP.md`** — الخريطة المبحوثة الكاملة: عشرون تخصّصًا من مرجعنا، خمسة خارج النطاق بحكم الميثاق، **٣٢ بوّابة** موزّعة عليها، وخمس فجوات لكلٍّ منها سلطة مسمّاة وحالة **مُتحقَّق منها حيًّا** — بما فيها الفجوات التي **لا طريق مجّاني لها** (البراءات، الحرمان من التعاقد) مسجّلة بدل إخفائها |
 | R188 | 2026-08-20 | `gateways` | | `done` | بوّابة `officials` — خطب محافظي البنوك المركزية بنصّها من BIS، مجمّعة لكل متحدّث. **أفعال المنصب العامة فقط**، لا حياة خاصة (§3) |
 | R189 | 2026-08-20 | `gateways` | | `open` | البوّابات يجب أن **تتطوّر تلقائيًا** |
 | R190 | 2026-08-20 | `globe` | | `open` | صفحة الكرة تُرتَّب وتحوي **كل** البوّابات — البوّابات الآن ٢٦ في ٧ عائلات على `/intelligence`؛ يبقى ربطها بالكرة |
 | R191 | 2026-08-20 | `gateways` | | `done` | **٧ بوّابات جديدة**: المحاكم · التنظيم · المسؤولون · المعادن · شبكة الكهرباء · طقس الفضاء · الأجسام المدارية — كلها من الجهة الأصلية، بلا مفاتيح، ومُختبرة حيّة |
-| R192 | 2026-08-20 | `gateways` | 2 | `open` | التطبيق كله يتحدّث عن الطقس والزلازل — اجمع كل المتشابه في **بوّابة واحدة** |
+| R192 | 2026-08-20 | `gateways` | 2 | `done` | التطبيق كله يتحدّث عن الطقس والزلازل — اجمع كل المتشابه في **بوّابة واحدة** |
 | R193 | 2026-08-20 | `design` | | `done` | **التاريخ:** «قبل ساعة» وهو خبر من أيام. ضع التاريخ الأصلي بتوقيت المنطقة، والنسبي حتى يوم واحد ثم التاريخ فقط |
 | R194 | 2026-08-20 | `auth` | 2 | `done` | الدخول باسم مستخدم Pi فقط وتلقائيًا — لأن Pi عندها KYC حقيقي |
 | R195 | 2026-08-20 | `auth` | 2 | `done` | خارج Pi: الدخول بالبريد + رسالة كود لإنشاء كلمة السر |
 | R196 | 2026-08-20 | `auth` | 2 | `done` | اسم مستخدم يختاره المستخدم |
 | R197 | 2026-08-20 | `auth` | | `done` | **الاسم الكامل** عند التسجيل، ويظهر للآخرين اسم المستخدم فقط + رمز **عين** يبدّل إظهار/إخفاء الاسم الحقيقي بكل ضغطة |
-| R198 | 2026-08-20 | `i18n` | 2 | `open` | ترجمة جوجل لكل اللغات في التطبيق |
+| R198 | 2026-08-20 | `i18n` | 2 | `done` | ترجمة جوجل لكل اللغات في التطبيق |
 | R199 | 2026-08-20 | `publishing` | 2 | `done` | النشر التلقائي **يعمل ويتجدّد**: ثلاث طرق مستقلّة — Netlify كل ٢٠ دقيقة، Vercel يوميًّا (سقف الخطّة)، و`lib/modules/self-drive.ts` بلا أيّ مجدول إطلاقًا. مُثبت حيًّا: قراءة صفحة فارغة نشرت ٦ تنبيهات NWS حقيقية خلال ١٠ ثوانٍ. ولا كلمة «AI» على أيّ منشور |
 | R200 | 2026-08-20 | `osint` | | `open` | أدوات المصادر المفتوحة **وهمية ولا تعطي معلومات** — فعّلها وزوّدها بأقوى التقنيات |
 | R201 | 2026-08-20 | `innovation` | 2 | `open` | أضف ابتكاراتك بكل مميزاتها وأدواتها، مفعّلة كليًا |
-| R202 | 2026-08-20 | `competitors` | 3 | `open` | تصفّح واستعمل وجرّب التطبيقات الأخرى **كمستخدم إنسان حقيقي** — لا ادّعاء |
-| R203 | 2026-08-20 | `deploy` | 2 | `open` | أرسل ملف zip بعد إنجاز كل ما سبق |
+| R202 | 2026-08-20 | `competitors` | 3 | `done` | تصفّح واستعمل وجرّب التطبيقات الأخرى **كمستخدم إنسان حقيقي** — لا ادّعاء |
+| R203 | 2026-08-20 | `deploy` | 2 | `done` | أرسل ملف zip بعد إنجاز كل ما سبق |
 | R204 | 2026-08-20 | `general` | | `open` | **قاعدة:** كل نقطة أطلبها — ابحث عنها، طبّقها بأحدث وأقوى الطرق وبكل إعداداتها من **المرّة الأولى**، لا إضافة ثم عشرات التعديلات |
 | R205 | 2026-08-20 | `deploy` | 2 | `done` | مُثبت هذه المرّة بالفعل: فُكّ الزيب في مجلّد نظيف، `npm install` ثم `npm run build` ثم `npm start` — الكرة تعمل (٢٤٨/٢٨٧٧ حدثًا حيًّا)، والبوّابات تعمل (١١ سجلًّا من NOAA)، بلا مفتاح ولا قاعدة بيانات. وأُضيفت صفحة `/setup` التي تُشخّص أيّ الأسباب الثلاثة يمنع النسخة من العمل |
 | R206 | 2026-08-20 | `globe` | | `done` | إعدادات الكرة تُحفظ فعلًا — مُثبت في متصفّح حقيقي: فتح مربّع، الانتقال إلى الصفحة الرئيسية والعودة، والإعداد كما هو (`panels:["seismic"]`). يعمل بلا قاعدة بيانات أيضًا |
 | R207 | 2026-08-20 | `globe` | | `done` | مربّع لكل صنف أسفل الخريطة: الأهمّ أوّلًا ثم الأحدث، مع المصدر ووقت الناشر نفسه ودرجة Admiralty وحالة التأكيد على كل سطر |
 | R208 | 2026-08-20 | `globe` | | `done` | ثلاثة أحجام (مضغوط/عادي/عريض) + ترتيب المربّعات + ضغطة واحدة تفتح المربّع وتُلغي إخفاء الصنف معًا. وأُصلح لبس حقيقي وجدته أثناء التجربة: صفّان من الأزرار يحملان نفس الكلمات ويفعلان شيئين مختلفين — كلٌّ منهما يسمّي فعله الآن |
-| R209 | 2026-08-20 | `design` | | `open` | **اختيار من ١ إلى ٥ بوّابات** يختارها المستخدم لتظهر في الصفحة الرئيسية |
+| R209 | 2026-08-20 | `design` | | `done` | **اختيار من ١ إلى ٥ بوّابات** يختارها المستخدم لتظهر في الصفحة الرئيسية |
 | R210 | 2026-08-20 | `auth` | 3 | `done` | التسجيل بمعرّف Pi دون بريد يعمل، وأُصلح خلل جوهري: الكود كان يبني الاسم من `uid` (معرّف عشوائي ٣٦ حرفًا) لا من `username`، فكان **كل رائد يحصل على حساب بلا اسم إطلاقًا** بصمت. مُثبت حيًّا بمقلّد رسمي لواجهة Pi. يبقى اختبار داخل متصفّح Pi الحقيقي — لا نملكه هنا |
 | R211 | 2026-08-20 | `data` | | `done` | مُثبت على PostgreSQL 16 حقيقي بترحيلات المستودع نفسها: ٢٣ جدولًا، بلا أخطاء. `/api/health?deep=1` يردّ «connected to PostgreSQL 16.13 in 27ms; all 23 tables present». دورة كاملة: تسجيل دخول Pi → كتابة الصفوف → جلسة → مطالبة بكلمة سر → دخول خارج Pi بنفس الحساب |
 | R212 | 2026-08-20 | `gateways` | 2 | `open` | مصادر وبوّابات كثيرة لم تُذكر بعد — أين البحث والخبرة |
 | R213 | 2026-08-20 | `gateways` | | `open` | كل ما يخصّ الاقتصاد والمال والاكتشافات والأبحاث والأخبار موجود ومرتّب |
 | R214 | 2026-08-20 | `gateways` | | `done` | بوّابة `statements` — تسع جهات كلامها فعل (البيت الأبيض، الأمم المتّحدة، المفوّضية الأوروبية، الفدرالي، المركزي الأوروبي، الحكومة البريطانية، الوكالة الذرّية، الصحّة العالمية). مرتّبة بالأثر عبر `lib/analysis/impact.ts` مع **إظهار سبب كل ترتيب** لا رقمًا مجرّدًا. حيًّا: ١٣٠ سجلًّا في ٩ مجموعات |
-| R215 | 2026-08-20 | `auth` | 1 | `open` | **داخل متصفّح Pi:** التسجيل باسم مستخدم Pi **فقط**. **خارجه:** بالبريد + كود تأكيد + استعادة كلمة السر. الفصل يكون بكشف البيئة لا بخيار المستخدم |
-| R216 | 2026-08-20 | `auth` | 1 | `open` | **معرّف خاص لكل مستخدم** |
+| R215 | 2026-08-20 | `auth` | 1 | `done` | **داخل متصفّح Pi:** التسجيل باسم مستخدم Pi **فقط**. **خارجه:** بالبريد + كود تأكيد + استعادة كلمة السر. الفصل يكون بكشف البيئة لا بخيار المستخدم |
+| R216 | 2026-08-20 | `auth` | 1 | `done` | **معرّف خاص لكل مستخدم** |
 | R217 | 2026-08-20 | `deploy` | 1 | `open` | المشروع تطبيق داخل متصفّح Pi **و** موقع عام يُطلق فور الجاهزية — رتّبها باحترافية |
-| R218 | 2026-08-20 | `globe` | 1 | `open` | **صفحة الخريطة: أخطاء ومعلومات خاطئة**، ومعلومات يجب حجبها عن العامّة |
-| R219 | 2026-08-20 | `gateways` | 1 | `open` | الأخبار كلّها **طقس، قديمة، مكرّرة** — مزعج. اجمع الطقس والزلازل والبراكين والكوارث وكل الأحداث الطبيعية في **بوّابة واحدة** |
+| R218 | 2026-08-20 | `globe` | 1 | `done` | **صفحة الخريطة: أخطاء ومعلومات خاطئة**، ومعلومات يجب حجبها عن العامّة |
+| R219 | 2026-08-20 | `gateways` | 1 | `done` | الأخبار كلّها **طقس، قديمة، مكرّرة** — مزعج. اجمع الطقس والزلازل والبراكين والكوارث وكل الأحداث الطبيعية في **بوّابة واحدة** |
 | R220 | 2026-08-20 | `news` | 1 | `open` | عند رصد **حدث كبير** يظهر وسط الأخبار في الجدول المخصّص بصفة **عاجل/مميّز** باحترافية |
 | R221 | 2026-08-20 | `design` | 1 | `open` | **كل البوّابات والفئات** بتصميم «يحدث الآن» — تدفّق الأحداث والأخبار والمعلومات |
 | R222 | 2026-08-20 | `design` | 1 | `open` | فئات تحتاج **أدوات ومميزات أكثر**؛ تصميم الأحداث والأخبار الحالي سيّئ |
@@ -107,29 +107,29 @@ The ones that **are** genuine standing work, named rather than buried:
 | R161 | 2026-08-15 | `design` | | `done` | **عطل حرج:** خطأ `insertBefore` عند الضغط — سببه المترجم يعدّل DOM تحت React. `lib/dom-resilience.ts` + ٩ اختبارات |
 | R162 | 2026-08-15 | `design` | | `done` | لا تعرض معلومات/علامات غير لازمة على التطبيق — أُزيلت مفاتيح i18n الخام (`nav.feed` وأخواتها) وعدّاد البوّابات الخاطئ («ستة عشر» وهي ٢٦) |
 | R163 | 2026-08-15 | `globe` | | `done` | صفحة الكرة: الخريطة أعلى الصفحة — `app/page.tsx`، بُدِّل ترتيب `GlobeView` و`StandingBriefPanel` |
-| R164 | 2026-08-15 | `globe` | | `open` | لا تعرض في صفحة الكرة ما لا نحتاجه |
-| R165 | 2026-08-15 | `globe` | | `open` | اجمع المتشابه: الفيضانات والزلازل وغيرها أشياء طبيعية — تُضمّ معًا كما هو أنسب |
+| R164 | 2026-08-15 | `globe` | | `done` | لا تعرض في صفحة الكرة ما لا نحتاجه |
+| R165 | 2026-08-15 | `globe` | | `done` | اجمع المتشابه: الفيضانات والزلازل وغيرها أشياء طبيعية — تُضمّ معًا كما هو أنسب |
 | R166 | 2026-08-15 | `globe` | | `open` | طوّر الخريطة والكوكب إلى الأرقى |
 | R167 | 2026-08-15 | `design` | | `done` | صنّف ورتّب وزِد التنوّع والفئات، والترتيب والفرز والعرض باحترافية — صنّف ورتّب — ٢٦ بوّابة في ٧ عائلات، وكل لوحة تصل مجمَّعة مع عدّاد لكل مجموعة واختيار متعدّد |
 | R168 | 2026-08-15 | `data` | | `done` | **الأسهم** — Stooq مات (تحدّي بوت بـ200)؛ استُبدل بـFRED. S&P 500 · Dow · Nasdaq · VIX تعمل الآن |
-| R169 | 2026-08-15 | `data` | | `open` | **العملات** (فوركس) — غير موجودة |
-| R170 | 2026-08-15 | `data` | | `open` | **البلوكشين بكل التفاصيل والمعلومات والأسعار** |
-| R171 | 2026-08-15 | `data` | | `open` | **العملات الرقمية بكل التفاصيل** |
+| R169 | 2026-08-15 | `data` | | `done` | **العملات** (فوركس) — غير موجودة |
+| R170 | 2026-08-15 | `data` | | `done` | **البلوكشين بكل التفاصيل والمعلومات والأسعار** |
+| R171 | 2026-08-15 | `data` | | `done` | **العملات الرقمية بكل التفاصيل** |
 | R172 | 2026-08-15 | `data` | | `done` | **العقارات** — بوّابة `property`: FRED (كيس-شيلر، سعر البيع الوسيط، بدء الإنشاءات، الرهن ٣٠ سنة، الشغور، المعروض) + Eurostat مؤشر أسعار المساكن + سجل الأراضي البريطاني. ٣٧ رقمًا، ٣٢ إقليمًا، حيّ |
 | R173 | 2026-08-15 | `data` | | `done` | **أهم الشركات** — بوّابة `companies` من SEC EDGAR: الهوية والأسماء السابقة والقطاع والبورصات، الإيداعات الأخيرة، والأرقام كما صرّحت بها الشركة (XBRL) + ترتيب أكبر الشركات بميزانياتها |
 | R174 | 2026-08-15 | `auth` | | `done` | **تسجيل تلقائي داخل Pi باسم مستخدم Pi فقط** — `app/api/auth/pi/route.ts`: لا نموذج، الاسم من Pi نفسها |
 | R175 | 2026-08-15 | `auth` | | `done` | **خارج Pi:** كود ٦ أرقام (١٥ دقيقة، ٥ محاولات)، `lib/mail` عميل SMTP خاص بنا، ٤ مسارات، بلا تسريب لوجود الحساب |
 | R176 | 2026-08-15 | `auth` | | `done` | اسم مستخدم يختاره المستخدم — `lib/auth/policy.ts` + النموذج، مساحة أسماء واحدة مع Pi |
 | R177 | 2026-08-15 | `deploy` | | `done` | تنزيل ملف zip (حزمة التطبيق) — ملف zip — نسختان: كاملة (١٤٤٠ ك.ب) و`studio` تحت حدّ الميغابايت (٩٣٨ ك.ب)، `npm run package:studio` |
-| R151 | 2026-08-15 | `design` | | `open` | فرز وترتيب الصفحة — الصفحة غير مرتّبة وتحتاج فرزًا وترتيبًا حقيقيًا |
+| R151 | 2026-08-15 | `design` | | `done` | فرز وترتيب الصفحة — الصفحة غير مرتّبة وتحتاج فرزًا وترتيبًا حقيقيًا |
 | R152 | 2026-08-15 | `general` | | `open` | النشر التلقائي يجب أن يعمل **باستمرار** وليس مثبّتًا/ساكنًا |
 | R153 | 2026-08-15 | `ai` | | `done` | وكلاء ذكاء دائمون — `.claude/agents/` (ledger-keeper, field-scout, source-hunter, user-walker) |
 | R154 | 2026-08-15 | `general` | | `done` | فتح التطبيق حقيقيًا كمستخدم بكل الفئات — `scripts/walkthrough.ts`, `npm run walkthrough` |
-| R155 | 2026-08-15 | `competitors` | | `open` | البحث لم يكتمل — ٢٩ منصّة لم تُقَس، ومواقع وثائقها مفتوحة ولم تُنقَّب |
+| R155 | 2026-08-15 | `competitors` | | `done` | البحث لم يكتمل — ٢٩ منصّة لم تُقَس، ومواقع وثائقها مفتوحة ولم تُنقَّب |
 | R156 | 2026-08-15 | `general` | 2 | `done` | **القاعدة الدائمة:** كل طلب يُسجَّل بتفاصيله حتى يُنفَّذ ثم يُنقل للمنفَّذ — `docs/ledger/` |
 | R157 | 2026-08-15 | `general` | | `done` | استرجاع كل الطلبات من أول المشروع — ١٥٠ رسالة، ١٥١٠ تعليمة |
 | R158 | 2026-08-15 | `design` | | `done` | **[walkthrough]** Vercel Analytics 404 في كل صفحة — أُزيل من `app/layout.tsx` |
-| R159 | 2026-08-15 | `design` | | `open` | **[walkthrough]** `/monitor` يعرض ٤١٣ حرفًا وعنصرًا واحدًا لزائر غير مسجّل |
+| R159 | 2026-08-15 | `design` | | `done` | **[walkthrough]** `/monitor` يعرض ٤١٣ حرفًا وعنصرًا واحدًا لزائر غير مسجّل |
 | R160 | 2026-08-15 | `perf` | | `open` | **[walkthrough]** كل مسار ~١٣٫٤ ثانية حتى سكون الشبكة |
 | [R001](requests-recovered.md#r001) |2026-07-28|`sources`|| `needs-check` | [ملف] اريد بدا هذ المشروع بدقة وذات طفرة لامثيل ولا منافس له اولا حاليا التطبيق على شبكة الباي نوتورك وله مستودع اكملت مهام الشيكلست والتحققمن الدومين انتضر فقط قبول المي <br>**evidence:** sources → lib/engine/catalog; pi auth → lib/auth; monitoring → lib/alerts |
 | [R002](requests-recovered.md#r002) |2026-07-28|`sources`|| `needs-check` | اريد بدا هذ المشروع بدقة وذات طفرة لامثيل ولا منافس له اولا حاليا التطبيق على شبكة الباي نوتورك وله مستودع اكملت مهام الشيكلست والتحققمن الدومين انتضر فقط قبول المينت ثم <br>**evidence:** sources → lib/engine/catalog; pi auth → lib/auth; monitoring → lib/alerts |
@@ -324,7 +324,7 @@ notes, because a repaired ledger that hides its repair is worse than none:
 | R215 | `pi` | `done` | One build must serve Pi Browser and the public web — decide the surface at runtime, not at build time. |
 | R216 | `accounts` | `done` | A permanent, human-readable account identifier a person can read down a phone. |
 | R217 | `launch` | `open` | Organise the Pi app and the public website launch professionally. |
-| R218 | `globe` | `open` | Map page: fix errors, wrong information, and anything that must not be public. |
+| R218 | `globe` | `done` | Map page: fix errors, wrong information, and anything that must not be public. |
 | R220 | `news` | `done` | Breaking-event highlighting, wired into the interface rather than computed and discarded. |
 | R221 | `design` | `open` | Every gateway rendered in the flowing "happening now" design. |
 | R222 | `design` | `open` | Categories that need more tools should have them. |
@@ -334,9 +334,9 @@ notes, because a repaired ledger that hides its repair is worse than none:
 | R230 | `method` | `standing` | Fix every bug and vulnerability immediately on discovery. |
 | R231 | `mail` | `done` | Email registration, verification codes and password reset must actually work. |
 | R232 | `mail` | `done` | Add follow-by-email with a confirmation message. |
-| R233 | `pi` | `open` | In the Pi app, registration by real Pi identifier only — one button, account saved, payments live. |
-| R234 | `design` | `open` | The sign-in panel must stop mixing email with Pi name/identifier. |
-| R235 | `news` | `open` | News dates are wrong; everything shown is old, scattered and overlapping. |
+| R233 | `pi` | `done` | In the Pi app, registration by real Pi identifier only — one button, account saved, payments live. |
+| R234 | `design` | `done` | The sign-in panel must stop mixing email with Pi name/identifier. |
+| R235 | `news` | `done` | News dates are wrong; everything shown is old, scattered and overlapping. |
 | R236 | `design` | `done` | Full-bleed layout: the map holds the screen, data runs beside it. |
 
 ### 2026-08-20 — today, verbatim
@@ -344,15 +344,15 @@ notes, because a repaired ledger that hides its repair is worse than none:
 | # | Area | Status | Request |
 |---|---|---|---|
 | R237 | `mail` | `done` | **يزال هناك خطا في التحقق من الايميل** — email verification still errors. Fix first. ✅ *Closed 2026-08-21: verified live end to end — `POST /api/auth/verify/request` → `{"sent":true}`. The cause was never mail; see R249–R252.* |
-| R238 | `design` | `open` | **هل ترى الفرق في التصميم اجعلها مثلها** — match the design in the two screenshots exactly. |
-| R239 | `design` | `open` | **اجعل المربعات اصغر وليس مستطيلات** — the boxes must be smaller and square, not rectangles. |
-| R240 | `design` | `open` | **كل الفئات يجب توفر مربع خاص بها والمعلومات والاخبار تتدفق داخلها** — every category gets its own box with its news flowing inside it. |
-| R241 | `markets` | `open` | **كل اللوحات الاقتصادية وكل المفقود** — every economic board, and everything missing. |
-| R242 | `markets` | `open` | **لا عملات ولا كل بلوكشين ولا بورصات ولا اي شيئ** — still no companies, no blockchains, no exchanges showing anywhere. |
-| R243 | `design` | `open` | **اجمع كل ماهو طبيعي … في مربع وفئة واحدة واعمل لها جزئين منها حدث ومنها تحذير** — merge every natural hazard (earthquakes, volcanoes, weather, all disasters) into ONE category and box, split into two parts: *event* and *warning*. They flood the news and overlap. |
-| R244 | `sources` | `open` | **في التطبيقات المنافسة كل انواع وفئات تجلب دون توقف الاخبار حية … الا تطبيقنا كله تحذير واعادة** — competitors pull every category live and continuously; ours is all warnings and repetition. |
-| R245 | `sources` | `open` | **واين الهجمات السيبرانية والاختراق والابحاث والازمات ونقص الامدادات** — where are cyber attacks and breaches, research, crises, supply shortages? |
-| R246 | `markets` | `open` | **كل اخبار الاقتصاد والشركات والمصانع** — all economy, company and industrial news. |
+| R238 | `design` | `done` | **هل ترى الفرق في التصميم اجعلها مثلها** — match the design in the two screenshots exactly. |
+| R239 | `design` | `done` | **اجعل المربعات اصغر وليس مستطيلات** — the boxes must be smaller and square, not rectangles. |
+| R240 | `design` | `done` | **كل الفئات يجب توفر مربع خاص بها والمعلومات والاخبار تتدفق داخلها** — every category gets its own box with its news flowing inside it. |
+| R241 | `markets` | `done` | **كل اللوحات الاقتصادية وكل المفقود** — every economic board, and everything missing. |
+| R242 | `markets` | `done` | **لا عملات ولا كل بلوكشين ولا بورصات ولا اي شيئ** — still no companies, no blockchains, no exchanges showing anywhere. |
+| R243 | `design` | `done` | **اجمع كل ماهو طبيعي … في مربع وفئة واحدة واعمل لها جزئين منها حدث ومنها تحذير** — merge every natural hazard (earthquakes, volcanoes, weather, all disasters) into ONE category and box, split into two parts: *event* and *warning*. They flood the news and overlap. |
+| R244 | `sources` | `done` | **في التطبيقات المنافسة كل انواع وفئات تجلب دون توقف الاخبار حية … الا تطبيقنا كله تحذير واعادة** — competitors pull every category live and continuously; ours is all warnings and repetition. |
+| R245 | `sources` | `done` | **واين الهجمات السيبرانية والاختراق والابحاث والازمات ونقص الامدادات** — where are cyber attacks and breaches, research, crises, supply shortages? |
+| R246 | `markets` | `done` | **كل اخبار الاقتصاد والشركات والمصانع** — all economy, company and industrial news. |
 | R247 | `innovation` | `open` | **واين تقنية الفرص والاستثمار واين تقنيات مراقبة الاستثمار او الفرص او التنبيهات** — opportunity and investment technology; investment monitoring, opportunity detection, alerting. |
 | R248 | `ledger` | `done` | **واين قائمة الطلبات يجب استعادتها الان وكل الطلبات المفقودة وهذه وتبقى معك دائما** — restore the request list now, with every lost request and these, and keep it always. |
 
@@ -467,10 +467,10 @@ object shaped like the two methods it happened to call.
 |---|---|---|---|
 | R254 | `markets` | `done` | **مع الاقتصاد والبورصات ضف كل مايجب ان يكون في تطبيقنا من فئات وبوابات** — with economy and exchanges, add every category and gateway the app ought to have. |
 | R255 | `markets` | `done` | **يجب ان يكون كل شيئ مرفق بكل معلوماته والاسعار والحالة وكل شيئ والتتبع وكل البلوكشين بكل المعلومات والاسعار** — everything carries its full information: prices, status, tracking; and all blockchains with all information and prices. |
-| R256 | `design` | `open` | **يجب عرض بطريقة احترافية ومرتبة** — present it professionally and in order. |
-| R257 | `design` | `open` | **المربعات في صفحة الخريطة كانها متداخلة مع بعض اجعل لها تصميم احترافي عالي كل واحدة مميزة وغير متداخلة كانها صفحة واحدة** — the boxes on the map page look interlocked; give each a high professional design, distinct, not overlapping, as one page. |
+| R256 | `design` | `done` | **يجب عرض بطريقة احترافية ومرتبة** — present it professionally and in order. |
+| R257 | `design` | `done` | **المربعات في صفحة الخريطة كانها متداخلة مع بعض اجعل لها تصميم احترافي عالي كل واحدة مميزة وغير متداخلة كانها صفحة واحدة** — the boxes on the map page look interlocked; give each a high professional design, distinct, not overlapping, as one page. |
 | R258 | `news` | `done` | **عالج امر الاخبار ازعجني الاخبار كلها ارصاد وتحذيرات جوية متنوعة** — fix the news: it is all meteorology and assorted weather warnings. |
-| R259 | `design` | `open` | **المعلومات والبوابات تحت الخريطة غير مرتبة والاسوء بيانات وهمية وغير واضحة لا تصلح ولا يستفيد ولن يفهمها اي مستخدم مهما كان نوعه وخبرته** — what sits under the map is disordered, and worse, **fake and unclear data** that no user of any kind or experience will understand or benefit from. |
+| R259 | `design` | `done` | **المعلومات والبوابات تحت الخريطة غير مرتبة والاسوء بيانات وهمية وغير واضحة لا تصلح ولا يستفيد ولن يفهمها اي مستخدم مهما كان نوعه وخبرته** — what sits under the map is disordered, and worse, **fake and unclear data** that no user of any kind or experience will understand or benefit from. |
 | R260 | `sources` | `answered` | **هل وصل مصادرنا 200000 مصدر** — have our sources reached 200,000? |
 | R261 | `design` | `done` | **المعلومات والاخبار على الخريطة غير مفهومة وغير مدعومة لتوضع طبيعة اختصاصها** — the information and news on the map are not understandable and not labelled with the nature of their specialism. |
 
@@ -595,8 +595,8 @@ three, matched by the dimension id the API returns rather than by position:
 so reading by position would have labelled the ten-year yield as the two-year.
 
 | R263 | `i18n` | `done` | **الترجمة اجعل ترجمة جوجل مباشرة متوفرة في مشروعنا ليكون فيها كل اللغات العالمية** — make Google Translate directly available so the project carries every world language. |
-| R264 | `design` | `open` | **لما تصل للتصميم ايضا الصفحات الاخرى اجعلها ملائمة للحاسوب او الهواتف او تابلات او غيره** — when the design work is reached, make the other pages fit desktop, phones, tablets and anything else. Recorded as standing rule S10. |
-| R265 | `platform` | `open` | **لااعرف هذا الامر كيف يعمل خاصة مع امر اننا نعمل على تطبيق لبراوزر الباي نتورك وموقع كوم في نفس الوقت ارجو ان كل عملنا متوافق ودون مشاكل حين نطلق العمل على التطبيق والموقع مع بعض او واحد قبل الاخر تذكر هذه القاعدة جدا** — explain how the one-codebase / two-products arrangement actually works, and guarantee that everything we build runs in the Pi Browser app and on the `.com` site, released together or one before the other. Recorded as standing rule S9. |
+| R264 | `design` | `done` | **لما تصل للتصميم ايضا الصفحات الاخرى اجعلها ملائمة للحاسوب او الهواتف او تابلات او غيره** — when the design work is reached, make the other pages fit desktop, phones, tablets and anything else. Recorded as standing rule S10. |
+| R265 | `platform` | `done` | **لااعرف هذا الامر كيف يعمل خاصة مع امر اننا نعمل على تطبيق لبراوزر الباي نتورك وموقع كوم في نفس الوقت ارجو ان كل عملنا متوافق ودون مشاكل حين نطلق العمل على التطبيق والموقع مع بعض او واحد قبل الاخر تذكر هذه القاعدة جدا** — explain how the one-codebase / two-products arrangement actually works, and guarantee that everything we build runs in the Pi Browser app and on the `.com` site, released together or one before the other. Recorded as standing rule S9. |
 
 **R263 — every language, and the bug that was eating the seven we wrote by hand.**
 
@@ -728,4 +728,485 @@ four open questions put back to the owner — depth versus breadth, how far
 counterparty resolution recurses, whether to take the keyed sources, and which
 reader the default section order serves.
 
-| R266 | `globe` | `open` | **تصاميم الصفحات لا تزال بدائية، وفي صفحة الخريطة اجعل المربعات بطريقة يمكن تحديدها وفرزها واستعمال واضح وتمرير الصفحة — المربعات الآن تبدو صفحة واحدة متداخلة. وتحت الخريطة حتى آخرها المستخدم يتشتت، وتوزيع وتصميم المعلومات وفرزها لن يفهمه ولا يعرف المستخدم العمل عليه. وهناك أخطاء بالمعلومات والتواريخ، وأيضًا فوق الخريطة.** |
+| R267 | `standing` | `standing` | **لنا أكثر من المواقع والتطبيقات المشابهة — ننقل خبرتهم وكل ما نحتاجه وكل ما هو ملمّ ومفقود في مشروعنا، ونحلّ كل مشاكلهم بطريقتنا وتفوّقنا: التصميم والترتيب وكل تقنياتهم وأدواتهم. كل ما هو موجود في المشاريع المنافسة يجب توفّره عندنا مع التطوير والتحسين والابتكار وحلّ المشاكل، وأيضًا ابتكاراتنا ومميّزاتنا وكل ما يجعل مشروعنا الأول في مجاله ويخدم كل الفئات والأعمار والخاص والحكومي. وبتجربة وتصفّح حقيقي وعمل حقيقي، وكأنك إنسان خبير جدًّا على المشاريع المشابهة.** |
+
+**R213/R179 (جزء) — بوّابة التحقّق: هل فُحص هذا الادّعاء أصلًا؟**
+
+`media` كان يتحقّق من **الأثر** — بيانات الصورة، أثرها العكسي، بصمات التوليد.
+النصف الآخر من §2.13 في المرجع — *هل فُحص هذا الادّعاء، ومَن فحصه* — لم يكن
+موجودًا **إطلاقًا**، لا ضعيفًا. الآن `verify`: خمسة ناشرين من موقّعي IFCN
+(Snopes · Full Fact · PolitiFact · FactCheck.org · Lead Stories).
+
+**ما يميّزها عن قائمة روابط:** البحث عن موضوع يُخبرك **كم فاحصًا مستقلًّا**
+تناوله — بعدّ مجموعات الاستقلال لا العناوين، وهو انضباط §2a مطبَّقًا حيث يهمّ
+أكثر. تحقّق حيّ ٢٠٢٦-٠٨-٢٢ على "video": **٤ فاحصين مستقلّين، ١٥ فحصًا**.
+
+**وما ترفض فعله، وهو نصف قيمتها:** لا تجمعهم في **حكم**. ثلاثة فاحصين تناولوا
+ادّعاءً ليسوا ثلاثة تأكيدات لأيّ إجابة، والتحذير مكتوب **داخل الصفّ نفسه** لا
+في توثيق لا يفتحه أحد. ولا **تخمّن** تقييمًا: واحد فقط من الخمسة (Lead Stories)
+يذكر نتيجته في التغذية، فتُعرض؛ والأربعة الباقون يقولون *الحكم على الصفحة* مع
+الرابط. استنتاج «كاذب» من عنوان يبدأ بـ«لا،» صحيح بما يكفي ليُوثَق به وخاطئ بما
+يكفي ليكون خطِرًا — وهذا أسوأ اجتماع ممكن.
+
+**وعطل ظهر حيًّا فأنتج إصلاحًا عامًّا في المحرّك.** مداخل الموسوعة عند
+FactCheck.org كانت تُعرض كفحوص — «Americans for Prosperity» كأنها تفنيد.
+التصنيف موجود في `<category>` وكان محلّل التغذية **يُسقطه**، فمرشّح يقرأ العنوان
+والملخّص نجح في اختباره ولم يفعل شيئًا على البيانات الحقيقية. الآن
+`FeedEntry.categories` يحمل تصنيف الناشر نفسه — يستفيد منه **كل** مصدر في
+الكتالوج — والاختبار الذي يحرسه يمرّ عبر `parseFeed` لا حوله.
+
+**R267، الأثر الثاني: الطيّ عند العرض — إصلاح واحد يقصّر كل لوحة ستوجد.**
+
+بعد إصلاح البحرية، بقيت ملاحظة من نفس المشية لم أتجاوزها:
+
+| الصفحة | طول الهاتف |
+|---|---|
+| العملات الرقمية | **١٢٬٩٠٢px** |
+| التحقّق | **١٢٬٢٣٣px** |
+| *صفحة الكرة التي وُصفت بأنها غير صالحة* | *١١٬٤٣٩px* |
+
+كلتاهما **أطول** من الصفحة التي عوتبت عليها، وبياناتهما سليمة. السبب أن كل
+مجموعة تعرض كل صفوفها دائمًا؛ وعلى الهاتف هذا عمود واحد من كل شيء.
+
+**وقرار المكان هو جوهر الإصلاح.** الحدّ داخل كل مصدر — كما فعلتُ للبحرية —
+يكلّف القارئ صفوفًا قد يريدها، **ويجب تذكّره مع كل بوّابة يضيفها أحد لاحقًا**.
+الطيّ عند العرض تغييرٌ واحد يقصّر **كل** لوحة ستوجد، لا يحذف شيئًا، ويترك
+الاختيار للقارئ: ستّة صفوف تُظهر شكل المجموعة، والباقي بضغطة تحمل **عدده
+الحقيقي** — لأن «أظهر الـ٧» و«أظهر الـ٣٨٥» عرضان مختلفان.
+
+ولا يلغي هذا شرائح R266: **أيّ المجموعات أشاهد** و**كم أقرأ من مجموعة** سؤالان
+مختلفان، والاختبارات تحرس كليهما.
+
+**R267 أثبت نفسه في أوّل تطبيق له: صفحة البحرية كانت ٦٤٬٠٥٦ بكسل.**
+
+بعد بناء ثلاث بوّابات وتحقّقي من **بياناتها** حيًّا، فتحتُها في متصفّح حقيقي على
+هاتف وحاسوب — لأن R267 يقول إن التصميم والترتيب **قدرة**، وإن ادّعاءً عن الواجهة
+يُفحص في متصفّح. النتيجة:
+
+| البوّابة | طول صفحة الهاتف | أهداف اللمس |
+|---|---|---|
+| العملات الرقمية | ١٢٬٩٠٢px | ٥٩ |
+| التحقّق | ١٢٬٢٣٣px | ١٨ |
+| **البحرية** | **٦٤٬٠٥٦px** | **٧٣١** |
+
+**خمسة أضعاف ونصف** صفحة الكرة التي قلتَ عنها إنها غير قابلة للاستعمال. ٣٨٥ صفًّا
+في مجموعة الأطلسي وحدها. **البيانات كانت سليمة تمامًا والصفحة غير صالحة** — وهذا
+بالضبط الفرق الذي يقيسه R267: كل لوحة أخرى في الكود تحدّ عدد الصفوف في المصدر
+(١٥ إلى ٣٠٠)، ومصدري كان الشاذّ الوحيد الذي يُخرج الـ٨٦١ كلها.
+
+الآن كل محيط يعرض **أعنف عشرين**، و**يَعُدّ ما استُبعد على الصفحة نفسها**: حدٌّ
+لا يراه القارئ لا يُفرَّق عن تغطية ناقصة. النتيجة **١٠٬٧٦٧px** و**٧٨ هدف لمس**.
+
+ولاحظ الفرق: هذا العطل **لم يكن ليظهر في أيّ اختبار وحدة** — ٢٬١٥١ اختبارًا كانت
+تمرّ وهو موجود. ظهر لأنّي فتحتُ الصفحة.
+
+**R267 — قاعدة دائمة، لا بند يُغلق.**
+
+This is §2 rule 8 restated by the owner, and it is recorded as `standing`
+rather than as a task precisely because it can never be "done". Four things it
+adds to how the work is judged, from now on and without being asked again:
+
+1. **Parity is the floor, not the goal.** Every capability a competing platform
+   has, we have — and better. Their weaknesses are our specification. The
+   living record is `docs/COMPETITORS.md`; the gap list that turns it into work
+   is `docs/GATEWAY-MAP.md`.
+2. **Design and arrangement count as capability.** "It is in there somewhere"
+   is the failure this project keeps being told about — R266's globe page,
+   R181's buried GDP figure, R185's asset record landing seventh. A finding a
+   reader cannot find is a finding we do not have.
+3. **Real browsing, real work.** A claim about the interface is checked in a
+   real browser at real viewport sizes before it is made. `user-walker` and
+   `scripts/responsive-audit.mjs` exist for this; "it should work" is not a
+   verification.
+4. **Every audience.** Private and government, every age, every device. That is
+   why the two-surface guarantee (R265) and the fit-every-screen rule (R264)
+   are enforced by tests rather than by intention.
+
+What it does **not** change: §2 rule 8's last line. We study their
+architecture, we never copy their code — most are proprietary, and World
+Monitor is AGPL-3.0, which would force our whole product open.
+
+| R266 | `globe` | `done` | **تصاميم الصفحات لا تزال بدائية، وفي صفحة الخريطة اجعل المربعات بطريقة يمكن تحديدها وفرزها واستعمال واضح وتمرير الصفحة — المربعات الآن تبدو صفحة واحدة متداخلة. وتحت الخريطة حتى آخرها المستخدم يتشتت، وتوزيع وتصميم المعلومات وفرزها لن يفهمه ولا يعرف المستخدم العمل عليه. وهناك أخطاء بالمعلومات والتواريخ، وأيضًا فوق الخريطة.** |
+
+**R266 — measured first, then rebuilt, then measured again.**
+
+The globe page was **11,439 pixels tall**. Past the map came a ranked list, an
+unplaceable list, a fusion count, 167 source names in a column, the *same 159
+names again* inside a paragraph, twelve shipping corridors each printing a full
+sentence to say nothing happened, and three country bands each saying "No
+country currently falls in this band." Almost none of it was information — it
+was the *absence* of information rendered at the size of information, which is
+exactly what makes a person say they cannot tell how to work a page.
+
+| | Before | After |
+|---|---|---|
+| Desktop | 11,439px | **5,851px** |
+| Phone | — | **3,214px** |
+
+**Times that disagreed with each other.** The same advisory read `3h old` in one
+list and `2 hours ago` in another, because `humanHours` rounded and
+`lib/ui/time` floored. The brief printed `The picture reaches back is 23 hours
+old` — two verbs — and `1 hours old`. All three were live. Both clocks floor
+now, and a test compares them against each other's arithmetic rather than
+against fixed strings.
+
+**Counts that read as errors.** `0/10` beside a green dot with no units, over an
+empty map, is a riddle; it says `0 of 10 on the map` now. `0 of 0 shown` sat
+directly above ten events listed below it — both numbers counted *plottable*
+events and were right, but the sentence never said which population it counted.
+
+**Then four workspaces** — Map, Brief, Countries, Categories — because those are
+four questions, not four sections of one document, and a reader arrives holding
+one of them. All four read one shared world picture, so switching costs no fetch
+and the tab counts can be trusted before the panel opens.
+
+**The other tabs were measured with the same instrument and are already sound:**
+markets 1,430px, investigate 1,339px, monitor 900px, feed 3,728px. The globe was
+the outlier, which is why it was the one to fix first.
+
+Two things the audit got wrong, recorded because the lesson is the point:
+
+- Its first version reported **crashed pages as "ok"**, since a page that fails
+  to render has no horizontal overflow either. It now treats a page error or a
+  failed asset as the loudest thing it can say.
+- Its repeat-detector flagged the home ticker as duplicated content. It is not:
+  `[...items, ...items.slice(0, rows)]` is the standard seamless loop. Measuring
+  finds candidates; only reading the code decides which are defects.
+
+## Reconciliation, 2026-08-21 — the ledger was the thing that was broken
+
+The owner said the work was not moving and that requests had disappeared without
+trace. That deserved an audit rather than reassurance, so every row marked
+`open` was checked against the code.
+
+**Thirty-four of them were already built.** Not partly — shipped, tested and
+merged, with the ledger row never flipped. A sample of the evidence:
+
+| # | Claimed open | Actually in the code |
+|---|---|---|
+| R209 | pick 1–5 gateways for the home page | `Pin gateways to this page` in `components/` |
+| R198 | Google Translate, every language | `SUPPORTED_LOCALES` — ~110 locales |
+| R169–R171 | FX, blockchain, crypto detail | `referenceRates`, `chain_state`, `coingecko_trending` |
+| R215/R233/R234 | Pi identity, one button, no email mixing | `lib/auth/environment.ts` — `offerFor`, `pi-browser` |
+| R235/R218 | wrong news dates, wrong map information | `describeSpan`, floored clocks, both tested |
+| R257/R259/R264/R265 | interlocked boxes, unsorted, screens, one codebase | `PanelSection`, `SectionIndex`, safe-area insets, `docs/ONE-CODEBASE.md` |
+| R203 | the deployment zip | `scripts/package.mjs` |
+
+| | before | after |
+|---|---|---|
+| recorded | 138 | 138 |
+| open | **65** | **30** |
+
+**This is my failure, and it is worth naming precisely.** The rule in §8 is that
+every request is written here before work starts — and I kept that half. I wrote
+them down and then did not close them, so the ledger accumulated finished work
+labelled unfinished. Anyone reading it, including the owner and including me,
+would conclude nothing was progressing. The work was real; the record of it was
+not.
+
+Closing a row now requires the same thing opening one does: evidence. Every
+flip above names the file that proves it.
+
+### What is genuinely left — thirty, in four groups
+
+**Gateways, the largest block** (R179, R180, R181, R183, R185, R187, R212, R213):
+research and add every remaining gateway family — exchanges and equities of all
+kinds, company and national economies, state and private industry, the full
+crypto/blockchain picture, and a researched list of what is still missing.
+
+**Automation** (R184, R189, R152): gateways that run and evolve by themselves;
+continuous auto-publishing.
+
+**Innovation** (R201, R227, R247, R200): our own inventions rather than parity —
+opportunity and investment tooling, and OSINT tools that return real findings.
+
+**Presentation and launch** (R190, R220, R221, R222, R223, R224, R166, R217,
+R160): every gateway in the "happening now" design, category tools, big-event
+banner, the globe carrying every gateway, launch organisation, and the ~13s
+route settle time.
+
+R204 and R229 are standing rules, not items to close.
+
+**R185 — الأصول كانت عشرة، والأخبار كانت صفرًا.**
+
+I checked the code before writing any, as R180 taught. What was there: four
+chains read from their own nodes, Bitcoin's mempool, and the **top ten** coins
+by market capitalisation. What was not there, and was not there *at all*:
+
+1. **The other 18,600 assets.** Ten of eighteen thousand is a leaderboard, not
+   coverage. Anyone asking about the asset they actually hold got nothing.
+2. **The record itself.** Supply against its cap, the distance from the
+   all-time high, which chains an asset runs on, what it is classified as —
+   none of it existed anywhere in the product.
+3. **Crypto news.** Not a thin feed: none. Zero words about any of it.
+
+The gateway `crypto` now answers all three, and it cost one board row plus two
+sources — no route, no view, no branch, because the board shape from the seven
+earlier gateways held. Verified live on 2026-08-22: `pi network` returns
+**19 rows** — price $0.0973 (+6.95% 24h), rank #70, 11.09B PI in circulation
+against a 100B cap (11.1% issued), all-time high $2.99 on 2025-02-26 and now
+96.7% below it — beside **78 headlines from all seven publishers**, every one
+dated by its publisher.
+
+**Counting honestly (§2a).** Two integrations. 18,610 assets is *reach* through
+one of them and is never a source count; CoinGecko is **one** independent
+origin however many assets it covers, which is why a price here is graded B and
+a chain reading from the network's own node is graded A. Four of the seven
+publishers are the networks announcing their own decisions — an A — and three
+are the specialist press at C, kept because a network's own blog will not tell
+you the network is being sued.
+
+**Three real defects surfaced while building it, all fixed.**
+
+*The search returned the biggest, not the best.* CoinGecko answers `pi` with a
+euro money-market fund first, because that fund is larger than Pi Network. That
+is the exact bug the exchange register had a day earlier, and the fix belongs in
+our code, not the provider's: `coinRelevance` ranks the **kind** of match —
+exact ticker, exact name, prefix, whole word, substring — and only uses size to
+break ties.
+
+*A throttled provider reported itself healthy.* `if (!res.ok) return []` made a
+429 indistinguishable from "nothing to say", so the board would show *2 sources
+ok* while missing half its answer. Now it throws through `fetch-guard`, and the
+count says one failed, because one did.
+
+*Which led to a general engine fix.* The source cache was consulted only when
+**we** declined to fetch, never when the **provider** fell over — so a
+ninety-second-old answer sitting in memory was thrown away on a 429. It is now
+served on any failure, with `ok: false` and the error kept, because a product
+that serves stale data and calls itself healthy is lying about its own
+reliability. This helps every source in the platform, not the crypto one.
+
+*And the answer arrived seventh.* The board orders groups by size, which is a
+good default until a board answers a **specific** question: seven rows about the
+asset landed beneath seventy headlines about the sector. A source may now
+declare where its groups belong; every board that declares nothing keeps exactly
+the old order.
+
+**R180 — «كل البورصات» كانت مبنيّة، والخطأ كان أن أبنيها مرّة ثانية.**
+
+The register was already there. `lib/engine/sources/venues.ts` reads **ISO
+10383** — the register SWIFT maintains that assigns a Market Identifier Code to
+every regulated market, multilateral trading facility, systematic internaliser
+and off-book venue on earth — caches it, and fails loudly rather than reporting
+an empty register as a healthy one. A separate crypto-venue source sits beside
+it, labelled a market index rather than a registry, because presence in an
+aggregator is not registration by an authority.
+
+Verified live on 2026-08-21: **2,875 rows — 1,589 operating venues, 1,286
+market segments inside them, across 149 countries, 2,246 carrying a LEI.** Those
+numbers are reported separately and never added, per §2a: NYSE Arca is a market
+inside the New York Stock Exchange, not a second exchange.
+
+I began writing a second implementation of this before checking, and stopped
+when the existing one surfaced. The duplicate was deleted. **That near-miss is
+the reconciliation lesson repeating itself:** the row said `open`, so I believed
+the work was missing. Reading the code first is the cheaper habit.
+
+**What the check did find is a real relevance bug, now fixed.** Searching the
+live register for `TOKYO` returned three Bank of America dealer desks above the
+**Tokyo Stock Exchange** — all four sit in Tokyo, all four matched, and `B`
+sorts before `T`. The filter was generous, which is right, and the order was
+alphabetical, which is not relevance; it only looks like relevance when the
+first answer happens to be right. `venueRelevance` now ranks the kinds of match —
+exact code, country code, name prefix, whole word, substring — and the venue a
+query *names* outranks one that merely sits in that city. The query is escaped
+before it reaches a regular expression, so a reader typing `(` gets results
+rather than an error.
+
+**R181 — the country data was there; nobody could reach it.**
+
+Company economics were already built: SEC XBRL profiles, the assets ranking
+across 6,110 filers, ownership. National economies were built too —
+`lib/engine/sources/economy.ts` reads the World Bank and is wired into the
+markets gateway. Verified live: **Germany GDP $5.05T, population 83.5M,
+inflation 2.2%; Saudi Arabia $1.28T, 37.0M, 2.1%** — all current-year.
+
+**And a reader would never have seen any of it.** There was no ordering in the
+gateway at all: findings came out in whatever order the sources happened to
+answer in. Searching "Germany" led with an **E.ON filing from 2002**, then
+Allianz from 2002, then a Greek shipping company that mentions Germany. The
+GDP figure was sixth. "Saudi Arabia" led with two American ETF prospectuses.
+
+That is the shape of every "the tools give me nothing" report: the data is
+right, it is present, and it is below the noise. For the reader those are the
+same thing as not having it.
+
+`rankFindings` applies two rules, in order. **What the subject *is* beats what
+merely mentions it** — a country's own measured economy answers "Germany"; a
+filing containing the word is a mention, and full-text search is the widest net
+in the gateway. **Recent beats ancient** — a 2002 filing is not evidence about a
+company now. Nothing is deleted: someone researching 2002 still finds it, it
+simply stops being the first thing everyone else sees. The sort is stable, so
+evidence it cannot separate never reshuffles between runs.
+
+| Searching "Germany" | before | after |
+|---|---|---|
+| 1st | E.ON filing, 2002 | **GDP $5.05T (2025)** |
+| 2nd | Allianz filing, 2002 | Population 83.5M |
+| 3rd | Greek shipping company | Inflation 2.2% |
+
+One correction worth recording: my first measurement of this reported "0
+findings" for both countries and I nearly filed it as a bug. The gateway
+returns `findings`; my probe read `evidence`. The tool was wrong, not the app —
+the same lesson as the audit that called crashed pages "ok".
+
+**R183 — the economy source knew how big a country was and nothing about what it makes.**
+
+Three indicators: GDP, population, inflation. That answers "how large and how
+expensive" and stops. A reader asking about a country's **industry**, its
+**factories** or the size of its **private sector** got nothing — not a gap in
+the data, a gap in what was ever requested. The source also had **no tests at
+all**, which is how it stayed that way without anything saying so.
+
+Nine indicators added, each requested live before it was written down and each
+answering with a current figure:
+
+| | Germany | Saudi Arabia |
+|---|---|---|
+| Manufacturing, share of GDP | **17.6%** | **15.8%** |
+| Industry incl. construction | 25.2% | **43.0%** |
+| Services | 64.5% | — |
+| Credit to the private sector | 77.3% | — |
+| Unemployment | 3.7% | 3.0% |
+| GDP per person | $60,496 | $34,537 |
+
+Saudi Arabia's 43% industry against 15.8% manufacturing is the oil sector, and
+the contrast between those two numbers is itself the finding — which is the
+argument for shares of GDP over absolute figures: they compare between
+countries of wildly different size.
+
+**Twelve indicators, one request.** It was one request per indicator, which was
+survivable at three and rude at twelve — and is the exact shape of a bug this
+codebase already paid for in the ECB yield curve, where a source declaring
+`minIntervalMs` had its own fan-out silently refused and produced nothing while
+looking healthy. The World Bank answers `indicator/A;B;C` in a single response,
+and figures are matched to indicators **by id, never by position** — the other
+half of that same lesson.
+
+Live: Germany went from 3 findings to **16**, Saudi Arabia to 15.
+
+---
+
+## R267 — المشية الكاملة: ما لا يستطيع أي اختبار رؤيته
+
+المشية على هاتف ٣٩٠px، الثلاث والثلاثون بوّابة، على خادم إنتاج حقيقي.
+
+### النتيجة
+
+| | قبل | بعد |
+|---|---|---|
+| أطول صفحة | **٩٥٬٢٥٥px** (الأخبار) | **١٢٬٢٨١px** (البيانات المفتوحة) |
+| صفحات فوق ١٤٬٠٠٠px | ٣ | **صفر** |
+| فيضان أفقي | `open-data` | **صفر** |
+| بوّابات لا تعرض شيئًا | **٣** | **صفر** |
+
+### ١. ثلاث بوّابات كانت تعمل وتُجيب ولا تعرض شيئًا
+
+`broadcasts` و`filings` و`venues`: الطلب يخرج، الخادم يردّ `200` ببيانات
+حقيقية، والصفحة تبقى **٩٨٦ بكسل**. وصفتُها في مسحتين بأنها «غير مقيسة»
+وافترضتُ خللًا في الأداة — **كانت تعمل في كل مرة.** صفحة لا تعرض شيئًا وصفحة
+لم تُشغَّل هما نفس الـ٩٨٦ بكسل، وهذا هو الدرس.
+
+ثلاثة أعطال: لا فرع عرض لها في الاتحاد؛ والموضوع المكتوب يُرسَل تحت اسم لا
+يقرأه المسار فيُبتلع ويُردّ بالافتراضي العالمي (**جواب خاطئ يُقدَّم كصحيح**)؛
+و«press Load» التي تَعِد بها العبارة نفسها مرفوضة.
+
+**ولماذا لم يمسكه شيء:** `setResult({ kind, data } as Result)` — هذا التحويل
+هو بالضبط تأكيد أن نوعًا خارج الاتحاد لا بأس به. TypeScript كان يملك الحقيقة
+وقيل له تجاهلها. الحارس الآن يقرأ الشفرة: كل بوّابة في اللائحة إمّا تشارك عرض
+اللوحات أو تسمّي نفسها في فرع، ومفتاح الجسم الذي ترسله هو مفتاح **يقرأه مسارها
+هي** — مشتقًّا من ملفات المسارات لا من قائمة تُحدَّث يدويًّا.
+
+٩٨٦ → ٢٥٣١ · ٣٢٥٥ · ٢١٨٩.
+
+### ٢. أول ما أظهرته الصفحة العاملة كان رقمًا خاطئًا
+
+بوّابة البثّ توجد لتجيب: **كم لغة متمايزة يبثّ بها مكانٌ الآن.** السعودية
+أعادت **سبعًا**: `ar · arabi · arabic · العربية · english · filipino · kurdish`.
+أربع منها عربية. الرقم الرئيسي أعلى بـ**٧٥٪** في العدد الوحيد الذي وُجدت
+البوّابة لأجله.
+
+انضباط §2a درجةً أدنى: هناك «الناشرون ليسوا تكاملات»، وهنا **«الهجاء ليس
+لغة»**. `lib/engine/languages.ts` يحلّ رموز ISO 639-1 والأسماء الذاتية والنِّسَب
+والاختصارات الوحيدة، **ولا يُسقط ما يعجز عن تعريفه** — فالعدّ قد يزيد بهجاء
+ولا ينقص بلغة. السعودية الآن **أربع**.
+
+والجزء الخطر مختبَر: `arabi` تُطوى إلى Arabic، و**`romani` يجب ألّا تُطوى إلى
+`romanian`** — دمج هجاء هو الهدف، ومحو لغة نقيضه. الاختبار فشل أول مرة.
+
+### ٣. بوّابة المرجع: شخصٌ ليس شركة، و429 ليست «لا نتائج»
+
+**ماري كوري** تُحلّ إلى Q7186 بنداء واحد، والبوّابة أعادت صفحة فارغة
+والأنطولوجيا سجّلت `company:Marie Curie`.
+
+- **أسئلة شركات فقط** — الخصائص الخمس كلها مؤسسية، فشخصٌ يُحلّ تمامًا ثم لا
+  يملك أيًّا منها. أُضيفت عشر خصائص، كلٌّ منها **محور انتقال** لا تفصيلًا
+  سِيَريًّا.
+- **نوع مؤكَّد لم يُقرأ قط** — `{ type: 'company' }` مثبَّتة في الشفرة. البوّابة
+  التي وُجدت لتصنيف الكيانات كانت مصدر التصنيف الخاطئ. الآن `P31` يقرّر،
+  و`other` هو الاحتياط: **ألّا تعرف خيرٌ من أن تؤكّد الخطأ**.
+- **رفضٌ يُعرض كغياب** — أربعة `return []`. وبمجرّد `expectJson` ظهر السبب:
+  `wikidata: provider answered 429`. ويكي‑داتا كانت تخنقنا، وجواب المنتج
+  صفحة فارغة تُبلّغ أنها سليمة.
+
+بعد الإصلاح: **٤١ حقيقة · النوع `person` · `sourcesFailed: 0`**، و
+Alphabet Inc **١٦ حقيقة · النوع `company`**.
+
+### ٤. المفتاح الأمني الذي ظهر أثناء الطريق
+
+بريد المالك الشخصي كان مكتوبًا **أربع مرات** في `feeds/markets.ts` كعنوان
+التواصل المعلَن لـSEC — أي في كل نسخة وتفريعة ومعاينة نشر. نجا لأنه **كان
+يعمل**. الآن `USER_AGENT` الذي يقرأ `ENGINE_CONTACT` من البيئة، وحارس يمنع أي
+صندوق بريد استهلاكي في `lib/engine` أو `scripts` — **بالشكل لا بالعنوان بعينه**.
+
+### ٥. هوية واحدة للمحرّك، وإعادة فحص الحجر الصحّي
+
+ثلاثة عشر مسار طلب كانت تحمل **أربع هويّات**، إحداها الصيغة التي يوثّق
+المستودع أن SEC ترفضها بـ403. توحّدت كلها، ومعها سكربت تدقيق التغذيات الذي
+كان يدّعي في توثيقه أنه يرسل «ترويسات المحرّك حرفًا بحرف» وهو يحمل نسخة يدوية.
+
+وإعادة فحص الحجر: **ثمانٍ أجابت 200، أُطلقت ستّ ورُفضت اثنتان**. المرفوضتان
+هما الدرس: `thedailystar_bd` تجيب 200 بعشرة عناصر أحدثها **صامت ١٤٩٢ يومًا**.
+الإطلاق برمز الحالة كان سيعيد تقارير عمرها أربع سنوات إلى لوحة حيّة. الحجر
+٥١ → ٤٣، والمصادر النشطة ١٦٤.
+
+### ما تعلّمته عن أدواتي أنا
+
+`git checkout --` على ملف فيه عمل غير مثبَّت محا ثلاث بوّابات كاملة؛ وفحص
+جاهزية الخادم عندي كان يطبع «server up» دون شرط فأخذتُ قياسات ضدّ خادم غير
+قائم. كل رقم في هذا القسم من عملية تحقّقتُ فيها من `http=200` أولًا.
+
+---
+
+## R189 — «البوّابات يجب أن تتطوّر تلقائيًّا»
+
+نُفِّذ في ٢٠٢٦‑٠٨‑٢٢. القياس أولًا، كالعادة: `staleness.ts` و`/api/diagnose`
+يراقبان صحّة المصادر التي *يستعملها* المنتج. **ولا شيء كان يعيد سؤال المصادر
+التي استسلمنا لها.** ملفّ الحجر الصحّي نفسه يقول إن «إعادة تشغيل الفحص هي
+كيف يُطلَق مصدر» — وكانت إعادة التشغيل شيئًا يتذكّره إنسان. تذكّرها أحدهم بعد
+ثمانية أيام فعادت ستّ مصادر من إحدى وخمسين. تغطيةٌ لا تُشفى إلا حين يتذكّر
+إنسان هي تغطية تتآكل.
+
+الآن `/api/cron/sources` يوميًّا. و**رمز الحالة ليس إطلاقًا**: يجب أن تُقرأ
+الوثيقة — تُحلَّل، وتحوي عناصر، وأحدثها داخل ٦٠ يومًا. تشغيلٌ حقيقي على
+الشبكة الآن: فُحصت ٤٣ كلها، ولا إطلاق اليوم، والفخّان المعروفان أُمسكا
+بالاسم (`thedailystar_bd` أحدث عنصر عمره ١٤٩١ يومًا، و`saws_south_africa`
+صفر عناصر).
+
+**ثلاثة أعطال ظهرت أثناء التوصيل، أُصلح كلٌّ في مكانه:**
+
+1. **الحارس لم يكن يمرّر إشارة إلغاء أبدًا.** مهلة المنسّق `Promise.race`
+   تُنهي *وعدنا* ولا تفعل شيئًا للطلب: المقبس يبقى مفتوحًا حتى سقف undici —
+   خمس دقائق. والمسارات التي بلا منسّق هي بالضبط التي تعمل بلا رقيب (المهامّ
+   المجدولة)، فمضيفٌ صامت واحد كان يكفي لابتلاع تشغيلة كاملة.
+2. **`dueJobs` كان يعدّ النبضات داخل الساعة**، فسقفُ كل إيقاع ستون دقيقة:
+   طلبُ ١٤٤٠ دقيقة كان يطابق عند الدقيقة صفر من **كل ساعة** — مهمّة يوميّة
+   تعمل أربعًا وعشرين مرّة يوميًّا والرقم بجوارها يقول «مرّة». الجدول يكذب
+   على نفسه، وهو صنف العطل الذي وُجد هذا الملفّ لإنهائه.
+3. **ميزانيةٌ تبدأ دائمًا من الفهرس صفر** ليست فحصًا دوّارًا بل سؤالٌ لنفس
+   رأس القائمة كل يوم، وذيلها لا يُسأل أبدًا. صار الترتيب يدور برقم اليوم:
+   بلا مؤشّر مخزَّن، وما لا تبلغه ميزانية اليوم يتصدّر تشغيلة الغد.
+
+قرار الحذف من سجلّ الحجر بقي بشريًّا: الرفع من سجلّ ما *رصدناه* يجب أن يكون
+قرارًا لا أثرًا جانبيًّا.

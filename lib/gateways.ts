@@ -34,6 +34,9 @@ export const ALL_MODES = [
   'companies',
   'venues',
   'filings',
+  'crypto',
+  'maritime',
+  'verify',
   'statements',
   'courts',
   'regulation',
@@ -65,10 +68,10 @@ export const GATEWAY_FAMILIES: ReadonlyArray<{ label: string; modes: readonly Mo
   { label: 'Start anywhere', modes: ['nexus', 'track'] },
   { label: 'Infrastructure', modes: ['domain', 'threat', 'geo'] },
   { label: 'People & accounts', modes: ['username', 'email'] },
-  { label: 'Money & entities', modes: ['finance', 'ownership', 'procurement', 'board', 'markets', 'property', 'companies', 'venues', 'filings'] },
+  { label: 'Money & entities', modes: ['finance', 'ownership', 'procurement', 'board', 'markets', 'crypto', 'property', 'companies', 'venues', 'filings'] },
   { label: 'Law & the state', modes: ['statements', 'courts', 'regulation', 'officials'] },
-  { label: 'Earth & systems', modes: ['resources', 'grid', 'space-weather', 'orbital'] },
-  { label: 'Knowledge & record', modes: ['research', 'reference', 'open-data', 'news', 'media', 'broadcasts'] },
+  { label: 'Earth & systems', modes: ['resources', 'grid', 'space-weather', 'orbital', 'maritime'] },
+  { label: 'Knowledge & record', modes: ['research', 'reference', 'open-data', 'news', 'media', 'verify', 'broadcasts'] },
 ]
 
 export interface GatewayGuidance {
@@ -200,6 +203,27 @@ export const GATEWAY_GUIDANCE: Record<Mode, GatewayGuidance> = {
     example: 'inflation',
     limit:
       'Public acts of office — a policy speech, on the record. This never follows a person, and it holds nothing about anyone’s private life (charter §3). Central banks only; other officials are not in this feed.',
+  },
+  verify: {
+    answers:
+      'Whether a claim has already been fact-checked, and by how many INDEPENDENT checkers — five IFCN-signatory newsrooms read at once, with the count of separate origins rather than a count of headlines.',
+    example: 'video',
+    limit:
+      'It reports who examined a subject; it never collapses them into a verdict, because checkers addressing the same claim may have reached different conclusions. Only Lead Stories states its finding in the feed — for the other four the verdict is on the page, and the row says so rather than guessing one from the headline’s grammar. An empty result means nobody in this set has published on it, never that a claim is true.',
+  },
+  maritime: {
+    answers:
+      'What the sea is doing, measured rather than forecast — NOAA’s buoy network reporting wave height and period, wind and gust, pressure, sea and air temperature, from around 850 stations at once, grouped by ocean with the roughest first.',
+    example: 'Alaska',
+    limit:
+      'Conditions, not vessels. There is no keyless route to AIS ship tracking and we did not invent one, so this will not tell you where a ship is. A station that has stopped reporting is absent rather than calm — an empty sea area means no instrument answered, never that the water is flat.',
+  },
+  crypto: {
+    answers:
+      'Any of the 18,610 listed digital assets with its whole record — price, supply against its cap, distance from its all-time high, the chains it actually runs on — beside what the networks are announcing themselves and what the specialist press is reporting.',
+    example: 'pi network',
+    limit:
+      'Prices come from one aggregator, so they are one origin however many assets they cover — never treat two of its rows as corroboration. It reads assets and announcements, never wallets or holders: whose coins these are is not a question this product will answer.',
   },
   resources: {
     answers:

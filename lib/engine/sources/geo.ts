@@ -12,7 +12,6 @@ const ICAO24 = /^[0-9a-f]{6}$/i
 const LATLON = /^\s*(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*$/
 
 const OSM_HEADERS = {
-  'User-Agent': 'Lambda NX OSINT (research; contact via app)',
   Accept: 'application/json',
 }
 

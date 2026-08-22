@@ -1,7 +1,9 @@
 import { describe, it, expect, vi } from 'vitest'
 import { Registry } from './registry'
 import { collect } from './orchestrator'
-import { Guardrail, PassiveGuardrailError } from './guardrail'
+import { Guardrail, PassiveGuardrailError, USER_AGENT } from './guardrail'
+import { readFileSync, globSync } from 'node:fs'
+import { join } from 'node:path'
 import { gradeConfidence, dedupeEvidence, buildGraph, formatAdmiralty } from './analysis'
 import type { Admiralty, Capability, Evidence, Source } from './types'
 
@@ -79,6 +81,101 @@ describe('guardrail — passive-only enforcement', () => {
     } finally {
       vi.unstubAllGlobals()
     }
+  })
+
+  /**
+   * The orchestrator's `Promise.race` deadline settles our promise and leaves
+   * the request running. What reaches `fetch` has to carry a signal, or a
+   * provider that accepts a connection and never answers holds it for undici's
+   * five-minute ceiling — inside unattended jobs that have no orchestrator and
+   * no deadline of their own.
+   */
+  it('passes a real abort signal to every request, not just a settled promise', async () => {
+    const g = new Guardrail()
+    g.allowHosts(['api.good.test'])
+    const fetchMock = vi.fn().mockResolvedValue(new Response('ok'))
+    vi.stubGlobal('fetch', fetchMock)
+    try {
+      await g.createFetch('s')('https://api.good.test/x')
+      const init = fetchMock.mock.calls[0][1] as RequestInit
+      expect(init.signal, 'a request with no signal cannot be abandoned').toBeInstanceOf(AbortSignal)
+      expect(init.signal?.aborted).toBe(false)
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it("keeps the caller's own signal working alongside the deadline", async () => {
+    const g = new Guardrail()
+    g.allowHosts(['api.good.test'])
+    const fetchMock = vi.fn().mockResolvedValue(new Response('ok'))
+    vi.stubGlobal('fetch', fetchMock)
+    try {
+      const mine = new AbortController()
+      await g.createFetch('s')('https://api.good.test/x', { signal: mine.signal })
+      const init = fetchMock.mock.calls[0][1] as RequestInit
+      expect(init.signal?.aborted).toBe(false)
+      mine.abort()
+      expect(init.signal?.aborted, "the caller's cancellation must still reach the request").toBe(true)
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+})
+
+/**
+ * A fan-out returns when its slowest member does, so one slow source sets the
+ * latency every reader pays. Nothing recorded which member that was: `ok` and
+ * `error` say whether a source works and said nothing about what it costs, so
+ * a source that answers reliably and slowly never appears in any failure list
+ * and is never noticed. Measured 2026-08-22: the world picture ran 4.9s over
+ * 135 sources, of which one took 4,891ms and contributed nothing.
+ */
+describe('the orchestrator reports what each source cost', () => {
+  it('times a source that answers', async () => {
+    const reg = new Registry()
+    reg.registerAll([makeSource({ key: 'slow', run: async () => {
+      await new Promise((r) => setTimeout(r, 25))
+      return [ev('answered')]
+    } })])
+    const out = await collect({ capability: 'dns', value: 'example.com' }, { registry: reg })
+    const result = out.results.find((r) => r.sourceKey === 'slow')
+    expect(result?.durationMs, 'a source with no cost recorded cannot be compared').toBeGreaterThanOrEqual(20)
+  })
+
+  /**
+   * The failing branch matters more than the succeeding one: a source that
+   * fails *slowly* is the worst kind, since it costs the full wait and returns
+   * nothing for it.
+   */
+  it('times a source that fails, not only one that works', async () => {
+    const reg = new Registry()
+    reg.registerAll([
+      makeSource({ key: 'slow-fail', run: async () => {
+        await new Promise((r) => setTimeout(r, 25))
+        throw new Error('provider down')
+      } }),
+      makeSource({ key: 'ok', run: async () => [ev('fine')] }),
+    ])
+    const out = await collect({ capability: 'dns', value: 'x.com' }, { registry: reg, mode: 'all' })
+    const failed = out.results.find((r) => r.sourceKey === 'slow-fail')
+    expect(failed?.ok).toBe(false)
+    expect(failed?.durationMs).toBeGreaterThanOrEqual(20)
+  })
+
+  it('times every source in a fan-out, so the slowest can be named', async () => {
+    const reg = new Registry()
+    reg.registerAll([
+      makeSource({ key: 'quick', run: async () => [ev('a')] }),
+      makeSource({ key: 'slower', run: async () => {
+        await new Promise((r) => setTimeout(r, 30))
+        return [ev('b')]
+      } }),
+    ])
+    const out = await collect({ capability: 'dns', value: 'x.com' }, { registry: reg, mode: 'all' })
+    for (const r of out.results) expect(typeof r.durationMs).toBe('number')
+    const slowest = [...out.results].sort((a, b) => (b.durationMs ?? 0) - (a.durationMs ?? 0))[0]
+    expect(slowest.sourceKey).toBe('slower')
   })
 })
 
@@ -254,5 +351,96 @@ describe('orchestrator — parallelism and deadlines', () => {
     expect(out.evidence.map((e) => e.claim)).toEqual(['from second'])
     // It stopped at the first source that answered; the third never ran.
     expect(out.results.map((r) => r.sourceKey)).toEqual(['empty', 'second'])
+  })
+})
+
+/**
+ * The engine says who it is once, in `guardrail.ts`, and every request inherits
+ * it. This is the test that keeps that true, because it stopped being true
+ * quietly: thirteen request paths had grown **four different** identities —
+ * `Lambda NX OSINT (research; contact via app)` (no reachable contact),
+ * `Lambda-NX-OSINT` (no contact at all), `LambdaNX/1.0 (+https://github.com/…)`
+ * (the URL form `guardrail.ts` records as measured to draw a 403 from the SEC's
+ * edge filter), and a hand-copied duplicate of the canonical string.
+ *
+ * The copies were not merely untidy. `USER_AGENT` reads `ENGINE_CONTACT`, so a
+ * deployment that sets its own operator address was still sending ours from
+ * every one of those thirteen paths — and the SEC, which is the one provider
+ * whose requirement was actually measured, was being sent the form it refuses
+ * from the catalogue adapter's default.
+ *
+ * One exception is deliberate and named: `CatalogSource.userAgent`, for a
+ * publisher that mandates a particular string. It lives in the adapter, applies
+ * per record, and falls back to `USER_AGENT`.
+ */
+describe('the engine has one identity', () => {
+  const files = [
+    ...globSync('lib/engine/**/*.ts', { cwd: process.cwd() }),
+    // The feed audit too. Its own doc comment says it must send "the engine's
+    // headers, character for character" — and it held a hand-copy of the old
+    // string, so the moment the engine consolidated, an audit still claiming
+    // to measure the product would have gone back to measuring itself.
+    ...globSync('scripts/**/*.ts', { cwd: process.cwd() }),
+  ]
+    .filter((f) => !f.endsWith('.test.ts'))
+    .filter((f) => f !== 'lib/engine/guardrail.ts')
+
+  it('is set in exactly one place, plus the documented per-record override', () => {
+    const offenders: string[] = []
+    for (const f of files) {
+      const code = readFileSync(join(process.cwd(), f), 'utf8')
+        .replace(/^[ \t]*\/\*[\s\S]*?\*\//gm, '')
+        .replace(/^[ \t]*\/\/.*$/gm, '')
+      // A key, not prose: `'User-Agent':` or `"User-Agent":`.
+      for (const m of code.matchAll(/['"]User-Agent['"]\s*:\s*([^\n]*)/gi)) {
+        // Passing the engine's constant through is the point, not a violation —
+        // on its own, or behind a record's documented override.
+        if (/\bUSER_AGENT\b/.test(m[1])) continue
+        offenders.push(`${f}: ${m[1].trim()}`)
+      }
+    }
+    expect(offenders, 'a second User-Agent for the engine').toEqual([])
+  })
+
+  it('carries a contact address and no URL', () => {
+    // Both halves measured: providers require a way to reach us, and the SEC
+    // refuses a User-Agent containing a link however it is phrased.
+    expect(USER_AGENT).toMatch(/@/)
+    expect(USER_AGENT).not.toMatch(/https?:\/\//)
+  })
+
+  it('lets a deployment name its own operator', () => {
+    // The reason the copies mattered: this switch could never reach them.
+    expect(readFileSync(join(process.cwd(), 'lib/engine/guardrail.ts'), 'utf8')).toContain(
+      'ENGINE_CONTACT',
+    )
+  })
+
+  /**
+   * And the address it gives out is never a person's.
+   *
+   * Four catalogue records carried the project owner's personal Gmail address
+   * as their SEC contact — in the source, so in every clone, every fork and
+   * every deploy preview. It worked, which is why it survived: the SEC accepted
+   * it and the feeds came through. It is still a private detail written into a
+   * file that anyone contributing to this repository can read, which this
+   * project's standing rule forbids outright.
+   *
+   * The scan is for the shape rather than for that one address: any literal
+   * consumer-mailbox contact in engine source is the same mistake with a
+   * different spelling. A deployment's real operator belongs in
+   * `ENGINE_CONTACT`, which is an environment variable precisely so it is not
+   * this.
+   */
+  const PERSONAL_MAILBOX = /@(gmail|googlemail|outlook|hotmail|yahoo|proton(mail)?|icloud|gmx|mail)\./i
+
+  it('never hard-codes a person as the contact', () => {
+    const offenders: string[] = []
+    for (const f of files) {
+      for (const [i, line] of readFileSync(join(process.cwd(), f), 'utf8').split('\n').entries()) {
+        if (PERSONAL_MAILBOX.test(line)) offenders.push(`${f}:${i + 1}`)
+      }
+    }
+    expect(offenders, 'a personal mailbox committed as a contact address').toEqual([])
   })
 })
