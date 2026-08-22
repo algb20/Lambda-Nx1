@@ -39,7 +39,22 @@ That leaves **fifteen** disciplines a gateway can honestly serve.
 
 ## 2. Where we stand
 
-**34 gateways, 7 families, 203 catalogue records** across 7 disciplines
+**34 gateways in 7 families.** Sources, counted by importing the registry
+rather than grepping the tree — the only count that cannot drift from the code:
+
+| | Measured 2026-08-22 |
+|---|---|
+| **Coded sources** (modules with real logic) | **63** |
+| **Catalogue records, total** | **239** |
+| **Catalogue records that actually run** (`activeSources()`) | **158** |
+| **Sources live in a sweep** | **221** (63 + 158) |
+| **Distinct hosts the guardrail permits** | **182** |
+
+The 81 catalogued records that do not run are not a discrepancy to hide: they
+are licence-blocked, keyed-and-unconfigured, or gateway-driven rather than
+swept — and each states which in its own record. A platform that quotes its
+catalogue size as its live source count is quoting the wrong column, which is
+exactly what §2a exists to prevent us doing. across 7 disciplines
 (`osint` 52, `fin` 44, `geoint` 46, `cyber` 22, `humint` 15, `infra` 11,
 `sci` 6), plus the coded modules.
 

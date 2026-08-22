@@ -154,18 +154,30 @@ Measured in this tree, today:
 
 | | Us | World Monitor |
 |---|---|---|
-| Sources | **129** (57 coded + 72 catalogue) | 536+ hosts |
-| Distinct hosts | **67** | 536+ |
+| Sources live in a sweep | **221** (63 coded + 158 catalogue) | 536+ hosts |
+| Catalogued, including not-yet-running | **302** (63 + 239) | — |
+| Distinct hosts | **182** | 536+ |
 | Map layers | 5 analytic views | ~40 data layers |
 | Reference geodata layers | **0** | cables, bases, pipelines, chokepoints, spaceports |
 | Composed indices | 0 | CII, risk gauge, DEFCON, threat timeline |
 | Cache tiers | 2 (in-process result cache + single-flight) | 4 (bootstrap → memory → Redis → upstream) |
-| Real-time transports | None | WebSocket relay (AIS) |
+| Real-time transports | None — **still the honest gap** | WebSocket relay (AIS) |
+| Maritime & ocean conditions | **NOAA NDBC, 1,351 stations** | AIS vessel positions |
+| Fact-check / claim record | **5 IFCN checkers, corroboration by independent origin** | None visible |
 | Prediction markets / commodities / energy inventories | None | All three |
 | Live TV / webcams | None | 9 broadcasters, 23 cameras |
 | Per-finding Admiralty grading | **Every finding** | None visible |
 | Corroboration counted by independent origin | **Yes** | Outlets only |
 | Published self-diagnosis | **`/api/diagnose`** | Status page only |
+
+> **Re-measured 2026-08-22** by importing the registry rather than grepping the
+> tree, which is the only count that cannot drift from the code. The previous
+> figures in this table (129 sources, 67 hosts) were stale by roughly seventy
+> per cent — and the correction runs in our favour, which is exactly why it had
+> to be checked rather than assumed. Of 239 catalogue records, **158 run**; the
+> rest are licence-blocked, keyed-and-unconfigured, or driven by a gateway
+> rather than the sweep, and each says which in its own record. Quoting 302 as
+> the live count would be the §2a error we accuse the field of.
 
 **Sources are the gap that matters, and it was an architectural problem rather
 than an effort problem.** Every source was a hand-written module, so each cost a
