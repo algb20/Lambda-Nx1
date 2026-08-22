@@ -350,7 +350,7 @@ we do not, ranked by how visible their absence is to a reader.
 | Source transparency | Built — every finding carries source, timestamp, Admiralty grade, confidence | **Ahead**, and it is the product's whole argument |
 | Honest source counting | §2a — integrations vs publishers vs independent origins, never added | **Ahead**, and unique. The field quotes the middle column as the first |
 | Mobile / PWA / desktop clients | Web + Pi Browser, one codebase (R265), fits every screen (R264) | **Parity on reach**, no installable desktop client yet |
-| Streaming / real-time push | SSE channel built, wired to three surfaces, and **verified pushing real readings from the deployed host** (`lib/stream/`); the host cuts a connection at ~30s and the client reconnects into the same running channel | **Parity**, with the host's ceiling measured rather than assumed — see below |
+| Streaming / real-time push | SSE channel built, wired to three surfaces, and **verified pushing real readings from the deployed host** (`lib/stream/`); the host cuts at ~30s, and each connection is served by a cold instance, so production is per connection rather than shared | **Parity** — push works, *shared* production needs a bus that outlives a request. Measured, not assumed; see below |
 | Saved workspaces, collaboration | History and groups exist; no shared workspace | **Behind** |
 | Earth-observation imagery | Not built — §3.5 | **Behind**, with a stated reason |
 | Ship tracking (AIS) | No keyless route; §3.1 | **Behind by licence, not by effort** |
@@ -423,11 +423,48 @@ nothing upstream. The channel now lingers past a reconnect and does not
 re-fetch to replace a reading it already holds; an unwatched channel still
 stops, one linger later.
 
-The earlier note here said neither preview was reachable from the build
-environment. That was wrong — the Netlify preview answers normally through the
-egress proxy. The measurement was available the whole time it was recorded as
-unavailable, which is its own lesson about the difference between "I could not
-reach it" and "I tried once and stopped".
+**And then the fix was measured too, which changed the verdict again.** Six
+connections to `/api/world/stream` on the deployed build carrying that fix,
+three seconds apart:
+
+| connection | first reading | produced at |
+|---|---|---|
+| 1 | after 14.1s | 10:20:06 |
+| 2 | none within 32s | — |
+| 3 | after 14.2s | 10:20:37 |
+| 4 | after 14.1s | 10:20:54 |
+| 5 | after 14.1s | 10:21:11 |
+| 6 | none within 32s | — |
+
+Four connections, four *different* production times, none handed a kept
+reading. **On Netlify the module scope does not survive between requests**:
+every connection gets a cold channel and pays for its own production. So the
+linger is correct, tested, and *inert on this host* — it does its work for
+concurrent readers of one instance and on any host that keeps a process warm,
+and there is no warm process here to linger in. `broadcast.ts` had already
+written that scope limit as a possibility; this is it measured as the fact.
+
+The second number matters more: **roughly one connection in three delivered no
+reading at all** inside the host's 30-second window, because a cold production
+takes ~14s and sometimes longer. `useLive` covers it — three empty connections
+demote the surface to polling — but that is the fallback carrying the feature,
+not the feature working.
+
+So the row reads **Parity, not Ahead**, and the remaining work is named
+precisely: *shared production needs state that outlives a request* — the shared
+bus (Redis, Postgres LISTEN/NOTIFY) that `broadcast.ts` deliberately does not
+pretend to have. That is a real piece of work, not a tweak.
+
+Two corrections to my own earlier notes, both in the same direction:
+
+- The claim that neither preview was reachable from the build environment was
+  wrong. The Netlify preview answers normally through the egress proxy. The
+  measurement was available the whole time it was recorded as unavailable.
+- The claim, made an hour ago in this same section, that the linger fix removes
+  the 3.6× upstream amplification held only in-process. On the deployed default
+  host it removes nothing, because there is no process to keep. Verifying the
+  fix on the same host that justified it is what caught that; asserting it from
+  a passing unit test would not have.
 
 **Why this belongs in the file rather than being quietly fixed.** A wrong claim
 about a competitor costs a paragraph. A wrong claim about *ourselves* in the

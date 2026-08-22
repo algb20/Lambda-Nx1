@@ -45,13 +45,48 @@
  * the reading is. Serving a cached value silently, with no age beside it, is
  * the failure this codebase has already fixed twice; the age is not optional.
  *
- * ## Scope: one process
+ * ## Scope: one process — and on the default host, that is one *connection*
  *
  * This is in-memory and per-process, and that is honest for what it is. On a
  * platform that runs several instances, each has its own channel and its own
  * timer — so the saving is per instance, not global. Making it global needs a
  * shared bus (Redis, Postgres LISTEN/NOTIFY), which is a real option behind the
  * same interface and is deliberately not pretended at here.
+ *
+ * That caveat was written as a possibility. **Measured on the deployed Netlify
+ * preview, 2026-08-22, it is the actual situation.** Six connections to
+ * `/api/world/stream`, three seconds apart:
+ *
+ * | connection | first reading | produced at |
+ * |---|---|---|
+ * | 1 | after 14.1s | 10:20:06 |
+ * | 2 | none within 32s | — |
+ * | 3 | after 14.2s | 10:20:37 |
+ * | 4 | after 14.1s | 10:20:54 |
+ * | 5 | after 14.1s | 10:21:11 |
+ * | 6 | none within 32s | — |
+ *
+ * Four connections, four *different* production times, each preceded by a
+ * fourteen-second wait. Not one was handed a kept reading. So on this host the
+ * module scope does not survive between requests: every connection gets a cold
+ * channel and pays for its own production.
+ *
+ * Two consequences, neither of them hidden:
+ *
+ * 1. **The linger above does not buy back the saving here**, because there is
+ *    no surviving process to linger in. It is still correct and still tested,
+ *    and it does its work for concurrent readers of one instance and on any
+ *    host that keeps a process warm. On Netlify it is inert.
+ * 2. **Roughly one connection in three delivered no reading at all** before the
+ *    host's ~30s cut, because producing takes ~14s from cold and sometimes far
+ *    longer. `useLive` covers that — three empty connections in a row demote
+ *    the surface to polling — but a reader on a slow instance waits for that
+ *    demotion.
+ *
+ * The honest reading: server-push works, and *shared* production does not,
+ * until the shared bus this section already named exists. Anything better
+ * requires state that outlives a request, which is a deliberate piece of work
+ * and not a tweak to this file.
  */
 
 /** What a subscriber receives: the value, and when it was produced. */
