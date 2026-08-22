@@ -54,6 +54,9 @@ import type { GeoReport } from '@/lib/modules/geo'
 import type { ResearchReport } from '@/lib/modules/research'
 import type { ReferenceReport } from '@/lib/modules/reference'
 import type { OpenDataReport } from '@/lib/modules/open-data'
+import type { BroadcastsReport } from '@/lib/modules/broadcasts'
+import type { FilingsReport } from '@/lib/modules/filings'
+import type { VenuesReport } from '@/lib/modules/venues'
 import { TargetTracker } from '@/components/target-tracker'
 import { DataGlobe } from '@/components/data-globe'
 import { ExportDossier } from '@/components/export-dossier'
@@ -61,6 +64,7 @@ import { LeadFinding } from '@/components/lead-finding'
 import { GatewayEmpty } from '@/components/gateway-empty'
 import { GATEWAY_FAMILIES, GATEWAY_GUIDANCE, type Mode } from '@/lib/gateways'
 import { HistoryPanel } from '@/components/history-panel'
+import { RowList } from '@/components/row-list'
 import { Onboarding } from '@/components/onboarding'
 import { pointsFromEvidence, type GlobePoint } from '@/lib/geo/centroids'
 import { PREDICATE_LABEL } from '@/lib/engine/ontology'
@@ -89,6 +93,9 @@ type Result =
   | { kind: 'reference'; data: ReferenceReport }
   | { kind: 'open-data'; data: OpenDataReport }
   | { kind: 'media'; data: MediaReport }
+  | { kind: 'broadcasts'; data: BroadcastsReport }
+  | { kind: 'filings'; data: FilingsReport }
+  | { kind: 'venues'; data: VenuesReport }
 
 const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: string }> = [
   { id: 'nexus', label: 'Unified', icon: ScanSearch, placeholder: 'anything — domain, IP, email, company, wallet, hash…' },
@@ -139,6 +146,11 @@ const BODY_KEY: Partial<Record<Mode, string>> = {
   research: 'query',
   reference: 'query',
   'open-data': 'query',
+  // Their routes read `value` or `query`; without these three the typed
+  // subject arrived as `{ broadcasts: "SA" }` and was silently discarded.
+  broadcasts: 'query',
+  filings: 'query',
+  venues: 'query',
 }
 
 /** Modes where an empty query is valid (returns a top/overview result). */
@@ -153,6 +165,10 @@ const EMPTY_OK: Partial<Record<Mode, boolean>> = {
   property: true,
   companies: true,
   ...Object.fromEntries(BOARDS.map((b) => [b.key, true])),
+  // All three placeholders end "— or press Load"; the run refused it.
+  broadcasts: true,
+  filings: true,
+  venues: true,
 }
 
 type EvidenceItem = DomainReport['sections']['dns'][number]
@@ -528,6 +544,261 @@ function OpenDataView({ r }: { r: OpenDataReport }) {
           </p>
         ) : null}
       </Card>
+    </div>
+  )
+}
+
+/**
+ * What a gateway says it cannot tell you.
+ *
+ * Three modules return a `limits` array that is documented as never empty, and
+ * the field existed for a while with nowhere on screen to appear. A limit that
+ * is only in the JSON is a limit the reader never sees, which is the same as
+ * not having written it.
+ */
+function GatewayLimits({ limits }: { limits: string[] }) {
+  if (limits.length === 0) return null
+  return (
+    <Card className="p-4">
+      <h4 className="mb-1.5 text-sm font-semibold">What this does not tell you</h4>
+      <ul className="space-y-1">
+        {limits.map((l, i) => (
+          <li key={i} className="text-[11px] leading-relaxed text-muted-foreground">
+            {l}
+          </li>
+        ))}
+      </ul>
+    </Card>
+  )
+}
+
+/**
+ * Live broadcasts, by country.
+ *
+ * The headline figure is the one the module exists for and no radio directory
+ * publishes: **how many distinct languages a place is transmitting in right
+ * now**. A language census records what people say they speak; this records
+ * what is on air today, and the two differ exactly where the difference is
+ * interesting.
+ *
+ * Liveness is graded rather than assumed, so it is shown rather than implied:
+ * a station counted as recently opened was opened by a real listener within the
+ * day, and one that is not says so instead of wearing a green dot.
+ */
+function BroadcastsView({ r }: { r: BroadcastsReport }) {
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+          <h3 className="font-semibold">{r.query || 'What the world is listening to'}</h3>
+          <p className="text-[11px] tabular-nums text-muted-foreground">
+            {r.summary.stations} stations · {r.summary.countries} countries ·{' '}
+            {r.summary.languages} languages
+            {r.summary.sourcesFailed > 0 ? ` · ${r.summary.sourcesFailed} source failed` : ''}
+          </p>
+        </div>
+        <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+          {/* Both halves of the liveness grade, because "verified live" with no
+              number behind it is the claim every directory makes. */}
+          {r.summary.recentlyOpened} opened by a listener within the day
+          {r.summary.stale > 0 ? ` · ${r.summary.stale} rest on older evidence` : ''} ·{' '}
+          {r.summary.located} carry a coordinate. Streams are the broadcasters&rsquo; own public
+          URLs — nothing is proxied, recorded or transcribed.
+        </p>
+      </Card>
+
+      {r.countries.length === 0 ? (
+        <Card className="p-4 text-sm text-muted-foreground">
+          Nothing matched, or nothing that matched was verified live. Both are statements about
+          this query and the catalogue, not about whether the place broadcasts.
+        </Card>
+      ) : (
+        <div className="grid items-start gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+          {r.countries.map((c) => (
+            <Card key={c.countryIso} className="p-4">
+              <h4 className="flex items-baseline justify-between gap-2 text-sm font-semibold">
+                <span className="min-w-0">{c.country}</span>
+                <span className="shrink-0 text-[11px] font-normal tabular-nums text-muted-foreground">
+                  {c.stations.length}
+                </span>
+              </h4>
+              <p className="mb-2 text-[11px] text-muted-foreground">
+                {c.languages.length} language{c.languages.length === 1 ? '' : 's'} on air
+                {c.languages.length > 0 ? `: ${c.languages.slice(0, 6).join(' · ')}` : ''}
+              </p>
+              <RowList
+                rows={c.stations.map((s) => ({
+                  key: s.id,
+                  headline: s.name,
+                  url: s.homepage ?? s.streamUrl,
+                  detail: [
+                    s.state,
+                    s.languages.join(', ') || null,
+                    s.codec,
+                    s.bitrate ? `${s.bitrate} kbps` : null,
+                    s.hls ? 'HLS' : null,
+                  ]
+                    .filter(Boolean)
+                    .join(' · '),
+                }))}
+              />
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <GatewayLimits limits={r.limits} />
+    </div>
+  )
+}
+
+/**
+ * A day of filings, banded by how much each one actually discloses.
+ *
+ * The module's own measurement is the reason for the shape: on a measured
+ * window, 92 of 100 filings carried item 9.01 — the administrative note that
+ * documents are attached. Listing all hundred in filing order buries the one
+ * restatement among the ninety-two, so the bands lead and the count of filings
+ * that disclosed anything at all is stated before any of them are read.
+ */
+function FilingsView({ r }: { r: FilingsReport }) {
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+          <h3 className="font-semibold">{r.query || 'The disclosure tape'}</h3>
+          <p className="text-[11px] tabular-nums text-muted-foreground">
+            {r.summary.filings} filings · {r.summary.companies} companies
+            {r.summary.sourcesFailed > 0 ? ` · ${r.summary.sourcesFailed} source failed` : ''}
+          </p>
+        </div>
+        <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+          {r.summary.signalling} of {r.summary.filings} disclosed something beyond the
+          administrative. A filing is a company&rsquo;s own statement to its regulator; this grades
+          what <em>kind</em> of statement it is, and is never investment advice.
+        </p>
+        {r.standouts.length > 0 ? (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {r.standouts.map((s) => (
+              <span
+                key={s.code}
+                title={s.means}
+                className="rounded-full border border-border px-2.5 py-1 text-[11px] text-muted-foreground"
+              >
+                {s.label}
+                <span className="ml-1 tabular-nums opacity-60">{s.count}</span>
+              </span>
+            ))}
+          </div>
+        ) : null}
+      </Card>
+
+      {r.bands.every((b) => b.filings.length === 0) ? (
+        <Card className="p-4 text-sm text-muted-foreground">
+          Nothing in this window matched{r.query ? ` “${r.query}”` : ''}. That is a statement about
+          the window, not about the world.
+        </Card>
+      ) : (
+        <div className="grid items-start gap-4 lg:grid-cols-2">
+          {r.bands
+            .filter((b) => b.filings.length > 0)
+            .map((b) => (
+              <Card key={b.key} className="p-4">
+                <h4 className="flex items-baseline justify-between gap-2 text-sm font-semibold">
+                  <span className="min-w-0">{b.title}</span>
+                  <span className="shrink-0 text-[11px] font-normal tabular-nums text-muted-foreground">
+                    {b.filings.length}
+                  </span>
+                </h4>
+                <p className="mb-2 text-[11px] leading-relaxed text-muted-foreground">{b.note}</p>
+                <RowList
+                  rows={b.filings.map((f) => ({
+                    key: f.accession,
+                    headline: f.tickers.length ? `${f.company} (${f.tickers.join(', ')})` : f.company,
+                    url: f.url,
+                    at: f.filedAt ? `${f.filedAt}T00:00:00Z` : null,
+                    detail: `${f.form} · ${f.meaning}`,
+                  }))}
+                />
+              </Card>
+            ))}
+        </div>
+      )}
+
+      <GatewayLimits limits={r.limits} />
+    </div>
+  )
+}
+
+/**
+ * Every registered trading venue, grouped by what kind of thing it is.
+ *
+ * The LEI ratio is on the summary rather than buried per row because it tells a
+ * reader, before they start, how far the question "who owns these" can be
+ * taken: a venue with an LEI walks up its ownership chain through the GLEIF
+ * data this platform already holds, and a venue without one is a name on a list
+ * and stops there.
+ */
+function VenuesView({ r }: { r: VenuesReport }) {
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+          <h3 className="font-semibold">{r.query || 'The venue registry'}</h3>
+          <p className="text-[11px] tabular-nums text-muted-foreground">
+            {r.summary.venues} venues · {r.summary.countries} countries
+            {r.summary.sourcesFailed > 0 ? ` · ${r.summary.sourcesFailed} source failed` : ''}
+          </p>
+        </div>
+        <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+          {r.summary.withLei} of {r.summary.venues} carry a legal entity identifier, and can
+          therefore be traced to an owner. Registration is not endorsement: a venue appears here
+          because an authority assigned it a code.
+        </p>
+      </Card>
+
+      {r.groups.every((g) => g.venues.length === 0) ? (
+        <Card className="p-4 text-sm text-muted-foreground">
+          Nothing matched{r.query ? ` “${r.query}”` : ''}. That is a statement about this query,
+          not about the world.
+        </Card>
+      ) : (
+        <div className="grid items-start gap-4 lg:grid-cols-2">
+          {r.groups
+            .filter((g) => g.venues.length > 0)
+            .map((g) => (
+              <Card key={g.key} className="p-4">
+                <h4 className="flex items-baseline justify-between gap-2 text-sm font-semibold">
+                  <span className="min-w-0">{g.title}</span>
+                  <span className="shrink-0 text-[11px] font-normal tabular-nums text-muted-foreground">
+                    {g.venues.length}
+                  </span>
+                </h4>
+                <p className="mb-2 text-[11px] leading-relaxed text-muted-foreground">{g.note}</p>
+                <RowList
+                  rows={g.venues.map((v) => ({
+                    key: v.mic,
+                    headline: v.name,
+                    url: v.website,
+                    detail: [
+                      v.mic,
+                      v.categoryLabel,
+                      [v.city, v.countryIso].filter(Boolean).join(', ') || null,
+                      // Stated only when true. "No LEI" is a fact about our
+                      // reach, and it is what decides whether ownership is
+                      // answerable at all.
+                      v.lei ? `LEI ${v.lei}` : 'no LEI — ownership not traceable from here',
+                    ]
+                      .filter(Boolean)
+                      .join(' · '),
+                  }))}
+                />
+              </Card>
+            ))}
+        </div>
+      )}
+
+      <GatewayLimits limits={r.limits} />
     </div>
   )
 }
@@ -1501,6 +1772,24 @@ function collectFindings(result: Result): { subject: string; gateway: string; fi
       return { subject: result.data.subject, gateway: 'research', findings: slim(result.data.findings) }
     case 'reference':
       return { subject: result.data.subject, gateway: 'reference', findings: slim(result.data.facts) }
+    case 'broadcasts':
+      return {
+        subject: result.data.query || 'What the world is listening to',
+        gateway: 'broadcasts',
+        findings: slim(result.data.findings),
+      }
+    case 'filings':
+      return {
+        subject: result.data.query || 'The disclosure tape',
+        gateway: 'filings',
+        findings: slim(result.data.findings),
+      }
+    case 'venues':
+      return {
+        subject: result.data.query || 'The venue registry',
+        gateway: 'venues',
+        findings: slim(result.data.findings),
+      }
     case 'media':
       return null
   }
@@ -2202,6 +2491,9 @@ export function IntelligenceDashboard() {
       {result?.kind === 'reference' ? <ReferenceView r={result.data} /> : null}
       {result?.kind === 'open-data' ? <OpenDataView r={result.data} /> : null}
       {result?.kind === 'media' ? <MediaView r={result.data} /> : null}
+      {result?.kind === 'broadcasts' ? <BroadcastsView r={result.data} /> : null}
+      {result?.kind === 'filings' ? <FilingsView r={result.data} /> : null}
+      {result?.kind === 'venues' ? <VenuesView r={result.data} /> : null}
 
       {aiInput && aiInput.findings.length > 0 ? (
         <AiAnalystPanel

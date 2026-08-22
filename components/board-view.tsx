@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 
 import { Card } from '@/components/ui/card'
 import { TimeStamp } from '@/components/time-stamp'
+import { RowList } from '@/components/row-list'
 import type { BoardReport } from '@/lib/modules/board-shared'
 
 /**
@@ -47,64 +48,28 @@ import type { BoardReport } from '@/lib/modules/board-shared'
  * away with the real count on it.
  */
 /**
- * Rows shown before a group collapses.
- *
- * Six is enough to see what a group *is* — its shape, its newest entries, the
- * kind of thing in it — without being enough to bury the group after it.
- */
-const ROWS_BEFORE_COLLAPSE = 6
-
-/**
  * One group's rows, collapsed past the first few.
  *
- * The count lives on the control rather than in a footnote, because "show all
- * 385" and "show all 7" are different offers and a reader deciding whether to
- * press deserves to know which one this is.
+ * The collapsing itself lives in `RowList`, shared with every other gateway
+ * that groups things — the rule about how long a list may get before it needs
+ * a reader's permission is one rule, and keeping a second copy of it here is
+ * how the two drift.
+ *
+ * The publisher's own time is always passed, never ours, and `at` is present
+ * even when null so the row still says "not stated" rather than silently
+ * omitting the column.
  */
 function GroupRows({ rows }: { rows: BoardReport['groups'][number]['rows'] }) {
-  const [open, setOpen] = useState(false)
-  const visible = open ? rows : rows.slice(0, ROWS_BEFORE_COLLAPSE)
-  const hidden = rows.length - visible.length
-
   return (
-    <>
-      <ul className="divide-y divide-border/40">
-        {visible.map((row, i) => (
-          <li key={`${row.headline}-${i}`} className="py-2">
-            <div className="flex items-baseline justify-between gap-3">
-              {row.url ? (
-                <a
-                  href={row.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="min-w-0 text-sm font-medium hover:underline"
-                >
-                  {row.headline}
-                </a>
-              ) : (
-                <span className="min-w-0 text-sm font-medium">{row.headline}</span>
-              )}
-              {/* The publisher's own time, never ours — and a date past a
-                  day old rather than a relative label that keeps moving. */}
-              <TimeStamp iso={row.at} className="shrink-0 text-[11px] text-muted-foreground" />
-            </div>
-            {row.detail ? (
-              <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">{row.detail}</p>
-            ) : null}
-          </li>
-        ))}
-      </ul>
-      {rows.length > ROWS_BEFORE_COLLAPSE ? (
-        <button
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          className="touch-target mt-1 w-full rounded-md border border-border/60 px-2 py-1.5 text-[11px] text-muted-foreground transition-colors hover:bg-muted"
-        >
-          {open ? 'Show fewer' : `Show all ${rows.length}`}
-          {open ? null : <span className="ml-1 opacity-60">({hidden} more)</span>}
-        </button>
-      ) : null}
-    </>
+    <RowList
+      rows={rows.map((row, i) => ({
+        key: `${row.headline}-${i}`,
+        headline: row.headline,
+        url: row.url,
+        detail: row.detail,
+        at: row.at ?? null,
+      }))}
+    />
   )
 }
 
