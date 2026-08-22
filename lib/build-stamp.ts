@@ -8,7 +8,7 @@
  */
 
 /** When this build was produced, ISO-8601. */
-export const BUILT_AT = "2026-08-22T03:35:40.123Z"
+export const BUILT_AT = "2026-08-22T03:47:36.480Z"
 
 /** The commit it was produced from, or an empty string if nothing said. */
-export const BUILT_FROM = "84dd3bc838b4d41590312ceb6bc02af78a3f39a5"
+export const BUILT_FROM = "c2550dece639494fd3f0f87bdb9ea295556e7117"

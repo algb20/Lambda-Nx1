@@ -103,6 +103,14 @@ assumed working, and each is a lesson the next gateway inherits:
    name, and `?? id` does not catch an empty string.
  - **A North Sea platform read `Tartan &quot;A&quot; AWS`** — attribute values
    are XML and nothing decoded them.
+ - **The phone page was 64,056 pixels tall**, with 731 tap targets and 385
+   rows in the Atlantic group alone — five and a half times the globe page this
+   project had already been told was unusable. The data was perfect and the
+   page was not. Every other board in the codebase caps in the source; this one
+   emitted all 861 stations. Each basin now shows its roughest twenty and
+   **counts what it left out on the page**, because a cap the reader cannot see
+   is indistinguishable from missing coverage. **10,767 px** after the fix.
+   Found only by opening it in a browser — which is exactly what R267 is for.
  - **Lake Winnipeg and eleven Lake Ontario stations were in the Atlantic.**
    NDBC's network carries the Great Lakes and reservoirs as far inland as Lake
    Murray. Separated using two signals the register itself supplies — elevation

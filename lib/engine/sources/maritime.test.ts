@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { basin, decodeEntities, isInlandStation, maritimeConditions, parseLatestObservations, parseStations, seaState } from './maritime'
+import { basin, decodeEntities, isInlandStation, maritimeConditions, parseLatestObservations, parseStations, PER_BASIN, seaState } from './maritime'
 import type { SourceContext, SourceInput } from '../types'
 
 /**
@@ -301,6 +301,56 @@ describe('the gateway', () => {
     const claims = (await maritimeConditions.run(ask(''), ctx)).map((e) => e.claim)
     expect(claims.some((c) => c.includes('Tartan "A" AWS'))).toBe(true)
     expect(claims.every((c) => !c.includes('&quot;'))).toBe(true)
+  })
+
+  /**
+   * The defect the first live walk found, and the reason this gateway is
+   * capped at all: it emitted all 861 reporting stations, and the phone page
+   * came out **64,056 pixels tall** with 731 tap targets — five and a half
+   * times the globe page this project had already been told was too long.
+   */
+  it('caps each ocean, keeping the roughest, and says how many it left out', async () => {
+    const rows: string[] = []
+    for (let i = 0; i < 40; i++) {
+      // Wave height ascending with the index, so the cap is only correct if it
+      // keeps the *last* twenty rather than the first twenty it encountered.
+      const h = (i * 0.1).toFixed(1)
+      rows.push(
+        `4${String(1000 + i)}    27.00   -62.00  2026 08 21 23 00  90   5.0   6.0  ${h}   8   6  95  1015.0   0.3  27.0  28.4  24.0 10.0     MM`,
+      )
+    }
+    const ctx = ctxOf((url) => ({
+      text: url.includes('activestations') ? '<stations/>' : `${OBS}\n${rows.join('\n')}`,
+    }))
+    const out = await maritimeConditions.run(ask(''), ctx)
+    const atlantic = out.filter((e) => (e.data as { group: string }).group === 'Atlantic Ocean')
+
+    // Twenty readings plus one row accounting for the remainder.
+    const readings = atlantic.filter((e) => !e.claim.includes('more station'))
+    expect(readings).toHaveLength(PER_BASIN)
+
+    const note = atlantic.find((e) => e.claim.includes('more station'))
+    expect(note?.claim).toContain('more stations reporting here')
+    // A cap the reader cannot see is indistinguishable from missing coverage.
+    expect(note?.claim).toContain('Search a station name')
+    expect((note?.data as { value: number }).value).toBeGreaterThan(0)
+
+    /**
+     * And it kept the roughest, not the first twenty it happened to meet.
+     *
+     * The fixture's Atlantic candidates run 0.0 m to 3.9 m. The fifteen highest
+     * are taken by "Roughest seas now measured" first, leaving 0.0 m to ~2.4 m,
+     * of which the basin keeps the top twenty — so everything shown must sit
+     * above the handful dropped at the bottom of that range.
+     */
+    const heights = readings.map((e) => (e.data as { value?: number }).value ?? 0)
+    expect(Math.min(...heights)).toBeGreaterThan(0.4)
+    expect(Math.max(...heights)).toBeGreaterThan(Math.min(...heights))
+  })
+
+  it('adds no remainder row when a group fits', async () => {
+    const out = await maritimeConditions.run(ask(''), both)
+    expect(out.some((e) => e.claim.includes('more station'))).toBe(false)
   })
 
   it('reads passively, from one declared host', () => {

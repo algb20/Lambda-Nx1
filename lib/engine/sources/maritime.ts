@@ -342,6 +342,14 @@ function point(p: MaritimePoint): Evidence {
 const GROUP_ORDER = { match: 100, roughest: 90, tsunami: 95, basins: 50, inland: 40 } as const
 
 /**
+ * Stations shown per ocean before the rest are summarised.
+ *
+ * Twenty is a readable group on a phone; 385 is not, and 385 is what the
+ * Atlantic actually returns. The number left out is always stated.
+ */
+export const PER_BASIN = 20
+
+/**
  * Sea conditions worldwide, from the instruments measuring them.
  *
  * Two requests, always: the observations and the register. They are fetched
@@ -480,21 +488,59 @@ export const maritimeConditions: Source = {
     }
 
     /**
-     * Everything else, by ocean.
+     * Everything else, by ocean — and **capped**, which is the whole lesson of
+     * this gateway's first live walk.
      *
-     * Grouping eight hundred readings by basin is what turns a list into
-     * something a reader can navigate — and the board makes every group
-     * independently selectable, so "show me only the Pacific" is a property of
-     * the data rather than a feature bolted onto one screen.
+     * The first version emitted all 861 reporting stations. The data was
+     * perfect and the page was unusable: **64,056 pixels tall on a phone**,
+     * with 731 tap targets — five and a half times the globe page that this
+     * project was already told was too long, and 385 rows in the Atlantic group
+     * alone. Every other board in the codebase caps in the source (15 to 300
+     * rows); this one was the outlier.
+     *
+     * Nobody reads the 300th buoy. What a reader wants from an ocean is the
+     * notable ones, and a way to reach any specific station — which the search
+     * already gives. So each basin shows its roughest twenty, and the ones left
+     * out are **counted and named as left out** rather than silently dropped:
+     * a cap the reader cannot see is indistinguishable from missing coverage.
      */
     const shown = new Set([...rough, ...darts].map((n) => n.o.station))
+    const byGroup = new Map<string, Array<(typeof named)[number]>>()
     for (const n of named) {
       if (shown.has(n.o.station)) continue
-      out.push(
-        n.inland
-          ? row(n, 'Lakes & inland waters', GROUP_ORDER.inland, n.o.waveHeight ?? 0)
-          : row(n, basin(n.o.lat, n.o.lon), GROUP_ORDER.basins, n.o.waveHeight ?? 0),
-      )
+      const group = n.inland ? 'Lakes & inland waters' : basin(n.o.lat, n.o.lon)
+      const list = byGroup.get(group)
+      if (list) list.push(n)
+      else byGroup.set(group, [n])
+    }
+
+    for (const [group, list] of byGroup) {
+      const weight = group === 'Lakes & inland waters' ? GROUP_ORDER.inland : GROUP_ORDER.basins
+      // Roughest first inside the basin, so the cap keeps what matters rather
+      // than whichever stations happen to sort first by identifier.
+      const ordered = [...list].sort((a, b) => (b.o.waveHeight ?? -1) - (a.o.waveHeight ?? -1))
+      for (const n of ordered.slice(0, PER_BASIN)) {
+        out.push(row(n, group, weight, n.o.waveHeight ?? 0))
+      }
+      const hidden = ordered.length - PER_BASIN
+      if (hidden > 0) {
+        out.push(
+          point({
+            group,
+            groupWeight: weight,
+            headline: `${hidden} more station${hidden === 1 ? '' : 's'} reporting here`,
+            detail:
+              `${ordered.length} stations are reporting in this group and the ${PER_BASIN} with the ` +
+              `highest seas are shown. Search a station name, a sea area or the body that owns the ` +
+              `instrument to reach any of the rest.`,
+            value: hidden,
+            unit: 'stations',
+            // Last inside its group: it is a footnote about the group, not a
+            // reading, and it must never displace an actual measurement.
+            weight: -1,
+          }),
+        )
+      }
     }
 
     return out
