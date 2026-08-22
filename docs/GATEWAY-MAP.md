@@ -350,14 +350,56 @@ we do not, ranked by how visible their absence is to a reader.
 | Source transparency | Built — every finding carries source, timestamp, Admiralty grade, confidence | **Ahead**, and it is the product's whole argument |
 | Honest source counting | §2a — integrations vs publishers vs independent origins, never added | **Ahead**, and unique. The field quotes the middle column as the first |
 | Mobile / PWA / desktop clients | Web + Pi Browser, one codebase (R265), fits every screen (R264) | **Parity on reach**, no installable desktop client yet |
-| Streaming / real-time push | Polling with a refresh buffer; no server-push channel | **Behind** — the honest gap |
+| Streaming / real-time push | SSE channel built and proven (`lib/stream/sse.ts`, `/api/track`); two panels still poll on a 120s timer | **Partial** — see the correction below |
 | Saved workspaces, collaboration | History and groups exist; no shared workspace | **Behind** |
 | Earth-observation imagery | Not built — §3.5 | **Behind**, with a stated reason |
 | Ship tracking (AIS) | No keyless route; §3.1 | **Behind by licence, not by effort** |
 
-Three of those are genuinely behind and none of the three is behind for lack of
-noticing. They are written here so they cannot be forgotten, which is the whole
-reason this file exists.
+**Correction, 2026-08-22 — this table was wrong about our own product, and
+that is the more useful finding.**
+
+The streaming row read *"Polling with a refresh buffer; no server-push channel —
+Behind — the honest gap"*, and I was about to spend a session building the
+channel. It already exists. `lib/stream/sse.ts` frames Server-Sent Events and
+`/api/track` holds a connection open, pushes the target profile on connect, and
+re-pushes on every re-track with a heartbeat to keep intermediaries from closing
+the door. Measured live against a running build on 2026-08-22:
+
+```
+retry: 3000
+event: open
+data: {"target":"bitcoin"}
+
+event: target
+data: {"reason":"initial","profile":{ … real SEC filings, graded … }}
+```
+
+What the row should have said, measured rather than remembered:
+
+| Surface | Mechanism |
+|---|---|
+| `track` gateway | **SSE server-push** — proven |
+| Markets panel | polls `/api/chain` every 120s |
+| Context rail | polls `/api/world` every 120s |
+| News ticker | rotates already-loaded items — **not** a poll |
+| Globe | a seconds counter — **not** a poll |
+
+So the verdict is **Partial**: the channel is built and works, it is wired to
+one gateway, and two panels have not been moved onto it. That is a smaller and
+much better-specified piece of work than "build streaming", and the difference
+between the two is a session.
+
+**Why this belongs in the file rather than being quietly fixed.** A wrong claim
+about a competitor costs a paragraph. A wrong claim about *ourselves* in the
+document that decides what to build next costs the work — it very nearly bought
+a second implementation of something already shipped and tested. Every row in
+this table now needs the same treatment the source counts got in §2a: checked
+against the running product, not against memory of it. The rows above were
+written from what the code was believed to do.
+
+Two of the three remaining gaps are genuinely behind and neither is behind for
+lack of noticing. They are written here so they cannot be forgotten, which is
+the whole reason this file exists.
 
 ---
 

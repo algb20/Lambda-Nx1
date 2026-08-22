@@ -178,6 +178,33 @@ export const API_GROUPS: ApiGroup[] = [
         returns: ['networks', 'venues', 'movers'],
       },
       {
+        /**
+         * The same picture, pushed instead of asked for.
+         *
+         * Published rather than internal because it is the honest answer to
+         * "how do I follow this without hammering you": one held-open
+         * connection, one producer serving every reader, and a reading the
+         * moment it lands rather than up to two minutes later. `/api/chain`
+         * stays for scripts, exports and the fallback poll.
+         */
+        path: '/api/chain/stream',
+        route: 'chain/stream',
+        method: 'GET',
+        title: 'Blockchain radar, streamed',
+        description:
+          'The blockchain radar over Server-Sent Events. Emits `open`, then a `reading` per production carrying the value and `at` — the moment the producer returned it, never the moment it was sent — and `error` when a provider fails. One producer serves every connected reader, so following it costs the publishers nothing extra.',
+        returns: ['open', 'reading', 'error'],
+      },
+      {
+        path: '/api/world/stream',
+        route: 'world/stream',
+        method: 'GET',
+        title: 'The live world picture, streamed',
+        description:
+          'The same events the globe and the context rail draw, over Server-Sent Events, with the same framing as the chain stream. Replaces a per-tab two-minute poll with one shared producer.',
+        returns: ['open', 'reading', 'error'],
+      },
+      {
         path: '/api/diagnose',
         route: 'diagnose',
         method: 'GET',
