@@ -39,7 +39,7 @@ That leaves **fifteen** disciplines a gateway can honestly serve.
 
 ## 2. Where we stand
 
-**33 gateways, 7 families, 198 catalogue records** across 7 disciplines
+**34 gateways, 7 families, 203 catalogue records** across 7 disciplines
 (`osint` 52, `fin` 44, `geoint` 46, `cyber` 22, `humint` 15, `infra` 11,
 `sci` 6), plus the coded modules.
 
@@ -57,7 +57,7 @@ That leaves **fifteen** disciplines a gateway can honestly serve.
 | 10 | Intelligence analysis (§2.10) | analyst, ontology, trust lens, calibration | **Built** |
 | 11 | Data science (§2.11) | `open-data` (CKAN federation) | **Built** |
 | 12 | Investigative research (§2.12) | `research`, `reference` | **Built** |
-| 13 | Verification (§2.13) | `media` | **Partial** — no claim record → §3.2 |
+| 13 | Verification (§2.13) | `media` (artefacts) + `verify` (claims) | **Built** 2026-08-22 → §3.2 |
 | 14 | Due diligence / KYC / AML (§2.14) | `finance` (OpenSanctions), `ownership` (GLEIF L2) | **Partial** — no debarment lists → §3.3 |
 | 15 | Digital footprint (§2.18) | `username`, `email` | **Built** |
 
@@ -131,7 +131,27 @@ outlets reporting their own checking work — and none is independent of the
 others in the way a wire is independent of a government, so two of them agreeing
 is worth less than one of them plus a primary document.
 
-**Status: gap, next.**
+**Status: BUILT** (2026-08-22) — the `verify` gateway.
+
+Its differentiator is the reading on top, not the syndication: searching a
+subject reports **how many independent checkers examined it**, counting
+independence groups rather than headlines. It never collapses them into a
+verdict, and the row says so in itself — three checkers addressing a claim is
+not three confirmations of any answer.
+
+Of the five, exactly one (Lead Stories) states its finding in the feed. That
+one is shown; the other four say *verdict on the page* and link there. Guessing
+"False" from a headline that begins "No," would be right often enough to be
+trusted and wrong often enough to be dangerous.
+
+One defect surfaced live and produced a general engine fix: **FactCheck.org's
+encyclopaedia entries were listed as fact-checks** — "Americans for
+Prosperity" presented as a debunking. The label lives in `<category>`, which
+the feed parser dropped, so a filter reading the title and summary passed its
+unit test and did nothing at all on real data. `FeedEntry.categories` now
+carries the publisher's own classification, which every catalogue source
+benefits from, and the test that guards it runs through `parseFeed` rather than
+around it.
 
 ### 3.3 Due diligence — debarment and exclusion
 
@@ -236,7 +256,7 @@ reason this file exists.
 1. ~~**Maritime & ocean** — NDBC.~~ **Built** 2026-08-22: the `maritime` gateway.
    856 stations reporting, grouped by ocean with the roughest seas first, the
    DART tsunami network called out, and inland waters separated from seas.
-2. **Verification / claim record** — five verified fact-check publishers.
+2. ~~**Verification / claim record**~~ **Built** 2026-08-22: the `verify` gateway.
 3. **Debarment** — re-probe; no route today.
 4. **Patents** — catalogue EPO OPS as keyed; build the moment a key exists.
 5. **Earth observation** — after the globe can carry a raster layer.

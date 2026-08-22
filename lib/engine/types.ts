@@ -31,6 +31,7 @@ export type Capability =
   | 'market_board'
   | 'crypto'
   | 'maritime'
+  | 'verification'
   | 'property'
   | 'venues'
   | 'filings'

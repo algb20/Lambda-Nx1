@@ -108,6 +108,13 @@ export const BOARDS: BoardDefinition[] = [
     searchable: true,
   },
   {
+    key: 'verify',
+    capability: 'verification',
+    title: 'Fact-checks & claims',
+    note: 'Whether a claim has already been checked, by five independent IFCN-signatory newsrooms — Snopes, Full Fact, PolitiFact, FactCheck.org and Lead Stories. Search a subject and it reports how many INDEPENDENT checkers examined it, which is a corroboration reading and never a verdict. Where a publisher states its finding in the feed it is shown; where it does not, the row says so and links to the check.',
+    searchable: true,
+  },
+  {
     key: 'maritime',
     capability: 'maritime',
     title: 'Maritime & ocean',

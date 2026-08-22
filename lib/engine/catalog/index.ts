@@ -11,6 +11,7 @@ import { NATIONAL_SOURCES } from './feeds/national'
 import { SCIENCE_SOURCES } from './feeds/science'
 import { MARKET_SOURCES } from './feeds/markets'
 import { CRYPTO_SOURCES } from './feeds/crypto'
+import { FACTCHECK_SOURCES } from './feeds/factcheck'
 import { partitionByLicence, requiredAttributions, LAMBDA_USAGE, type UsageContext } from './licence'
 import { SOURCE_FAMILIES, livePublisherReach, plannedPublisherReach } from './families'
 import { isQuarantined } from './quarantine'
@@ -35,6 +36,7 @@ export const CATALOG: CatalogSource[] = [
   ...INFRASTRUCTURE_SOURCES,
   ...MARKET_SOURCES,
   ...CRYPTO_SOURCES,
+  ...FACTCHECK_SOURCES,
   ...OFFICIAL_SOURCES,
   ...CYBER_SOURCES,
   ...RESEARCH_SOURCES,

@@ -87,6 +87,11 @@ export type Topic =
    * fact, and a consensus change is not.
    */
   | 'crypto'
+  /**
+   * A published fact-check of a specific claim. Distinct from `news` because a
+   * check is a conclusion *about* reporting, not reporting.
+   */
+  | 'factcheck'
   | 'economy'
   | 'sanctions'
   | 'corporate'

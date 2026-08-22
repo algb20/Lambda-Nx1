@@ -36,6 +36,7 @@ export const ALL_MODES = [
   'filings',
   'crypto',
   'maritime',
+  'verify',
   'statements',
   'courts',
   'regulation',
@@ -70,7 +71,7 @@ export const GATEWAY_FAMILIES: ReadonlyArray<{ label: string; modes: readonly Mo
   { label: 'Money & entities', modes: ['finance', 'ownership', 'procurement', 'board', 'markets', 'crypto', 'property', 'companies', 'venues', 'filings'] },
   { label: 'Law & the state', modes: ['statements', 'courts', 'regulation', 'officials'] },
   { label: 'Earth & systems', modes: ['resources', 'grid', 'space-weather', 'orbital', 'maritime'] },
-  { label: 'Knowledge & record', modes: ['research', 'reference', 'open-data', 'news', 'media', 'broadcasts'] },
+  { label: 'Knowledge & record', modes: ['research', 'reference', 'open-data', 'news', 'media', 'verify', 'broadcasts'] },
 ]
 
 export interface GatewayGuidance {
@@ -202,6 +203,13 @@ export const GATEWAY_GUIDANCE: Record<Mode, GatewayGuidance> = {
     example: 'inflation',
     limit:
       'Public acts of office — a policy speech, on the record. This never follows a person, and it holds nothing about anyone’s private life (charter §3). Central banks only; other officials are not in this feed.',
+  },
+  verify: {
+    answers:
+      'Whether a claim has already been fact-checked, and by how many INDEPENDENT checkers — five IFCN-signatory newsrooms read at once, with the count of separate origins rather than a count of headlines.',
+    example: 'video',
+    limit:
+      'It reports who examined a subject; it never collapses them into a verdict, because checkers addressing the same claim may have reached different conclusions. Only Lead Stories states its finding in the feed — for the other four the verdict is on the page, and the row says so rather than guessing one from the headline’s grammar. An empty result means nobody in this set has published on it, never that a claim is true.',
   },
   maritime: {
     answers:
