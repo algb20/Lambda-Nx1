@@ -122,6 +122,19 @@ export const API_GROUPS: ApiGroup[] = [
         ],
       },
       {
+        path: '/api/posture',
+        route: 'posture',
+        method: 'GET',
+        title: 'Whether this deployment’s own guarantees are switched on',
+        description:
+          'The evidence behind the “Passive · Lawful” badge, which used to be a hardcoded green shield that said the same words whether the guardrail was enforcing anything or had been deleted. Every check here is one that would fail if the protection were removed: the allowlist is probed with a host no source declares, a bound fetch is asked to issue DELETE, and the licence gate is asked how much it is still holding back. Published rather than kept internal, because a compliance claim a reader cannot inspect is a claim they are being asked to take on trust.',
+        returns: [
+          'lawful — true only when every check passed; never a default',
+          'checks — each with its label, pass or fail, and the evidence either way',
+          'checkedAt — a claim about compliance has an age, and this is it',
+        ],
+      },
+      {
         path: '/api/markets/constellation',
         route: 'markets/constellation',
         method: 'GET',
