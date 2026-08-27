@@ -7,6 +7,7 @@ import { Label, useCurated, useT } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import type { ChainRadarReport } from '@/lib/modules/chain-radar'
 import { useLive } from '@/lib/stream/use-live'
+import { ConstellationView } from '@/components/constellation-view'
 import {
   STATUS_MEANING,
   UNKNOWN,
@@ -170,6 +171,20 @@ export function MarketsPanel() {
             <Stat labelKey="mk.ethDominance" value={percent(m.ethDominance)} />
           </div>
         ) : null}
+      </Card>
+
+      {/*
+        The constellation leads the board.
+
+        Everything below it is a list of numbers — prices, volumes, congestion —
+        and a list answers "what is it worth". The one question a list cannot
+        answer is "what moves with what", which is the question that decides
+        whether a portfolio is diversified or is one bet written eleven times.
+        It is also the only surface here computed rather than reported, so it is
+        the thing this product has that a quote board does not.
+      */}
+      <Card className="p-4">
+        <ConstellationView />
       </Card>
 
       {/* ── Networks ─────────────────────────────────────────────────────── */}
