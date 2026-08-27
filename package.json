@@ -19,6 +19,7 @@
     "scan:secrets": "vitest run lib/security/secret-scan.test.ts",
     "walkthrough": "tsx scripts/walkthrough.ts",
     "check:deploys": "tsx scripts/check-deploys.ts",
+    "verify:live": "tsx scripts/verify-live.ts",
     "audit:responsive": "node scripts/responsive-audit.mjs",
     "package:studio": "node scripts/package.mjs --profile studio"
   },
