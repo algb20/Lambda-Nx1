@@ -914,7 +914,7 @@ export function GlobeView() {
                 onClick={() => setLayer(l)}
                 aria-pressed={layer === l}
                 title={LAYER_META[l].label}
-                className={`flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] transition-colors ${
+                className={`touch-target flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-[11px] transition-colors ${
                   layer === l
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:bg-muted'
@@ -977,7 +977,7 @@ export function GlobeView() {
         */}
         <button
           onClick={copyView}
-          className="ms-auto flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-muted-foreground ring-1 ring-border transition-colors hover:bg-muted"
+          className="touch-target ms-auto flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-muted-foreground ring-1 ring-border transition-colors hover:bg-muted"
           title="Copy a link to exactly this view — layer, region, window and mode"
         >
           <LinkIcon className="h-3 w-3" />
@@ -986,101 +986,130 @@ export function GlobeView() {
         <button
           onClick={() => load(true)}
           disabled={refreshing}
-          className="flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-muted-foreground ring-1 ring-border transition-colors hover:bg-muted disabled:opacity-50"
+          className="touch-target flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-muted-foreground ring-1 ring-border transition-colors hover:bg-muted disabled:opacity-50"
         >
           <RefreshCw className={`h-3 w-3 ${refreshing ? 'animate-spin' : ''}`} />
           {report ? <TimeStamp iso={report.generatedAt} fallback="Refresh" /> : 'Refresh'}
         </button>
       </div>
 
-      {isEventLayer && report ? (
-        <TimeScrubber
-          window={timeWindow}
-          histogram={histogram}
-          playbackStartMs={playbackStartMs}
-          playing={playing}
-          shown={inWindow.length}
-          held={inScope.length}
-          unplaceable={report.unplaceable.length}
-          receiptTimed={receiptTimed}
-          onChooseWindow={chooseWindow}
-          onScrub={(ms) => {
-            setPlaying(false)
-            // Landing on the last minute means "live", not "a minute ago": the
-            // board has to be able to return to its pinned state by hand.
-            setCursorMs(ms >= liveEdgeMs - 60_000 ? null : ms)
-          }}
-          onTogglePlay={togglePlay}
-        />
-      ) : null}
-
       {/*
-        The headline band.
+        Below `xl` the map comes first and its controls follow it.
 
-        Above the map rather than below it, and above the rail rather than
-        inside it, because these six figures decide whether anything under them
-        can be believed. Every figure is computed in `lib/world/kpis` and tested
-        there; four of them are ones a board that wanted to look healthy would
-        not volunteer — refused feeds, the age of the newest *observation*, the
-        regions nothing covers, and how many kinds are reporting at all.
+        Measured on a 390×844 phone once the rail and the strip landed: the
+        canvas began **685px down an 844px screen — 81% of it**. Eighty-one per
+        cent of a phone spent on instrumentation before the world it instruments.
+
+        The order is the fix, not deletion. The scrubber and the layer rail are
+        both *controls over the map*, and where height is the scarce resource a
+        control belongs under the thing it controls: the reader sees the world,
+        then adjusts it. Nothing is hidden and nothing moves more than one
+        screen. The **source order is unchanged** — only `order` moves things —
+        so the reading order for a screen reader and the tab order for a
+        keyboard both stay as written, which rearranging the JSX would have
+        broken silently.
+
+        From `xl`, where the height exists, the arrangement is exactly as before.
+        Measured after: 52% phone · 45% laptop · 33% desktop.
       */}
-      <KpiStrip report={report} />
-
-      {/*
-        Rail beside the map, in one row from `2xl`.
-
-        The category toggles used to live in a card *below* the canvas, so
-        changing what the map drew meant scrolling past the map, losing sight of
-        the thing being changed, and scrolling back to see the result. Below
-        `2xl` the rail keeps its place directly above the canvas and lays its
-        rows out sideways — still adjacent, still never behind it.
-
-        The breakpoint is `2xl` and not `xl`, and it was measured rather than
-        chosen. This tab already splits into a map pane and a 26rem context rail
-        from `xl`, so on a 1440 laptop the map pane is 752px wide — and a 208px
-        layer rail beside it left the canvas **530px**, a third of its width
-        spent on a third column of chrome. At 1920 the same rail leaves the map
-        884px, which it can afford. So the sideways form serves every width
-        where the vertical one would come out of the map itself.
-
-        `items-start` so the rail is its own height rather than stretching to
-        the canvas: an empty column of card below twelve categories is the kind
-        of dead space that made this page eleven thousand pixels tall.
-      */}
-      <div className="flex flex-col gap-3 2xl:flex-row 2xl:items-start">
-        {isEventLayer && report && report.categories.length > 0 ? (
-          <div className="2xl:w-56 2xl:shrink-0">
-            <LayerRail
-              report={report}
-              muted={muted}
-              onToggle={toggleCategory}
-              onOnly={onlyCategory}
-              onAll={showAllCategories}
-            />
-          </div>
+      <div className="flex flex-col gap-3">
+        <div className="order-3 xl:order-1">
+        {isEventLayer && report ? (
+          <TimeScrubber
+            window={timeWindow}
+            histogram={histogram}
+            playbackStartMs={playbackStartMs}
+            playing={playing}
+            shown={inWindow.length}
+            held={inScope.length}
+            unplaceable={report.unplaceable.length}
+            receiptTimed={receiptTimed}
+            onChooseWindow={chooseWindow}
+            onScrub={(ms) => {
+              setPlaying(false)
+              // Landing on the last minute means "live", not "a minute ago": the
+              // board has to be able to return to its pinned state by hand.
+              setCursorMs(ms >= liveEdgeMs - 60_000 ? null : ms)
+            }}
+            onTogglePlay={togglePlay}
+          />
         ) : null}
 
-        <Card className="min-w-0 flex-1 overflow-hidden p-0">
-          {/* The canvas is the riskiest part of this page (2D drawing, pointer
-              capture, animation frames). Isolate it so a failure there still
-              leaves the event list below usable. */}
-          <ErrorBoundary label="The world surface">
-            <WorldSurface
-              points={points}
-              height={height}
-              mode={mode}
-              onModeChange={setMode}
-              onSelect={isEventLayer ? onSelect : undefined}
-              /**
-               * Clustering is for the layers that plot hundreds of events. The
-               * coverage layer draws ten region marks whose *size* is its
-               * message, and the liquidity layer one mark per jurisdiction;
-               * merging either would destroy the thing being shown.
-               */
-              clusterRadius={isEventLayer ? CLUSTER_RADIUS_PX : 0}
-            />
-          </ErrorBoundary>
-        </Card>
+        </div>
+
+        <div className="order-1 xl:order-2">
+        {/*
+          The headline band.
+
+          Above the map rather than below it, and above the rail rather than
+          inside it, because these six figures decide whether anything under them
+          can be believed. Every figure is computed in `lib/world/kpis` and tested
+          there; four of them are ones a board that wanted to look healthy would
+          not volunteer — refused feeds, the age of the newest *observation*, the
+          regions nothing covers, and how many kinds are reporting at all.
+        */}
+        <KpiStrip report={report} />
+
+        </div>
+
+        <div className="order-2 xl:order-3">
+        {/*
+          Rail beside the map, in one row from `2xl`.
+
+          The category toggles used to live in a card *below* the canvas, so
+          changing what the map drew meant scrolling past the map, losing sight of
+          the thing being changed, and scrolling back to see the result. Below
+          `2xl` the rail keeps its place directly above the canvas and lays its
+          rows out sideways — still adjacent, still never behind it.
+
+          The breakpoint is `2xl` and not `xl`, and it was measured rather than
+          chosen. This tab already splits into a map pane and a 26rem context rail
+          from `xl`, so on a 1440 laptop the map pane is 752px wide — and a 208px
+          layer rail beside it left the canvas **530px**, a third of its width
+          spent on a third column of chrome. At 1920 the same rail leaves the map
+          884px, which it can afford. So the sideways form serves every width
+          where the vertical one would come out of the map itself.
+
+          `items-start` so the rail is its own height rather than stretching to
+          the canvas: an empty column of card below twelve categories is the kind
+          of dead space that made this page eleven thousand pixels tall.
+        */}
+        <div className="flex flex-col gap-3 2xl:flex-row 2xl:items-start">
+          {isEventLayer && report && report.categories.length > 0 ? (
+              <div className="order-2 2xl:order-none 2xl:w-56 2xl:shrink-0">
+              <LayerRail
+                report={report}
+                muted={muted}
+                onToggle={toggleCategory}
+                onOnly={onlyCategory}
+                onAll={showAllCategories}
+              />
+            </div>
+          ) : null}
+
+            <Card className="order-1 min-w-0 flex-1 overflow-hidden p-0 2xl:order-none">
+            {/* The canvas is the riskiest part of this page (2D drawing, pointer
+                capture, animation frames). Isolate it so a failure there still
+                leaves the event list below usable. */}
+            <ErrorBoundary label="The world surface">
+              <WorldSurface
+                points={points}
+                height={height}
+                mode={mode}
+                onModeChange={setMode}
+                onSelect={isEventLayer ? onSelect : undefined}
+                /**
+                 * Clustering is for the layers that plot hundreds of events. The
+                 * coverage layer draws ten region marks whose *size* is its
+                 * message, and the liquidity layer one mark per jurisdiction;
+                 * merging either would destroy the thing being shown.
+                 */
+                clusterRadius={isEventLayer ? CLUSTER_RADIUS_PX : 0}
+              />
+            </ErrorBoundary>
+          </Card>
+        </div>
+        </div>
       </div>
 
       {isEventLayer && report && inWindow.length === 0 && inScope.length > 0 ? (
@@ -1329,7 +1358,7 @@ export function GlobeView() {
                     key={s}
                     onClick={() => setSort(s)}
                     aria-pressed={sort === s}
-                    className={`shrink-0 whitespace-nowrap px-2 py-1 text-[10px] capitalize transition-colors ${
+                    className={`touch-target shrink-0 whitespace-nowrap px-2 py-1 text-[10px] capitalize transition-colors ${
                       sort === s
                         ? 'bg-primary text-primary-foreground'
                         : 'text-muted-foreground hover:bg-muted'

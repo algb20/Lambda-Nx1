@@ -240,7 +240,7 @@ export function PanelSection({
           aria-expanded={empty ? undefined : !collapsed}
           aria-controls={empty ? undefined : bodyId}
           disabled={empty}
-          className={`flex min-w-0 items-center gap-1.5 text-start ${
+          className={`touch-target flex min-w-0 items-center gap-1.5 text-start ${
             empty ? 'cursor-default' : 'cursor-pointer'
           }`}
         >

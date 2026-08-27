@@ -822,6 +822,23 @@ export function WorldSurface({
     <div
       className="relative w-full select-none bg-[#04090f]"
       style={{ height }}
+      /**
+       * How many marks this surface was actually handed.
+       *
+       * A canvas is opaque to a test: a browser can measure the element and see
+       * nothing of what was drawn inside it, so a map plotting the wrong things
+       * is exactly as inspectable as one plotting the right ones. That opacity
+       * is how ten events with no coordinate came to be drawn as a cluster
+       * labelled **10** at 0°N 0°E while the page's own badge read `0 of 10 on
+       * the map` — three surfaces disagreeing, and not one of 2,500 unit tests
+       * able to see it, because the fault lived between them.
+       *
+       * So the surface states its own input. `world-consistency.browser.ts`
+       * holds it to the report: if the engine placed *n* events, the canvas was
+       * handed *n* marks. This is the only thing on the page that could tell a
+       * fabricated coordinate from a real one, and it costs one attribute.
+       */
+      data-plotted={points.length}
     >
       <canvas
         ref={canvasRef}
@@ -856,7 +873,7 @@ export function WorldSurface({
         // the view you would switch *to* and swaps on each press.
         <button
           onClick={() => setMode(mode === 'globe' ? 'map' : 'globe')}
-          className="absolute left-3 top-3 flex items-center gap-1.5 rounded-md bg-background/80 px-2.5 py-1.5 text-[11px] font-medium text-foreground ring-1 ring-border backdrop-blur transition-colors hover:bg-background"
+          className="touch-target absolute left-3 top-3 flex items-center gap-1.5 rounded-md bg-background/80 px-2.5 py-1.5 text-[11px] font-medium text-foreground ring-1 ring-border backdrop-blur transition-colors hover:bg-background"
           title={mode === 'globe' ? 'Switch to the flat world map' : 'Switch to the 3D globe'}
           aria-label={mode === 'globe' ? 'Switch to the flat world map' : 'Switch to the 3D globe'}
         >
@@ -873,24 +890,24 @@ export function WorldSurface({
       ) : null}
 
       {/* Clear of the HUD band along the bottom edge. */}
-      <div className="absolute bottom-12 right-3 flex flex-col gap-1">
+      <div className="absolute bottom-12 right-3 flex flex-col gap-1.5">
         <button
           onClick={() => nudgeZoom(1.3)}
-          className="flex h-7 w-7 items-center justify-center rounded-md bg-background/80 text-foreground ring-1 ring-border backdrop-blur hover:bg-background"
+          className="touch-size flex h-7 w-7 items-center justify-center rounded-md bg-background/80 text-foreground ring-1 ring-border backdrop-blur hover:bg-background"
           title="Zoom in"
         >
           <Plus className="h-3.5 w-3.5" />
         </button>
         <button
           onClick={() => nudgeZoom(1 / 1.3)}
-          className="flex h-7 w-7 items-center justify-center rounded-md bg-background/80 text-foreground ring-1 ring-border backdrop-blur hover:bg-background"
+          className="touch-size flex h-7 w-7 items-center justify-center rounded-md bg-background/80 text-foreground ring-1 ring-border backdrop-blur hover:bg-background"
           title="Zoom out"
         >
           <Minus className="h-3.5 w-3.5" />
         </button>
         <button
           onClick={resetView}
-          className="flex h-7 w-7 items-center justify-center rounded-md bg-background/80 text-muted-foreground ring-1 ring-border backdrop-blur hover:bg-background"
+          className="touch-size flex h-7 w-7 items-center justify-center rounded-md bg-background/80 text-muted-foreground ring-1 ring-border backdrop-blur hover:bg-background"
           title="Reset view"
         >
           <RotateCcw className="h-3.5 w-3.5" />

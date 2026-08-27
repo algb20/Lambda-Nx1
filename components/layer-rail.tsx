@@ -154,7 +154,7 @@ export function LayerRail({ report, muted, onToggle, onOnly, onAll }: LayerRailP
                 onClick={() => onToggle(row.category)}
                 aria-pressed={on}
                 title={`${on ? 'Hide' : 'Show'} ${row.label} on the map`}
-                className="flex min-w-0 flex-1 items-center gap-2 text-start"
+                className="touch-target flex min-w-0 flex-1 items-center gap-2 text-start"
               >
                 {/* The mark the canvas draws, not a colour swatch. */}
                 <GlyphMark category={row.category} color={row.color} size={16} dim={!on} />

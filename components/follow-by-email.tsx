@@ -85,7 +85,7 @@ export function FollowByEmail() {
           autoComplete="email"
           className="h-8 text-xs"
         />
-        <Button onClick={submit} disabled={busy || !email.trim()} size="sm" className="h-8 shrink-0">
+        <Button onClick={submit} disabled={busy || !email.trim()} size="sm" className="touch-target h-8 shrink-0">
           {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Follow'}
         </Button>
       </div>
