@@ -239,6 +239,91 @@ export function LiveColumns() {
     )
   }
 
+  /**
+   * A rail with nothing in it has to say so.
+   *
+   * This returned an empty grid — a pane of blank pixels beside the map, 592px
+   * wide at 1440 and 1712px at 2560, with no word in it. Measured on the front
+   * page with a rate-limited sweep: the rail held 415 characters, all of them
+   * the amber banner, and the rest was void. A reader cannot tell that from a
+   * product that has finished loading and found the world quiet, and the second
+   * reading is the flattering one — which is exactly why it must not be left
+   * available.
+   *
+   * The three causes are genuinely different and the panel names which one this
+   * is: no report at all (the sweep never came back), a report that read sources
+   * and found nothing, or a report whose events all fell outside every subject
+   * box. Each states what it *did* manage, because "we read 119 sources and none
+   * of them had anything" is a finding, and a blank pane is not.
+   */
+  if (boxes.length === 0) {
+    return (
+      <div className="flex h-full min-h-0 flex-col gap-2 p-4 text-xs">
+        {error ? (
+          <p className="flex items-start gap-1.5 rounded-md bg-amber-500/10 px-2 py-1.5 text-[11px] text-amber-700 dark:text-amber-500">
+            <AlertCircle className="mt-px h-3 w-3 shrink-0" />
+            <span>{error}</span>
+          </p>
+        ) : null}
+        <p className="font-medium">
+          {report ? 'The sweep returned no events to group.' : 'No sweep to read.'}
+        </p>
+        {report ? (
+          <>
+            {/*
+              The three source counts, separately. One number — "119 sources" —
+              hides the difference between a feed that answered with nothing and
+              a feed that did not answer, and that difference is the whole
+              question when a rail is empty. The first is a quiet world; the
+              second is a broken sweep.
+            */}
+            <dl className="grid grid-cols-3 gap-2 text-center">
+              {(
+                [
+                  ['answered', report.summary.sourcesOk],
+                  ['empty', report.summary.sourcesEmpty],
+                  ['failed', report.summary.sourcesFailed],
+                ] as const
+              ).map(([label, value]) => (
+                <div key={label} className="rounded-md border border-border bg-muted/40 px-2 py-1.5">
+                  <dd className="text-sm font-semibold tabular-nums">{value}</dd>
+                  <dt className="text-[10px] text-muted-foreground">{label}</dt>
+                </div>
+              ))}
+            </dl>
+            <p className="text-[11px] leading-relaxed text-muted-foreground">
+              It carried{' '}
+              <span className="font-medium tabular-nums text-foreground">
+                {report.summary.total}
+              </span>{' '}
+              events, of which{' '}
+              <span className="font-medium tabular-nums text-foreground">
+                {report.summary.placed}
+              </span>{' '}
+              could be placed on the map. Nothing here is hidden: this rail
+              groups events by subject, and there was no subject to draw.
+            </p>
+          </>
+        ) : (
+          <p className="text-[11px] leading-relaxed text-muted-foreground">
+            Three different things produce an empty world, and they look
+            identical from here: a deployment with no server, a server with no
+            outbound access, and a fault in the sweep itself.{' '}
+            <a href="/setup" className="font-medium text-primary hover:underline">
+              Find out which one this is
+            </a>
+            .
+          </p>
+        )}
+        {report ? (
+          <p className="text-[10px] text-muted-foreground">
+            Last read <TimeStamp iso={report.generatedAt} fallback="time not stated" />.
+          </p>
+        ) : null}
+      </div>
+    )
+  }
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       {/* A stale picture is still shown, and still labelled. Blanking it would

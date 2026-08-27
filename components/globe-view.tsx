@@ -698,9 +698,29 @@ export function GlobeView() {
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <Globe2 className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-bold">Live world surface</h2>
+      {/*
+        One control band, not four stacked ones.
+
+        The title, the layer chips, the sentence naming the selected layer and
+        the refresh button each had a row of their own, separated by 12px. That
+        is article rhythm, and this is not an article — measured, the map began:
+
+        | Viewport  | Map starts at | Screen spent before it |
+        |-----------|---------------|------------------------|
+        | 1920×1080 | 359px         | 33%                    |
+        | 1440×900  | 375px         | **42%**                |
+        | 390×844   | 414px         | **49%**                |
+
+        Half a phone screen, and nearly half a laptop's, went to chrome before
+        the thing the page exists to show. Nothing here is deleted — the title,
+        the counts, the layer names and the sentence all remain, and the sentence
+        is still on its own line on a phone where the band would otherwise wrap
+        into a paragraph. They simply share a line where there is a line to
+        share.
+      */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <Globe2 className="h-5 w-5 shrink-0 text-primary" />
+        <h2 className="text-base font-bold lg:text-lg">Live world surface</h2>
         {/*
           It read `0/10` beside a green dot, and nothing else. A reader met two
           numbers with no units, a healthy-looking dot, and an empty map — and
@@ -724,27 +744,18 @@ export function GlobeView() {
             <span className="tabular-nums">{report.summary.total}</span> on the map
           </Badge>
         ) : null}
-        <button
-          onClick={() => load(true)}
-          disabled={refreshing}
-          className="ml-auto flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-muted-foreground ring-1 ring-border transition-colors hover:bg-muted disabled:opacity-50"
-        >
-          <RefreshCw className={`h-3 w-3 ${refreshing ? 'animate-spin' : ''}`} />
-          {report ? <TimeStamp iso={report.generatedAt} fallback="Refresh" /> : 'Refresh'}
-        </button>
-      </div>
 
-      {/* Layer + region controls, above the canvas so they are reachable on a
-          phone without scrolling past a full-height globe.
+        {/* Layer controls, in the title band rather than a row below it, and
+            still above the canvas so they are reachable on a phone without
+            scrolling past a full-height globe.
 
-          The labels used to collapse to icons below 640px, on the reasoning
-          that the sentence underneath names the layer in full. It names the
-          *selected* one — so a phone reader saw five unlabelled glyphs and had
-          to tap each to find out what it was. A glyph is not a word, and it is
-          less of one for the majority of our readers, who never met this icon
-          set. The row scrolls sideways instead: every option stays readable and
-          the cost is one gesture. */}
-      <div className="flex flex-wrap items-center gap-1.5">
+            The labels used to collapse to icons below 640px, on the reasoning
+            that the sentence underneath names the layer in full. It names the
+            *selected* one — so a phone reader saw five unlabelled glyphs and had
+            to tap each to find out what it was. A glyph is not a word, and it is
+            less of one for the majority of our readers, who never met this icon
+            set. The row scrolls sideways instead: every option stays readable and
+            the cost is one gesture. */}
         <span className="scroll-row flex max-w-full items-center rounded-md ring-1 ring-border">
           {(Object.keys(LAYER_META) as Layer[]).map((l) => {
             const Icon = LAYER_META[l].icon
@@ -796,12 +807,27 @@ export function GlobeView() {
             ))}
           </>
         ) : null}
-      </div>
 
-      <p className="text-[10px] leading-relaxed text-muted-foreground">
-        <span className="font-medium text-foreground">{LAYER_META[layer].label}.</span>{' '}
-        {LAYER_META[layer].question}
-      </p>
+        {/*
+          The sentence naming the selected layer. It keeps its own line on a
+          phone — squeezed into a band beside five chips it would wrap to two
+          words a line — and joins the band from `lg`, where there is room for
+          it and the row below it was pure spacing.
+        */}
+        <p className="w-full text-[10px] leading-relaxed text-muted-foreground lg:w-auto lg:min-w-0 lg:flex-1 lg:truncate">
+          <span className="font-medium text-foreground">{LAYER_META[layer].label}.</span>{' '}
+          {LAYER_META[layer].question}
+        </p>
+
+        <button
+          onClick={() => load(true)}
+          disabled={refreshing}
+          className="ms-auto flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-muted-foreground ring-1 ring-border transition-colors hover:bg-muted disabled:opacity-50"
+        >
+          <RefreshCw className={`h-3 w-3 ${refreshing ? 'animate-spin' : ''}`} />
+          {report ? <TimeStamp iso={report.generatedAt} fallback="Refresh" /> : 'Refresh'}
+        </button>
+      </div>
 
       {isEventLayer && report ? (
         <TimeScrubber

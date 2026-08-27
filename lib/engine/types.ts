@@ -29,6 +29,7 @@ export type Capability =
   | 'ownership'
   | 'news'
   | 'market_board'
+  | 'market_series'
   | 'crypto'
   | 'maritime'
   | 'verification'

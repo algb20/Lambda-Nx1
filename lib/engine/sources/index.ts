@@ -32,6 +32,7 @@ import { gdeltNews, wikiInTheNews, usgsQuakes, reliefWeb } from './news'
 import { wikidata } from './reference'
 // Gateway — Markets Board (live multi-class overview)
 import { coingeckoTop, fredCommodities, fredIndices, frankfurterBoard } from './markets-board'
+import { MARKET_SERIES_SOURCES } from './market-series'
 import { PROPERTY_SOURCES } from './property'
 import { VENUE_SOURCES } from './venues'
 import { FILING_SOURCES } from './filings'
@@ -341,6 +342,19 @@ export function registerMarketsBoard(): void {
   if (registeredBoard) return
   registry.registerAll(marketsBoardSources)
   registeredBoard = true
+}
+
+let registeredSeries = false
+/**
+ * Price histories for the correlation constellation. Separate from
+ * `registerMarketsBoard` on purpose: the board is a quote surface and pays a
+ * quote's request cost, and a reader who never opens the constellation should
+ * never spend a call on 168 hourly closes for a hundred assets.
+ */
+export function registerMarketSeries(): void {
+  if (registeredSeries) return
+  registry.registerAll(MARKET_SERIES_SOURCES)
+  registeredSeries = true
 }
 
 let registeredProperty = false

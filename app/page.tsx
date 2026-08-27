@@ -10,6 +10,7 @@ import { FollowByEmail } from "@/components/follow-by-email"
 import { LiveColumns } from "@/components/live-columns"
 import { UserPreferences } from "@/components/user-preferences"
 import { BottomNav } from "@/components/bottom-nav"
+import { shellContainerFor } from "@/lib/shell-width"
 import { CommandPalette } from '@/components/command-palette'
 import { SideNav } from "@/components/side-nav"
 import { ContextRail } from "@/components/context-rail"
@@ -131,7 +132,7 @@ export default function HomePage({ initialTab }: { initialTab?: Tab } = {}) {
       style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
       className="min-h-screen bg-background lg:!pb-0"
     >
-      <Header onNavigate={navigate} />
+      <Header onNavigate={navigate} tab={activeTab} />
 
       {/* One keystroke to any of five tabs and twenty-seven gateways. Mounted
           at the shell so it works from every panel, including a broken one. */}
@@ -165,9 +166,7 @@ export default function HomePage({ initialTab }: { initialTab?: Tab } = {}) {
           // column wastes the monitor and squeezes every number.
           activeTab === "globe"
             ? "flex w-full gap-0 px-0 py-0"
-            : activeTab === "markets"
-              ? "container mx-auto flex gap-6 px-4 py-4 lg:max-w-none lg:gap-8 lg:py-6"
-              : "container mx-auto flex gap-6 px-4 py-4 lg:max-w-[88rem] lg:gap-8 lg:py-6 2xl:max-w-[104rem]"
+            : `${shellContainerFor(activeTab)} flex gap-6 py-4 lg:gap-8 lg:py-6`
         }
       >
         <SideNav activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -207,7 +206,32 @@ export default function HomePage({ initialTab }: { initialTab?: Tab } = {}) {
                 the world.
               */
               <div className="flex min-h-[calc(100vh-3.5rem)] flex-col xl:flex-row">
-                <div className="min-w-0 flex-1 space-y-6 px-4 py-4 xl:max-w-[38rem] xl:overflow-y-auto">
+                {/*
+                  The map takes the monitor; the reading takes a rail.
+
+                  This was the other way round and it was measured, not
+                  disliked. The map pane carried `xl:max-w-[38rem]` and the rail
+                  `flex-1`, so every pixel past 1440 went to the rail and none
+                  to the globe:
+
+                  | Viewport | Globe canvas | Rail  | Text in the rail |
+                  |----------|--------------|-------|------------------|
+                  | 1280     | 502px        | 505px | 415 chars        |
+                  | 1440     | 574px        | 592px | 415 chars        |
+                  | 1920     | **574px**    | 1072px| 415 chars        |
+                  | 2560     | **574px**    | 1712px| 415 chars        |
+
+                  On a 2560 monitor two thirds of the screen held four hundred
+                  characters and the product's flagship surface stayed at
+                  574px. A display that does not grow with the display it is on
+                  is not an operations surface, whatever it is called.
+
+                  So the cap moves to the rail, which is the pane that has a
+                  natural right width — a subject box is readable at about
+                  19rem and gains nothing from more. The map takes what is
+                  left, which is now everything a bigger monitor adds.
+                */}
+                <div className="min-w-0 flex-1 space-y-6 px-4 py-4 xl:overflow-y-auto">
                 {/*
                   The brief leads the map rather than sitting behind a button.
                   It reads the same world picture the globe draws, and the
@@ -260,7 +284,7 @@ export default function HomePage({ initialTab }: { initialTab?: Tab } = {}) {
                   how an operations display behaves and the opposite of how an
                   article does.
                 */}
-                <aside className="min-w-0 flex-1 border-t border-border xl:sticky xl:top-14 xl:h-[calc(100vh-3.5rem)] xl:min-w-[28rem] xl:border-l xl:border-t-0">
+                <aside className="min-w-0 shrink-0 border-t border-border xl:sticky xl:top-14 xl:h-[calc(100vh-3.5rem)] xl:w-[26rem] xl:border-l xl:border-t-0 2xl:w-[32rem]">
                   <LiveColumns />
                 </aside>
               </div>

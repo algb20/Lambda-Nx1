@@ -120,3 +120,82 @@ describe('a control that cannot be read is not a control', () => {
     expect(source).toContain('scroll-row')
   })
 })
+
+describe('the header and the page share one shell', () => {
+  /**
+   * They were separate strings and they drifted, which is the only way this
+   * could have happened: the header kept `max-w-2xl` (672px) from when the
+   * product was a single reading column, while the page grew to `88rem`. On a
+   * 1440px screen their left edges were 80px apart and on 1920px they were
+   * 208px apart, so the brand and every control in the bar lined up with
+   * nothing underneath them.
+   *
+   * One exported constant is the fix; this is what keeps it one. A future edit
+   * that hard-codes a width into either file puts the two back out of step
+   * silently, and no screenshot in CI would catch it.
+   */
+  for (const file of ['components/header.tsx', 'app/page.tsx']) {
+    it(`${file} takes its width from lib/shell-width`, () => {
+      const source = code(file)
+      expect(source).toContain('shellContainerFor')
+      expect(source).toMatch(/from ["']@\/lib\/shell-width["']/)
+    })
+  }
+
+  /**
+   * And neither may re-declare one. `container mx-auto` written out in either
+   * file is the drift itself, whatever value follows it.
+   */
+  it('neither file writes its own shell container', () => {
+    for (const file of ['components/header.tsx', 'app/page.tsx']) {
+      expect(code(file)).not.toMatch(/container mx-auto/)
+    }
+  })
+})
+
+describe('the globe gives the monitor to the map, not to the rail', () => {
+  const page = code('app/page.tsx')
+
+  /**
+   * Measured before the fix: the map pane carried `xl:max-w-[38rem]` and the
+   * rail `flex-1`, so the globe canvas stopped growing at 574px while the rail
+   * reached 1072px at 1920 and 1712px at 2560 — holding 415 characters. Every
+   * pixel a bigger monitor added went to the pane that did not need it.
+   *
+   * The cap belongs on the rail, which has a natural right width, and the map
+   * takes the remainder. A cap back on the map pane is the regression.
+   */
+  it('the map pane carries no width cap', () => {
+    expect(page).not.toMatch(/xl:max-w-\[38rem\]/)
+  })
+
+  it('the rail is the pane with a fixed width', () => {
+    expect(page).toMatch(/xl:w-\[26rem\]/)
+    expect(page).toMatch(/2xl:w-\[32rem\]/)
+  })
+})
+
+describe('an empty pane says why it is empty', () => {
+  /**
+   * The rail returned an empty grid when a sweep carried no events: several
+   * hundred pixels of nothing beside the map, which reads as a product that
+   * loaded and found the world quiet. That is the flattering reading and it was
+   * the wrong one — the sweep had been rate-limited.
+   */
+  const rail = code('components/live-columns.tsx')
+
+  it('the live rail has an empty state at all', () => {
+    expect(rail).toMatch(/boxes\.length === 0/)
+  })
+
+  /**
+   * And it separates the two source outcomes that look identical from a blank
+   * pane: a feed that answered with nothing is a quiet world, a feed that did
+   * not answer is a broken sweep.
+   */
+  it('it distinguishes a quiet source from a failed one', () => {
+    expect(rail).toContain('sourcesOk')
+    expect(rail).toContain('sourcesEmpty')
+    expect(rail).toContain('sourcesFailed')
+  })
+})

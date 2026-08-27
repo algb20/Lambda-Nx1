@@ -122,6 +122,22 @@ export const API_GROUPS: ApiGroup[] = [
         ],
       },
       {
+        path: '/api/markets/constellation',
+        route: 'markets/constellation',
+        method: 'GET',
+        title: 'The correlation constellation — what moves with what',
+        description:
+          'A hundred assets, their last seven days of hourly closes, and the structure that connects them: Pearson correlation on log returns, Mantegna distance √(2(1−r)), a minimum spanning tree over it, and average-linkage groups. Computed, not reported — this is the one markets surface here that is not a quote.',
+        returns: [
+          'nodes — every asset with its group, its mean correlation and its degree in the tree, placed in 3D by a deterministic layout',
+          'edges — the n−1 strongest links that still connect the whole market, each carrying r and the distance',
+          'clusters — named after their largest member, with the mean correlation inside each',
+          'method — observations, window, and the named distance, structure and clustering, so the number can be argued with',
+          'dropped — every asset excluded, with the reason and the measurement that caused it',
+          'concentration — how much of the market sits in one group, which in crypto is a finding rather than a fault',
+        ],
+      },
+      {
         path: '/api/mcp',
         route: 'mcp',
         method: 'POST',
