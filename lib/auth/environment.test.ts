@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   SURFACE_POLL_MS,
   SURFACE_SETTLE_MS,
@@ -6,6 +6,9 @@ import {
   looksLikePiBrowser,
   offerFor,
   subscribeToSurface,
+  confirmPiSurface,
+  piSurfaceConfirmed,
+  resetPiSurfaceConfirmation,
   surfaceOnServer,
   surfaceSnapshot,
 } from './environment'
@@ -178,5 +181,71 @@ describe('what each surface is offered', () => {
     expect(web.length).toBeGreaterThan(30)
     // The web note must tell a Pi user the route that does work for them.
     expect(web).toContain('Pi username')
+  })
+})
+
+describe('the pioneer whose Pi Browser does not say so', () => {
+  const realWindow = (globalThis as { window?: unknown }).window
+  const PLAIN = 'Mozilla/5.0 (Linux; Android 13) Chrome/120 Mobile'
+
+  beforeEach(() => {
+    resetPiSurfaceConfirmation()
+    // A Pi Browser that names itself as ordinary mobile Chrome, with no bridge
+    // yet — which is what one looks like before anything loads the SDK.
+    ;(globalThis as { window?: unknown }).window = { navigator: { userAgent: PLAIN } }
+  })
+  afterEach(() => {
+    resetPiSurfaceConfirmation()
+    if (realWindow === undefined) delete (globalThis as { window?: unknown }).window
+    else (globalThis as { window?: unknown }).window = realWindow
+  })
+
+  /**
+   * The circle this closes, stated as the three facts that made it:
+   *
+   *   1. the surface is `pi-browser` only if the agent says so or `window.Pi` exists
+   *   2. `window.Pi` exists only after the app loads the SDK
+   *   3. the app loads the SDK only when the surface is `pi-browser`
+   *
+   * A real Pi Browser whose agent carries no mark satisfies none of them, so it
+   * was shown the email form — inside Pi Browser — for as long as it existed.
+   */
+  it('is still web before anything asks Pi, with no mark and no bridge', () => {
+    expect(detectSurface({ userAgent: PLAIN, hasPiBridge: false })).toBe('web')
+  })
+
+  it('becomes pi-browser once a real handshake confirms it', () => {
+    const plainAgent = { userAgent: PLAIN, hasPiBridge: false }
+    expect(detectSurface(plainAgent)).toBe('web')
+    confirmPiSurface()
+    expect(detectSurface({ ...plainAgent, confirmedPi: piSurfaceConfirmed() })).toBe('pi-browser')
+  })
+
+  /**
+   * The confirmation can land after the settle window closes — a handshake on a
+   * slow phone is not a five-second affair — so it must notify subscribers
+   * directly rather than waiting to be polled.
+   */
+  it('tells subscribers immediately, not on the next poll', () => {
+    const seen: number[] = []
+    const stop = subscribeToSurface(() => seen.push(Date.now()))
+    confirmPiSurface()
+    expect(seen, 'a confirmation nobody hears leaves the wrong form on screen').toHaveLength(1)
+    stop()
+  })
+
+  it('stops notifying after the subscriber leaves', () => {
+    let calls = 0
+    const stop = subscribeToSurface(() => calls++)
+    stop()
+    confirmPiSurface()
+    expect(calls).toBe(0)
+  })
+
+  /** Never the other way: a confirmed pioneer does not become a web visitor. */
+  it('does not go back', () => {
+    confirmPiSurface()
+    confirmPiSurface()
+    expect(piSurfaceConfirmed()).toBe(true)
   })
 })

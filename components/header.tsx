@@ -9,6 +9,7 @@ import { BrandMark } from "@/components/brand-mark"
 import { useTheme } from "@/hooks/use-theme"
 import { useI18n, CURATED_LOCALES, SUPPORTED_LOCALES, LOCALE_LABELS } from "@/lib/i18n"
 import { usePiAuthOptional } from "@/contexts/pi-auth-context"
+import { SUBSCRIPTION_VISIBLE } from "@/lib/plans/plans"
 import { useViewer } from "@/hooks/use-viewer"
 
 /**
@@ -177,7 +178,10 @@ export function Header({ onNavigate }: { onNavigate?: (tab: 'preferences') => vo
                 </>
               ) : null}
             </div>
-            {onNavigate ? (
+            {/* Hidden with the rest of the subscription surface (R273) — a
+                button that leads to a price list nobody can see is a dead end,
+                which is the exact fault this button was added to fix. */}
+            {onNavigate && SUBSCRIPTION_VISIBLE ? (
               <Button
                 variant="outline"
                 size="sm"

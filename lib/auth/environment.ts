@@ -37,8 +37,15 @@ export type Surface = 'pi-browser' | 'web'
 
 export interface EnvironmentSignals {
   userAgent: string
-  /** Whether `window.Pi` is present. */
+  /**
+   * Whether `window.Pi` is present.
+   *
+   * Weak evidence, and weaker since the app began loading the SDK itself — see
+   * `confirmPiSurface` below. Kept for a host that injects the bridge first.
+   */
   hasPiBridge: boolean
+  /** A real `Pi.authenticate` handshake completed. Proof, not a guess. */
+  confirmedPi?: boolean
 }
 
 /**
@@ -64,8 +71,65 @@ export function looksLikePiBrowser(userAgent: string): boolean {
  * once, which is the worse of the two errors.
  */
 export function detectSurface(signals: EnvironmentSignals): Surface {
+  if (signals.confirmedPi) return 'pi-browser'
   return signals.hasPiBridge || looksLikePiBrowser(signals.userAgent) ? 'pi-browser' : 'web'
 }
+
+/**
+ * The pioneer whose Pi Browser does not say so, and the circle that trapped them.
+ *
+ * ## What was wrong
+ *
+ * Every signal above is a *guess made before anything is loaded*, and both
+ * guesses can be false inside a real Pi Browser:
+ *
+ *  - The user agent mark is not guaranteed. Pi Browser is a Chromium shell and
+ *    its agent string has looked like ordinary mobile Chrome in releases; the
+ *    list above exists precisely because the token has changed before.
+ *  - `window.Pi` is **injected by the SDK script, which the app loads itself**.
+ *    Pi Browser does not put it there.
+ *
+ * So the two combined into a circle with no way in:
+ *
+ *     surface is pi-browser  ⟸ window.Pi exists
+ *     window.Pi exists       ⟸ the app loaded the SDK
+ *     the app loads the SDK  ⟸ surface is pi-browser
+ *
+ * A pioneer whose agent lacked the mark waited out the whole settle window for
+ * a bridge nothing would ever inject, and was shown the email form inside Pi
+ * Browser — the exact failure the mark list was written to avoid.
+ *
+ * ## What replaces it
+ *
+ * A capability, taken rather than guessed: load the SDK and *ask Pi who this
+ * is*. `Pi.authenticate` returns a pioneer inside Pi Browser and settles no
+ * other way anywhere else, so a successful handshake is proof no string can
+ * give. `confirmPiSurface()` is called by whatever completes that handshake.
+ *
+ * Note what this makes untrue: once the app loads the SDK on the open web,
+ * `window.Pi` exists there too, so `hasPiBridge` stops being evidence of
+ * anything. It is kept only for a host that injects the bridge before we do,
+ * and the confirmation above is what actually decides.
+ */
+let piConfirmed = false
+
+/** Record that a real Pi handshake completed. Irreversible by design. */
+export function confirmPiSurface(): void {
+  if (piConfirmed) return
+  piConfirmed = true
+  for (const listener of surfaceListeners) listener()
+}
+
+export function piSurfaceConfirmed(): boolean {
+  return piConfirmed
+}
+
+/** Test seam: forget the confirmation between cases. */
+export function resetPiSurfaceConfirmation(): void {
+  piConfirmed = false
+}
+
+const surfaceListeners = new Set<() => void>()
 
 /** Read the signals from the browser. Returns `web` when there is no browser. */
 export function detectSurfaceNow(): Surface {
@@ -73,6 +137,7 @@ export function detectSurfaceNow(): Surface {
   return detectSurface({
     userAgent: window.navigator?.userAgent ?? '',
     hasPiBridge: typeof (window as { Pi?: unknown }).Pi !== 'undefined',
+    confirmedPi: piSurfaceConfirmed(),
   })
 }
 
@@ -135,6 +200,12 @@ export function subscribeToSurface(onChange: () => void): () => void {
   let last = detectSurfaceNow()
   if (last === 'pi-browser') return () => {}
 
+  /**
+   * The confirmation can arrive after the settle window closes — a Pi
+   * handshake on a slow phone is not a 5-second affair — so listeners are
+   * notified directly by `confirmPiSurface` rather than only by the poll.
+   */
+  surfaceListeners.add(onChange)
   const started = Date.now()
   const timer = setInterval(() => {
     const now = detectSurfaceNow()
@@ -147,7 +218,10 @@ export function subscribeToSurface(onChange: () => void): () => void {
     }
   }, SURFACE_POLL_MS)
 
-  return () => clearInterval(timer)
+  return () => {
+    surfaceListeners.delete(onChange)
+    clearInterval(timer)
+  }
 }
 
 export interface SignInOffer {

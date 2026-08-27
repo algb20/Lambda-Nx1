@@ -16,6 +16,7 @@ import {
   withTimeout,
   type PiAuthStatus,
 } from "@/lib/auth/pi-client";
+import { confirmPiSurface } from "@/lib/auth/environment";
 
 // Our own login endpoint (independent of the App Studio default backend).
 const LOGIN_URL = "/api/auth/pi";
@@ -190,6 +191,12 @@ export function PiAuthProvider({
       setApiAuthToken(piAuthResult.accessToken);
     }
 
+    /**
+     * A completed handshake is the proof `environment.ts` could not get from a
+     * user-agent string. Recording it here means a pioneer whose Pi Browser
+     * does not identify itself is still recognised for the rest of the session.
+     */
+    confirmPiSurface();
     setUserData(loginRes.data);
   };
 
