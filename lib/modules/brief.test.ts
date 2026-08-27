@@ -91,6 +91,7 @@ function report(over: Partial<WorldEventsReport> = {}): WorldEventsReport {
       total: 1,
       placed: 1,
       newestAt: '2026-08-14T11:35:00.000Z',
+      untimed: 0,
       sources: ['usgs_recent'],
       sourcesOk: 1,
       sourcesEmpty: 1,

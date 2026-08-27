@@ -39,9 +39,11 @@ import {
   CATEGORY_META,
   REGION_LABEL,
   dedupeEvents,
+  newestObservation,
   operationalOrder,
   regionOf,
   severityOf,
+  untimedCount,
   type EventCategory,
   type Region,
   type FusedEventSummary,
@@ -521,11 +523,28 @@ export async function getWorldEvents(): Promise<WorldEventsReport> {
         STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || a.sourceKey.localeCompare(b.sourceKey),
     )
 
-  const newestAt = deduped.reduce<string | null>((newest, e) => {
-    const t = Date.parse(e.at)
-    if (!Number.isFinite(t)) return newest
-    return !newest || t > Date.parse(newest) ? e.at : newest
-  }, null)
+  /**
+   * The newest thing a **publisher** said happened — not the newest thing we
+   * fetched.
+   *
+   * This reduced over `e.at` until it was measured on a running board. `at` is
+   * `retrievedAt`, our own clock stamped on the record as it arrived, so the
+   * figure was arithmetically incapable of being anything but the present
+   * moment. Every surface reading it — the board header, the pinned gateways,
+   * the standing brief's "Newest", and the live-edge figure in the KPI strip —
+   * printed a confident **just now** over a run whose freshest item was three
+   * hours old and whose oldest was from the previous day.
+   *
+   * The field's own documentation says it answers "is this live?". Read from
+   * the retrieval clock it answered nothing: it restated that we had just made
+   * a request, which is never in doubt.
+   *
+   * Both figures live in `world-events-shared` so they can be tested without
+   * running a sweep — an inlined reducer is exactly how the wrong field went
+   * unnoticed.
+   */
+  const newestAt = newestObservation(deduped)
+  const untimed = untimedCount(deduped)
 
   // The sweep's own outcome, written to the platform's record of itself. Not
   // awaited: this is bookkeeping about a sweep, and it must never be able to
@@ -569,8 +588,12 @@ export async function getWorldEvents(): Promise<WorldEventsReport> {
     summary: {
       total: deduped.length,
       placed: events.length,
-      /** The most recent event we hold — the honest answer to "is this live?". */
+      /**
+       * The newest time a *publisher* stated, or null when nobody stated one.
+       * Never our retrieval clock — see the reducer above for what that cost.
+       */
       newestAt,
+      untimed,
       sources: results.map((r) => r.sourceKey),
       // Counted from the graded health, so "ok" means contributed — not merely
       // "did not throw". A summary that counts empty feeds as healthy is how an

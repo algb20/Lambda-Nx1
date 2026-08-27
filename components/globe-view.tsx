@@ -29,6 +29,9 @@ import {
   Link2 as LinkIcon,
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { KpiStrip } from '@/components/kpi-strip'
+import { LayerRail } from '@/components/layer-rail'
+import { allLayers, onlyLayer } from '@/lib/world/layers'
 import {
   NameList,
   PanelSection,
@@ -56,6 +59,7 @@ import {
   describeWindow,
   detectionLagMinutes,
   fusedByEventId,
+  hasCoordinate,
   humanHours,
   lagBandOf,
   latencyProfile,
@@ -592,6 +596,36 @@ export function GlobeView() {
     [ranked, selectedId],
   )
 
+  /**
+   * The ranked events the map may actually draw.
+   *
+   * `ranked` deliberately carries unplaceable events, because the *list* must
+   * rank a sanctions package and a central-bank decision alongside a hazard —
+   * that is the defect documented above `listScope`. The **map** cannot draw
+   * them, and the three point branches below were reading `r.event.lat as
+   * number` off records whose `lat` is `null`.
+   *
+   * A cast is not a conversion. `null as number` is still `null` at runtime,
+   * arithmetic coerces it to `0`, and every undated-location event was
+   * therefore plotted at **0°N 0°E** — Null Island, in the Gulf of Guinea.
+   * Caught by looking at a running board: the badge read `0 of 10 on the map`
+   * and the sentence beneath it read "there is nothing to plot", while the
+   * canvas drew a cluster mark labelled **10** off the coast of Ghana.
+   *
+   * This is the exact failure this module's own header swears against — "a real
+   * event with no coordinate is listed beside the map rather than silently
+   * discarded or, *worse*, plotted at a guessed location". Null Island is the
+   * worst available guess, because it looks like a finding.
+   *
+   * So the filter lives here, once, in front of every branch that plots events,
+   * and it is a real coordinate check rather than a cast.
+   */
+  const plottable = useMemo(
+    () =>
+      ranked.filter((r) => hasCoordinate(r.event)),
+    [ranked],
+  )
+
   const points: SurfacePoint[] = useMemo(() => {
     if (layer === 'coverage') {
       /**
@@ -644,7 +678,7 @@ export function GlobeView() {
        * contradict each other about is an open question, not a well-confirmed
        * one, and it must not be drawn in the colour that means settled.
        */
-      return ranked.map((r) => {
+      return plottable.map((r) => {
         const band = corroborationBandOf(r.origins, r.contested)
         return {
           id: r.event.id,
@@ -666,7 +700,7 @@ export function GlobeView() {
        * flatter every feed that publishes no dates. The count of those is stated
        * in the panel below instead.
        */
-      return ranked.flatMap((r) => {
+      return plottable.flatMap((r) => {
         const lag = detectionLagMinutes(r.event)
         if (lag === null) return []
         const band = lagBandOf(lag)
@@ -683,7 +717,7 @@ export function GlobeView() {
         ]
       })
     }
-    return ranked.map((r) => ({
+    return plottable.map((r) => ({
       id: r.event.id,
       lat: r.event.lat as number,
       lon: r.event.lon as number,
@@ -696,7 +730,7 @@ export function GlobeView() {
       // What it is, which decides the shape it is drawn as.
       category: r.event.category,
     }))
-  }, [layer, chain, ranked, report])
+  }, [layer, chain, plottable, report])
 
   /**
    * Hide or show a category on the map — and close its panel when it is hidden.
@@ -719,6 +753,39 @@ export function GlobeView() {
         },
       }
     })
+
+  /**
+   * Isolate one category, and restore them all — the two gestures a checkbox
+   * rail makes tedious.
+   *
+   * "Show me only earthquakes" is the common operator move, and with per-item
+   * toggles alone it costs one click per other category to get there and the
+   * same again to come back. `onlyCategory` mutes every category *present in
+   * this run* rather than the whole catalogue: muting kinds that reported
+   * nothing would leave the rail's hidden count claiming twenty hidden layers
+   * when nineteen of them had nothing to hide.
+   *
+   * Both close the panels of what they hide, for the same reason `toggleCategory`
+   * does: a panel open under a category absent from the map is a contradiction
+   * the reader has to resolve.
+   */
+  const onlyCategory = (category: EventCategory) =>
+    update((p) => {
+      const next = onlyLayer(
+        (report?.categories ?? []).map((c) => c.category),
+        category,
+      )
+      return {
+        ...p,
+        globe: {
+          ...p.globe,
+          muted: next,
+          panels: p.globe.panels.filter((c) => !next.includes(c as EventCategory)),
+        },
+      }
+    })
+
+  const showAllCategories = () => update((p) => ({ ...p, globe: { ...p.globe, muted: allLayers() } }))
 
   const isEventLayer = EVENT_LAYERS.includes(layer)
 
@@ -947,27 +1014,74 @@ export function GlobeView() {
         />
       ) : null}
 
-      <Card className="overflow-hidden p-0">
-        {/* The canvas is the riskiest part of this page (2D drawing, pointer
-            capture, animation frames). Isolate it so a failure there still
-            leaves the event list below usable. */}
-        <ErrorBoundary label="The world surface">
-          <WorldSurface
-            points={points}
-            height={height}
-            mode={mode}
-            onModeChange={setMode}
-            onSelect={isEventLayer ? onSelect : undefined}
-            /**
-             * Clustering is for the layers that plot hundreds of events. The
-             * coverage layer draws ten region marks whose *size* is its
-             * message, and the liquidity layer one mark per jurisdiction;
-             * merging either would destroy the thing being shown.
-             */
-            clusterRadius={isEventLayer ? CLUSTER_RADIUS_PX : 0}
-          />
-        </ErrorBoundary>
-      </Card>
+      {/*
+        The headline band.
+
+        Above the map rather than below it, and above the rail rather than
+        inside it, because these six figures decide whether anything under them
+        can be believed. Every figure is computed in `lib/world/kpis` and tested
+        there; four of them are ones a board that wanted to look healthy would
+        not volunteer — refused feeds, the age of the newest *observation*, the
+        regions nothing covers, and how many kinds are reporting at all.
+      */}
+      <KpiStrip report={report} />
+
+      {/*
+        Rail beside the map, in one row from `2xl`.
+
+        The category toggles used to live in a card *below* the canvas, so
+        changing what the map drew meant scrolling past the map, losing sight of
+        the thing being changed, and scrolling back to see the result. Below
+        `2xl` the rail keeps its place directly above the canvas and lays its
+        rows out sideways — still adjacent, still never behind it.
+
+        The breakpoint is `2xl` and not `xl`, and it was measured rather than
+        chosen. This tab already splits into a map pane and a 26rem context rail
+        from `xl`, so on a 1440 laptop the map pane is 752px wide — and a 208px
+        layer rail beside it left the canvas **530px**, a third of its width
+        spent on a third column of chrome. At 1920 the same rail leaves the map
+        884px, which it can afford. So the sideways form serves every width
+        where the vertical one would come out of the map itself.
+
+        `items-start` so the rail is its own height rather than stretching to
+        the canvas: an empty column of card below twelve categories is the kind
+        of dead space that made this page eleven thousand pixels tall.
+      */}
+      <div className="flex flex-col gap-3 2xl:flex-row 2xl:items-start">
+        {isEventLayer && report && report.categories.length > 0 ? (
+          <div className="2xl:w-56 2xl:shrink-0">
+            <LayerRail
+              report={report}
+              muted={muted}
+              onToggle={toggleCategory}
+              onOnly={onlyCategory}
+              onAll={showAllCategories}
+            />
+          </div>
+        ) : null}
+
+        <Card className="min-w-0 flex-1 overflow-hidden p-0">
+          {/* The canvas is the riskiest part of this page (2D drawing, pointer
+              capture, animation frames). Isolate it so a failure there still
+              leaves the event list below usable. */}
+          <ErrorBoundary label="The world surface">
+            <WorldSurface
+              points={points}
+              height={height}
+              mode={mode}
+              onModeChange={setMode}
+              onSelect={isEventLayer ? onSelect : undefined}
+              /**
+               * Clustering is for the layers that plot hundreds of events. The
+               * coverage layer draws ten region marks whose *size* is its
+               * message, and the liquidity layer one mark per jurisdiction;
+               * merging either would destroy the thing being shown.
+               */
+              clusterRadius={isEventLayer ? CLUSTER_RADIUS_PX : 0}
+            />
+          </ErrorBoundary>
+        </Card>
+      </div>
 
       {isEventLayer && report && inWindow.length === 0 && inScope.length > 0 ? (
         <Card className="flex items-start gap-2 border-amber-500/30 bg-amber-500/5 p-3 text-xs">
@@ -1166,57 +1280,27 @@ export function GlobeView() {
         </Card>
       ) : null}
 
+      {/*
+        How to read the marks.
+
+        This card used to carry a second copy of the category toggles, and the
+        duplication had already caused a real misclick in a walk-through: a
+        reader wanting to *open* Earthquakes clicked the first "Earthquake" they
+        saw and *hid* them instead. The toggles now exist once, in the rail
+        beside the map, which is also the legend — so what is left here is the
+        part the rail cannot say: what the motion and the numbers on a mark mean.
+      */}
       {layer === 'events' && report && report.categories.length > 0 ? (
         <Card className="p-3">
-          {/*
-            Two rows of chips on this page carry the same words. These hide and
-            show categories *on the map*; the "Category panels" picker further
-            down opens a category as a readable panel. A live walk-through
-            clicked the first "Earthquake" it found, expecting a panel, and hid
-            the earthquakes instead — the two controls were indistinguishable
-            by name, so the heading and each chip's label now say which is which.
-          */}
-          <h4 className="mb-0.5 text-xs font-semibold">Show on the map</h4>
-          {/*
-            This row is the legend. Each chip carries the exact shape the map
-            draws for that category, in the same colour, moving the same way —
-            so the vocabulary is learned in the row a reader is already using to
-            filter, instead of in a panel they have to go and find.
-          */}
-          <p className="mb-1.5 text-[10px] text-muted-foreground">
-            Hides a category from the globe. To read a category instead, open it under{' '}
-            <span className="font-medium">Category panels</span> below.
-          </p>
-          <div className="flex flex-wrap gap-1">
-            {report.categories.map((c) => {
-              const on = !muted.has(c.category)
-              return (
-                <button
-                  key={c.category}
-                  onClick={() => toggleCategory(c.category)}
-                  aria-pressed={on}
-                  aria-label={`${on ? 'Hide' : 'Show'} ${c.label} on the map`}
-                  title={`${on ? 'Hide' : 'Show'} ${c.label} on the map`}
-                  className={`flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] transition-colors ${
-                    on
-                      ? 'border-border bg-muted/60 text-foreground'
-                      : 'border-dashed border-border/60 text-muted-foreground/60'
-                  }`}
-                >
-                  {/* The mark itself, not a coloured dot — so this row is the
-                      map's key rather than a colour swatch beside a word. */}
-                  <GlyphMark category={c.category} color={c.color} size={14} dim={!on} />
-                  {c.label}
-                  <span className="text-muted-foreground">{c.count}</span>
-                </button>
-              )
-            })}
-          </div>
-          <p className="mt-1.5 text-[10px] leading-relaxed text-muted-foreground">
+          <h4 className="mb-1 text-xs font-semibold">Reading the marks</h4>
+          <p className="text-[10px] leading-relaxed text-muted-foreground">
             A pulsing point carries a real severity — a magnitude, a burnt area, or an agency&apos;s
             own alert level. Points that were never graded do not pulse; we do not invent urgency a
             source did not report. A numbered mark is several events too close together to draw
-            apart at this zoom: tap it to fly in and split it.
+            apart at this zoom: tap it to fly in and split it. Each shape is its category&apos;s own,
+            drawn in the rail beside the map at the same size the canvas draws it — to hide a
+            category use that rail, and to *read* one open it under{' '}
+            <span className="font-medium">Category panels</span> below.
           </p>
         </Card>
       ) : null}
