@@ -30,19 +30,31 @@ export interface Deployment {
 
 export const DEPLOYMENTS: Deployment[] = [
   {
+    name: 'gregarious-haupia',
+    origin: 'https://gregarious-haupia-b516fd.netlify.app',
+    role: 'live — the configured deployment',
+  },
+  /**
+   * Two earlier Netlify projects still building this repository, neither
+   * configured. They are listed rather than dropped, because a public
+   * deployment of the app that nobody intends to run is not harmless: it serves
+   * the product to anyone who finds the URL, with no session secret and no
+   * database, and it will keep consuming build minutes on every push. The check
+   * stays red until they are deleted, which is the point.
+   *
+   * Delete each in Netlify → Site configuration → General → Danger zone, then
+   * remove its entry here. A third one, `voluble-rabanadas-b516fd`, was deleted
+   * on 2026-08-27 and is already gone from this list.
+   */
+  {
     name: 'zippy-gecko',
     origin: 'https://zippy-gecko-fc5e2e.netlify.app',
-    role: 'Netlify project building main',
+    role: 'leftover — unconfigured, delete it',
   },
   {
     name: 'melodious-tiramisu',
     origin: 'https://melodious-tiramisu-8edae7.netlify.app',
-    role: 'Netlify project building main',
-  },
-  {
-    name: 'voluble-rabanadas',
-    origin: 'https://voluble-rabanadas-b44f1b.netlify.app',
-    role: 'Netlify project building main — found twelve days stale on 2026-08-27',
+    role: 'leftover — unconfigured, delete it',
   },
 ]
 
