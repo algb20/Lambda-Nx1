@@ -47,6 +47,7 @@ import { loadWorld } from '@/lib/world/report-store'
 import type { ViewMode } from '@/lib/geo/projection'
 import type { ChainRadarReport } from '@/lib/modules/chain-radar'
 import { originOf } from '@/lib/engine/catalog'
+import { GlyphMark } from '@/components/glyph-mark'
 import {
   CORROBORATION_BANDS,
   LAG_BANDS,
@@ -692,6 +693,8 @@ export function GlobeView() {
       weight: 1 + r.event.severity * 3,
       color: r.event.color,
       intensity: r.event.severity,
+      // What it is, which decides the shape it is drawn as.
+      category: r.event.category,
     }))
   }, [layer, chain, ranked, report])
 
@@ -1174,6 +1177,12 @@ export function GlobeView() {
             by name, so the heading and each chip's label now say which is which.
           */}
           <h4 className="mb-0.5 text-xs font-semibold">Show on the map</h4>
+          {/*
+            This row is the legend. Each chip carries the exact shape the map
+            draws for that category, in the same colour, moving the same way —
+            so the vocabulary is learned in the row a reader is already using to
+            filter, instead of in a panel they have to go and find.
+          */}
           <p className="mb-1.5 text-[10px] text-muted-foreground">
             Hides a category from the globe. To read a category instead, open it under{' '}
             <span className="font-medium">Category panels</span> below.
@@ -1194,10 +1203,9 @@ export function GlobeView() {
                       : 'border-dashed border-border/60 text-muted-foreground/60'
                   }`}
                 >
-                  <span
-                    className="h-1.5 w-1.5 rounded-full"
-                    style={{ backgroundColor: c.color, opacity: on ? 1 : 0.35 }}
-                  />
+                  {/* The mark itself, not a coloured dot — so this row is the
+                      map's key rather than a colour swatch beside a word. */}
+                  <GlyphMark category={c.category} color={c.color} size={14} dim={!on} />
                   {c.label}
                   <span className="text-muted-foreground">{c.count}</span>
                 </button>

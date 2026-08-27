@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Plus, Minus, RotateCcw, Globe2, Map as MapIcon } from 'lucide-react'
 import { ATLAS } from '@/lib/geo/atlas'
 import { clusterByScreenDistance, meanCoordinate, type ScreenCluster } from '@/lib/geo/cluster'
+import { glyphFor } from '@/lib/geo/glyphs'
 import {
   clampTilt,
   greatCircle,
@@ -44,6 +45,15 @@ export interface SurfacePoint {
   color?: string
   /** 0–1. Drives the pulse — a real severity, never decoration. */
   intensity?: number
+  /**
+   * What kind of thing this is, which decides its glyph.
+   *
+   * Absent means "we do not know", and an unknown kind draws the plain dot —
+   * which is honest. What is no longer allowed is a *known* kind drawing a
+   * plain dot, because that was the undifferentiated coloured disc the owner
+   * rejected: see `lib/geo/glyphs`.
+   */
+  category?: string
 }
 
 export interface SurfaceArc {
@@ -436,25 +446,46 @@ export function WorldSurface({
         ctx.arc(mark.x, mark.y, size * 3, 0, Math.PI * 2)
         ctx.fill()
 
+        /**
+         * The mark is a glyph for what the thing *is*, not a coloured disc.
+         *
+         * A colour is not a name — twenty-five categories share one hue wheel,
+         * and two oranges eight degrees apart are the same orange to anyone not
+         * holding the legend. The shape says earthquake or power cut; the colour
+         * still groups it; the count, below, says how many were merged. See
+         * `lib/geo/glyphs` for the shape and motion vocabulary.
+         */
         ctx.fillStyle = color
-        ctx.beginPath()
-        ctx.arc(mark.x, mark.y, size, 0, Math.PI * 2)
-        ctx.fill()
+        ctx.strokeStyle = color
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+        glyphFor(pt.category).draw(ctx, mark.x, mark.y, size, pulse)
 
         if (count > 1) {
-          // The count is the whole point of merging: a mark that hides how much
-          // it stands for is worse than the overlap it replaced. Dark ink on the
-          // category colour, which is always a light saturated tone here.
-          ctx.strokeStyle = 'rgba(3, 10, 18, 0.55)'
-          ctx.lineWidth = 1
+          /**
+           * The count moves to a badge instead of filling the mark.
+           *
+           * It is real information — a mark that hides how much it stands for is
+           * worse than the overlap it replaced — but it is the second question,
+           * not the first. Sitting above and to the side it can be read without
+           * covering the shape that answers the first.
+           */
+          const bx = mark.x + size * 0.85
+          const by = mark.y - size * 0.85
+          const text = count > 999 ? '999+' : String(count)
+          const r = Math.max(6, size * 0.5)
+          ctx.fillStyle = 'rgba(3, 10, 18, 0.88)'
           ctx.beginPath()
-          ctx.arc(mark.x, mark.y, size, 0, Math.PI * 2)
+          ctx.arc(bx, by, r, 0, Math.PI * 2)
+          ctx.fill()
+          ctx.strokeStyle = withAlpha(color, 0.9)
+          ctx.lineWidth = 1
           ctx.stroke()
-          ctx.fillStyle = '#04090f'
-          ctx.font = `600 ${Math.max(9, Math.round(size * 0.95))}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`
+          ctx.fillStyle = '#dbeafe'
+          ctx.font = `600 ${Math.max(8, Math.round(r * 1.1))}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`
           ctx.textAlign = 'center'
           ctx.textBaseline = 'middle'
-          ctx.fillText(count > 999 ? '999+' : String(count), mark.x, mark.y)
+          ctx.fillText(text, bx, by)
         }
 
         plotted.push({ x: mark.x, y: mark.y, r: size, cluster: mark })
