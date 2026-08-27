@@ -80,3 +80,89 @@ describe('wikidata source', () => {
     expect(ev).toEqual([])
   })
 })
+
+/**
+ * The measured failure: Wikidata resolved Marie Curie to Q7186 on the first
+ * call, and the gateway returned nothing, because every property it lifted was
+ * corporate. The page read as a failure and the ontology recorded a person as
+ * `company:Marie Curie`.
+ */
+describe('a person resolves to a person, with something to show', () => {
+  const person = {
+    entities: {
+      Q7186: {
+        labels: { en: { value: 'Marie Curie' } },
+        descriptions: { en: { value: 'Polish-French physicist and chemist' } },
+        claims: {
+          P31: [{ mainsnak: { datavalue: { value: { id: 'Q5' } } } }],
+          P27: [{ mainsnak: { datavalue: { value: { id: 'Q142' } } } }],
+          P166: [{ mainsnak: { datavalue: { value: { id: 'Q38104' } } } }],
+        },
+      },
+    },
+  }
+  const labels = {
+    entities: {
+      Q5: { labels: { en: { value: 'human' } } },
+      Q142: { labels: { en: { value: 'France' } } },
+      Q38104: { labels: { en: { value: 'Nobel Prize in Physics' } } },
+    },
+  }
+
+  const ctx = () => ({
+    fetch: (url: string): Promise<Response> => {
+      if (url.includes('wbsearchentities')) return Promise.resolve(json({ search: [{ id: 'Q7186' }] }))
+      if (url.includes('EntityData')) return Promise.resolve(json(person))
+      return Promise.resolve(json(labels))
+    },
+  })
+
+  it('never returns an empty page for an entity it resolved', async () => {
+    const out = await wikidata.run({ capability: 'reference', value: 'Marie Curie' }, ctx())
+    expect(out.length).toBeGreaterThan(0)
+    const identity = out.find((e) => (e.data as { relation?: string }).relation === 'identity')
+    expect(identity, 'the identity itself is the answer, not a preamble').toBeDefined()
+    expect(identity?.claim).toContain('Marie Curie')
+    expect(identity?.claim).toContain('human')
+    expect(identity?.claim).toContain('physicist')
+  })
+
+  it('types her from the entity rather than from the questions asked', () => {
+    // `company:Marie Curie` was written into the knowledge graph. A wrong fact
+    // stated confidently is what the grading exists to prevent.
+    return wikidata
+      .run({ capability: 'reference', value: 'Marie Curie' }, ctx())
+      .then((out) => {
+        const identity = out.find((e) => (e.data as { relation?: string }).relation === 'identity')
+        expect(identity?.entity?.type).toBe('person')
+      })
+  })
+
+  it('lifts the relations a person actually has', async () => {
+    const out = await wikidata.run({ capability: 'reference', value: 'Marie Curie' }, ctx())
+    const relations = out.map((e) => (e.data as { relation?: string }).relation)
+    expect(relations).toContain('citizenship')
+    expect(relations).toContain('award')
+  })
+
+  it('says "other" rather than guessing when it does not recognise the class', async () => {
+    const odd = {
+      entities: {
+        Q1: {
+          labels: { en: { value: 'Some Thing' } },
+          claims: { P31: [{ mainsnak: { datavalue: { value: { id: 'Q99999999' } } } }] },
+        },
+      },
+    }
+    const c = {
+      fetch: (url: string): Promise<Response> => {
+        if (url.includes('wbsearchentities')) return Promise.resolve(json({ search: [{ id: 'Q1' }] }))
+        if (url.includes('EntityData')) return Promise.resolve(json(odd))
+        return Promise.resolve(json({ entities: {} }))
+      },
+    }
+    const out = await wikidata.run({ capability: 'reference', value: 'Some Thing' }, c)
+    const identity = out.find((e) => (e.data as { relation?: string }).relation === 'identity')
+    expect(identity?.entity?.type).toBe('other')
+  })
+})

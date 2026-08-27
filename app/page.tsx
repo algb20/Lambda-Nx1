@@ -5,8 +5,7 @@ import { HomeFeed } from "@/components/home-feed"
 import { IntelligenceDashboard } from "@/components/intelligence-dashboard"
 import { MonitoringDashboard } from "@/components/monitor-dashboard"
 import { CalibrationScoreboard } from "@/components/calibration-scoreboard"
-import { GlobeView } from "@/components/globe-view"
-import { StandingBriefPanel } from "@/components/standing-brief"
+import { GlobeWorkspace } from "@/components/globe-workspace"
 import { FollowByEmail } from "@/components/follow-by-email"
 import { LiveColumns } from "@/components/live-columns"
 import { UserPreferences } from "@/components/user-preferences"
@@ -235,8 +234,17 @@ export default function HomePage({ initialTab }: { initialTab?: Tab } = {}) {
                   to read together, second because it explains what the map is
                   already showing.
                 */}
-                <GlobeView />
-                <StandingBriefPanel />
+                {/*
+                  Four workspaces, not one column.
+
+                  The map led and the brief followed, and below both hung the
+                  category feeds and the country picture — four unrelated jobs
+                  stacked into nine thousand pixels. The map still leads: it is
+                  the first tab, and it is what a reader opening a globe came
+                  for. The other three are counted beside it rather than buried
+                  under it. See components/globe-workspace.tsx.
+                */}
+                <GlobeWorkspace />
                 {/*
                   Offered at the foot of the brief, where somebody has just read
                   one and knows what they would be getting. A subscribe box at

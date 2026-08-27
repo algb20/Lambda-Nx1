@@ -81,6 +81,17 @@ export type Topic =
   | 'vulnerability'
   | 'malware'
   | 'markets'
+  /**
+   * Crypto assets and the networks they run on. Separate from `markets`
+   * because the two answer different questions: a token's price is a market
+   * fact, and a consensus change is not.
+   */
+  | 'crypto'
+  /**
+   * A published fact-check of a specific claim. Distinct from `news` because a
+   * check is a conclusion *about* reporting, not reporting.
+   */
+  | 'factcheck'
   | 'economy'
   | 'sanctions'
   | 'corporate'

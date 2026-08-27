@@ -98,7 +98,6 @@ interface GithubSearchResponse {
 }
 
 const GITHUB_HEADERS = {
-  'User-Agent': 'Lambda-NX-OSINT',
   Accept: 'application/vnd.github+json',
 }
 

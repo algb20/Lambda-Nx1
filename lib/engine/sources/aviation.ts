@@ -144,7 +144,6 @@ export const faaAirspaceStatus: Source = {
   async run(_input: SourceInput, ctx: SourceContext) {
     const res = await ctx.fetch('https://nasstatus.faa.gov/api/airport-status-information', {
       headers: {
-        'User-Agent': 'LambdaNX/1.0 (+https://github.com/algb20/Lambda-Nx1)',
         Accept: 'application/xml, text/xml;q=0.9, */*;q=0.5',
       },
     })

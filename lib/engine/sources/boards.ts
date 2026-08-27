@@ -33,7 +33,8 @@
  * the period travels inside the headline, because a number without its period
  * is read as "now" and is usually not.
  */
-import type { Evidence, Source } from '../types'
+import type { Evidence, Source, SourceContext } from '../types'
+import { expectOk } from '../fetch-guard'
 import { publicationTime } from '../observed'
 import { parseFeed } from '../feedxml'
 import { assessImpact, corroborationBySubject } from '../../analysis/impact'
@@ -49,6 +50,72 @@ export interface BoardPoint {
   url?: string
   /** Higher sorts first inside its group. Used where an order exists. */
   weight?: number
+}
+
+/**
+ * Every request from this file, made the same way.
+ *
+ * ## The failure this exists for, measured
+ *
+ * The courts board reported **`ok: 1, failed: 0` and zero rows**. CourtListener
+ * was in fact answering:
+ *
+ * ```
+ * 429 {"detail":"Request was throttled. Expected available in 5040 seconds."}
+ * ```
+ *
+ * Ninety minutes of throttling, swallowed by `if (!res.ok) return []`, and
+ * presented to the reader as a healthy source with nothing to say. That is what
+ * `boardFetch` fixes: `expectOk` turns a refusal into a thrown error the
+ * orchestrator records, so the board says one source failed instead of quietly
+ * showing an empty page. The same trap cost the markets board two of its four
+ * sections when Stooq began answering with a challenge page.
+ *
+ * ## Why there is no User-Agent here, having briefly had one
+ *
+ * The first version of this block set its own. That was wrong twice over, and
+ * the correction is worth keeping because the reasoning was plausible.
+ *
+ * First, it was not needed: `Guardrail.createFetch` already puts `USER_AGENT`
+ * on every request the engine makes, so nothing in this file was ever
+ * anonymous. The throttle was a spent quota, not a refusal to identify — and
+ * "we were anonymous" was a diagnosis reached by reasoning rather than by
+ * reading the code that sends the header.
+ *
+ * Second, the string chosen — `LambdaNX/1.0 (+https://github.com/…)` — is the
+ * exact form `guardrail.ts` records as **measured to be refused with a 403 by
+ * the SEC's edge filter**, whichever way it is phrased. None of these nine
+ * endpoints is the SEC, so nothing broke; a later board reading an SEC host
+ * would have inherited a header this codebase already knew was harmful.
+ *
+ * The engine has one identity and one place that decides it. A source may
+ * still override it for a provider that demands a specific string — but it
+ * must be because that provider demanded it, and measured.
+ */
+const BOARD_HEADERS = {
+  Accept: 'application/json, application/rss+xml, application/xml;q=0.9, */*;q=0.5',
+}
+
+async function boardFetch(ctx: SourceContext, sourceKey: string, url: string): Promise<Response> {
+  return expectOk(sourceKey, await ctx.fetch(url, { headers: BOARD_HEADERS }))
+}
+
+/**
+ * The same request, for a source that reads **many** endpoints.
+ *
+ * The distinction is not cosmetic and collapsing it would be a bug in one
+ * direction or the other. A board reading one API has nothing to show when that
+ * API refuses, and must say so — that is `boardFetch`. A board reading nine
+ * press offices, eighteen FRED series or three CelesTrak groups loses one of
+ * many, and killing the whole run for it would turn a partial answer into no
+ * answer. So this one returns the response as it came and lets the caller skip.
+ *
+ * What it must never become is the swallowed failure it replaces: the caller
+ * skips a *known* absence, and the board's own summary still counts what came
+ * back against what was asked for.
+ */
+async function boardTry(ctx: SourceContext, url: string): Promise<Response> {
+  return ctx.fetch(url, { headers: BOARD_HEADERS })
 }
 
 function boardEvidence(
@@ -81,6 +148,33 @@ interface ClResult {
 }
 
 /**
+ * How a filing date is shown when the calendar disagrees with the court.
+ *
+ * The live board carried a case whose `dateFiled` was **2028-04-13** — nearly
+ * two years out. The ranking was already safe: `publicationTime` refuses a date
+ * beyond a two-hour skew, so `at` came back `null` and the row sorted by
+ * receipt rather than climbing to the top of every board on a date that has not
+ * happened. What was not safe was the *reading*: the row said `filed
+ * 2028-04-13` in the same flat voice as every real date, so a person had no way
+ * to tell a courthouse typo from a decision.
+ *
+ * Deleting the date would be the wrong repair. The court's index really does
+ * state it, and suppressing a source's own field to make our page look tidy is
+ * the opposite of this project's rule about honest numbers. So the date is
+ * quoted, and what we could not verify about it is quoted with it. Three cases
+ * are distinguishable and each says something different about the record:
+ * ahead of now, before the epoch, and not a date at all.
+ */
+export function statedFilingDetail(stated: string | undefined, now = Date.now()): string | undefined {
+  if (!stated) return undefined
+  if (publicationTime(stated)) return `filed ${stated}`
+  const ms = Date.parse(stated)
+  if (Number.isNaN(ms)) return `filing date as the court states it: ${stated} — unreadable`
+  if (ms > now) return `filing date as the court states it: ${stated} — not yet reached`
+  return `filing date as the court states it: ${stated} — outside the plausible range`
+}
+
+/**
  * The court record, searchable.
  *
  * CourtListener is the Free Law Project's index of American case law — the
@@ -99,9 +193,13 @@ export const courtsSource: Source = {
     const url =
       'https://www.courtlistener.com/api/rest/v4/search/?type=o&order_by=dateFiled%20desc&page_size=20' +
       (query ? `&q=${encodeURIComponent(query)}` : '')
-    const res = await ctx.fetch(url)
-    if (!res.ok) return []
-    const body = (await res.json().catch(() => null)) as { results?: ClResult[] } | null
+    const body = (await boardFetch(ctx, 'courtlistener', url)
+      .then((r) => r.json())
+      .catch((err) => {
+        // A parse failure is the provider's problem, not "no results".
+        if (err instanceof Error && err.name === 'SourceUnavailableError') throw err
+        return null
+      })) as { results?: ClResult[] } | null
     if (!Array.isArray(body?.results)) return []
 
     return body.results.slice(0, 20).map((r) =>
@@ -110,7 +208,7 @@ export const courtsSource: Source = {
         {
           group: r.court ?? 'Court not named',
           headline: r.caseName ?? 'Unnamed case',
-          detail: r.dateFiled ? `filed ${r.dateFiled}` : undefined,
+          detail: statedFilingDetail(r.dateFiled),
           at: publicationTime(r.dateFiled),
           url: r.absolute_url ? `https://www.courtlistener.com${r.absolute_url}` : undefined,
         },
@@ -153,8 +251,7 @@ export const regulationSource: Source = {
     const url =
       `https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&${fields}` +
       (query ? `&conditions[term]=${encodeURIComponent(query)}` : '')
-    const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    const res = await boardFetch(ctx, 'federal_register', url)
     const body = (await res.json().catch(() => null)) as { results?: FrDoc[] } | null
     if (!Array.isArray(body?.results)) return []
 
@@ -203,8 +300,7 @@ export const officialsSource: Source = {
   hosts: ['www.bis.org'],
   minIntervalMs: 2000,
   async run(input, ctx) {
-    const res = await ctx.fetch('https://www.bis.org/doclist/cbspeeches.rss')
-    if (!res.ok) return []
+    const res = await boardFetch(ctx, 'bis_speeches', 'https://www.bis.org/doclist/cbspeeches.rss')
     const entries = parseFeed(await res.text().catch(() => ''))
     const query = input.value.trim().toLowerCase()
     const matched = query
@@ -306,7 +402,8 @@ export const resourcesSource: Source = {
   async run(_input, ctx) {
     const out: Evidence[] = []
     for (const s of COMMODITIES) {
-      const res = await ctx.fetch(
+      const res = await boardTry(
+        ctx,
         `https://fred.stlouisfed.org/graph/fredgraph.csv?id=${encodeURIComponent(s.id)}`,
       )
       if (!res.ok) continue
@@ -389,10 +486,11 @@ export const powerGridSource: Source = {
   hosts: ['data.elexon.co.uk'],
   minIntervalMs: 2000,
   async run(_input, ctx) {
-    const res = await ctx.fetch(
+    const res = await boardFetch(
+      ctx,
+      'elexon_grid',
       'https://data.elexon.co.uk/bmrs/api/v1/generation/outturn/summary?format=json',
     )
-    if (!res.ok) return []
     const body = (await res.json().catch(() => null)) as ElexonPeriod[] | { data?: ElexonPeriod[] } | null
     const periods = Array.isArray(body) ? body : body?.data
     if (!Array.isArray(periods) || periods.length === 0) return []
@@ -467,7 +565,7 @@ export const spaceWeatherSource: Source = {
   async run(_input, ctx) {
     const out: Evidence[] = []
 
-    const scalesRes = await ctx.fetch('https://services.swpc.noaa.gov/products/noaa-scales.json')
+    const scalesRes = await boardTry(ctx, 'https://services.swpc.noaa.gov/products/noaa-scales.json')
     if (scalesRes.ok) {
       const body = (await scalesRes.json().catch(() => null)) as Record<string, SwpcNow> | null
       const now = body?.['0']
@@ -503,7 +601,10 @@ export const spaceWeatherSource: Source = {
      * operator reads, and it is the difference between "quiet" and "quiet after
      * a storm that may not be over".
      */
-    const kpRes = await ctx.fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json')
+    const kpRes = await boardTry(
+      ctx,
+      'https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json',
+    )
     if (kpRes.ok) {
       const rows = (await kpRes.json().catch(() => null)) as Array<Record<string, unknown>> | null
       if (Array.isArray(rows)) {
@@ -577,7 +678,8 @@ export const orbitalSource: Source = {
     const out: Evidence[] = []
 
     for (const group of groups) {
-      const res = await ctx.fetch(
+      const res = await boardTry(
+        ctx,
         `https://celestrak.org/NORAD/elements/gp.php?GROUP=${group.key}&FORMAT=json`,
       )
       if (!res.ok) continue
@@ -682,7 +784,7 @@ export const statementsSource: Source = {
     const raw: Raw[] = []
 
     for (const feed of STATEMENT_FEEDS) {
-      const res = await ctx.fetch(feed.url)
+      const res = await boardTry(ctx, feed.url)
       // One press office being unreachable must not cost the other eight.
       if (!res.ok) continue
       const entries = parseFeed(await res.text().catch(() => ''))

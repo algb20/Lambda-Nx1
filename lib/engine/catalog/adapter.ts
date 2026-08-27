@@ -1,6 +1,7 @@
 import type { Evidence, Source, SourceContext } from '../types'
 import { parseFeed } from '../feedxml'
 import { publicationTime, publicationZoneOffset } from '../observed'
+import { USER_AGENT } from '../guardrail'
 import type { CatalogSource } from './types'
 
 /**
@@ -376,11 +377,18 @@ export function catalogSource(entry: CatalogSource): Source {
            * scrapers and they are right to; a source that will not say who it
            * is has no standing to complain when it is throttled.
            *
-           * A record may override it where the publisher mandates a particular
-           * form — see `CatalogSource.userAgent`. The SEC is the reason that
-           * exists.
+           * The default is the engine's one identity, from `guardrail.ts`,
+           * rather than a second string kept here. The copy that used to live
+           * here was `LambdaNX/1.0 (+https://github.com/…)` — the URL-bearing
+           * form that same file records as **measured to draw a 403 from the
+           * SEC's edge filter** — so the catalogue's default disagreed with the
+           * engine's on the one point that had actually been tested, and no
+           * operator setting `ENGINE_CONTACT` could reach it.
+           *
+           * A record may still override it where the publisher mandates a
+           * particular form — see `CatalogSource.userAgent`.
            */
-          'User-Agent': entry.userAgent ?? 'LambdaNX/1.0 (+https://github.com/algb20/Lambda-Nx1)',
+          'User-Agent': entry.userAgent ?? USER_AGENT,
           Accept:
             entry.kind === 'geojson' || entry.kind === 'json'
               ? 'application/json, application/geo+json;q=0.9, */*;q=0.5'

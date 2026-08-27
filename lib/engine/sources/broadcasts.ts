@@ -272,11 +272,10 @@ export const broadcastsSource: Source = {
   hosts: ['de1.api.radio-browser.info'],
   minIntervalMs: 1_000,
   async run(input, ctx) {
-    const res = await ctx.fetch(endpointFor(input.value, HOW_MANY), {
-      // The catalogue asks callers to identify themselves so it can attribute
-      // load. Ours names the product, which is the arrangement they request.
-      headers: { 'User-Agent': 'LambdaNX/1.0 (contact@lambdanx.app)' },
-    })
+    // The catalogue asks callers to identify themselves so it can attribute
+    // load. The engine's `USER_AGENT` does that on every request, so there is
+    // nothing to add here.
+    const res = await ctx.fetch(endpointFor(input.value, HOW_MANY))
     if (!res.ok) throw new Error(`Radio-Browser answered ${res.status}`)
 
     const stations = readStations(await res.json())

@@ -8,12 +8,23 @@
  * That number is not in any gazetteer. A language census reports what people
  * say they speak; this reports what is actually being transmitted, today, and
  * the two differ in exactly the places where the difference matters.
+ *
+ * ## Which makes the count worth getting right, and it was not
+ *
+ * Walked in a real browser against Saudi Arabia, this said **seven** languages
+ * and listed `ar · arabi · arabic · العربية · english · filipino · kurdish`.
+ * Four of the seven are Arabic. Lowercasing the publisher's string is not the
+ * same as identifying a language, and a headline figure built that way is the
+ * charter's §2a mistake one level down: a spelling is not a language, exactly
+ * as a mirror is not an independent source. `distinctLanguages` decides it now,
+ * and the honest answer for that query is four.
  */
 import { collect } from '../engine/orchestrator'
 import { registry } from '../engine/registry'
 import { registerBroadcasts } from '../engine/sources'
 import type { Evidence } from '../engine/types'
 import type { BroadcastPoint } from '../engine/sources/broadcasts'
+import { distinctLanguages } from '../engine/languages'
 
 export interface BroadcastCountry {
   countryIso: string
@@ -62,7 +73,7 @@ export async function broadcastsReport(query: string): Promise<BroadcastsReport>
     const list = byCountry.get(point.countryIso) ?? []
     list.push(point)
     byCountry.set(point.countryIso, list)
-    for (const l of point.languages) allLanguages.add(l.toLowerCase())
+    for (const l of distinctLanguages(point.languages)) allLanguages.add(l)
     if (point.lat !== null && point.lon !== null) located += 1
     if (point.liveness.basis === 'opened') recentlyOpened += 1
     if (point.liveness.basis === 'stale') stale += 1
@@ -73,7 +84,7 @@ export async function broadcastsReport(query: string): Promise<BroadcastsReport>
       countryIso: iso,
       country: stations[0]?.country ?? iso,
       stations,
-      languages: [...new Set(stations.flatMap((s) => s.languages.map((l) => l.toLowerCase())))].sort(),
+      languages: distinctLanguages(stations.flatMap((s) => s.languages)),
     }))
     .sort((a, b) => b.stations.length - a.stations.length)
 

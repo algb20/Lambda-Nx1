@@ -188,8 +188,11 @@ export const secFilingsSource: Source = {
 
     const res = await ctx.fetch(`https://efts.sec.gov/LATEST/search-index?${params}`, {
       // The SEC refuses anonymous automated traffic and asks callers to
-      // identify themselves. A UA containing a bare URL is rejected — measured.
-      headers: { 'User-Agent': 'LambdaNX/1.0 (contact@lambdanx.app)', Accept: 'application/json' },
+      // identify themselves. The engine's `USER_AGENT` is exactly the accepted
+      // form — a name and a contact address, no URL — so this inherits it
+      // rather than keeping a second copy that an operator's `ENGINE_CONTACT`
+      // could never reach.
+      headers: { Accept: 'application/json' },
     })
     if (!res.ok) throw new Error(`SEC full-text search answered ${res.status}`)
 

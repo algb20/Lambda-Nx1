@@ -29,6 +29,9 @@ export type Capability =
   | 'ownership'
   | 'news'
   | 'market_board'
+  | 'crypto'
+  | 'maritime'
+  | 'verification'
   | 'property'
   | 'venues'
   | 'filings'
@@ -148,6 +151,19 @@ export interface SourceResult {
   cached?: boolean
   /** Age of the replayed answer in ms; null when nothing was held. */
   cacheAgeMs?: number | null
+  /**
+   * How long this source took, in ms — success, failure and timeout alike.
+   *
+   * Added because a fan-out is only as fast as its slowest member and nothing
+   * recorded which member that was. The world picture takes 8.0 seconds over
+   * 135 sources — exactly the per-source deadline, so at least one is running
+   * to the buzzer and every reader waits for it — and there was no way to name
+   * it without instrumenting the engine by hand.
+   *
+   * `ok` and `error` say whether a source works. This says what it costs, which
+   * is the other half of knowing whether to keep it.
+   */
+  durationMs?: number
 }
 
 /**

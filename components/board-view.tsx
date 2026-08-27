@@ -1,8 +1,10 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+
 import { Card } from '@/components/ui/card'
 import { TimeStamp } from '@/components/time-stamp'
+import { RowList } from '@/components/row-list'
 import type { BoardReport } from '@/lib/modules/board-shared'
 
 /**
@@ -29,7 +31,48 @@ import type { BoardReport } from '@/lib/modules/board-shared'
  * Courts, regulation, central-bank speeches, commodity prices, grid output,
  * space weather and orbital objects are not the same subject and are exactly the
  * same shape. Seven views would drift; one cannot.
+ *
+ * ## Why a group shows only its first rows
+ *
+ * Because every group used to render every row, always, and on a phone that is
+ * one column of everything. Walked in a real browser: **crypto came out
+ * 12,902 pixels tall and fact-checks 12,233** — both *longer* than the globe
+ * page this project was already told nobody could use, and neither had
+ * anything wrong with its data.
+ *
+ * Capping in each source is the wrong place for this. It costs the reader rows
+ * they might have wanted and it has to be remembered again for every new
+ * gateway. Collapsing at the *render* is one change that shortens every board
+ * there will ever be, removes nothing, and puts the choice with the reader:
+ * the first few rows are the shape of the group, and "show all" is one press
+ * away with the real count on it.
  */
+/**
+ * One group's rows, collapsed past the first few.
+ *
+ * The collapsing itself lives in `RowList`, shared with every other gateway
+ * that groups things — the rule about how long a list may get before it needs
+ * a reader's permission is one rule, and keeping a second copy of it here is
+ * how the two drift.
+ *
+ * The publisher's own time is always passed, never ours, and `at` is present
+ * even when null so the row still says "not stated" rather than silently
+ * omitting the column.
+ */
+function GroupRows({ rows }: { rows: BoardReport['groups'][number]['rows'] }) {
+  return (
+    <RowList
+      rows={rows.map((row, i) => ({
+        key: `${row.headline}-${i}`,
+        headline: row.headline,
+        url: row.url,
+        detail: row.detail,
+        at: row.at ?? null,
+      }))}
+    />
+  )
+}
+
 export function BoardView({
   r,
   title,
@@ -118,32 +161,7 @@ export function BoardView({
                 {g.rows.length}
               </span>
             </h4>
-            <ul className="divide-y divide-border/40">
-              {g.rows.map((row, i) => (
-                <li key={`${row.headline}-${i}`} className="py-2">
-                  <div className="flex items-baseline justify-between gap-3">
-                    {row.url ? (
-                      <a
-                        href={row.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="min-w-0 text-sm font-medium hover:underline"
-                      >
-                        {row.headline}
-                      </a>
-                    ) : (
-                      <span className="min-w-0 text-sm font-medium">{row.headline}</span>
-                    )}
-                    {/* The publisher's own time, never ours — and a date past a
-                        day old rather than a relative label that keeps moving. */}
-                    <TimeStamp iso={row.at} className="shrink-0 text-[11px] text-muted-foreground" />
-                  </div>
-                  {row.detail ? (
-                    <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">{row.detail}</p>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
+            <GroupRows rows={g.rows} />
           </Card>
         ))}
         </div>

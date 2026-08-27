@@ -510,6 +510,7 @@ export async function getWorldEvents(): Promise<WorldEventsReport> {
         count,
         error: r.error ?? null,
         cacheAgeMs: r.cacheAgeMs ?? null,
+        durationMs: r.durationMs ?? null,
         ok: r.ok,
       }
     })

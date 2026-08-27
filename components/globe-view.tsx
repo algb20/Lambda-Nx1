@@ -28,8 +28,6 @@ import {
   type SectionState,
 } from '@/components/panel-section'
 import { usePrefs } from '@/components/prefs-provider'
-import { CategoryPanels } from '@/components/category-panels'
-import { CountryDossier } from '@/components/country-dossier'
 import { diversify, overflowSummary } from '@/lib/analysis/significance'
 import { TimeStamp } from '@/components/time-stamp'
 import { Badge } from '@/components/ui/badge'
@@ -1523,18 +1521,16 @@ export function GlobeView() {
       ) : null}
 
       {/*
-        The panels sit under the map, built from the same world picture the dots
-        above them are drawn from — no second fetch, because a panel that
-        re-queried would show a different world from the globe it sits beneath.
-      */}
-      <CategoryPanels report={report} />
+        The category feeds and the country picture used to hang off the bottom
+        of this component, so the map surface and two unrelated analyses were
+        one nine-thousand-pixel column. They are now workspaces of their own —
+        see components/globe-workspace.tsx — and this renders only the map and
+        what is directly about it.
 
-      {/*
-        Below the panels, because it reads the same events at a different
-        altitude: the panels answer "what happened", this answers "what does it
-        say about a country, and how well can we see that country at all".
+        They still read the same world picture from the shared store, so
+        switching workspace costs nothing and cannot show a different world from
+        the globe.
       */}
-      <CountryDossier />
     </div>
   )
 }

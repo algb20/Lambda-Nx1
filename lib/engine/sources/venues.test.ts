@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { parseCsv, parseCsvLine, readMicRegistry } from './venues'
+import { parseCsv, parseCsvLine, readMicRegistry, venueRelevance } from './venues'
+import type { VenuePoint } from './venues'
 
 /**
  * A fragment of the real ISO 10383 file, kept verbatim including its quoting.
@@ -173,5 +174,58 @@ describe('a malformed or empty file', () => {
 
   it('skips a row with no MIC instead of emitting a nameless venue', () => {
     expect(readMicRegistry(csv(row({ MIC: '' })), '')).toHaveLength(0)
+  })
+})
+
+/**
+ * Relevance, from the real register rather than a tidy fixture.
+ *
+ * Searching **"TOKYO"** against the live ISO 10383 file returned three Bank of
+ * America dealer desks above the **Tokyo Stock Exchange** — all four sit in
+ * Tokyo, all four matched, and `B` sorts before `T`. Alphabetical order is not
+ * relevance; it only looks like it when the first answer happens to be right.
+ */
+describe('venueRelevance', () => {
+  const desk = (over: Partial<VenuePoint> = {}): VenuePoint =>
+    ({
+      mic: 'BAJD',
+      operatingMic: null,
+      name: 'BANK OF AMERICA MERRILL LYNCH - JAPAN',
+      legalEntity: 'MERRILL LYNCH JAPAN SECURITIES CO., LTD.',
+      countryIso: 'JP',
+      city: 'TOKYO',
+      category: 'ATSS',
+      status: 'ACTIVE',
+      ...over,
+    }) as VenuePoint
+
+  const tse = desk({
+    mic: 'XTKS',
+    name: 'TOKYO STOCK EXCHANGE',
+    legalEntity: 'TOKYO STOCK EXCHANGE, INC.',
+  })
+
+  it('ranks the venue named Tokyo above the desk that merely sits in Tokyo', () => {
+    expect(venueRelevance(tse, 'tokyo')).toBeGreaterThan(venueRelevance(desk(), 'tokyo'))
+  })
+
+  it('lets nothing outrank an exact code', () => {
+    expect(venueRelevance(tse, 'xtks')).toBe(100)
+    expect(venueRelevance(tse, 'xtks')).toBeGreaterThan(venueRelevance(tse, 'tokyo'))
+  })
+
+  /**
+   * The query reaches a regular expression, and a user is entitled to type a
+   * bracket without taking the gateway down with them.
+   */
+  it('treats the query as text, never as a pattern', () => {
+    expect(() => venueRelevance(tse, '(')).not.toThrow()
+    expect(() => venueRelevance(tse, 'a[b')).not.toThrow()
+    expect(() => venueRelevance(tse, '*')).not.toThrow()
+  })
+
+  it('scores nothing for an empty query rather than ranking at random', () => {
+    expect(venueRelevance(tse, '')).toBe(0)
+    expect(venueRelevance(tse, '   ')).toBe(0)
   })
 })

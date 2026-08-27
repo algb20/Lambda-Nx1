@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card'
 import { Label, useCurated, useT } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import type { ChainRadarReport } from '@/lib/modules/chain-radar'
+import { useLive } from '@/lib/stream/use-live'
 import {
   STATUS_MEANING,
   UNKNOWN,
@@ -84,38 +85,26 @@ export function MarketsPanel() {
    */
   const t = useT()
   const curated = useCurated()
-  const [report, setReport] = useState<ChainRadarReport | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    let alive = true
-    const load = async () => {
-      setLoading(true)
-      try {
-        const res = await fetch('/api/chain', { cache: 'no-store' })
-        const body = (await res.json()) as ChainRadarReport & { error?: string }
-        if (!alive) return
-        if (!res.ok || body.error) setError(body.error ?? `The markets feed answered ${res.status}`)
-        else {
-          setReport(body)
-          setError(null)
-        }
-      } catch (e) {
-        // A stale picture is still shown, and still labelled. Blanking it over
-        // one failed poll would throw away something substantially true.
-        if (alive) setError(e instanceof Error ? e.message : 'The markets feed did not answer')
-      } finally {
-        if (alive) setLoading(false)
-      }
-    }
-    void load()
-    const timer = setInterval(() => void load(), REFRESH_MS)
-    return () => {
-      alive = false
-      clearInterval(timer)
-    }
-  }, [])
+  /**
+   * Pushed, not polled.
+   *
+   * This panel used to run its own two-minute timer, which meant every open tab
+   * fetched the chain radar independently — and a reader could sit for up to two
+   * minutes looking at a market that had already moved. One producer now serves
+   * every reader and the panel is told the moment a reading lands.
+   *
+   * `useLive` falls back to polling `/api/chain` when the stream cannot be
+   * established, so the Pi Browser and anything behind a buffering proxy still
+   * work; the transport is reported rather than assumed.
+   */
+  const live = useLive<ChainRadarReport & { error?: string }>({
+    streamUrl: '/api/chain/stream',
+    pollUrl: '/api/chain',
+    pollMs: REFRESH_MS,
+  })
+  const report = live.value && !live.value.error ? live.value : null
+  const error = live.error ?? live.value?.error ?? null
+  const loading = live.value === null && live.error === null
 
   if (!report && loading) {
     return (
