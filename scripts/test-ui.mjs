@@ -77,6 +77,21 @@ if (alreadyRunning) {
   }
 }
 
+/**
+ * One warm-up request before the suite.
+ *
+ * `next start` compiles a route on its first request, and the suite's first
+ * visits were paying for that — a run immediately after a build reported a
+ * missing element at one viewport that was present at the other four, because
+ * that viewport happened to be the one that waited on a cold route. Warming the
+ * two pages the suite actually asserts on removes a whole class of red that has
+ * nothing to do with the app.
+ */
+console.log('Warming the routes the suite measures…')
+for (const path of ['/', '/api/world?tier=first-light', '/api/world']) {
+  await fetch(`${BASE}${path}`, { signal: AbortSignal.timeout(120_000) }).catch(() => undefined)
+}
+
 const code = await run('npx', ['vitest', 'run', '--config', 'vitest.browser.config.ts'], {
   BASE,
 })

@@ -332,3 +332,43 @@ describe('the strip as a whole', () => {
     ])
   })
 })
+
+describe('the first pass says it is the first pass', () => {
+  /**
+   * `14 of 174 feeds` is a healthy state during first light and an outage on a
+   * full sweep. The strip is the one place on this page a reader trusts without
+   * checking, so rendering the two identically would teach them not to.
+   */
+  it('marks the feed figure as the first pass', () => {
+    const r = report({ tier: 'first-light' })
+    const feeds = byKey(buildKpis(r, NOW), 'feeds')
+    expect(feeds.label).toContain('first')
+    expect(feeds.detail).toContain('First pass')
+    expect(feeds.detail).toContain('climbs')
+  })
+
+  it('says nothing about a first pass on a full sweep', () => {
+    const feeds = byKey(buildKpis(report({ tier: 'full' }), NOW), 'feeds')
+    expect(feeds.label).toBe('Feeds')
+    expect(feeds.detail).not.toContain('First pass')
+  })
+
+  /**
+   * A report archived before the tiers existed carries no `tier`. Those were
+   * all full sweeps, and treating an absent field as "partial" would relabel
+   * every one of them as incomplete.
+   */
+  it('treats a report with no tier as a full sweep', () => {
+    const r = report()
+    delete (r as { tier?: unknown }).tier
+    expect(byKey(buildKpis(r, NOW), 'feeds').label).toBe('Feeds')
+  })
+
+  it('still reports refusals honestly during the first pass', () => {
+    const r = report({ tier: 'first-light' })
+    r.summary.sourcesFailed = 2
+    const feeds = byKey(buildKpis(r, NOW), 'feeds')
+    expect(feeds.detail).toContain('2 refused')
+    expect(feeds.tone).toBe('warn')
+  })
+})

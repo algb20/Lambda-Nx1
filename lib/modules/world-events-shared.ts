@@ -16,6 +16,7 @@ import {
   rarityReason,
   type BreakingVerdict,
 } from '../analysis/significance'
+import type { SweepTier } from './first-light'
 
 /**
  * What kind of thing an event is.
@@ -298,6 +299,20 @@ export interface RegionCoverageSummary {
 
 export interface WorldEventsReport {
   generatedAt: string
+  /**
+   * Which pass produced this report.
+   *
+   * `first-light` is a deliberately partial picture — fourteen worldwide hazard
+   * authorities, read so the map has something true on it while the other 160
+   * feeds are still being asked. It is stated rather than inferred because a
+   * partial picture that does not announce itself is the same fault as an empty
+   * board reporting itself healthy: the reader has no way to know that the
+   * counts under their eyes are about to change.
+   *
+   * Optional on the type so an archived report from before the tiers existed
+   * still parses; absent means `full`, which is what those all were.
+   */
+  tier?: SweepTier
   /** Events with a coordinate — these are what the map draws. */
   events: WorldEvent[]
   /** Real events with no location. Listed, never plotted at a guess. */

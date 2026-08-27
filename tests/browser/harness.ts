@@ -73,11 +73,117 @@ export async function serverIsUp(): Promise<boolean> {
   }
 }
 
+/**
+ * The suite paces itself to the server's own rate limit.
+ *
+ * ## The evidence
+ *
+ * Adding `4xx` on `/api/*` to what a visit records turned a vague failure into
+ * a precise one: **429 Too Many Requests**, on `/api/world`, `/api/preferences`,
+ * `/api/monitors` and the rest. `GATEWAY_LIMIT` in `lib/rate-limit.ts` allows
+ * 30 requests a minute per address, and the suite visits ten pages at five
+ * widths — every one of them costing several gateway calls from one address.
+ *
+ * The limiter was right and the suite was the abusive client. Two earlier
+ * guesses — a saturated server, an exhausted browser — were both wrong, and
+ * both were guesses made because nothing was recording what the page received.
+ *
+ * ## Why pacing rather than an exemption
+ *
+ * A loopback bypass would be a real hole: platforms that terminate TLS in front
+ * of the app routinely present the proxy's address to it, so "trust 127.0.0.1"
+ * can mean "trust everyone" on exactly the deployment that most needs the
+ * limit. The suite waits instead. It is slower and it tests the app as shipped.
+ *
+ * ## And what this caught in the suite itself
+ *
+ * Before the `4xx` reporting, the overflow tests **passed** on pages whose every
+ * data call had been refused — green geometry over an empty document, which is
+ * the same "healthy over blank" fault this codebase keeps finding one layer up.
+ */
+const GATEWAY_LIMIT = 30
+const GATEWAY_WINDOW_MS = 60_000
+
+/**
+ * Gateway calls a single visit is assumed to cost.
+ *
+ * Measured from what a visit to `/` actually requests: two world sweeps (the
+ * first-light pass and the full one) plus preferences, and the busier pages add
+ * one or two more. Six is the observed worst case, and the budget is spent at
+ * the worst case rather than the average — a pacer that is right on average is
+ * a pacer that is wrong exactly when the page is heaviest.
+ */
+const CALLS_PER_VISIT = 6
+
+const visitTimes: number[] = []
+
+/**
+ * Which API statuses mean the *page* is broken.
+ *
+ * Not "any 4xx or 5xx", which is where this started and which reported the app
+ * as broken three times over for behaving exactly as designed:
+ *
+ * - **401 / 403** — the suite browses signed out, and `/api/monitors`,
+ *   `/api/calibration` and `/api/suggestions` require an account. Refusing an
+ *   anonymous reader is the access control working, and a harness that calls it
+ *   a fault is asking the app to leak.
+ * - **503** — `/api/investigations` and the Pi claim route answer this when no
+ *   database is configured, which is true of this environment. Saying so is the
+ *   honest answer; a test that demanded 200 would be demanding a fabrication.
+ *
+ * What remains genuinely is a fault: **429**, which means the suite is the
+ * abusive client (it was, and the pacing above is the answer), and the 5xx
+ * range that is not a declared unavailability — a route that actually threw.
+ */
+function isApiFault(status: number): boolean {
+  if (status === 401 || status === 403) return false
+  if (status === 503) return false
+  return status === 429 || status >= 500 || status === 408
+}
+
+/** Wait, if needed, so this visit does not push us past the server's limit. */
+async function payVisitBudget(): Promise<void> {
+  for (;;) {
+    const now = Date.now()
+    while (visitTimes.length > 0 && now - visitTimes[0] > GATEWAY_WINDOW_MS) visitTimes.shift()
+    const spent = visitTimes.length * CALLS_PER_VISIT
+    if (spent + CALLS_PER_VISIT <= GATEWAY_LIMIT) {
+      visitTimes.push(now)
+      return
+    }
+    // Sleep until the oldest visit falls out of the window, plus a little.
+    const wait = GATEWAY_WINDOW_MS - (now - visitTimes[0]) + 250
+    await new Promise((r) => setTimeout(r, wait))
+  }
+}
+
 let browser: Browser | null = null
+let contextsOpened = 0
+
+/**
+ * How many contexts one browser process serves before it is replaced.
+ *
+ * ## Why this is here
+ *
+ * The overflow tests open ten pages at five widths, and after those fifty
+ * contexts the *browser* — not the server — stopped loading pages: the next
+ * visit waited sixty seconds for a report that a `curl` against the same server
+ * returned in **8ms**. A long-lived Chromium accumulating fifty closed contexts
+ * in a small container is a harness problem wearing a product problem's clothes,
+ * and it cost two rounds of chasing a layout bug that did not exist.
+ *
+ * Twenty-five is under half the point where it was observed to degrade and high
+ * enough that a relaunch costs the suite about a second in total.
+ */
+const CONTEXTS_PER_BROWSER = 25
 
 export async function getBrowser(): Promise<Browser> {
+  if (browser && contextsOpened >= CONTEXTS_PER_BROWSER) {
+    await closeBrowser()
+  }
   if (!browser) {
     browser = await chromium.launch({ executablePath: EXECUTABLE, args: LAUNCH_ARGS })
+    contextsOpened = 0
   }
   return browser
 }
@@ -85,12 +191,23 @@ export async function getBrowser(): Promise<Browser> {
 export async function closeBrowser(): Promise<void> {
   await browser?.close()
   browser = null
+  contextsOpened = 0
 }
 
 export interface Visit {
   page: Page
   /** Anything the page threw, and any `/_next/` asset that failed to load. */
   broke: string[]
+  /**
+   * Whether the `waitFor` selector actually appeared, when one was asked for.
+   *
+   * `null` when nothing was waited on. This exists because swallowing the
+   * timeout silently — which the first version did — turns **too slow** into
+   * **missing**, and those need different fixes. It produced exactly that:
+   * a run right after a build reported "desktop: no KPI strip" when the strip
+   * was fine and the server was still compiling the route.
+   */
+  ready: boolean | null
   close: () => Promise<void>
 }
 
@@ -116,7 +233,9 @@ export async function visit(
    */
   opts: { waitFor?: string } = {},
 ): Promise<Visit> {
+  await payVisitBudget()
   const b = await getBrowser()
+  contextsOpened++
   const ctx = await b.newContext({
     viewport: { width: vp.width, height: vp.height },
     deviceScaleFactor: 1,
@@ -126,9 +245,18 @@ export async function visit(
   const page = await ctx.newPage()
   const broke: string[] = []
   page.on('pageerror', (err) => broke.push(String(err.message).slice(0, 200)))
+  page.on('requestfailed', (req) => {
+    if (req.url().includes('/api/')) {
+      broke.push(`request failed: ${new URL(req.url()).pathname} — ${req.failure()?.errorText}`)
+    }
+  })
   page.on('response', (res) => {
-    if (res.status() >= 400 && new URL(res.url()).pathname.startsWith('/_next/')) {
-      broke.push(`${res.status()} ${new URL(res.url()).pathname}`)
+    const path = new URL(res.url()).pathname
+    const status = res.status()
+    // A build asset that 404s means the page never really ran. Always a fault.
+    if (status >= 400 && path.startsWith('/_next/')) broke.push(`${status} ${path}`)
+    if (status >= 400 && path.startsWith('/api/') && isApiFault(status)) {
+      broke.push(`${status} ${path}`)
     }
   })
   /**
@@ -156,14 +284,29 @@ export async function visit(
       timeout: 30_000,
     })
     .catch(() => undefined)
+  let ready: boolean | null = null
   if (opts.waitFor) {
-    // Not fatal on timeout: "this never appeared" is a finding the caller
-    // should assert on and report in its own words, not a harness exception
-    // that names a selector and no viewport.
-    await page.waitForSelector(opts.waitFor, { timeout: 30_000 }).catch(() => undefined)
+    // Not fatal on timeout — "this never appeared" is a finding the caller
+    // should report in its own words — but recorded, so the caller can tell
+    // a missing element from a slow one.
+    /**
+     * Sixty seconds, not thirty.
+     *
+     * Measured directly, the strip lands in 452ms at 320px and 2.0s at 390px.
+     * Inside the suite it once took longer than thirty: the overflow tests visit
+     * ten pages at five viewports first, and every visit to `/` starts two world
+     * sweeps, so by the time the dashboard test runs the server has been asked
+     * for the world a hundred times in a few minutes. That is this suite's own
+     * load and not a property of the app, and a limit tight enough to catch it
+     * would fail for a reason no reader of the failure could act on.
+     */
+    ready = await page
+      .waitForSelector(opts.waitFor, { timeout: 60_000 })
+      .then(() => true)
+      .catch(() => false)
   }
   await page.waitForTimeout(2_500)
-  return { page, broke, close: () => ctx.close() }
+  return { page, broke, ready, close: () => ctx.close() }
 }
 
 /** Does the document scroll sideways? The one failure a reader cannot work around. */
