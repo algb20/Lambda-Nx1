@@ -18,10 +18,29 @@
  * | exchanges | **0** |
  * | correlation constellation | **0 assets, 1 source failed** |
  *
- * One CoinGecko call succeeds and the rest come back empty. Meanwhile the same
- * deployment read 145 other sources successfully in the same sweep, so nothing
- * is wrong with the deployment — we were simply spending one provider's
- * allowance four times over and losing three of them.
+ * The CoinGecko-backed lists are empty while the figures that come from
+ * elsewhere are live. Meanwhile the same deployment read 145 other sources
+ * successfully, so nothing is wrong with the deployment.
+ *
+ * ## What this fixes, and what it does not — stated before it is believed
+ *
+ * I first wrote that this was one cause behind all four rows. That is more than
+ * the evidence supports, and the difference matters:
+ *
+ * - **Within one request** — several sources reading the same host inside a
+ *   single sweep — the collision is real, and this queue removes it. That is
+ *   what the tests demonstrate.
+ * - **Across requests** the budget lives in module scope, and on this host
+ *   module scope is not guaranteed to survive between invocations (the same
+ *   property that made a streaming linger inert here, measured earlier in this
+ *   codebase). `/api/chain` and `/api/markets/constellation` are separate
+ *   requests, so this does not necessarily connect them.
+ *
+ * So the honest statement is: a real defect, fixed and proven under test;
+ * whether it is *the* cause of the production emptiness is not yet established.
+ * What will settle it is the other half of the same change — every failure now
+ * carries the provider's own words, so the next deployment prints CoinGecko's
+ * reason instead of a silent zero.
  *
  * ## Why a queue rather than a longer interval
  *
