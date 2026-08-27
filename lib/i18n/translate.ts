@@ -129,19 +129,85 @@ export const googleTranslate: TranslationProvider = {
 }
 
 /**
+ * Google's dictionary-extension endpoint. Keyless, and it works from a server.
+ *
+ * ## The correction this records
+ *
+ * An hour before this was written, this file said a keyless provider could not
+ * work from a datacenter address and that a deployment therefore needed a paid
+ * credential. That was wrong, and it was wrong because one endpoint had been
+ * tested and generalised from.
+ *
+ * `translate.googleapis.com` with `client=gtx` **is** refused — 429, every
+ * time, from every datacenter address tried. `clients5.google.com` with
+ * `client=dict-chrome-ex` is not. Same company, same service, same absence of a
+ * key; what differs is the host and the client string. Measured on 2026-08-27
+ * from the same address that had just been refused:
+ *
+ * | Probe | Result |
+ * |---|---|
+ * | one string | `200` — `["الأحداث العالمية الحية"]` |
+ * | batch of five | `200`, five results, in order |
+ * | batch of forty (our `BATCH_SIZE`) | `200`, **40 of 40** |
+ * | fr · zh-CN · hi · sw · ur · ja · yo · ta | `200` for all eight |
+ * | ten consecutive calls | **10 of 10** |
+ *
+ * So it leads the chain: it costs nothing, needs no account, and is the one
+ * measured to answer. The keyed providers below stay as a fallback for a
+ * deployment that wants DeepL's phrasing or an address where even this is
+ * refused — never as a requirement.
+ *
+ * `translate.google.com` with `client=at` also answers 200 keylessly and is
+ * deliberately *not* used: given three strings it returned one. A provider that
+ * silently returns fewer results than it was given would shift every label on
+ * the page by one.
+ */
+export const googleFreeTranslate: TranslationProvider = {
+  name: 'google-free',
+  available: () => true,
+  async translate(texts: string[], to: string, from = 'auto'): Promise<string[]> {
+    if (texts.length === 0) return []
+    const params = new URLSearchParams({ client: 'dict-chrome-ex', sl: from, tl: to })
+    for (const text of texts) params.append('q', text)
+
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
+    try {
+      const res = await fetch(`https://clients5.google.com/translate_a/t?${params.toString()}`, {
+        signal: controller.signal,
+        headers: { Accept: 'application/json' },
+      })
+      if (!res.ok) throw new TranslationUnavailableError('google-free', `answered ${res.status}`)
+      /**
+       * Its answer is `[["translated","detectedLang"], …]` — a pair per input.
+       * `parseTranslationResponse` already reads the first element of a nested
+       * entry, which is the translation, so the same parser covers this shape
+       * and the two the other endpoint returns.
+       */
+      const parsed = parseTranslationResponse(await res.json().catch(() => null), texts.length)
+      if (!parsed) throw new TranslationUnavailableError('google-free', 'answered in a shape it does not recognise')
+      return parsed
+    } catch (err) {
+      if (err instanceof TranslationUnavailableError) throw err
+      throw new TranslationUnavailableError('google-free', err instanceof Error ? err.message : 'request failed')
+    } finally {
+      clearTimeout(timer)
+    }
+  },
+}
+
+/**
  * DeepL, with a key. 500,000 characters a month on the free tier.
  *
- * Added because the keyless path above is **measured not to work from a
- * server**: Google's public endpoint answered 429 to every request from a
- * datacenter address, and so did every keyless alternative tried the same
- * afternoon — MyMemory's shared daily quota was already spent, three Lingva
- * instances answered 500, and LibreTranslate's public host returned HTML.
- * That is structural, not a bad day: these endpoints exist for browsers, and
- * this product translates on the server deliberately (see the route).
+ * **Optional, and deliberately not first.** The keyless provider above is
+ * measured to work, so nothing here is required to translate the product —
+ * requiring a credit card for a language toggle would be the wrong trade for
+ * every reader who does not have one.
  *
- * So a working deployment needs one credential. This is the cheapest one that
- * is good at the job, and it sits behind the same interface as the rest
- * (charter rule #4) — swapping it costs this constant and nothing else.
+ * It stays because two providers are better than one and because DeepL phrases
+ * some languages better than Google does. A deployment that sets the key gets
+ * it as the fallback when the keyless path is refused. It sits behind the same
+ * interface as the rest (charter rule #4) — swapping it costs this constant.
  */
 export const deeplTranslate: TranslationProvider = {
   name: 'deepl',
@@ -246,15 +312,20 @@ export const googleCloudTranslate: TranslationProvider = {
 }
 
 /**
- * The providers this deployment can actually use, best first.
+ * The providers this deployment can actually use, in the order they are tried.
  *
- * Keyed providers lead because they are the ones measured to work from a
- * server. The keyless one stays last rather than being deleted: it costs
- * nothing, it does work from some addresses, and a deployment with no key at
- * all is better served by trying it than by refusing outright.
+ * **Keyless first**, because the keyless one is measured to work and because a
+ * language toggle that demands a credit card is not a language toggle. The
+ * keyed providers follow as a fallback for the deployment that wants them or
+ * the address where even `clients5` is refused, and the original `gtx` endpoint
+ * trails as a last resort: it is measured to answer 429 from a datacenter, but
+ * it costs nothing to ask, and there are addresses where the opposite is true.
+ *
+ * That ordering also means a deployment with a DeepL key does not spend a
+ * character of its monthly allowance until it needs to.
  */
 export function activeProviders(
-  all: TranslationProvider[] = [deeplTranslate, googleCloudTranslate, googleTranslate],
+  all: TranslationProvider[] = [googleFreeTranslate, deeplTranslate, googleCloudTranslate, googleTranslate],
 ): TranslationProvider[] {
   return all.filter((p) => p.available())
 }
@@ -286,7 +357,7 @@ export async function translateWithFallback(
     return {
       texts,
       provider: null,
-      unavailable: 'no translation provider is configured — set DEEPL_API_KEY or GOOGLE_TRANSLATE_API_KEY',
+      unavailable: 'no translation provider is available at all',
     }
   }
 

@@ -8,6 +8,7 @@ import {
   translateWithFallback,
   deeplTarget,
   activeProviders,
+  googleFreeTranslate,
   type TranslationProvider,
   isTranslatable,
   parseTranslationResponse,
@@ -247,7 +248,7 @@ describe('translateWithFallback', () => {
   it('says plainly when there is no provider at all', async () => {
     const out = await translateWithFallback(['Hello'], 'ar', [])
     expect(out.provider).toBeNull()
-    expect(out.unavailable, 'the operator needs the variable name, not a shrug').toMatch(/DEEPL_API_KEY/)
+    expect(out.unavailable).toContain('no translation provider')
   })
 
   /**
@@ -269,23 +270,32 @@ describe('translateWithFallback', () => {
 })
 
 describe('a provider is only offered when its credential exists', () => {
-  it('leaves out the keyed providers when no key is set', () => {
+  /**
+   * The product must translate with no account, no key and no card. Anything
+   * else makes a language toggle a paywall for readers who do not have one.
+   */
+  it('has working keyless providers when no key is set anywhere', () => {
     const before = { deepl: process.env.DEEPL_API_KEY, google: process.env.GOOGLE_TRANSLATE_API_KEY }
     delete process.env.DEEPL_API_KEY
     delete process.env.GOOGLE_TRANSLATE_API_KEY
     try {
-      expect(activeProviders().map((p) => p.name)).toEqual(['google-public'])
+      expect(activeProviders().map((p) => p.name)).toEqual(['google-free', 'google-public'])
     } finally {
       if (before.deepl) process.env.DEEPL_API_KEY = before.deepl
       if (before.google) process.env.GOOGLE_TRANSLATE_API_KEY = before.google
     }
   })
 
-  it('puts the keyed provider first, because it is the one that works from a server', () => {
+  /**
+   * A key is an addition, never a promotion past the free path — otherwise a
+   * deployment that sets one starts spending its monthly allowance on requests
+   * the keyless endpoint would have served.
+   */
+  it('keeps the keyless provider first even when a key is set', () => {
     const before = process.env.DEEPL_API_KEY
     process.env.DEEPL_API_KEY = 'test-key:fx'
     try {
-      expect(activeProviders().map((p) => p.name)).toEqual(['deepl', 'google-public'])
+      expect(activeProviders().map((p) => p.name)).toEqual(['google-free', 'deepl', 'google-public'])
     } finally {
       if (before) process.env.DEEPL_API_KEY = before
       else delete process.env.DEEPL_API_KEY
