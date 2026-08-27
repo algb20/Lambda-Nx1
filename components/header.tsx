@@ -5,6 +5,7 @@ import { useState } from "react"
 import { Moon, Sun, ShieldCheck, CreditCard, Languages, UserCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { PostureBadge } from "@/components/posture-badge"
 import { BrandMark } from "@/components/brand-mark"
 import { useTheme } from "@/hooks/use-theme"
 import { useI18n, CURATED_LOCALES, SUPPORTED_LOCALES, LOCALE_LABELS } from "@/lib/i18n"
@@ -92,13 +93,16 @@ export function Header({
           </div>
 
           <div className="flex items-center gap-2">
-            <Badge
-              variant="outline"
-              className="hidden sm:flex text-xs bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-            >
-              <ShieldCheck className="h-3 w-3 mr-1" />
-              {t('badge.passiveLawful')}
-            </Badge>
+            {/*
+              The compliance claim, checked rather than asserted.
+
+              This was a hardcoded green shield: the same words and the same
+              colour whether the guardrail was enforcing anything or had been
+              deleted. See `components/posture-badge` and `lib/security/posture`
+              — it now probes the allowlist, the method rule and the licence
+              gate on every load, and it is green on nothing less.
+            */}
+            <PostureBadge label={t('badge.passiveLawful')} />
             {/* Who am I? Signing in and then seeing no trace of it is
                 disorienting — and it is the only way to tell whether the
                 features that need an account will work. */}

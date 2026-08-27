@@ -27,6 +27,8 @@
  * tests all read this same file.
  */
 
+import { DEFAULT_DENSITY, parseDensity, type Density } from './density'
+
 export const PREFS_VERSION = 1
 
 /** How many gateways a person may pin to the front page. */
@@ -60,6 +62,14 @@ export interface Prefs {
      */
     panels: string[]
     panelSize: PanelSize
+    /**
+     * How much of the analysis is on screen at once.
+     *
+     * One axis rather than two: it *chooses* the panel size above rather than
+     * competing with it — see `lib/prefs/density` for why a second independent
+     * density knob would have left the product unable to say what "dense" means.
+     */
+    density: Density
   }
   /** Gateways pinned to the front page, in the user's own order. */
   homeGateways: string[]
@@ -77,6 +87,7 @@ export const DEFAULT_PREFS: Prefs = {
     // panels is the wall of noise this platform keeps being told it is.
     panels: [],
     panelSize: 'regular',
+    density: DEFAULT_DENSITY,
   },
   homeGateways: [],
 }
@@ -137,6 +148,7 @@ export function parsePrefs(raw: unknown): Prefs {
       windowHours: typeof hours === 'number' && Number.isFinite(hours) && hours > 0 ? hours : null,
       panels: idList(globe.panels, 32),
       panelSize: size,
+      density: parseDensity(globe.density),
     },
     homeGateways: idList(input.homeGateways, MAX_HOME_GATEWAYS),
   }

@@ -36,10 +36,11 @@ import {
   NameList,
   PanelSection,
   SectionIndex,
-  useSectionCollapse,
   type SectionState,
 } from '@/components/panel-section'
 import { usePrefs } from '@/components/prefs-provider'
+import { DensityControl } from '@/components/density-control'
+import { collapsedAt, PANEL_SIZE_BY_DENSITY, type Density } from '@/lib/prefs/density'
 import { diversify, overflowSummary } from '@/lib/analysis/significance'
 import { TimeStamp } from '@/components/time-stamp'
 import { Badge } from '@/components/ui/badge'
@@ -818,7 +819,63 @@ export function GlobeView() {
   const emptySources = report?.sourceHealth.filter((s) => s.status === 'empty') ?? []
   const okSources = report?.sourceHealth.filter((s) => s.status === 'ok') ?? []
 
-  const { isCollapsed, toggle } = useSectionCollapse()
+  /**
+   * Density sets the layout; the chevron overrides one section for this visit.
+   *
+   * ## Two controls, one source of truth
+   *
+   * A section can now be closed by two things: the density level, which says
+   * what a *layout* shows, and the section's own chevron, which says what *this
+   * reader* wants right now. That is fine as long as exactly one of them is
+   * authoritative at a time, and the first attempt here was not — it kept the
+   * persisted collapse set and tried to reconcile the two, which meant a click
+   * on a section that density had closed toggled a stored value the reader
+   * could not see, and did visibly nothing. One click doing nothing is the kind
+   * of fault a reader blames themselves for.
+   *
+   * So the override is a plain map from section to the reader's own answer, and
+   * `collapsedAt` supplies the answer for everything they have not touched.
+   *
+   * ## Why the override is not persisted, and the density is
+   *
+   * It replaced a set of five booleans in `localStorage`. Persisting both would
+   * be two stored sources of truth for one question, and they would contradict
+   * each other the moment a reader changed density on another device — the
+   * layout would say Minimal and three sections would be open with no
+   * explanation on screen. The **level** is the durable choice and is stored in
+   * preferences; the chevron is the momentary one and lasts as long as the
+   * visit. Choosing a level clears the overrides, because choosing a layout is
+   * a deliberate reset.
+   */
+  const [override, setOverride] = useState<ReadonlyMap<string, boolean>>(() => new Map())
+
+  const density = prefs.globe.density
+
+  const sectionCollapsed = useCallback(
+    (id: string) => override.get(id) ?? collapsedAt(density, id),
+    [override, density],
+  )
+
+  const toggleSection = useCallback(
+    (id: string) =>
+      setOverride((prev) => {
+        const next = new Map(prev)
+        next.set(id, !(prev.get(id) ?? collapsedAt(density, id)))
+        return next
+      }),
+    [density],
+  )
+
+  const chooseDensity = useCallback(
+    (next: Density) => {
+      setOverride(new Map())
+      update((p) => ({
+        ...p,
+        globe: { ...p.globe, density: next, panelSize: PANEL_SIZE_BY_DENSITY[next] },
+      }))
+    },
+    [update],
+  )
 
   /**
    * What is on this page, in the order it appears, with live counts.
@@ -956,6 +1013,17 @@ export function GlobeView() {
             ))}
           </>
         ) : null}
+
+        {/*
+          How much of the analysis to show at once.
+
+          In the band with the layer chips because it is the same kind of
+          control — it changes what the page shows, not what the data is. In a
+          settings panel it would be configured once and forgotten, and the
+          whole value of it is switching: Minimal to glance, Extreme to work a
+          developing event, and back.
+        */}
+        <DensityControl density={density} onChange={chooseDensity} />
 
         {/*
           The sentence naming the selected layer. It keeps its own line on a
@@ -1341,8 +1409,8 @@ export function GlobeView() {
           id="sec-significant"
           title={windowHours === null ? 'Most significant now' : 'Most significant in this window'}
           count={rows.length}
-          collapsed={isCollapsed('sec-significant')}
-          onToggle={toggle}
+          collapsed={sectionCollapsed('sec-significant')}
+          onToggle={toggleSection}
           emptyLabel={
             publisher
               ? `Nothing from ${publisher} in this window.`
@@ -1481,8 +1549,8 @@ export function GlobeView() {
           id="sec-unplaceable"
           title="Reported, but not placeable"
           count={report.unplaceable.length}
-          collapsed={isCollapsed('sec-unplaceable')}
-          onToggle={toggle}
+          collapsed={sectionCollapsed('sec-unplaceable')}
+          onToggle={toggleSection}
           emptyLabel="Every event in this run carried a location."
           hint="Real events whose source gave no location — listed here rather than plotted at a guess."
         >
@@ -1525,8 +1593,8 @@ export function GlobeView() {
           id="sec-coverage"
           title="Where we cannot see"
           count={report.coverage.length}
-          collapsed={isCollapsed('sec-coverage')}
-          onToggle={toggle}
+          collapsed={sectionCollapsed('sec-coverage')}
+          onToggle={toggleSection}
           emptyLabel="No region assessment for this run."
           hint={
             <>
@@ -1576,8 +1644,8 @@ export function GlobeView() {
           id="sec-fusion"
           title="Event fusion"
           count={report.fusion.events}
-          collapsed={isCollapsed('sec-fusion')}
-          onToggle={toggle}
+          collapsed={sectionCollapsed('sec-fusion')}
+          onToggle={toggleSection}
           emptyLabel="No reports arrived to fuse in this window."
           hint={`${report.fusion.signals} reports resolved to ${report.fusion.events} distinct events.`}
         >
@@ -1637,8 +1705,8 @@ export function GlobeView() {
           id="sec-sources"
           title="Source integrity"
           count={okSources.length}
-          collapsed={isCollapsed('sec-sources')}
-          onToggle={toggle}
+          collapsed={sectionCollapsed('sec-sources')}
+          onToggle={toggleSection}
           emptyLabel={`No feed contributed to this run — ${failedSources.length} failed and ${emptySources.length} answered with nothing.`}
           hint={`${report.summary.sourcesOk} of ${report.sourceHealth.length} feeds contributed to this picture.`}
         >
