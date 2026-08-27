@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { MIN_PASSWORD_LENGTH } from '@/lib/auth/policy'
+import { discardBody } from '@/lib/http/discard'
 
 /**
  * Link a Pi Network username for sign-in outside the Pi Browser.
@@ -35,7 +36,14 @@ export function PiUsernameLink() {
   useEffect(() => {
     let cancelled = false
     fetch('/api/auth/pi/claim')
-      .then((res) => (res.ok ? res.json() : null))
+      .then((res) => {
+        // See lib/http/discard.ts: a body nobody reads holds the connection.
+        if (!res.ok) {
+          discardBody(res)
+          return null
+        }
+        return res.json()
+      })
       .then((data) => {
         if (!cancelled && data) setState(data as ClaimState)
       })

@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { discardBody } from '@/lib/http/discard'
 
 /**
  * Groups.
@@ -41,7 +42,7 @@ export function GroupsPanel() {
   const load = useCallback(async () => {
     try {
       const res = await fetch('/api/groups', { cache: 'no-store' })
-      if (!res.ok) return
+      if (!res.ok) return discardBody(res)
       const data = await res.json()
       setGroups(data.groups ?? [])
       setOwned(data.owned ?? 0)

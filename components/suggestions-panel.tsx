@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useI18n } from '@/lib/i18n'
+import { discardBody } from '@/lib/http/discard'
 
 type Kind = 'feature' | 'improvement' | 'bug' | 'integration' | 'data_source' | 'other'
 const KINDS: Kind[] = ['feature', 'improvement', 'bug', 'integration', 'data_source', 'other']
@@ -44,7 +45,7 @@ export function SuggestionsPanel() {
   const load = async () => {
     try {
       const res = await fetch('/api/suggestions')
-      if (!res.ok) return
+      if (!res.ok) return discardBody(res)
       const data = await res.json()
       setClusters(data.clusters ?? [])
       setConfigured(data.configured !== false)

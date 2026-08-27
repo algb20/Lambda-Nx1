@@ -46,14 +46,30 @@ describe.each(SURFACES)('%s', (path) => {
   it('takes the publisher from the catalogue rather than inventing one', () => {
     // A hand-written mapping would drift from the independence groups the
     // confidence grade uses, and the two would disagree about who is speaking.
-    expect(source).toMatch(/import \{[^}]*originOf[^}]*\} from '@\/lib\/engine\/catalog'/)
+    //
+    // `@/lib/engine/catalog/origins` is that same answer, generated from the
+    // catalogue and asserted equal to it by `origins.test.ts` — the browser
+    // reads it so that a lookup does not drag 192 KB of feed definitions into
+    // the first chunk of the default page. Either import is the catalogue
+    // speaking; anything else is a surface inventing publishers.
+    expect(source).toMatch(
+      /import \{[^}]*originOf[^}]*\} from '@\/lib\/engine\/catalog(\/origins)?'/,
+    )
   })
 })
 
 describe('the catalogue answers with its own independence groups', () => {
-  const source = readFileSync(join(process.cwd(), 'lib/engine/catalog/index.ts'), 'utf8')
+  const index = readFileSync(join(process.cwd(), 'lib/engine/catalog/index.ts'), 'utf8')
+  const generator = readFileSync(join(process.cwd(), 'scripts/build-origin-index.ts'), 'utf8')
+
+  it('has exactly one implementation of `originOf`', () => {
+    // Two would be two answers to "who is speaking", and the one the grade uses
+    // would not be the one the board uses.
+    expect(index).toMatch(/export \{[^}]*originOf[^}]*\} from '\.\/origins'/)
+    expect(index).not.toMatch(/export function originOf/)
+  })
 
   it('derives origin from `independence`, the same field §2a counts', () => {
-    expect(source).toMatch(/independence \?\? s\.key/)
+    expect(generator).toMatch(/s\.independence && s\.independence !== s\.key/)
   })
 })

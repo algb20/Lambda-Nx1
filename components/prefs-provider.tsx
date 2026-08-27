@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { DEFAULT_PREFS, parsePrefs, prefsEqual, type Prefs } from '@/lib/prefs/schema'
+import { discardBody } from '@/lib/http/discard'
 
 /**
  * One place that remembers what the user chose.
@@ -74,7 +75,14 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
     // ── Then ask the server, for a signed-in user ──────────────────────────
     let live = true
     fetch('/api/preferences')
-      .then((r) => (r.ok ? r.json() : null))
+      .then((r) => {
+        // See lib/http/discard.ts: a body nobody reads holds the connection.
+        if (!r.ok) {
+          discardBody(r)
+          return null
+        }
+        return r.json()
+      })
       .then((body: { prefs?: unknown; signedIn?: boolean } | null) => {
         if (!live || !body?.signedIn) return
         if (body.prefs) {

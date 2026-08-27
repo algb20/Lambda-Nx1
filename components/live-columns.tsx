@@ -12,7 +12,7 @@ import {
   type WorldEventsReport,
 } from '@/lib/modules/world-events-shared'
 import { diversify } from '@/lib/analysis/significance'
-import { originOf } from '@/lib/engine/catalog'
+import { originOf } from '@/lib/engine/catalog/origins'
 import { isNaturalHazard, splitHazards } from '@/lib/analysis/hazards'
 
 /**

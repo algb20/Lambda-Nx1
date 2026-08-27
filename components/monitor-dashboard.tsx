@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { RadarKnowledgeBase } from '@/components/radar-knowledge-base'
 import type { Monitor, Alert } from '@/lib/db'
+import { discardBody } from '@/lib/http/discard'
 
 const INTERVALS: Array<{ label: string; minutes: number }> = [
   { label: 'Hourly', minutes: 60 },
@@ -27,6 +28,9 @@ export function MonitoringDashboard() {
   const refresh = useCallback(async () => {
     const res = await fetch('/api/monitors')
     if (res.status === 401) {
+      // Decided from the status; the body is never read, so it is released
+      // explicitly. See lib/http/discard.ts.
+      discardBody(res)
       setAuthed(false)
       return
     }

@@ -50,7 +50,8 @@ import { useWorldReport } from '@/hooks/use-world-report'
 import { loadWorld } from '@/lib/world/report-store'
 import type { ViewMode } from '@/lib/geo/projection'
 import type { ChainRadarReport } from '@/lib/modules/chain-radar'
-import { originOf } from '@/lib/engine/catalog'
+import { originOf } from '@/lib/engine/catalog/origins'
+import { discardBody } from '@/lib/http/discard'
 import { GlyphMark } from '@/components/glyph-mark'
 import {
   CORROBORATION_BANDS,
@@ -382,7 +383,14 @@ export function GlobeView() {
     if (layer !== 'liquidity' || chain) return
     let alive = true
     fetch('/api/chain', { cache: 'no-store' })
-      .then((r) => (r.ok ? r.json() : null))
+      .then((r) => {
+        // See lib/http/discard.ts: a body nobody reads holds the connection.
+        if (!r.ok) {
+          discardBody(r)
+          return null
+        }
+        return r.json()
+      })
       .then((d) => {
         if (alive && d && !d.error) setChain(d as ChainRadarReport)
       })
