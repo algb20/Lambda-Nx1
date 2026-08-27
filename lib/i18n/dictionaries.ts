@@ -89,6 +89,10 @@ type Dict = Record<string, string>
 
 const en: Dict = {
   'app.tagline': 'Intelligence platform',
+  'lang.search': 'Search languages…',
+  'lang.none': 'No language matches that.',
+  'lang.unavailable': 'Translation is unavailable right now — this page is showing English. No provider accepted the request.',
+  'common.dismiss': 'Dismiss',
   'header.pay': 'Pay with',
   'header.pay.title': 'Open your plan and subscribe with Pi',
   'upgrade.title': 'Your plan',
@@ -169,6 +173,10 @@ const en: Dict = {
 
 const ar: Dict = {
   'app.tagline': 'منصّة استخبارات',
+  'lang.search': 'ابحث عن لغة…',
+  'lang.none': 'لا لغة تطابق ذلك.',
+  'lang.unavailable': 'الترجمة غير متاحة الآن — تُعرض الصفحة بالإنجليزية. لم يقبل أيّ مزوّد ترجمة الطلب.',
+  'common.dismiss': 'إغلاق',
   'header.pay': 'ادفع بـ',
   'header.pay.title': 'افتح خطتك واشترك عبر Pi',
   'upgrade.title': 'خطّتك',
@@ -249,6 +257,10 @@ const ar: Dict = {
 
 const es: Dict = {
   'app.tagline': 'Plataforma de inteligencia',
+  'lang.search': 'Search languages…',
+  'lang.none': 'No language matches that.',
+  'lang.unavailable': 'Translation is unavailable right now — this page is showing English. No provider accepted the request.',
+  'common.dismiss': 'Dismiss',
   'header.pay': 'Pagar con',
   'header.pay.title': 'Abre tu plan y suscríbete con Pi',
   'upgrade.title': 'Tu plan',
@@ -328,6 +340,10 @@ const es: Dict = {
 
 const fr: Dict = {
   'app.tagline': 'Plateforme de renseignement',
+  'lang.search': 'Search languages…',
+  'lang.none': 'No language matches that.',
+  'lang.unavailable': 'Translation is unavailable right now — this page is showing English. No provider accepted the request.',
+  'common.dismiss': 'Dismiss',
   'header.pay': 'Payer avec',
   'header.pay.title': 'Ouvrez votre offre et abonnez-vous avec Pi',
   'upgrade.title': 'Votre offre',
@@ -407,6 +423,10 @@ const fr: Dict = {
 
 const zh: Dict = {
   'app.tagline': '情报平台',
+  'lang.search': 'Search languages…',
+  'lang.none': 'No language matches that.',
+  'lang.unavailable': 'Translation is unavailable right now — this page is showing English. No provider accepted the request.',
+  'common.dismiss': 'Dismiss',
   'header.pay': '支付',
   'header.pay.title': '打开你的方案并使用 Pi 订阅',
   'upgrade.title': '你的方案',
@@ -486,6 +506,10 @@ const zh: Dict = {
 
 const hi: Dict = {
   'app.tagline': 'इंटेलिजेंस प्लेटफ़ॉर्म',
+  'lang.search': 'Search languages…',
+  'lang.none': 'No language matches that.',
+  'lang.unavailable': 'Translation is unavailable right now — this page is showing English. No provider accepted the request.',
+  'common.dismiss': 'Dismiss',
   'header.pay': 'भुगतान करें',
   'header.pay.title': 'अपना प्लान खोलें और Pi से सदस्यता लें',
   'upgrade.title': 'आपका प्लान',
@@ -565,6 +589,10 @@ const hi: Dict = {
 
 const id: Dict = {
   'app.tagline': 'Platform intelijen',
+  'lang.search': 'Search languages…',
+  'lang.none': 'No language matches that.',
+  'lang.unavailable': 'Translation is unavailable right now — this page is showing English. No provider accepted the request.',
+  'common.dismiss': 'Dismiss',
   'header.pay': 'Bayar dengan',
   'header.pay.title': 'Buka paket Anda dan berlangganan dengan Pi',
   'upgrade.title': 'Paket Anda',

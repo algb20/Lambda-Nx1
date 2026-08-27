@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Slider } from '@/components/ui/slider'
 import { UpgradePanel } from '@/components/upgrade-panel'
+import { SUBSCRIPTION_VISIBLE } from '@/lib/plans/plans'
 import { AccountPanel } from '@/components/account-panel'
 import { PiUsernameLink } from '@/components/pi-username-link'
 import { AvatarSetting } from '@/components/avatar'
@@ -108,10 +109,17 @@ export function UserPreferences() {
           and the API reference are both rendered from the definitions the app
           itself enforces, so neither can drift from the product. */}
       <p className="flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
-        <a href="/pricing" className="hover:text-foreground hover:underline">
-          Pricing
-        </a>
-        <span>·</span>
+        {/* Hidden with the rest of the subscription surface (R273). The page
+            itself stays reachable by URL and stays rendered from the plan
+            definitions, so nothing about it can rot while it is out of sight. */}
+        {SUBSCRIPTION_VISIBLE ? (
+          <>
+            <a href="/pricing" className="hover:text-foreground hover:underline">
+              Pricing
+            </a>
+            <span>·</span>
+          </>
+        ) : null}
         <a href="/docs/api" className="hover:text-foreground hover:underline">
           API
         </a>

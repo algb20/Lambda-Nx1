@@ -75,6 +75,27 @@ export const PLAN_LIST: Plan[] = [PLANS.free, PLANS.pro]
 /** Whether tier checks are actually enforced (off until subscriptions ship). */
 export const TIERS_ENFORCED = process.env.ENFORCE_TIERS === 'true'
 
+/**
+ * Whether to *show* subscriptions at all. Hidden while the pricing is decided.
+ *
+ * Separate from `TIERS_ENFORCED`, and both halves of that separation matter.
+ * Enforcement answers "does the free plan stop at twenty investigations";
+ * this answers "does a visitor see a price at all". They were one thing for a
+ * moment while this was written, and one thing is wrong: with enforcement off
+ * and the panel still on screen, the product invited a payment for something
+ * every visitor already had — which is the shape of a promise you cannot keep.
+ *
+ * Hidden, not deleted, and deliberately: the tiers, the prices, the Pi payment
+ * flow and their tests all stay exactly where they are and stay tested, so
+ * turning this back on is one variable rather than a rebuild. `docs/GATEWAYS.md`
+ * still describes the intended model.
+ *
+ * `NEXT_PUBLIC_` because the decision is needed while rendering, on the client,
+ * before any request — and because a build serves both surfaces, so it cannot
+ * be answered by the server alone.
+ */
+export const SUBSCRIPTION_VISIBLE = process.env.NEXT_PUBLIC_SHOW_SUBSCRIPTION === 'true'
+
 export function getPlan(id: string | null | undefined): Plan {
   return (id && PLANS[id as PlanId]) || PLANS.free
 }

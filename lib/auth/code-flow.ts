@@ -73,9 +73,36 @@ export async function accountsUnavailable(route: string): Promise<NextResponse |
    * Deliberately not awaited *before* the liveness check below: if the database
    * is unreachable there is nothing to create, and the error the visitor needs
    * is the connection one.
+   *
+   * ## And deliberately not awaited to completion either. Measured.
+   *
+   * On 2026-08-27 the first registration against a freshly configured
+   * deployment **hung for over sixty seconds and then created the account
+   * anyway**: the caller's request had already been cut, so nobody received the
+   * session cookie. The second attempt was told *"That username is taken"* — by
+   * an account its owner never saw made. Every subsequent registration took two
+   * seconds.
+   *
+   * That is precisely the corrupted signup this function's own docstring says
+   * it exists to prevent, arriving through the one door it left open: applying
+   * the schema is bounded at `APPLY_TIMEOUT_MS` (25s), and awaiting that inside
+   * a visitor's request on a serverless function guarantees the function dies
+   * first. The row is written after the caller has gone.
+   *
+   * So the wait is bounded by what a person will sit through, not by what the
+   * schema needs. If it is not ready within that, the work carries on in the
+   * background and the visitor is told, honestly, to come back in a moment —
+   * which is the outcome this module already chose for every other kind of
+   * not-ready. The next request finds it done.
    */
   const database = await databaseAvailability()
-  if (database.live) await ensureSchema()
+  if (database.live && !(await schemaReadyWithin(SCHEMA_WAIT_MS))) {
+    console.warn(`[${route}] refusing — the schema is still being created; the visitor was asked to retry`)
+    return NextResponse.json(
+      { error: UNAVAILABLE_MESSAGE.initialising, reason: 'schema_initialising' },
+      { status: 503, headers: { 'Cache-Control': 'no-store', 'Retry-After': '15' } },
+    )
+  }
 
   if (!database.live) {
     console.error(
@@ -113,6 +140,59 @@ const UNAVAILABLE_MESSAGE: Record<string, string> = {
     'Accounts are busy right now: the database has no free connections. Nothing was created and no code was sent — please try again in a minute.',
   schema:
     'Accounts are not ready on this deployment: the database is connected but its tables were never created. Nothing was created and no code was sent. The operator has to apply the schema.',
+  /**
+   * Deliberately the opposite advice from `schema` above, because it is the
+   * opposite situation. There, nothing changes until a person acts, so
+   * inviting a retry loop wastes their afternoon. Here the deployment is
+   * creating the tables *right now* and the next attempt genuinely succeeds —
+   * measured at two seconds, against sixty-plus for the attempt that waited.
+   */
+  initialising:
+    'Accounts are being set up on this deployment — its database tables are still being created. Nothing was created and no code was sent. This takes a few seconds; please try again shortly.',
+}
+
+/**
+ * How long a visitor waits for the schema before being told to come back.
+ *
+ * Chosen from the two measured numbers it sits between: applying the schema is
+ * bounded at 25 seconds, and a warm request that needs no schema work returns
+ * in two. Three seconds covers the case where the work is nearly done — the
+ * visitor never learns there was a problem — and refuses long before any
+ * serverless function ceiling can cut the response after the row is written.
+ */
+export const SCHEMA_WAIT_MS = 3_000
+
+/**
+ * Is the schema ready, within a budget?
+ *
+ * The healing itself is *not* cancelled when the budget runs out — it keeps
+ * running in the process and the next request finds it done. Only our waiting
+ * for it stops. Cancelling would mean a deployment where nobody ever waits long
+ * enough for the tables to be created, which is a worse failure than the one
+ * being fixed.
+ */
+export async function schemaReadyWithin(budgetMs: number): Promise<boolean> {
+  /**
+   * The rejection is swallowed *before* the race, not after.
+   *
+   * Racing the raw promise lets a rejected heal propagate straight out of
+   * `accountsUnavailable` and out of the route — turning "the schema is not
+   * ready" into the blank 500 this whole module was written to abolish. Caught
+   * here, a heal that throws is simply a heal that is not ready yet, which is
+   * the truth. Found by the test below, not by reading this code.
+   */
+  const healing = ensureSchema().catch(() => false)
+  let timer: ReturnType<typeof setTimeout> | undefined
+  try {
+    return await Promise.race([
+      healing,
+      new Promise<boolean>((resolve) => {
+        timer = setTimeout(() => resolve(false), budgetMs)
+      }),
+    ])
+  } finally {
+    if (timer) clearTimeout(timer)
+  }
 }
 
 /**

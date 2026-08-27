@@ -2,6 +2,7 @@
 
 import { useEffect, useSyncExternalStore, type ReactNode } from "react";
 import { PiAuthProvider, usePiAuth } from "@/contexts/pi-auth-context";
+import { schedulePiProbe } from "@/lib/auth/pi-probe";
 import { I18nProvider } from "@/lib/i18n";
 import { StandaloneSignInPrompt } from "./standalone-auth";
 import { AuthLoadingScreen } from "./auth-loading-screen";
@@ -98,6 +99,18 @@ export function AppWrapper({ children }: { children: ReactNode }) {
    * and the panel blanked. See lib/dom-resilience.ts.
    */
   if (typeof window !== "undefined") installDomResilience();
+  /**
+   * Ask Pi who this is, once, after the page is up.
+   *
+   * Without this nothing ever loads the Pi SDK unless the surface is already
+   * believed to be Pi Browser — and the surface is believed to be Pi Browser
+   * partly because the SDK loaded. A pioneer whose Pi Browser does not name
+   * itself in its user agent sat inside that circle and was shown the email
+   * form. See lib/auth/pi-probe.ts.
+   */
+  useEffect(() => {
+    schedulePiProbe();
+  }, []);
   /**
    * One beacon per open, for everyone (guest included). A signed-in re-ping
    * happens inside AppContent once identity is known.

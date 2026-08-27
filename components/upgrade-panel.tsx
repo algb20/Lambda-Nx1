@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { usePiAuthOptional } from '@/contexts/pi-auth-context'
 import { useI18n } from '@/lib/i18n'
+import { SUBSCRIPTION_VISIBLE } from '@/lib/plans/plans'
 
 interface PlanDTO {
   id: 'free' | 'pro'
@@ -55,6 +56,15 @@ async function postStep(body: Record<string, unknown>): Promise<Record<string, u
  * and report what happened, and it cannot grant itself anything.
  */
 export function UpgradePanel() {
+  /**
+   * Hidden while the pricing is being decided (R273).
+   *
+   * An early return rather than a caller-side condition, so every present and
+   * future caller is covered by one line: the panel that must not be shown is
+   * the one place that can be sure it is not showing.
+   */
+  if (!SUBSCRIPTION_VISIBLE) return null
+
   const { t } = useI18n()
   const pi = usePiAuthOptional()
   const [plans, setPlans] = useState<PlanDTO[]>([])

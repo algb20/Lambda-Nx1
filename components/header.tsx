@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { BrandMark } from "@/components/brand-mark"
 import { useTheme } from "@/hooks/use-theme"
-import { useI18n, LOCALES, LOCALE_LABELS } from "@/lib/i18n"
+import { useI18n, CURATED_LOCALES, SUPPORTED_LOCALES, LOCALE_LABELS } from "@/lib/i18n"
 import { usePiAuthOptional } from "@/contexts/pi-auth-context"
+import { SUBSCRIPTION_VISIBLE } from "@/lib/plans/plans"
 import { useViewer } from "@/hooks/use-viewer"
 
 /**
@@ -38,6 +39,32 @@ export function Header({ onNavigate }: { onNavigate?: (tab: 'preferences') => vo
   const username = user?.username ?? pi?.userData?.username ?? null
 
   const [langOpen, setLangOpen] = useState(false)
+  const [langQuery, setLangQuery] = useState('')
+
+  /**
+   * Which languages the list offers, and in what order.
+   *
+   * The curated seven lead because their strings are hand-written — chosen
+   * wording, checked tone — and a machine translation of the same screen is a
+   * step down. The other hundred and one follow in the order the labels are
+   * declared, which groups them the way the file does.
+   *
+   * The filter reads both the English code and the label in its own script, so
+   * a reader looking for their language finds it by typing it the way they
+   * write it — `Deutsch` and `de` both reach German, `العربية` and `ar` both
+   * reach Arabic. Matching only the code would ask every reader to know the
+   * ISO-639 abbreviation for their own language before they can select it.
+   */
+  const orderedLocales = [
+    ...CURATED_LOCALES,
+    ...SUPPORTED_LOCALES.filter((c) => !(CURATED_LOCALES as readonly string[]).includes(c)),
+  ]
+  const q = langQuery.trim().toLowerCase()
+  const shownLocales = q
+    ? orderedLocales.filter(
+        (c) => c.toLowerCase().includes(q) || (LOCALE_LABELS[c] ?? '').toLowerCase().includes(q),
+      )
+    : orderedLocales
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
@@ -82,8 +109,13 @@ export function Header({ onNavigate }: { onNavigate?: (tab: 'preferences') => vo
                 {t('auth.guest')}
               </span>
             ) : null}
-            {/* A list, not a cycle button: with seven locales, "press until
-                your language comes round" is not a way to choose one. */}
+            {/* A searchable list, not a cycle button and not a bare list.
+                It offered seven of the hundred and eight languages the product
+                already defines — the other hundred were reachable only by
+                editing a cookie. A hundred and eight in an unsearchable
+                dropdown is its own kind of unreachable, so the seven curated
+                ones lead and a filter finds the rest by name in either
+                script. */}
             <div className="relative">
               <Button
                 variant="ghost"
@@ -107,11 +139,20 @@ export function Header({ onNavigate }: { onNavigate?: (tab: 'preferences') => vo
                     tabIndex={-1}
                     onClick={() => setLangOpen(false)}
                   />
+                  <div className="absolute end-0 z-50 mt-1 w-56 max-w-[85vw] overflow-hidden rounded-md border border-border bg-card shadow-lg">
+                    <input
+                      autoFocus
+                      value={langQuery}
+                      onChange={(e) => setLangQuery(e.target.value)}
+                      placeholder={t('lang.search')}
+                      aria-label={t('lang.search')}
+                      className="w-full border-b border-border bg-transparent px-3 py-2 text-xs outline-none placeholder:text-muted-foreground"
+                    />
                   <ul
                     role="listbox"
-                    className="absolute end-0 z-50 mt-1 min-w-[9rem] overflow-hidden rounded-md border border-border bg-card py-1 shadow-lg"
+                    className="max-h-72 overflow-y-auto overscroll-contain py-1"
                   >
-                    {LOCALES.map((code) => (
+                    {shownLocales.map((code) => (
                       <li key={code}>
                         <button
                           role="option"
@@ -120,20 +161,27 @@ export function Header({ onNavigate }: { onNavigate?: (tab: 'preferences') => vo
                             setLocale(code)
                             setLangOpen(false)
                           }}
-                          className={`flex w-full items-center justify-between gap-2 px-3 py-1.5 text-xs transition-colors hover:bg-muted ${
+                          className={`flex min-h-[2.25rem] w-full items-center justify-between gap-2 px-3 py-1.5 text-start text-xs transition-colors hover:bg-muted ${
                             code === locale ? "font-semibold text-primary" : "text-foreground"
                           }`}
                         >
-                          <span>{LOCALE_LABELS[code]}</span>
+                          <span className="truncate">{LOCALE_LABELS[code]}</span>
                           <span className="uppercase text-muted-foreground">{code}</span>
                         </button>
                       </li>
                     ))}
+                    {shownLocales.length === 0 ? (
+                      <li className="px-3 py-2 text-xs text-muted-foreground">{t('lang.none')}</li>
+                    ) : null}
                   </ul>
+                  </div>
                 </>
               ) : null}
             </div>
-            {onNavigate ? (
+            {/* Hidden with the rest of the subscription surface (R273) — a
+                button that leads to a price list nobody can see is a dead end,
+                which is the exact fault this button was added to fix. */}
+            {onNavigate && SUBSCRIPTION_VISIBLE ? (
               <Button
                 variant="outline"
                 size="sm"

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useI18n } from '@/lib/i18n'
 
 /**
@@ -21,8 +21,14 @@ import { useI18n } from '@/lib/i18n'
  *    re-renders, so a re-render can never leave half a page in each language.
  *  - **Nothing untranslatable is sent.** Code, identifiers, URLs, numbers and
  *    anything a caller marks `data-no-translate` are left exactly as they are.
- *  - **Failure is invisible.** If the endpoint is unreachable the page simply
- *    stays in English.
+ *  - **A blip is invisible; a refusal is not.** A failed round trip leaves the
+ *    page in English and says nothing, which is right for a dropped request.
+ *    But when the server reports that *no provider would translate at all*,
+ *    the reader is told — because the previous version treated both the same
+ *    and the feature was measured broken on the live deployment while every
+ *    surface, statistic and test reported it healthy. A reader who selects
+ *    Arabic and gets English concludes the product has no Arabic; they must
+ *    not have to guess between that and "it is temporarily unavailable".
  */
 
 const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'CODE', 'PRE', 'KBD', 'SAMP', 'TEXTAREA', 'NOSCRIPT'])
@@ -43,7 +49,9 @@ function shouldSkip(node: Node): boolean {
 }
 
 export function AutoTranslate({ children }: { children: React.ReactNode }) {
-  const { locale } = useI18n()
+  const { locale, t } = useI18n()
+  /** Set only when the server reports that no provider translated at all. */
+  const [unavailable, setUnavailable] = useState(false)
   /** Original English text, per node, so switching back is exact. */
   const originalsRef = useRef(new WeakMap<Node, string>())
   const attrOriginalsRef = useRef(new WeakMap<Element, Map<string, string>>())
@@ -154,9 +162,23 @@ export function AutoTranslate({ children }: { children: React.ReactNode }) {
           body: JSON.stringify({ texts: sources, to: locale }),
         })
         if (!res.ok) return
-        const data = (await res.json()) as { translations?: string[] }
+        const data = (await res.json()) as { translations?: string[]; unavailable?: string }
         const out = data.translations
         if (!Array.isArray(out) || out.length !== sources.length) return
+
+        /**
+         * The server translated nothing, and said so.
+         *
+         * Two things must not happen here. The English must not be memoised —
+         * doing so would pin it for the life of the page, so the interface
+         * would stay English even after the provider recovered — and the
+         * reader must not be left to conclude the product has no Arabic.
+         */
+        if (data.unavailable) {
+          if (localeRef.current === locale) setUnavailable(true)
+          return
+        }
+        setUnavailable(false)
 
         // The locale may have changed while the request was in flight.
         if (localeRef.current !== locale) return
@@ -209,5 +231,28 @@ export function AutoTranslate({ children }: { children: React.ReactNode }) {
     }
   }, [locale])
 
-  return <>{children}</>
+  return (
+    <>
+      {children}
+      {unavailable ? (
+        <div
+          role="status"
+          data-no-translate
+          className="fixed inset-x-2 bottom-2 z-[60] mx-auto max-w-md rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 shadow-lg dark:text-amber-300"
+        >
+          <div className="flex items-start justify-between gap-2">
+            <span>{t('lang.unavailable')}</span>
+            <button
+              type="button"
+              onClick={() => setUnavailable(false)}
+              aria-label={t('common.dismiss')}
+              className="shrink-0 rounded px-1 leading-none opacity-70 transition-opacity hover:opacity-100"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      ) : null}
+    </>
+  )
 }
