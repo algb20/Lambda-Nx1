@@ -33,3 +33,7 @@ next-env.d.ts
 
 # Real-browser walkthrough output — screenshots and findings, regenerated on demand
 .walkthrough/
+
+# python bytecode from the scripts/ utilities
+__pycache__/
+*.py[cod]
