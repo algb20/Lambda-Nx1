@@ -61,10 +61,37 @@ describe('package.json installs without our lockfile', () => {
       // An override for a package nothing depends on is dead weight at best and
       // a typo for a real dependency at worst.
       const present = name in all || Object.keys(all).some((d) => d.endsWith(`/${name}`))
-      expect(present || name === 'sharp' || name === 'esbuild', `override "${name}"`).toBe(true)
+      expect(present || name in TRANSITIVE_ONLY, `override "${name}"`).toBe(true)
+    }
+  })
+
+  /**
+   * A transitive override with no stated reason is a pin nobody can safely
+   * remove: the package is not in our dependencies, so the next reader cannot
+   * tell whether it patches a real advisory or was a guess. This started as two
+   * bare names in an `||` chain and grew a third the day an advisory landed —
+   * which is exactly when the reason matters most.
+   */
+  it('says why every transitive-only override exists', () => {
+    for (const [name, why] of Object.entries(TRANSITIVE_ONLY)) {
+      expect(why.length, `${name} is pinned with no reason beside it`).toBeGreaterThan(30)
+      expect(pkg.overrides?.[name], `${name} is excused but no longer overridden`).toBeDefined()
     }
   })
 })
+
+/**
+ * Overrides for packages nothing of ours depends on directly, and why each one
+ * is pinned anyway. Every entry lifts a transitive dependency that a parent we
+ * do not control pins too low.
+ */
+const TRANSITIVE_ONLY: Record<string, string> = {
+  sharp: "Next.js image optimisation pulls it; pinned to keep one copy of a large native binary rather than several.",
+  esbuild:
+    'Pulled by both vitest and drizzle-kit at different ranges; pinned so the two do not install separate native binaries.',
+  nanoid:
+    'GHSA-2v37-7h3g-55p8 — high severity, custom generators can loop indefinitely when size is zero, fixed in 3.3.18. It reaches us only through postcss, whose own range (^3.3.17) admits the vulnerable versions, so Dependabot could not lift it and failed three runs trying. `npm audit` reported one high vulnerability before this pin and zero after.',
+}
 
 describe('the scripts a fresh clone needs', () => {
   it('keeps the three commands the setup page tells people to run', () => {

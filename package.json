@@ -97,6 +97,7 @@
   "overrides": {
     "postcss": "^8.5.26",
     "sharp": "^0.35.3",
-    "esbuild": "^0.25.12"
+    "esbuild": "^0.25.12",
+    "nanoid": "^3.3.18"
   }
 }
