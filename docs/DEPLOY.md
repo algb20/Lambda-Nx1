@@ -380,6 +380,35 @@ Vercel exactly as on Netlify.
 
 ## 6. Post-deploy verification
 
+**Start here: `npm run check:deploys`.** It asks every deployment in
+`lib/ops/deployments.ts` for `/api/health`, ranks what it finds worst-first, and
+exits non-zero if anything is blocking, stale or unreachable. One command
+instead of one `curl` per site.
+
+```
+  zippy-gecko         unhealthy   9cf4946  2026-08-27T00:41:24.507Z
+  melodious-tiramisu  unhealthy   9cf4946  2026-08-27T00:39:50.442Z
+  voluble-rabanadas   unhealthy   bb5d88e  2026-08-15T02:24:19.468Z
+
+  ✖ zippy-gecko         session_secret is degraded — SESSION_SECRET not set
+  ▲ voluble-rabanadas   serving bb5d88e, 11 days behind the newest deployment
+  · zippy-gecko         cron_secret is off — CRON_SECRET not set
+```
+
+That is a real run from 2026-08-27, and it is why this exists. **All three
+deployments were unhealthy, `SESSION_SECRET` was unset on every one of them so
+nobody could sign in, `DATABASE_URL` was unset so there was no database at all,
+`CRON_SECRET` was unset so every scheduled job answered 503 — and one site had
+been serving a twelve-day-old build the whole time.** Every fact was already in
+`/api/health`. Reading it was a thing a person had to remember, which is the
+same failure this repository has now fixed three times in other places.
+
+`NX_DEPLOYMENTS` (comma-separated origins) points it at a fork or a self-host.
+It is given no credential and passes none — `/api/health` reports only *whether*
+a setting is configured — so its output is safe to paste anywhere.
+
+Then, per deployment:
+
 1. **Readiness probe** — the honest configuration report (no secrets leaked):
 
    ```bash
