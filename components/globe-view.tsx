@@ -2,6 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
+  hasViewState,
+  parseViewState,
+  shareUrl,
+  toSearch,
+  type GlobeViewState,
+  type ViewDefaults,
+} from '@/lib/globe/view-state'
+import {
   Globe2,
   Loader2,
   RefreshCw,
@@ -18,6 +26,7 @@ import {
   History,
   Play,
   Pause,
+  Link2 as LinkIcon,
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import {
@@ -270,6 +279,76 @@ export function GlobeView() {
       }),
     [update],
   )
+  /**
+   * The view, in the address bar.
+   *
+   * Two mechanisms that answer different questions and do not overlap:
+   * preferences answer *what do I usually want*, the URL answers *what am I
+   * pointing at right now*. Without the second, nobody can send anyone a view —
+   * which is the single most useful thing in the competitor link the owner sent.
+   *
+   * The URL wins on arrival and only on arrival: after that the reader's own
+   * changes drive it. Applied once, guarded by a ref, because re-applying on
+   * every render would fight every control on the page.
+   */
+  const viewDefaults: ViewDefaults = useMemo(
+    () => ({ mode: 'globe', layer: 'events', region: 'all', windowHours: null }),
+    [],
+  )
+  const currentView: GlobeViewState = useMemo(
+    () => ({ mode, layer, region, windowHours, lat: null, lon: null, zoom: null }),
+    [mode, layer, region, windowHours],
+  )
+  const linkApplied = useRef(false)
+  useEffect(() => {
+    if (linkApplied.current || typeof window === 'undefined') return
+    linkApplied.current = true
+    if (!hasViewState(window.location.search)) return
+    const shared = parseViewState(window.location.search, { mode, layer, region, windowHours })
+    update((p) => ({
+      ...p,
+      globe: {
+        ...p.globe,
+        view: shared.mode,
+        layer: shared.layer,
+        region: shared.region,
+        windowHours: shared.windowHours,
+      },
+    }))
+    // Deliberately once, on mount. See the note above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  /**
+   * And the address bar follows the controls.
+   *
+   * `replaceState`, not `pushState`: changing a layer is not a navigation, and
+   * making it one means the back button walks through every chip the reader
+   * pressed instead of leaving the page.
+   */
+  useEffect(() => {
+    if (typeof window === 'undefined' || !linkApplied.current) return
+    const next = window.location.pathname + toSearch(currentView, viewDefaults)
+    if (window.location.pathname + window.location.search !== next) {
+      window.history.replaceState(window.history.state, '', next)
+    }
+  }, [currentView, viewDefaults])
+
+  const [copied, setCopied] = useState(false)
+  const copyView = useCallback(() => {
+    if (typeof window === 'undefined') return
+    const url = shareUrl(window.location.origin, window.location.pathname, currentView)
+    void navigator.clipboard
+      ?.writeText(url)
+      .then(() => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      })
+      .catch(() => {
+        /* a refused clipboard is not worth an error dialogue */
+      })
+  }, [currentView])
+
   /** The selection is held by id, not by value — see `selected` below. */
   const [selectedId, setSelectedId] = useState<string | null>(null)
   /** null means pinned to the live edge, which is not the same as "at now". */
@@ -819,10 +898,25 @@ export function GlobeView() {
           {LAYER_META[layer].question}
         </p>
 
+        {/*
+            Copy this exact view.
+
+            The link carries every field rather than only what differs from the
+            defaults: a colleague opening it must land on what the sharer is
+            looking at, not on their own settings with a couple of overrides.
+        */}
+        <button
+          onClick={copyView}
+          className="ms-auto flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-muted-foreground ring-1 ring-border transition-colors hover:bg-muted"
+          title="Copy a link to exactly this view — layer, region, window and mode"
+        >
+          <LinkIcon className="h-3 w-3" />
+          {copied ? 'Copied' : 'Share view'}
+        </button>
         <button
           onClick={() => load(true)}
           disabled={refreshing}
-          className="ms-auto flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-muted-foreground ring-1 ring-border transition-colors hover:bg-muted disabled:opacity-50"
+          className="flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-muted-foreground ring-1 ring-border transition-colors hover:bg-muted disabled:opacity-50"
         >
           <RefreshCw className={`h-3 w-3 ${refreshing ? 'animate-spin' : ''}`} />
           {report ? <TimeStamp iso={report.generatedAt} fallback="Refresh" /> : 'Refresh'}
