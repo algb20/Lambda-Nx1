@@ -409,3 +409,47 @@ the largest genuine capability gap in this survey and it is ours to close.
 
 The two "ahead" rows are both method, not money. That is the only kind of lead
 this project can hold, and it is the kind that does not expire.
+
+## World Monitor, read again on 2026-08-27 — the engineering, not the screens
+
+The teardown above is of their *product*. This is of their *architecture
+document*, re-read the same day the owner asked for a fresh comparison. Their
+running site is unreachable from this environment (the egress proxy blocks
+`worldmonitor.app`), so nothing here is inferred from a screenshot — it is what
+their own `ARCHITECTURE.md` states.
+
+**Their upstream count has moved: 536+ hosts in the v2.10.0 read, 578+ now.**
+Under §2a of the charter that is an *integration* count, and it is the only
+number in their material that is directly comparable to ours.
+
+### The technologies they name, and where we actually stand
+
+| Concern | Theirs | Ours | Honest verdict |
+|---|---|---|---|
+| Map rendering | deck.gl + maplibre-gl + globe.gl, WebGL | our own 2D canvas | Behind on density and zoom; ahead on independence — three rendering libraries is three upstreams that can break us |
+| Basemap | PMTiles vector tiles | a built world atlas (`scripts/build-world-atlas.mjs`) | **Level, differently.** PMTiles is worth studying: one file, no tile server, no key |
+| Clustering | Supercluster | our own cluster pass (`lib/geo/cluster.ts`) | Level |
+| In-browser ML | `@xenova/transformers` ONNX — MiniLM-L6 embeddings, sentiment, NER — plus an IndexedDB vector store | none | **Behind, and it is the sharpest gap.** Keyless semantic search that runs on the reader's own machine is exactly the shape this project argues for |
+| Analysis off the main thread | `analysis.worker.ts`, `ml.worker.ts` | none — every pass runs on the main thread | Behind |
+| Cold start | `/api/bootstrap`, two-tier concurrent fetch, fast 3s + slow 5s | one sweep, tens of seconds | **Behind, and it is our loudest measured defect** (R271) |
+| Cache | four tiers (300s/600s/1800s/7200s/86400s), Redis coalescing via `cachedFetchJson`, `seed-meta:<key>` staleness | our own cache + archive, per-source TTL | Behind on tiering, level on honesty |
+| Polling | exponential backoff ×4, viewport-conditional, tab-paused, staggered 150ms flush | fixed interval | Behind |
+| Panels | 109 panel classes over one `Panel` base | our workspaces + boxes | Behind on count, and count is the point of a board |
+| Clients | web, Tauri desktop (5 targets), Docker/GHCR, MCP server, SDKs on npm/PyPI/RubyGems/Go | web + PWA + Pi | Behind |
+| State | mutable `AppContext`, no state library, URL sync at 250ms | React state + our stores | Level |
+| Tests | Playwright E2E **plus visual regression**, node:test, esbuild bundle checks | vitest ×2309 + a real-browser walkthrough | Level on breadth; **behind on visual regression**, which is precisely the class of defect the owner keeps reporting and our tests keep missing |
+| Licence | AGPL-3.0 | ours | **The line.** Studying this document is lawful and is what §2.8 asks for. Copying a line of their code would relicense our entire product |
+
+### What this changes about our order of work
+
+Three items move up, because each is a *measured* weakness of ours that their
+document shows a worked answer to:
+
+1. **A bootstrap path** — the first paint must not wait on a full sweep. Theirs
+   splits fast and slow upstreams with separate timeouts and hydrates twice.
+2. **Analysis off the main thread**, then in-browser embeddings. Keyless,
+   private, and it runs on hardware we do not pay for.
+3. **Visual-regression tests.** Every design fault in this project so far —
+   the header 208px out of alignment, a globe that stopped growing at 574px, a
+   rail rendering blank — was invisible to 2,309 passing tests and obvious in
+   one screenshot.
