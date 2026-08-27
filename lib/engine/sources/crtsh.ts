@@ -3,6 +3,7 @@
  * Keyless; CT logs typically reveal more subdomains than DNS enumeration alone.
  */
 import type { Evidence, Source } from '../types'
+import { expectOk } from '../fetch-guard'
 
 interface CrtShEntry {
   name_value?: string
@@ -20,7 +21,7 @@ export const crtsh: Source = {
     const domain = input.value.toLowerCase()
     const url = `https://crt.sh/?q=${encodeURIComponent('%.' + domain)}&output=json`
     const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    expectOk('crtsh', res)
     const entries = (await res.json().catch(() => null)) as CrtShEntry[] | null
     if (!Array.isArray(entries)) return []
 

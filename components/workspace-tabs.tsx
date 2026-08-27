@@ -107,7 +107,7 @@ export function WorkspaceTabs({
               aria-selected={selected}
               aria-controls={`panel-${w.id}`}
               onClick={() => choose(w.id)}
-              className={`-mb-px flex shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2 text-xs transition-colors ${
+              className={`touch-target -mb-px flex shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2 text-xs transition-colors ${
                 selected
                   ? 'border-primary font-semibold text-foreground'
                   : 'border-transparent text-muted-foreground hover:text-foreground'

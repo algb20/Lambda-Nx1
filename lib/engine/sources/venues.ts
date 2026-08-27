@@ -39,6 +39,7 @@
  */
 import type { Evidence, Source } from '../types'
 import { countryName } from '../../geo/edge-geo'
+import { expectOk } from '../fetch-guard'
 
 export type VenueKind = 'regulated' | 'crypto' | 'other'
 
@@ -393,7 +394,7 @@ export const cryptoVenuesSource: Source = {
   minIntervalMs: 2_000,
   async run(input, ctx) {
     const res = await ctx.fetch('https://api.coingecko.com/api/v3/exchanges?per_page=100&page=1')
-    if (!res.ok) return []
+    expectOk('coingecko_exchanges', res)
     const rows = (await res.json().catch(() => null)) as CoinGeckoExchange[] | null
     if (!Array.isArray(rows)) return []
 

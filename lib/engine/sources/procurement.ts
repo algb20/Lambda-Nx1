@@ -10,6 +10,7 @@
  * Every fact is an official published record with its source and timestamp.
  */
 import type { Evidence, Source } from '../types'
+import { expectOk } from '../fetch-guard'
 
 function fmtUsd(n: number): string {
   if (n >= 1e12) return `$${(n / 1e12).toFixed(2)}T`
@@ -59,7 +60,7 @@ export const usaspending: Source = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     })
-    if (!res.ok) return []
+    expectOk('usaspending', res)
     const j = (await res.json().catch(() => null)) as UsaResponse | null
     const results = j?.results ?? []
     return results.slice(0, 5).map<Evidence>((r) => {
@@ -121,7 +122,7 @@ export const worldbankProjects: Source = {
     if (q.length < 3) return []
     const url = `https://search.worldbank.org/api/v2/projects?format=json&rows=5&qterm=${encodeURIComponent(q)}`
     const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    expectOk('worldbank_projects', res)
     const j = (await res.json().catch(() => null)) as WbResponse | null
     const projects = j?.projects ? Object.values(j.projects) : []
     return projects

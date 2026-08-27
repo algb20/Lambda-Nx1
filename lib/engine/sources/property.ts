@@ -34,6 +34,7 @@
  * what an analyst actually reasons with.
  */
 import type { Evidence, Source } from '../types'
+import { expectOk } from '../fetch-guard'
 
 export type PropertyClass = 'price' | 'activity' | 'finance' | 'supply'
 
@@ -137,12 +138,17 @@ export const usHousing: Source = {
   minIntervalMs: 300,
   async run(_input, ctx) {
     const out: Evidence[] = []
+    let refused = 0
     for (const s of US_SERIES) {
       const res = await ctx.fetch(
         `https://fred.stlouisfed.org/graph/fredgraph.csv?id=${encodeURIComponent(s.id)}`,
       )
-      // One unavailable series must not cost the other five.
-      if (!res.ok) continue
+      // One unavailable series must not cost the other five — but all five
+      // refusing is the provider closing the door, not five empty series.
+      if (!res.ok) {
+        refused++
+        continue
+      }
       const rows = lastTwo(await res.text().catch(() => ''))
       const latest = rows[rows.length - 1]
       if (!latest) continue
@@ -219,7 +225,7 @@ export const euHousePrices: Source = {
       'https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/prc_hpi_q' +
       '?format=JSON&lastTimePeriod=1&purchase=TOTAL&unit=I15_Q'
     const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    expectOk('eurostat_hpi', res)
     const body = (await res.json().catch(() => null)) as JsonStat | null
     if (!body?.value || !body.dimension || !body.id || !body.size) return []
 
@@ -298,6 +304,12 @@ export const ukHousePrices: Source = {
       const res = await ctx.fetch(
         `https://landregistry.data.gov.uk/data/ukhpi/region/united-kingdom/month/${stamp}.json`,
       )
+      /**
+       * EXHAUSTION-IS-EMPTY: this walks back through recent months looking for
+       * the first one published. A 404 on a month the registry has not released
+       * yet is the expected answer, not a refusal, so running out of candidates
+       * means "not published yet" rather than "the provider would not serve us".
+       */
       if (!res.ok) continue
       const body = (await res.json().catch(() => null)) as UkhpiResult | null
       const topic = body?.result?.primaryTopic

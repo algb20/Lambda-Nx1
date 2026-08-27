@@ -70,9 +70,12 @@ describe('wikipediaTrending', () => {
     expect(first.sourceUrl).toContain('/wiki/Some_Event')
   })
 
-  it('returns nothing on a failed fetch', async () => {
-    const { evidence } = await run(wikipediaTrending, FEATURED, false)
-    expect(evidence).toEqual([])
+  /**
+   * Inverted for the same reason as the economy source: an empty list from a
+   * failed fetch is a source claiming a quiet day on a day it never saw.
+   */
+  it('raises the provider’s refusal rather than reporting a quiet day', async () => {
+    await expect(run(wikipediaTrending, FEATURED, false)).rejects.toThrow(/wikipedia_trending/)
   })
 })
 

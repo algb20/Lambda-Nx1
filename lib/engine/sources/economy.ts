@@ -11,6 +11,7 @@
  * can ride the Markets gateway without needing a mode of its own.
  */
 import type { Evidence, Source } from '../types'
+import { expectOk } from '../fetch-guard'
 
 /** Common country names + ISO2 → ISO3 (World Bank uses ISO3). Extend as needed. */
 const NAME_TO_ISO3: Record<string, string> = {
@@ -126,7 +127,7 @@ export const worldbankEconomy: Source = {
     const codes = INDICATORS.map((i) => i.code).join(';')
     const url = `https://api.worldbank.org/v2/country/${code}/indicator/${codes}?format=json&mrv=1&source=2&per_page=200`
     const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    expectOk('worldbank_economy', res)
     const j = (await res.json().catch(() => null)) as WbResponse | null
     const points = Array.isArray(j) ? (j[1] ?? []) : []
 

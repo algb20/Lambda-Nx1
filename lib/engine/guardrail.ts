@@ -8,11 +8,15 @@
  *   2. Only read/query methods are permitted (GET/HEAD/POST — POST covers
  *      provider query APIs); state-changing methods (PUT/PATCH/DELETE) are refused.
  *   3. Per-source minimum intervals throttle requests.
+ *   4. Per-**host** allowances, shared by every source reading that host, so
+ *      four of our own sources cannot spend one provider's budget four times
+ *      over and lose three of them. See `lib/engine/host-budget`.
  *
  * The passive guarantee is the allowlist: a subject/target host is never on it,
  * so the engine can never contact the target (no port scans, no nmap, no probing).
  */
 import type { Source } from './types'
+import { HostBudget } from './host-budget'
 
 export class PassiveGuardrailError extends Error {
   constructor(message: string) {
@@ -98,6 +102,15 @@ export class RateLimitedError extends Error {
 export class Guardrail {
   private readonly allowedHosts = new Set<string>()
   private readonly lastCallAt = new Map<string, number>()
+  /**
+   * One allowance per provider host, shared by every source that reads it.
+   *
+   * The per-source interval below cannot see that four of our sources read
+   * `api.coingecko.com`, so on the deployed site they fired together and three
+   * of the four came back empty while the fourth succeeded. See
+   * `lib/engine/host-budget` for the measurement and the queue.
+   */
+  private readonly hostBudget = new HostBudget()
 
   /** Register provider hosts a source is permitted to contact. */
   allowHosts(hosts: string[]): void {
@@ -139,6 +152,18 @@ export class Guardrail {
       if (method !== 'GET' && method !== 'HEAD' && method !== 'POST') {
         throw new PassiveGuardrailError(`state-changing method not allowed: ${method}`)
       }
+
+      /**
+       * The host's shared allowance, taken before the source's own interval.
+       *
+       * Before the host, because the thing that actually refuses us is the
+       * provider and not our own bookkeeping — a source that has waited out its
+       * private interval only to collide with a sibling on the same host has
+       * spent its wait for nothing.
+       *
+       * A host with no entry in the table costs nothing here at all.
+       */
+      await this.hostBudget.take(parsed.hostname)
 
       /**
        * The publisher's minimum interval, honoured without blocking.

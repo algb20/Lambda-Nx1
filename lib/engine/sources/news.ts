@@ -14,6 +14,7 @@
  * "confirmed" from one outlet).
  */
 import type { Evidence, Source } from '../types'
+import { expectOk } from '../fetch-guard'
 
 // ── GDELT DOC 2.0 (capability: news — topic coverage) ────────────────────────
 interface GdeltArticle {
@@ -54,7 +55,7 @@ export const gdeltNews: Source = {
       `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(topic)}` +
       `&mode=artlist&format=json&maxrecords=25&timespan=48h&sort=hybridrel`
     const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    expectOk('gdelt', res)
     const j = (await res.json().catch(() => null)) as GdeltResponse | null
     const articles = j?.articles ?? []
     const retrievedAt = new Date().toISOString()
@@ -98,7 +99,7 @@ export const usgsQuakes: Source = {
     if (input.value.trim().length > 0) return [] // topic queries go to GDELT
     const url = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.geojson'
     const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    expectOk('usgs_quakes', res)
     const j = (await res.json().catch(() => null)) as UsgsResponse | null
     const features = j?.features ?? []
     const retrievedAt = new Date().toISOString()
@@ -156,7 +157,7 @@ export const reliefWeb: Source = {
     if (topic.length >= 2) params.append('query[value]', topic)
     const url = `https://api.reliefweb.int/v1/reports?${params.toString()}`
     const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    expectOk('reliefweb', res)
     const j = (await res.json().catch(() => null)) as ReliefWebResponse | null
     const items = j?.data ?? []
     const retrievedAt = new Date().toISOString()
@@ -220,7 +221,7 @@ export const wikiInTheNews: Source = {
     const dd = String(now.getUTCDate()).padStart(2, '0')
     const url = `https://en.wikipedia.org/api/rest_v1/feed/featured/${yyyy}/${mm}/${dd}`
     const res = await ctx.fetch(url, { headers: WIKI_HEADERS })
-    if (!res.ok) return []
+    expectOk('wikipedia_itn', res)
     const j = (await res.json().catch(() => null)) as WikiFeatured | null
     const items = j?.news ?? []
     return items

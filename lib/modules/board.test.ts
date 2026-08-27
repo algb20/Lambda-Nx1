@@ -188,6 +188,26 @@ describe('board sources say who they are, and fail out loud', () => {
     // the strict helper would be a bug in the other direction.
     expect(boards).toContain('async function boardTry(')
     expect(boards).toMatch(/boardTry\(/)
-    expect(boards).toMatch(/if \(!res\.ok\) continue/)
+    expect(boards).toMatch(/refused\+\+/)
+  })
+
+  /**
+   * The other half of the same property, and the half this file used to get
+   * wrong. Tolerating one refusal is right; tolerating *every* refusal is the
+   * original fault one level up — nine feeds all refusing is the provider side
+   * going dark, and returning an empty board for it is the same lie that made
+   * a throttled gateway read as `ok: 1, failed: 0`.
+   *
+   * This assertion replaced one that matched the literal `if (!res.ok)
+   * continue`. That test passed for the right reason and failed for the wrong
+   * one: the skip is still there, it just counts itself now. Pinning a rule to
+   * the exact characters that expressed it makes the rule impossible to
+   * strengthen without appearing to break it.
+   */
+  it('raises when every endpoint in a fan-out refuses', () => {
+    const totalRefusals = [...boards.matchAll(/out\.length === 0 && refused/g)].length
+    const feedRefusals = [...boards.matchAll(/refused === \w+\.length/g)].length
+    expect(totalRefusals + feedRefusals, 'a fan-out that can go fully dark in silence').toBeGreaterThanOrEqual(3)
+    expect(boards).toContain('SourceUnavailableError')
   })
 })

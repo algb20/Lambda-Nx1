@@ -3,6 +3,7 @@
  * existed and its snapshot span. Keyless.
  */
 import type { Evidence, Source } from '../types'
+import { expectOk } from '../fetch-guard'
 
 function fmt(ts?: string): string {
   if (!ts || ts.length < 8) return 'unknown'
@@ -21,7 +22,7 @@ export const wayback: Source = {
       `https://web.archive.org/cdx/search/cdx?url=${encodeURIComponent(input.value)}` +
       `&output=json&limit=500&collapse=timestamp:8&fl=timestamp,original`
     const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    expectOk('wayback', res)
     const rows = (await res.json().catch(() => null)) as string[][] | null
     if (!Array.isArray(rows) || rows.length <= 1) return []
 

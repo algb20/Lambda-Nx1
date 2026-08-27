@@ -6,6 +6,7 @@
  * Each source self-filters by input shape so they register under their capability.
  */
 import type { Evidence, Source } from '../types'
+import { expectOk } from '../fetch-guard'
 
 const BTC = /^(bc1[a-z0-9]{20,80}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$/
 
@@ -30,7 +31,7 @@ export const opensanctions: Source = {
     if (q.length < 3 || BTC.test(q)) return []
     const url = `https://api.opensanctions.org/search/default?q=${encodeURIComponent(q)}&limit=5`
     const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    expectOk('opensanctions', res)
     const j = (await res.json().catch(() => null)) as OsResponse | null
     const results = j?.results ?? []
     return results.slice(0, 5).map<Evidence>((r) => ({
@@ -68,7 +69,7 @@ export const gleif: Source = {
     if (name.length < 3 || BTC.test(name)) return []
     const url = `https://api.gleif.org/api/v1/lei-records?filter[entity.legalName]=${encodeURIComponent(name)}&page[size]=3`
     const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    expectOk('gleif', res)
     const j = (await res.json().catch(() => null)) as GleifResponse | null
     const records = j?.data ?? []
     return records.map<Evidence>((rec) => {
@@ -106,7 +107,10 @@ export const mempool: Source = {
     if (!BTC.test(addr)) return []
     const url = `https://mempool.space/api/address/${encodeURIComponent(addr)}`
     const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    // A 404 here is the provider answering: no such record. Every other
+    // status is a refusal, and a refusal is not an empty result.
+    if (res.status === 404) return []
+    expectOk('mempool', res)
     const j = (await res.json().catch(() => null)) as MempoolAddress | null
     const stats = j?.chain_stats
     if (!stats) return []

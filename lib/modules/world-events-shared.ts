@@ -356,8 +356,24 @@ export interface WorldEventsReport {
   summary: {
     total: number
     placed: number
-    /** Timestamp of the newest event held, or null. Answers "is this live?". */
+    /**
+     * The newest time a **publisher** stated, or null when none did.
+     *
+     * Answers "is this live?". It only does so because it reads the publisher's
+     * `observedAt` — it once reduced over `at`, our own retrieval clock, which
+     * made it structurally incapable of being anything but the present moment.
+     * Every surface quoting it printed a confident "just now" over a run whose
+     * freshest item was three hours old.
+     */
     newestAt: string | null
+    /**
+     * Events whose publisher stated no usable time.
+     *
+     * The reason `newestAt` can be null on a run that holds plenty of events —
+     * without it a reader meeting "—" cannot tell a broken board from a set of
+     * feeds that simply do not date what they publish.
+     */
+    untimed: number
     sources: string[]
     /** Feeds that answered **and contributed** events. */
     sourcesOk: number
@@ -365,6 +381,59 @@ export interface WorldEventsReport {
     sourcesEmpty: number
     sourcesFailed: number
   }
+}
+
+/**
+ * The newest time a **publisher** stated across these events, or null.
+ *
+ * Extracted from the sweep so it can be tested, because the version inlined
+ * there reduced over `at` — our own `retrievedAt` clock — and was therefore
+ * arithmetically incapable of returning anything but the present moment. Four
+ * surfaces quoted it as "is this live?" and all four printed a confident *just
+ * now* over a run whose freshest item was three hours old.
+ *
+ * `observedAt` is nullable on purpose: a feed that publishes no date yields an
+ * event nobody can age, and inventing one is the fault this function exists to
+ * make impossible. An unparseable string counts as no time rather than as 1970.
+ */
+export function newestObservation(events: Array<Pick<WorldEvent, 'observedAt'>>): string | null {
+  return events.reduce<string | null>((newest, e) => {
+    if (!e.observedAt) return newest
+    const t = Date.parse(e.observedAt)
+    if (!Number.isFinite(t)) return newest
+    return !newest || t > Date.parse(newest) ? e.observedAt : newest
+  }, null)
+}
+
+/**
+ * How many of these events carry no usable publisher time.
+ *
+ * The companion to the above: it is what lets a surface showing "—" say *why*,
+ * so a reader can tell a set of undated feeds from a broken board.
+ */
+export function untimedCount(events: Array<Pick<WorldEvent, 'observedAt'>>): number {
+  return events.filter((e) => !e.observedAt || !Number.isFinite(Date.parse(e.observedAt))).length
+}
+
+/**
+ * Whether this event can honestly be drawn on a map.
+ *
+ * A one-line predicate with a real scar behind it. The globe's point branches
+ * read `event.lat as number` off records ranked for the *list*, which carries
+ * unplaceable events on purpose. A cast is not a conversion: `null as number`
+ * is still `null`, arithmetic coerces it to `0`, and every event with no
+ * location was plotted at **0°N 0°E** — Null Island, in the Gulf of Guinea.
+ *
+ * Measured on a running board, the page said `0 of 10 on the map` and "there is
+ * nothing to plot" while the canvas drew a mark labelled **10** off Ghana.
+ *
+ * `Number.isFinite` and not a null check, because `NaN` from a malformed
+ * coordinate string projects to the same fabricated place, and a truthiness
+ * check would additionally throw away the equator and the prime meridian —
+ * `0` is a real latitude.
+ */
+export function hasCoordinate(e: Pick<WorldEvent, 'lat' | 'lon'>): boolean {
+  return Number.isFinite(e.lat) && Number.isFinite(e.lon)
 }
 
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n))

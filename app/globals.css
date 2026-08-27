@@ -207,4 +207,27 @@
       transform: translate(-50%, -50%);
     }
   }
+
+  /**
+   * The other half of the same guideline, for controls that sit in a group.
+   *
+   * `.touch-target` grows an invisible hit area outwards from the centre, which
+   * is right for a control with room around it and wrong for one that has
+   * neighbours. The map's zoom stack is three 28px buttons four pixels apart:
+   * a 44px phantom area on each extends eight pixels past its box on every
+   * side, so the bottom of "zoom in" would sit twelve pixels inside the top of
+   * "zoom out". The reader presses one and gets the other, and nothing on
+   * screen explains why.
+   *
+   * So where controls are stacked, the box itself grows — but only on a coarse
+   * pointer, so a mouse interface keeps the compact chrome it was designed
+   * with. This is a size, not an overlay, so neighbours push each other apart
+   * instead of overlapping.
+   */
+  @media (pointer: coarse) {
+    .touch-size {
+      min-width: 44px;
+      min-height: 44px;
+    }
+  }
 }

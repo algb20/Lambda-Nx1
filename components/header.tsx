@@ -131,7 +131,7 @@ export function Header({
                 variant="ghost"
                 size="sm"
                 onClick={() => setLangOpen((v) => !v)}
-                className="h-8 gap-1 px-2 text-xs"
+                className="touch-target h-8 gap-1 px-2 text-xs"
                 title={LOCALE_LABELS[locale]}
                 aria-haspopup="listbox"
                 aria-expanded={langOpen}
@@ -197,13 +197,13 @@ export function Header({
                 size="sm"
                 onClick={() => onNavigate('preferences')}
                 title={t('header.pay.title')}
-                className="h-7 text-xs bg-accent/10 border-accent/20 hover:bg-accent/20"
+                className="touch-target h-7 text-xs bg-accent/10 border-accent/20 hover:bg-accent/20"
               >
                 <CreditCard className="h-3 w-3 mr-1" />
                 <span className="hidden sm:inline">{t('header.pay')}</span> π
               </Button>
             ) : null}
-            <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8">
+            <Button variant="ghost" size="icon" onClick={toggleTheme} className="touch-target h-8 w-8">
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
             {/*
@@ -227,7 +227,7 @@ export function Header({
                 aria-current={tab === 'account' ? 'page' : undefined}
                 title={t('nav.preferences')}
                 aria-label={t('nav.preferences')}
-                className={`h-8 w-8 ${tab === 'account' ? 'text-primary' : ''}`}
+                className={`touch-target h-8 w-8 ${tab === 'account' ? 'text-primary' : ''}`}
               >
                 <UserCircle2 className="h-4 w-4" />
               </Button>

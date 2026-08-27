@@ -4,6 +4,7 @@
  */
 import { createHash } from 'node:crypto'
 import type { Evidence, Source } from '../types'
+import { expectOk } from '../fetch-guard'
 
 interface GravatarProfile {
   entry?: Array<{ displayName?: string; profileUrl?: string; aboutMe?: string }>
@@ -21,7 +22,12 @@ export const gravatar: Source = {
     const retrievedAt = new Date().toISOString()
     const url = `https://www.gravatar.com/${hash}.json`
     const res = await ctx.fetch(url)
-    if (!res.ok) return [] // 404 = no public Gravatar
+    // A 404 here is the provider answering: this address has no public
+    // Gravatar. Every other status is a refusal, and a refusal is not the same
+    // finding — "no avatar" and "Gravatar would not talk to us" are different
+    // things to report about a person.
+    if (res.status === 404) return []
+    expectOk('gravatar', res)
     const j = (await res.json().catch(() => null)) as GravatarProfile | null
     const entry = j?.entry?.[0]
     const profileUrl = entry?.profileUrl ?? `https://www.gravatar.com/${hash}`

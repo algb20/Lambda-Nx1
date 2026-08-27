@@ -152,6 +152,16 @@ export interface ConstellationReport {
    * that too would be the finding.
    */
   concentration: { largestCluster: number; share: number }
+  /**
+   * Why a source did not answer, in its own words.
+   *
+   * Added because the deployed site returned `sourcesFailed: 1` and nothing
+   * else — an empty constellation with no reason, which is indistinguishable
+   * from a market with no structure in it. A count of failures without their
+   * causes is the same silence this project keeps finding and removing: the
+   * product reporting a shape when the truth is "I was refused".
+   */
+  failures: Array<{ source: string; error: string }>
   summary: {
     assetsRead: number
     assetsUsed: number
@@ -180,6 +190,7 @@ function emptyReport(generatedAt: string, summary: ConstellationReport['summary'
     },
     dropped: [],
     concentration: { largestCluster: 0, share: 0 },
+    failures: [],
     summary,
   }
 }
@@ -194,6 +205,9 @@ export async function constellation(): Promise<ConstellationReport> {
   )
   const sourcesOk = collected.results.filter((x) => x.ok).length
   const sourcesFailed = collected.results.filter((x) => !x.ok).length
+  const failures = collected.results
+    .filter((x) => !x.ok)
+    .map((x) => ({ source: x.sourceKey, error: x.error ?? 'no reason given' }))
 
   const points: MarketSeriesPoint[] = []
   for (const e of collected.evidence) {
@@ -203,7 +217,10 @@ export async function constellation(): Promise<ConstellationReport> {
   }
 
   if (points.length === 0) {
-    return emptyReport(generatedAt, { assetsRead: 0, assetsUsed: 0, sourcesOk, sourcesFailed })
+    return {
+      ...emptyReport(generatedAt, { assetsRead: 0, assetsUsed: 0, sourcesOk, sourcesFailed }),
+      failures,
+    }
   }
 
   const series: PriceSeries[] = points.map((p) => ({
@@ -223,6 +240,7 @@ export async function constellation(): Promise<ConstellationReport> {
         sourcesFailed,
       }),
       dropped: network.dropped,
+      failures,
     }
   }
 
@@ -334,6 +352,7 @@ export async function constellation(): Promise<ConstellationReport> {
       clustering: 'average-linkage',
     },
     dropped: network.dropped,
+    failures,
     concentration: {
       largestCluster: clusters.reduce((max, c) => Math.max(max, c.members), 0),
       share:

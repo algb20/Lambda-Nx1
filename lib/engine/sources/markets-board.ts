@@ -10,6 +10,7 @@
  * We report the quote as published, with source + timestamp. We never predict.
  */
 import type { Evidence, Source } from '../types'
+import { expectJson, expectOk, SourceUnavailableError } from '../fetch-guard'
 
 type AssetClass = 'crypto' | 'commodities' | 'indices' | 'fx'
 
@@ -71,10 +72,19 @@ export const coingeckoTop: Source = {
     const url =
       'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc' +
       '&per_page=10&page=1&price_change_percentage=24h'
-    const res = await ctx.fetch(url)
-    if (!res.ok) return []
-    const rows = (await res.json().catch(() => null)) as CgMarket[] | null
-    if (!Array.isArray(rows)) return []
+    /**
+     * A throttle is not a quiet market.
+     *
+     * This was `if (!res.ok) return []`, and it produced the exact fault this
+     * project keeps finding: on the deployed site `/api/chain` reported **13
+     * sources OK, 0 failed — and 0 movers**. CoinGecko throttles keyless
+     * callers from a cloud address, the board swallowed the refusal, and
+     * thirteen green lights sat over a blank panel.
+     */
+    const rows = await expectJson<CgMarket[] | null>('coingecko_board', await ctx.fetch(url))
+    if (!Array.isArray(rows)) {
+      throw new SourceUnavailableError('coingecko_board', 200, 'expected a list of markets')
+    }
     return rows
       .filter((r) => r.id && typeof r.current_price === 'number')
       .map((r) =>
@@ -184,14 +194,26 @@ function fredSource(key: string, cls: AssetClass): Source {
     minIntervalMs: 300,
     async run(_input, ctx) {
       const out: Evidence[] = []
+      /**
+       * Counted, because "one series is missing" and "the provider is refusing
+       * us" are different findings that look identical one row at a time.
+       *
+       * Skipping a bad series is right: a board that fails whole because one
+       * number is missing is worse than one that says which number is missing.
+       * But skipping *every* series and returning an empty list is the fault
+       * this whole pass exists to remove — the source would report itself
+       * healthy while the provider had shut the door. So the skips are tallied
+       * and a complete refusal is raised as one.
+       */
+      let refused = 0
       for (const s of series) {
         const res = await ctx.fetch(
           `https://fred.stlouisfed.org/graph/fredgraph.csv?id=${encodeURIComponent(s.id)}`,
         )
-        // One series being unavailable must not cost the other eight. A board
-        // that fails whole because one number is missing is worse than a board
-        // that says which number is missing.
-        if (!res.ok) continue
+        if (!res.ok) {
+          refused++
+          continue
+        }
         const rows = lastTwoObservations(await res.text().catch(() => ''))
         const latest = rows[rows.length - 1]
         if (!latest) continue
@@ -219,6 +241,15 @@ function fredSource(key: string, cls: AssetClass): Source {
           }),
         )
       }
+      /**
+       * Every series refused, and none produced a row: that is the provider
+       * shutting the door, not nine coincidental gaps. Reported as a refusal so
+       * the board says it was refused instead of showing an empty section under
+       * a green light.
+       */
+      if (out.length === 0 && refused === series.length) {
+        throw new SourceUnavailableError(key, null, `all ${refused} series refused`)
+      }
       return out
     },
   }
@@ -243,8 +274,8 @@ export const frankfurterBoard: Source = {
   minIntervalMs: 800,
   async run(_input, ctx) {
     const url = `https://api.frankfurter.dev/v1/latest?base=USD&symbols=${FX_SYMBOLS.join(',')}`
-    const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    // Same rule as the crypto half above: a refusal is not an empty rate table.
+    const res = expectOk('frankfurter_board', await ctx.fetch(url))
     const j = (await res.json().catch(() => null)) as FrankfurterResponse | null
     const rates = j?.rates ?? {}
     return Object.entries(rates)

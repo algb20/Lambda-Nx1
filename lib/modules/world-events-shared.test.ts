@@ -6,10 +6,13 @@ import {
   detectionLagMinutes,
   eventTimeMs,
   fusedByEventId,
+  hasCoordinate,
   humanHours,
   lagBandOf,
   latencyProfile,
+  newestObservation,
   operationalScore,
+  untimedCount,
   rankEvents,
   timeExtent,
   timeHistogram,
@@ -455,5 +458,132 @@ describe('rankEvents — the order has to be defensible', () => {
     const b = event({ id: 'a-first', severity: 0.4, observedAt: '2026-08-07T11:00:00Z' })
     expect(rankEvents([a, b], { now })[0].event.id).toBe('a-first')
     expect(rankEvents([b, a], { now })[0].event.id).toBe('a-first')
+  })
+})
+
+/**
+ * The live edge is the publisher's time, never ours.
+ *
+ * Found by reading a running board rather than the code: the KPI strip printed
+ * **Live edge — just now** in green while the panel beside it listed the same
+ * ten items as "3 hours ago", "21 hours ago" and "Aug 26". The reducer behind
+ * it summed over `at`, which is `retrievedAt` — our own clock, stamped on each
+ * record as it arrived. It could not have returned anything else.
+ *
+ * Four surfaces quoted that figure as "is this live?": the board header, the
+ * pinned gateways, the standing brief's "Newest", and the strip. All four were
+ * answering a question nobody asked — *did we just make a request?* — in the
+ * voice of one that matters.
+ */
+describe('newestObservation — the publisher’s clock, not ours', () => {
+  const ev = (observedAt: string | null) => ({ observedAt })
+
+  it('takes the newest publisher time', () => {
+    expect(
+      newestObservation([
+        ev('2026-08-20T10:00:00.000Z'),
+        ev('2026-08-27T09:00:00.000Z'),
+        ev('2026-08-25T23:00:00.000Z'),
+      ]),
+    ).toBe('2026-08-27T09:00:00.000Z')
+  })
+
+  it('returns null when nobody stated a time, rather than inventing one', () => {
+    expect(newestObservation([ev(null), ev(null)])).toBeNull()
+  })
+
+  it('skips undated events instead of letting them sink the answer', () => {
+    expect(newestObservation([ev(null), ev('2026-08-27T09:00:00.000Z'), ev(null)])).toBe(
+      '2026-08-27T09:00:00.000Z',
+    )
+  })
+
+  it('treats an unparseable string as no time, not as 1970', () => {
+    expect(newestObservation([ev('shortly'), ev('2026-08-20T10:00:00.000Z')])).toBe(
+      '2026-08-20T10:00:00.000Z',
+    )
+    expect(newestObservation([ev('shortly')])).toBeNull()
+  })
+
+  it('is null for an empty run', () => {
+    expect(newestObservation([])).toBeNull()
+  })
+
+  /**
+   * The regression itself. A run whose every event was retrieved *now* but
+   * published hours ago must report the publication time — the whole defect was
+   * that these two are different and the wrong one was read.
+   */
+  it('never reports the present moment for a run of older reports', () => {
+    const threeHoursAgo = new Date(Date.now() - 3 * 3_600_000).toISOString()
+    const newest = newestObservation([ev(threeHoursAgo), ev(threeHoursAgo)])
+    expect(newest).toBe(threeHoursAgo)
+    expect(Date.now() - Date.parse(newest as string)).toBeGreaterThan(2 * 3_600_000)
+  })
+})
+
+describe('untimedCount — why the edge can be unknown', () => {
+  const ev = (observedAt: string | null) => ({ observedAt })
+
+  it('counts the events carrying no time', () => {
+    expect(untimedCount([ev(null), ev('2026-08-27T09:00:00.000Z'), ev(null)])).toBe(2)
+  })
+
+  it('counts an unparseable time as untimed', () => {
+    expect(untimedCount([ev('shortly')])).toBe(1)
+  })
+
+  it('counts nothing when every event is dated', () => {
+    expect(untimedCount([ev('2026-08-27T09:00:00.000Z')])).toBe(0)
+  })
+
+  /** The pair has to agree: all untimed is exactly when the edge is unknown. */
+  it('agrees with newestObservation about when the edge is unknowable', () => {
+    const all = [ev(null), ev('nope'), ev(null)]
+    expect(untimedCount(all)).toBe(all.length)
+    expect(newestObservation(all)).toBeNull()
+  })
+})
+
+/**
+ * Null Island, as a regression.
+ *
+ * The globe's point branches cast `event.lat as number` off records that the
+ * ranking deliberately includes without coordinates. The cast satisfied the
+ * compiler and changed nothing at runtime: `null` coerced to `0`, and ten
+ * events with no location were drawn as one cluster mark labelled **10** in the
+ * Gulf of Guinea — while the page's own badge read `0 of 10 on the map` and the
+ * sentence under it said there was nothing to plot.
+ */
+describe('hasCoordinate — nothing is plotted at a guess', () => {
+  it('accepts a real coordinate', () => {
+    expect(hasCoordinate({ lat: 35.6, lon: 139.7 })).toBe(true)
+  })
+
+  it('rejects an event with no location rather than sending it to 0,0', () => {
+    expect(hasCoordinate({ lat: null, lon: null })).toBe(false)
+  })
+
+  it('rejects a half-located event, which would plot on a meridian at random', () => {
+    expect(hasCoordinate({ lat: 35.6, lon: null })).toBe(false)
+    expect(hasCoordinate({ lat: null, lon: 139.7 })).toBe(false)
+  })
+
+  /**
+   * The equator and the prime meridian are real places. A truthiness check —
+   * the obvious shorter version — would silently refuse to draw Quito, São Tomé
+   * and every event on the Greenwich line.
+   */
+  it('accepts zero, because 0° is a latitude and not a missing value', () => {
+    expect(hasCoordinate({ lat: 0, lon: 0 })).toBe(true)
+    expect(hasCoordinate({ lat: 0, lon: 6.6 })).toBe(true)
+  })
+
+  it('rejects NaN, which projects to the same fabricated place as null', () => {
+    expect(hasCoordinate({ lat: Number.NaN, lon: 10 })).toBe(false)
+  })
+
+  it('rejects an infinite coordinate', () => {
+    expect(hasCoordinate({ lat: Number.POSITIVE_INFINITY, lon: 10 })).toBe(false)
   })
 })

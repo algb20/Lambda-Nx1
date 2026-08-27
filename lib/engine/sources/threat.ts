@@ -5,6 +5,7 @@
  * indicator shape, so they can all register under the `threat` capability.
  */
 import type { Evidence, Source } from '../types'
+import { expectOk } from '../fetch-guard'
 
 const IPV4 = /^(?:\d{1,3}\.){3}\d{1,3}$/
 const isIp = (v: string) => IPV4.test(v)
@@ -27,7 +28,7 @@ export const feodo: Source = {
     if (!isIp(ip)) return []
     const url = 'https://feodotracker.abuse.ch/downloads/ipblocklist.json'
     const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    expectOk('feodo', res)
     const list = (await res.json().catch(() => null)) as FeodoEntry[] | null
     if (!Array.isArray(list)) return []
     const hit = list.find((e) => e.ip_address === ip)
@@ -68,7 +69,7 @@ export const urlhaus: Source = {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: `host=${encodeURIComponent(host)}`,
     })
-    if (!res.ok) return []
+    expectOk('urlhaus', res)
     const j = (await res.json().catch(() => null)) as UrlhausResp | null
     if (!j || j.query_status !== 'ok') return []
     const count = Number(j.url_count ?? 0)
@@ -108,7 +109,7 @@ export const threatfox: Source = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query: 'search_ioc', search_term: term }),
     })
-    if (!res.ok) return []
+    expectOk('threatfox', res)
     const j = (await res.json().catch(() => null)) as ThreatFoxResp | null
     if (!j || j.query_status !== 'ok' || !Array.isArray(j.data) || j.data.length === 0) return []
     const first = j.data[0]

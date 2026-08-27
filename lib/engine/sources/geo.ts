@@ -7,6 +7,7 @@
  * (descriptive User-Agent, low rate). No tracking of private individuals.
  */
 import type { Evidence, Source } from '../types'
+import { expectOk } from '../fetch-guard'
 
 const ICAO24 = /^[0-9a-f]{6}$/i
 const LATLON = /^\s*(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*$/
@@ -47,7 +48,7 @@ export const nominatim: Source = {
     if (m) {
       const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${m[1]}&lon=${m[2]}`
       const res = await ctx.fetch(url, { headers: OSM_HEADERS })
-      if (!res.ok) return []
+      expectOk('nominatim', res)
       const p = (await res.json().catch(() => null)) as NominatimPlace | null
       if (!p?.display_name) return []
       return [
@@ -65,7 +66,7 @@ export const nominatim: Source = {
     }
     const url = `https://nominatim.openstreetmap.org/search?format=json&limit=3&q=${encodeURIComponent(q)}`
     const res = await ctx.fetch(url, { headers: OSM_HEADERS })
-    if (!res.ok) return []
+    expectOk('nominatim', res)
     const results = (await res.json().catch(() => null)) as NominatimPlace[] | null
     if (!Array.isArray(results)) return []
     return results.slice(0, 3).map<Evidence>((p) => ({
@@ -98,7 +99,7 @@ export const opensky: Source = {
     if (!ICAO24.test(hex)) return []
     const url = `https://opensky-network.org/api/states/all?icao24=${hex}`
     const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    expectOk('opensky', res)
     const j = (await res.json().catch(() => null)) as OpenSkyResponse | null
     const s = j?.states?.[0]
     if (!s) return []
