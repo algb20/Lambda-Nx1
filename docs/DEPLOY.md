@@ -380,6 +380,67 @@ Vercel exactly as on Netlify.
 
 ## 6. Post-deploy verification
 
+**Start here: `npm run check:deploys`.** It asks every deployment in
+`lib/ops/deployments.ts` for `/api/health`, ranks what it finds worst-first, and
+exits non-zero if anything is blocking, stale or unreachable. One command
+instead of one `curl` per site.
+
+```
+  zippy-gecko         unhealthy   9cf4946  2026-08-27T00:41:24.507Z
+  melodious-tiramisu  unhealthy   9cf4946  2026-08-27T00:39:50.442Z
+  voluble-rabanadas   unhealthy   bb5d88e  2026-08-15T02:24:19.468Z
+
+  ✖ zippy-gecko         session_secret is degraded — SESSION_SECRET not set
+  ▲ voluble-rabanadas   serving bb5d88e, 11 days behind the newest deployment
+  · zippy-gecko         cron_secret is off — CRON_SECRET not set
+```
+
+That is a real run from 2026-08-27, and it is why this exists. **All three
+deployments were unhealthy, `SESSION_SECRET` was unset on every one of them so
+nobody could sign in, `DATABASE_URL` was unset so there was no database at all,
+`CRON_SECRET` was unset so every scheduled job answered 503 — and one site had
+been serving a twelve-day-old build the whole time.** Every fact was already in
+`/api/health`. Reading it was a thing a person had to remember, which is the
+same failure this repository has now fixed three times in other places.
+
+`NX_DEPLOYMENTS` (comma-separated origins) points it at a fork or a self-host.
+It is given no credential and passes none — `/api/health` reports only *whether*
+a setting is configured — so its output is safe to paste anywhere.
+
+**Then, once the variables are set and the site redeployed: `npm run verify:live`.**
+
+```bash
+CRON_SECRET=… ADMIN_SECRET=… npm run verify:live -- https://your-site
+```
+
+`check:deploys` answers *is each setting configured*. This answers *does each
+setting work*, which is a different question and the one that costs days. A
+`CRON_SECRET` that is set but mistyped answers 403 forever while every
+configuration report says the check passes; a `DATABASE_URL` can be present,
+correct in every character, and still point at a host serverless functions
+cannot resolve. So this asks each subsystem to do its job:
+
+| Subsystem | Asked | Distinguishes |
+|---|---|---|
+| sign-in | `/api/health` required checks | configured vs not |
+| database | `/api/health?deep=1` | unset · unreachable · reachable-but-incomplete · working |
+| scheduler | `GET /api/cron/sources` with the bearer | 503 (unset on host) vs 403 (set, and different from yours) |
+| admin | `GET /api/admin/visitors` | same two |
+
+The database verdict reads the body, not the status code — `?deep=1` answers
+`200` whether or not the database is reachable, so judging it on the status
+would call a dead database healthy. It separates *no DATABASE_URL* from *wrong
+DATABASE_URL* (the first version of it did not, and sent the reader to debug a
+connection that was never attempted), and it refuses to call a reachable
+database with missing tables working, which is what a truncated schema paste
+looks like from outside.
+
+Secrets come from your shell, go only to the origin you name, over HTTPS, and
+are never printed: a verdict says *the deployment rejected the credential this
+shell holds*, never what either value was.
+
+Then, per deployment:
+
 1. **Readiness probe** — the honest configuration report (no secrets leaked):
 
    ```bash

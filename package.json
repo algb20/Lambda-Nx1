@@ -18,6 +18,8 @@
     "verify": "npm run typecheck && npm run test && npm run build",
     "scan:secrets": "vitest run lib/security/secret-scan.test.ts",
     "walkthrough": "tsx scripts/walkthrough.ts",
+    "check:deploys": "tsx scripts/check-deploys.ts",
+    "verify:live": "tsx scripts/verify-live.ts",
     "audit:responsive": "node scripts/responsive-audit.mjs",
     "package:studio": "node scripts/package.mjs --profile studio"
   },
@@ -97,6 +99,7 @@
   "overrides": {
     "postcss": "^8.5.26",
     "sharp": "^0.35.3",
-    "esbuild": "^0.25.12"
+    "esbuild": "^0.25.12",
+    "nanoid": "^3.3.18"
   }
 }
