@@ -773,7 +773,25 @@ export function WorldSurface({
   }
 
   return (
-    <div className="relative w-full select-none" style={{ height }}>
+    /**
+     * The ground behind the world is space, in both themes.
+     *
+     * The canvas clears to transparent and every colour it then draws is a
+     * fixed dark palette — `OCEAN_OUTER` is `#04090f` whatever the theme is. So
+     * in a light theme a dark planet was pasted onto a white card, and the wider
+     * the pane got the more white surrounded it: at 1920 the sphere is about
+     * 820px across in an 1136px frame, which left roughly 300px of paper on
+     * either side of it. That reads as an illustration in a document rather than
+     * a display showing a world.
+     *
+     * Matching the ground to the palette the drawing already uses costs nothing
+     * in the dark theme and makes the light one honest. The controls over it
+     * carry their own `bg-background/80` chips, so they stay readable on it.
+     */
+    <div
+      className="relative w-full select-none bg-[#04090f]"
+      style={{ height }}
+    >
       <canvas
         ref={canvasRef}
         /**

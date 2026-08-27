@@ -11,6 +11,7 @@ import { useI18n, CURATED_LOCALES, SUPPORTED_LOCALES, LOCALE_LABELS } from "@/li
 import { usePiAuthOptional } from "@/contexts/pi-auth-context"
 import { SUBSCRIPTION_VISIBLE } from "@/lib/plans/plans"
 import { useViewer } from "@/hooks/use-viewer"
+import { shellContainerFor } from "@/lib/shell-width"
 
 /**
  * `onNavigate` exists for one reason: the "Pay with π" button used to do
@@ -19,7 +20,16 @@ import { useViewer } from "@/hooks/use-viewer"
  * does nothing is worse than no control, because it teaches the user the app is
  * broken. Now it takes them where the payment actually happens.
  */
-export function Header({ onNavigate }: { onNavigate?: (tab: 'preferences') => void } = {}) {
+export function Header({
+  onNavigate,
+  /**
+   * Which tab is open, so the header shares the page's width instead of
+   * keeping its own. It was `max-w-2xl` while the content had grown to `88rem`
+   * — measured 80px out of alignment at 1440px and 208px at 1920px. See
+   * lib/shell-width.ts.
+   */
+  tab = 'feed',
+}: { onNavigate?: (tab: 'preferences') => void; tab?: string } = {}) {
   const { theme, toggleTheme } = useTheme()
   const { locale, setLocale, t } = useI18n()
   // Optional because the header is shared by every surface. `pi.active`, not
@@ -68,7 +78,7 @@ export function Header({ onNavigate }: { onNavigate?: (tab: 'preferences') => vo
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
-      <div className="container mx-auto px-4 py-3 max-w-2xl">
+      <div className={`${shellContainerFor(tab)} py-3`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="relative">
