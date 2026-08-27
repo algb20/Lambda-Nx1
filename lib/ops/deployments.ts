@@ -35,25 +35,20 @@ export const DEPLOYMENTS: Deployment[] = [
     role: 'live — the configured deployment',
   },
   /**
-   * Two earlier Netlify projects still building this repository, neither
-   * configured. They are listed rather than dropped, because a public
+   * The last of three earlier Netlify projects still building this repository
+   * with nothing configured. It is listed rather than dropped, because a public
    * deployment of the app that nobody intends to run is not harmless: it serves
    * the product to anyone who finds the URL, with no session secret and no
-   * database, and it will keep consuming build minutes on every push. The check
-   * stays red until they are deleted, which is the point.
+   * database, and it spends build minutes on every push. The check stays red
+   * until it is deleted, which is the point.
    *
-   * Delete each in Netlify → Site configuration → General → Danger zone, then
-   * remove its entry here. A third one, `voluble-rabanadas-b516fd`, was deleted
-   * on 2026-08-27 and is already gone from this list.
+   * Delete it in Netlify → Site configuration → General → Danger zone, then
+   * remove this entry. `voluble-rabanadas` and `melodious-tiramisu` went the
+   * same way on 2026-08-27 and are already gone from here.
    */
   {
     name: 'zippy-gecko',
     origin: 'https://zippy-gecko-fc5e2e.netlify.app',
-    role: 'leftover — unconfigured, delete it',
-  },
-  {
-    name: 'melodious-tiramisu',
-    origin: 'https://melodious-tiramisu-8edae7.netlify.app',
     role: 'leftover — unconfigured, delete it',
   },
 ]
