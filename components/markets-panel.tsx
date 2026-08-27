@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import type { ChainRadarReport } from '@/lib/modules/chain-radar'
 import { useLive } from '@/lib/stream/use-live'
 import { ConstellationView } from '@/components/constellation-view'
+import { PriceTape } from '@/components/price-tape'
 import {
   STATUS_MEANING,
   UNKNOWN,
@@ -172,6 +173,17 @@ export function MarketsPanel() {
           </div>
         ) : null}
       </Card>
+
+      {/*
+        The tape leads everything.
+
+        Every other figure on this page is at most 120 seconds old — that is our
+        polling interval, not the market's cadence. The tape is a socket to the
+        venue and its ticks arrived in about a second when measured. Putting it
+        at the top is not decoration: it is the only number here that is true
+        *now*, and it says which venue printed it and how old it is.
+      */}
+      <PriceTape />
 
       {/*
         The constellation leads the board.

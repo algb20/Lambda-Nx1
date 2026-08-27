@@ -166,10 +166,11 @@ export const QUARANTINE: QuarantinedSource[] = [
   q('treasury_press', 'moved', 404),
   q('urlhaus_recent', 'moved', 404, 'abuse.ch moved to an authenticated API; the coded urlhaus source is unaffected.'),
   q('jakartapost', 'moved', 404),
-  q('infobae', 'moved', 404),
   q('eluniversal_mx', 'moved', 404),
   q('annahar_lebanon', 'moved', 404),
-  q('skynewsarabia', 'moved', 404),
+  // Its advertised replacement answers 403 — a bot challenge, which §3 of
+  // the charter forbids working around. It stays out until it answers.
+  q('skynewsarabia', 'bot-blocked', 403),
   q('aps_algeria', 'moved', 404),
   q('nhk_world', 'moved', 404),
   q('pagasa_philippines', 'moved', 404),
