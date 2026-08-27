@@ -576,6 +576,27 @@ function ConstellationRail({
           {report.summary.assetsUsed} survived the checks. A network needs at least two series
           that move and cover the same hours.
         </p>
+        {/*
+          Why, in the provider's own words.
+          The deployed site returned "1 source failed" and nothing else — an
+          empty picture with no reason, which reads exactly like a market with
+          no structure in it. A count without its cause is the silence this
+          project exists to remove.
+        */}
+        {report.failures.length > 0 ? (
+          <section className="space-y-1">
+            <h4 className="text-[10px] uppercase tracking-wide text-muted-foreground">
+              Sources that did not answer
+            </h4>
+            <ul className="space-y-0.5 text-[10px] leading-relaxed text-muted-foreground">
+              {report.failures.map((f) => (
+                <li key={f.source}>
+                  <span className="text-foreground">{f.source}</span> — {f.error}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
         {report.dropped.length > 0 ? <DroppedList dropped={report.dropped} /> : null}
       </aside>
     )

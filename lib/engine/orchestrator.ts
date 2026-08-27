@@ -25,6 +25,7 @@
 import type { Capability, Evidence, SourceInput, SourceResult, Source } from './types'
 import { Registry, registry as defaultRegistry } from './registry'
 import { RateLimitedError } from './guardrail'
+import { HostBusyError } from './host-budget'
 import { cachedSourceResult, rememberSourceResult, singleFlight } from './source-cache'
 import { dedupeEvidence } from './analysis'
 
@@ -139,7 +140,15 @@ async function runSourceUntimed(
      * `retrievedAt` on the replayed evidence is untouched, so nothing
      * downstream mistakes this for a fresh reading.
      */
-    if (err instanceof RateLimitedError) {
+    /**
+     * `HostBusyError` belongs here too, and for the same reason.
+     *
+     * Both mean *we* declined to make the request — one because this source
+     * called recently, the other because a sibling source is using the same
+     * provider's allowance. Neither is the provider failing, and reporting
+     * either as a dead source would blame a publisher for our own scheduling.
+     */
+    if (err instanceof RateLimitedError || err instanceof HostBusyError) {
       const cached = cachedSourceResult(source.key, input.value)
       if (cached) {
         return {
