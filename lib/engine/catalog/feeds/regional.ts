@@ -201,9 +201,16 @@ export const REGIONAL_SOURCES: CatalogSource[] = [
   },
   {
     key: 'infobae',
+    /**
+     * The general feed at `/feeds/rss/` has been 404 since it was catalogued.
+     * The publisher's own page advertises this Arc outbound feed instead, and
+     * it answers 200 with 869KB of records — verified 2026-08-27. Narrower than
+     * the general feed by one section, and a working narrow feed beats a dead
+     * wide one.
+     */
     name: 'Infobae — América',
     publisher: 'Infobae',
-    url: 'https://www.infobae.com/feeds/rss/',
+    url: 'https://www.infobae.com/arc/outboundfeeds/rss/category/estados-unidos/',
     kind: 'rss',
     discipline: 'osint',
     topics: ['news'],

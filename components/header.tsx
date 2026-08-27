@@ -29,7 +29,7 @@ export function Header({
    * lib/shell-width.ts.
    */
   tab = 'feed',
-}: { onNavigate?: (tab: 'preferences') => void; tab?: string } = {}) {
+}: { onNavigate?: (tab: string) => void; tab?: string } = {}) {
   const { theme, toggleTheme } = useTheme()
   const { locale, setLocale, t } = useI18n()
   // Optional because the header is shared by every surface. `pi.active`, not
@@ -206,6 +206,32 @@ export function Header({
             <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8">
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
+            {/*
+              Preferences, in the corner where accounts live.
+
+              It used to be the sixth button in the phone bar. Five destinations
+              plus a settings screen is six cramped targets on a 360px phone, and
+              settings is not a destination anyone navigates *to* — it is
+              somewhere you go once and leave. Moving it here is what freed the
+              bar to be five with the globe at its centre.
+
+              Always rendered, signed in or out: it holds the language, the
+              theme, the plan and the delete-my-account control, and a signed-out
+              reader needs the first of those more than anyone.
+            */}
+            {onNavigate ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onNavigate('account')}
+                aria-current={tab === 'account' ? 'page' : undefined}
+                title={t('nav.preferences')}
+                aria-label={t('nav.preferences')}
+                className={`h-8 w-8 ${tab === 'account' ? 'text-primary' : ''}`}
+              >
+                <UserCircle2 className="h-4 w-4" />
+              </Button>
+            ) : null}
           </div>
         </div>
       </div>

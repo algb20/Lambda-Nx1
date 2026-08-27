@@ -3,7 +3,7 @@
 import { Zap, Globe2, Brain, Radar, User, CandlestickChart } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useT, useCurated } from "@/lib/i18n"
-import { TAB_DEFS, type Tab } from "@/lib/navigation"
+import { BAR_TABS, tabDef, type Tab } from "@/lib/navigation"
 
 /**
  * The mobile navigation bar.
@@ -55,23 +55,56 @@ export function BottomNav({ activeTab, setActiveTab }: BottomNavProps) {
     >
       <div className="container mx-auto max-w-2xl px-4">
         <div className="flex items-center justify-around py-3">
-          {TAB_DEFS.map((tab) => {
-            const Icon = ICONS[tab.id]
-            const active = activeTab === tab.id
+          {BAR_TABS.map((id) => {
+            const tab = tabDef(id)
+            const Icon = ICONS[id]
+            const active = activeTab === id
+            /**
+             * The globe is the centre of the bar and is drawn as the centre.
+             *
+             * Not decoration: it is the surface this product exists to show, it
+             * is where the app opens, and the middle slot is the one a thumb
+             * reaches without the hand moving. A bar of five identical targets
+             * says every destination is equally the point, which is not true
+             * here and was the owner's complaint.
+             *
+             * The lift is small — a slightly larger icon in a filled disc that
+             * rises above the row — because a floating action button in the
+             * middle of a *navigation* bar is a different control and would
+             * teach the wrong thing.
+             */
+            const centre = id === 'globe'
             return (
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                key={id}
+                onClick={() => setActiveTab(id)}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex flex-col items-center gap-1 transition-colors",
+                  "touch-target flex flex-col items-center gap-1 transition-colors",
+                  centre && "-mt-4",
                   active ? "text-primary" : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <Icon className="h-5 w-5" />
+                {centre ? (
+                  <span
+                    className={cn(
+                      "flex h-11 w-11 items-center justify-center rounded-full ring-1 transition-colors",
+                      active
+                        ? "bg-primary text-primary-foreground ring-primary/40"
+                        : "bg-muted text-foreground ring-border",
+                    )}
+                  >
+                    <Icon className="h-6 w-6" />
+                  </span>
+                ) : (
+                  <Icon className="h-5 w-5" />
+                )}
                 {/* Curated by the dictionary — see side-nav for why the machine
                     translator must not touch it. */}
-                <span data-no-translate={curated(tab.i18nKey) || undefined} className="text-[10px] font-medium">
+                <span
+                  data-no-translate={curated(tab.i18nKey) || undefined}
+                  className={cn("text-[10px]", centre ? "font-semibold" : "font-medium")}
+                >
                   {t(tab.i18nKey)}
                 </span>
               </button>

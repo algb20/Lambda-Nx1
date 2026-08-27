@@ -16,7 +16,7 @@ import { SideNav } from "@/components/side-nav"
 import { ContextRail } from "@/components/context-rail"
 import { Header } from "@/components/header"
 import { ErrorBoundary } from "@/components/error-boundary"
-import { resolveTab, tabDef, type Tab } from "@/lib/navigation"
+import { HOME_TAB, pathForTab, resolveTab, tabDef, type Tab } from "@/lib/navigation"
 import { MarketsPanel } from "@/components/markets-panel"
 
 /**
@@ -68,12 +68,19 @@ export default function HomePage({ initialTab }: { initialTab?: Tab } = {}) {
    * the right panel on the first frame — which was the point of reading the
    * window in the first place.
    */
-  const [activeTab, setTab] = useState<Tab>(initialTab ?? 'feed')
+  /**
+   * The globe is home, so a bare `/` with no `initialTab` is the globe.
+   *
+   * `HOME_TAB` rather than a literal, because the home tab and the path mapping
+   * below have to agree — and when they were two literals in two files they
+   * were exactly the kind of pair that drifts.
+   */
+  const [activeTab, setTab] = useState<Tab>(initialTab ?? HOME_TAB)
 
   const setActiveTab = useCallback((id: Tab) => {
     setTab(id)
     if (typeof window === 'undefined') return
-    const path = id === 'feed' ? '/' : `/${id}`
+    const path = pathForTab(id)
     if (window.location.pathname !== path) window.history.pushState({ tab: id }, '', path)
   }, [])
 

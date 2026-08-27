@@ -47,7 +47,43 @@ import { ALL_MODES } from './gateways'
  * Placed after `globe` because it is the same act — reading the world — over a
  * different surface.
  */
-export const TABS = ['feed', 'globe', 'markets', 'intelligence', 'monitor', 'account'] as const
+/**
+ * The order, and why the globe sits in the middle of it.
+ *
+ * The globe is what this product is *for* — the live world with the agency that
+ * measured each thing on it — and it was third of six, reached by a tap that
+ * looked like any other. The owner asked for it centred, marked out from the
+ * rest, and open on arrival, and that is the right instinct: the centre slot of
+ * a bar is the one a thumb reaches without moving the hand, and every app that
+ * has a single defining surface puts it there.
+ *
+ * So: two tabs, the globe, two tabs — a real centre, not an approximate one —
+ * with `account` lifted out of the bar entirely and into the header, where
+ * accounts live in every application anyone has used.
+ */
+export const TABS = ['feed', 'markets', 'globe', 'intelligence', 'monitor', 'account'] as const
+
+/**
+ * Where the product opens.
+ *
+ * `/` is the globe. The feed keeps its own path rather than the root, because a
+ * home page is a claim about what the product is, and the claim this product
+ * makes is the world — not a list of posts about it.
+ */
+export const HOME_TAB: Tab = 'globe'
+
+/**
+ * The five in the phone bar, in bar order, with the globe at the centre.
+ *
+ * `account` is deliberately not among them: five destinations plus a settings
+ * screen is six cramped targets on a 360px phone, and the settings screen is
+ * not a destination anyone navigates *to* — it is somewhere you go once and
+ * leave. It lives in the header, always visible, signed in or not.
+ */
+export const BAR_TABS: readonly Tab[] = ['feed', 'markets', 'globe', 'intelligence', 'monitor']
+
+/** The index of the globe in `BAR_TABS` — the raised, larger button. */
+export const BAR_CENTRE = BAR_TABS.indexOf('globe')
 
 export type Tab = (typeof TABS)[number]
 
@@ -72,18 +108,18 @@ export const TAB_DEFS: readonly TabDef[] = [
     i18nKey: 'nav.feed',
   },
   {
-    id: 'globe',
-    short: 'World',
-    label: 'The world map',
-    description: 'The standing brief, and live events on the globe with the agency that measured each',
-    i18nKey: 'nav.globe',
-  },
-  {
     id: 'markets',
     short: 'Markets',
     label: 'Markets & chains',
     description: 'Live prices, network conditions, and where the volume actually trades',
     i18nKey: 'nav.markets',
+  },
+  {
+    id: 'globe',
+    short: 'World',
+    label: 'The world map',
+    description: 'The standing brief, and live events on the globe with the agency that measured each',
+    i18nKey: 'nav.globe',
   },
   {
     id: 'intelligence',
@@ -129,9 +165,14 @@ const MOVED: Record<string, Tab> = {
  * blank screen.
  */
 export function resolveTab(id: string | null | undefined): Tab {
-  if (!id) return 'feed'
+  if (!id) return HOME_TAB
   if ((TABS as readonly string[]).includes(id)) return id as Tab
-  return MOVED[id] ?? 'feed'
+  return MOVED[id] ?? HOME_TAB
+}
+
+/** The path a tab lives at. The home tab owns `/`; everything else owns its id. */
+export function pathForTab(id: Tab): string {
+  return id === HOME_TAB ? '/' : `/${id}`
 }
 
 export function tabDef(id: Tab): TabDef {
