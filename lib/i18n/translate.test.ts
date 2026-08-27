@@ -4,6 +4,11 @@ import {
   TranslationCache,
   batch,
   googleTranslate,
+  TranslationUnavailableError,
+  translateWithFallback,
+  deeplTarget,
+  activeProviders,
+  type TranslationProvider,
   isTranslatable,
   parseTranslationResponse,
 } from './translate'
@@ -148,20 +153,35 @@ describe('googleTranslate', () => {
   })
 
   /**
-   * Every failure path returns the originals, one-for-one. The caller
-   * substitutes positionally, so a short array would shift the whole interface.
+   * This test used to assert the opposite — "falls back to the original text on
+   * every failure" — and that assertion is what kept the feature broken.
+   *
+   * The reasoning behind it was half right: the caller substitutes
+   * positionally, so a short array would shift the whole interface. But
+   * "always return one string per input" and "never say you failed" are
+   * different promises, and only the first was needed. Returning the originals
+   * *silently* meant that on 2026-08-27 the live deployment answered
+   * `/api/translate` with `HTTP 200`, untranslated English, and a claim to have
+   * fetched two translations — while the provider had been answering **429** to
+   * every request for as long as anyone could tell. Nothing in the product,
+   * the tests, or the health checks could see it.
+   *
+   * The caller still falls back. It now knows that it is.
    */
-  it('falls back to the original text on every failure', async () => {
+  it('refuses out loud instead of quietly handing back English', async () => {
     const originals = ['Hello', 'Goodbye']
 
-    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, json: async () => null }) as Response))
-    expect(await googleTranslate.translate(originals, 'ar')).toEqual(originals)
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 429, json: async () => null }) as Response))
+    await expect(googleTranslate.translate(originals, 'ar')).rejects.toThrow(TranslationUnavailableError)
+
+    // The 429 is the measured one, so its reason names what it actually means.
+    await expect(googleTranslate.translate(originals, 'ar')).rejects.toThrow(/datacenter/)
 
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => ({ ok: true, json: async () => ({ unexpected: true }) }) as Response),
+      vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ unexpected: true }) }) as Response),
     )
-    expect(await googleTranslate.translate(originals, 'ar')).toEqual(originals)
+    await expect(googleTranslate.translate(originals, 'ar')).rejects.toThrow(/shape/)
 
     vi.stubGlobal(
       'fetch',
@@ -169,7 +189,7 @@ describe('googleTranslate', () => {
         throw new Error('network down')
       }),
     )
-    expect(await googleTranslate.translate(originals, 'ar')).toEqual(originals)
+    await expect(googleTranslate.translate(originals, 'ar')).rejects.toThrow(/network down/)
   })
 
   it('does not call the provider for an empty batch', async () => {
@@ -177,5 +197,111 @@ describe('googleTranslate', () => {
     vi.stubGlobal('fetch', spy)
     expect(await googleTranslate.translate([], 'ar')).toEqual([])
     expect(spy).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * The chain exists because the keyless provider is **measured not to work from
+ * a server**. On 2026-08-27, from a datacenter address, Google's public
+ * endpoint answered 429 to every request; MyMemory's shared daily quota was
+ * already spent; three Lingva instances answered 500; LibreTranslate's public
+ * host returned HTML. That is structural — those endpoints exist for browsers,
+ * and this product translates on the server deliberately.
+ */
+describe('translateWithFallback', () => {
+  const provider = (name: string, impl: TranslationProvider['translate']): TranslationProvider => ({
+    name,
+    available: () => true,
+    translate: impl,
+  })
+  const works = (name: string) => provider(name, async (texts) => texts.map((t) => `[${name}] ${t}`))
+  const refuses = (name: string) =>
+    provider(name, async () => {
+      throw new TranslationUnavailableError(name, 'answered 429')
+    })
+
+  it('names the provider that answered', async () => {
+    const out = await translateWithFallback(['Hello'], 'ar', [works('deepl')])
+    expect(out.provider).toBe('deepl')
+    expect(out.texts).toEqual(['[deepl] Hello'])
+    expect(out.unavailable).toBeNull()
+  })
+
+  it('moves to the next provider when one refuses', async () => {
+    const out = await translateWithFallback(['Hello'], 'ar', [refuses('deepl'), works('google-cloud')])
+    expect(out.provider).toBe('google-cloud')
+  })
+
+  /**
+   * The interface must render either way — so this never throws. What it must
+   * not do is let the caller believe it translated.
+   */
+  it('returns the originals and says why when every provider refuses', async () => {
+    const out = await translateWithFallback(['Hello'], 'ar', [refuses('deepl'), refuses('google-public')])
+    expect(out.texts).toEqual(['Hello'])
+    expect(out.provider, 'a null provider is what tells the caller not to cache this').toBeNull()
+    expect(out.unavailable).toContain('deepl')
+    expect(out.unavailable).toContain('google-public')
+  })
+
+  it('says plainly when there is no provider at all', async () => {
+    const out = await translateWithFallback(['Hello'], 'ar', [])
+    expect(out.provider).toBeNull()
+    expect(out.unavailable, 'the operator needs the variable name, not a shrug').toMatch(/DEEPL_API_KEY/)
+  })
+
+  /**
+   * A provider that returns the wrong number of strings would shift every
+   * label on the page by one. It is rejected as a refusal, not trusted.
+   */
+  it('rejects a provider that returns the wrong number of strings', async () => {
+    const short = provider('short', async () => ['only one'])
+    const out = await translateWithFallback(['a', 'b'], 'ar', [short, works('good')])
+    expect(out.provider).toBe('good')
+  })
+
+  it('does not call a provider for an empty batch', async () => {
+    const spy = vi.fn()
+    const out = await translateWithFallback([], 'ar', [provider('x', spy)])
+    expect(out.texts).toEqual([])
+    expect(spy).not.toHaveBeenCalled()
+  })
+})
+
+describe('a provider is only offered when its credential exists', () => {
+  it('leaves out the keyed providers when no key is set', () => {
+    const before = { deepl: process.env.DEEPL_API_KEY, google: process.env.GOOGLE_TRANSLATE_API_KEY }
+    delete process.env.DEEPL_API_KEY
+    delete process.env.GOOGLE_TRANSLATE_API_KEY
+    try {
+      expect(activeProviders().map((p) => p.name)).toEqual(['google-public'])
+    } finally {
+      if (before.deepl) process.env.DEEPL_API_KEY = before.deepl
+      if (before.google) process.env.GOOGLE_TRANSLATE_API_KEY = before.google
+    }
+  })
+
+  it('puts the keyed provider first, because it is the one that works from a server', () => {
+    const before = process.env.DEEPL_API_KEY
+    process.env.DEEPL_API_KEY = 'test-key:fx'
+    try {
+      expect(activeProviders().map((p) => p.name)).toEqual(['deepl', 'google-public'])
+    } finally {
+      if (before) process.env.DEEPL_API_KEY = before
+      else delete process.env.DEEPL_API_KEY
+    }
+  })
+})
+
+describe('deeplTarget', () => {
+  /** DeepL rejects a bare EN or PT outright; the rest map straight through. */
+  it('supplies the region DeepL insists on', () => {
+    expect(deeplTarget('en')).toBe('EN-GB')
+    expect(deeplTarget('pt')).toBe('PT-PT')
+  })
+
+  it('upper-cases everything else and drops our region suffix', () => {
+    expect(deeplTarget('ar')).toBe('AR')
+    expect(deeplTarget('zh-CN')).toBe('ZH')
   })
 })

@@ -211,7 +211,35 @@ describe('self-healing is safe to do unattended', () => {
 describe('the account gate brings the schema up', () => {
   const gate = readFileSync(join(process.cwd(), 'lib/auth/code-flow.ts'), 'utf8')
 
-  it('calls ensureSchema once the database is known to answer', () => {
-    expect(gate).toMatch(/if \(database\.live\) await ensureSchema\(\)/)
+  it('brings the schema up once the database is known to answer', () => {
+    expect(gate).toMatch(/database\.live && !\(await schemaReadyWithin\(/)
+  })
+
+  /**
+   * This test used to assert `if (database.live) await ensureSchema()`, and
+   * that literal `await` was the defect.
+   *
+   * Measured on the live deployment, 2026-08-27: the first registration hung
+   * for over sixty seconds **and created the account anyway**, because applying
+   * the schema is bounded at `APPLY_TIMEOUT_MS` — longer than a serverless
+   * function lives. The function was killed after the row was written and
+   * before the session cookie could be returned, so the account existed and its
+   * owner did not know; their second attempt was told the username was taken.
+   *
+   * A source-shape assertion is only worth having if it pins the property that
+   * matters. This one pinned the opposite.
+   */
+  it('does not make a visitor wait out a whole schema application', () => {
+    expect(gate, 'the unbounded await is what wrote an account nobody received').not.toMatch(
+      /await ensureSchema\(\)/,
+    )
+  })
+
+  it('keeps the healing running after it stops waiting', () => {
+    const helper = /export async function schemaReadyWithin[\s\S]*?\n}/.exec(gate)?.[0] ?? ''
+    expect(helper, 'a budget that cancelled the heal would never create the tables').toContain(
+      'Promise.race',
+    )
+    expect(helper, 'a rejected heal must be "not ready", never an exception').toContain('.catch(')
   })
 })
