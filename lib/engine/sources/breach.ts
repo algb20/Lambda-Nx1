@@ -4,6 +4,7 @@
  * breached data (charter §3).
  */
 import type { Evidence, Source } from '../types'
+import { expectOk } from '../fetch-guard'
 
 interface XonResponse {
   breaches?: string[][]
@@ -22,7 +23,7 @@ export const xposedornot: Source = {
     const url = `https://api.xposedornot.com/v1/check-email/${encodeURIComponent(email)}`
     const res = await ctx.fetch(url)
     if (res.status === 404) return [] // not found in any breach — a valid result
-    if (!res.ok) return []
+    expectOk('xposedornot', res)
     const j = (await res.json().catch(() => null)) as XonResponse | null
     const names = j?.breaches?.[0] ?? []
     if (names.length === 0) return []

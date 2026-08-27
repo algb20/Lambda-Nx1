@@ -10,6 +10,7 @@
  * input shape so it only produces evidence for inputs it understands.
  */
 import type { Evidence, Source } from '../types'
+import { expectOk } from '../fetch-guard'
 
 const FX_PAIR = /^([a-z]{3})\s*[\/\- ]\s*([a-z]{3})$/i
 
@@ -51,7 +52,7 @@ export const coingecko: Source = {
     const searchRes = await ctx.fetch(
       `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(q)}`,
     )
-    if (!searchRes.ok) return []
+    expectOk('coingecko', searchRes)
     const search = (await searchRes.json().catch(() => null)) as CgSearchResponse | null
     const coins = (search?.coins ?? []).filter((c) => c.id)
     if (coins.length === 0) return []
@@ -70,7 +71,7 @@ export const coingecko: Source = {
       `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(id)}` +
         `&vs_currencies=usd&include_market_cap=true&include_24hr_change=true`,
     )
-    if (!priceRes.ok) return []
+    expectOk('coingecko', priceRes)
     const prices = (await priceRes.json().catch(() => null)) as CgPriceResponse | null
     const p = prices?.[id]
     if (!p || typeof p.usd !== 'number') return []
@@ -128,7 +129,7 @@ export const edgar: Source = {
     if (q.length < 2 || FX_PAIR.test(q)) return []
     const url = `https://efts.sec.gov/LATEST/search-index?q=${encodeURIComponent(`"${q}"`)}`
     const res = await ctx.fetch(url, { headers: SEC_HEADERS })
-    if (!res.ok) return []
+    expectOk('edgar', res)
     const j = (await res.json().catch(() => null)) as EftsResponse | null
     const hits = j?.hits?.hits ?? []
     if (hits.length === 0) return []
@@ -174,7 +175,7 @@ export const frankfurter: Source = {
     if (base === target) return []
     const url = `https://api.frankfurter.dev/v1/latest?base=${base}&symbols=${target}`
     const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    expectOk('frankfurter', res)
     const j = (await res.json().catch(() => null)) as FrankfurterResponse | null
     const rate = j?.rates?.[target]
     if (typeof rate !== 'number') return []

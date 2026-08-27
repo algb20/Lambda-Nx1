@@ -34,7 +34,7 @@
  * is read as "now" and is usually not.
  */
 import type { Evidence, Source, SourceContext } from '../types'
-import { expectOk } from '../fetch-guard'
+import { expectOk, SourceUnavailableError } from '../fetch-guard'
 import { publicationTime } from '../observed'
 import { parseFeed } from '../feedxml'
 import { assessImpact, corroborationBySubject } from '../../analysis/impact'
@@ -401,12 +401,16 @@ export const resourcesSource: Source = {
   minIntervalMs: 200,
   async run(_input, ctx) {
     const out: Evidence[] = []
+    let refused = 0
     for (const s of COMMODITIES) {
       const res = await boardTry(
         ctx,
         `https://fred.stlouisfed.org/graph/fredgraph.csv?id=${encodeURIComponent(s.id)}`,
       )
-      if (!res.ok) continue
+      if (!res.ok) {
+        refused++
+        continue
+      }
       const rows = lastTwo(await res.text().catch(() => ''))
       const latest = rows[rows.length - 1]
       if (!latest) continue
@@ -433,6 +437,15 @@ export const resourcesSource: Source = {
           { source: 'A', info: 1 },
         ),
       )
+    }
+    /**
+     * A skip is right; a sweep of silent skips is not. One item being
+     * unreachable must not cost the others, but every one refusing and then
+     * returning an empty list reports the source as healthy with nothing to
+     * say — the fault that read as "13 sources OK, 0 failed, 0 movers".
+     */
+    if (out.length === 0 && refused > 0) {
+      throw new SourceUnavailableError('imf_commodities', null, `all ${refused} requests refused`)
     }
     return out
   },
@@ -677,12 +690,16 @@ export const orbitalSource: Source = {
     const query = input.value.trim().toLowerCase()
     const out: Evidence[] = []
 
+    let refused = 0
     for (const group of groups) {
       const res = await boardTry(
         ctx,
         `https://celestrak.org/NORAD/elements/gp.php?GROUP=${group.key}&FORMAT=json`,
       )
-      if (!res.ok) continue
+      if (!res.ok) {
+        refused++
+        continue
+      }
       const rows = (await res.json().catch(() => null)) as GpElement[] | null
       if (!Array.isArray(rows)) continue
 
@@ -718,6 +735,15 @@ export const orbitalSource: Source = {
           ),
         )
       }
+    }
+    /**
+     * A skip is right; a sweep of silent skips is not. One item being
+     * unreachable must not cost the others, but every one refusing and then
+     * returning an empty list reports the source as healthy with nothing to
+     * say — the fault that read as "13 sources OK, 0 failed, 0 movers".
+     */
+    if (out.length === 0 && refused > 0) {
+      throw new SourceUnavailableError('celestrak', null, `all ${refused} requests refused`)
     }
     return out
   },
@@ -783,10 +809,15 @@ export const statementsSource: Source = {
     }
     const raw: Raw[] = []
 
+    let refused = 0
     for (const feed of STATEMENT_FEEDS) {
       const res = await boardTry(ctx, feed.url)
-      // One press office being unreachable must not cost the other eight.
-      if (!res.ok) continue
+      // One press office being unreachable must not cost the other eight —
+      // but all of them refusing is the provider side going dark, not silence.
+      if (!res.ok) {
+        refused++
+        continue
+      }
       const entries = parseFeed(await res.text().catch(() => ''))
       for (const e of entries.slice(0, 15)) {
         raw.push({
@@ -799,7 +830,20 @@ export const statementsSource: Source = {
         })
       }
     }
-    if (raw.length === 0) return []
+    if (raw.length === 0) {
+      /**
+       * A skip is right; a silent sweep of skips is not.
+       *
+       * One item being unreachable must not cost the others. But if *every*
+       * one refuses, returning an empty list reports the source as healthy with
+       * nothing to say — the same fault one level up, and the one that showed
+       * as "13 sources OK, 0 failed, 0 movers" on the deployed board.
+       */
+      if (refused === STATEMENT_FEEDS.length) {
+        throw new SourceUnavailableError('statements', null, `all ${refused} feeds refused`)
+      }
+      return []
+    }
 
     // Corroboration is computed across the whole sweep, not per feed: the
     // question is whether *other* institutions are addressing the same subject,

@@ -47,6 +47,12 @@ async function queryDoh(
       // One record type failing must not abort the rest.
       continue
     }
+    /**
+     * EXHAUSTION-IS-EMPTY: each iteration asks for a different record type, and
+     * most domains have no record of most types. A resolver declining one type
+     * is a fact about that type, and a domain with none of them is a real and
+     * ordinary finding rather than a provider refusing us.
+     */
     if (!res.ok) continue
     const json = (await res.json().catch(() => null)) as DohResponse | null
     if (!json?.Answer) continue

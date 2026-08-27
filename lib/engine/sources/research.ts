@@ -8,7 +8,7 @@
  */
 import type { Evidence, Source } from '../types'
 import { parseFeed } from '../feedxml'
-import { SourceUnavailableError } from '../fetch-guard'
+import { SourceUnavailableError, expectOk } from '../fetch-guard'
 
 const MAILTO = 'mailto=research@lambda-nx.app'
 
@@ -46,7 +46,7 @@ export const openalex: Source = {
     if (q.length < 2) return []
     const url = `https://api.openalex.org/works?search=${encodeURIComponent(q)}&per-page=5&${MAILTO}`
     const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    expectOk('openalex', res)
     const j = (await res.json().catch(() => null)) as OpenAlexResponse | null
     const works = j?.results ?? []
     return works.slice(0, 5).map<Evidence>((w) => {
@@ -112,7 +112,7 @@ export const githubTrend: Source = {
     if (q.length < 2) return []
     const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(q)}&sort=stars&order=desc&per_page=5`
     const res = await ctx.fetch(url, { headers: GITHUB_HEADERS })
-    if (!res.ok) return []
+    expectOk('github', res)
     const j = (await res.json().catch(() => null)) as GithubSearchResponse | null
     const items = j?.items ?? []
     return items
@@ -156,7 +156,7 @@ export const arxiv: Source = {
       `https://export.arxiv.org/api/query?search_query=all:${encodeURIComponent(q)}` +
       `&start=0&max_results=5&sortBy=relevance`
     const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    expectOk('arxiv', res)
     const xml = await res.text().catch(() => '')
     if (!xml) return []
     return parseFeed(xml)
@@ -210,7 +210,7 @@ export const hackerNews: Source = {
       `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(q)}` +
       `&tags=story&hitsPerPage=5`
     const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    expectOk('hackernews', res)
     const j = (await res.json().catch(() => null)) as HnResponse | null
     const hits = j?.hits ?? []
     return hits
@@ -246,7 +246,7 @@ export const crossref: Source = {
     if (q.length < 2) return []
     const url = `https://api.crossref.org/works?query=${encodeURIComponent(q)}&rows=5&${MAILTO}`
     const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    expectOk('crossref', res)
     const j = (await res.json().catch(() => null)) as CrossrefResponse | null
     const items = j?.message?.items ?? []
     return items

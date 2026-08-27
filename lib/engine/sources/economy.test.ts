@@ -110,8 +110,21 @@ describe('it refuses rather than invents', () => {
     expect(ctx.fetch).not.toHaveBeenCalled()
   })
 
-  it('returns nothing when the provider fails, rather than a half picture', async () => {
-    expect(await worldbankEconomy.run(GERMANY, context(null, false))).toEqual([])
+  /**
+   * Inverted, because it was asserting the fault.
+   *
+   * "Returns nothing when the provider fails" is exactly the shape that let a
+   * refusal be reported as a healthy source with nothing to say — measured on
+   * the deployed site as 13 sources OK, 0 failed and 0 movers. A provider that
+   * refused us has not told us the country has no economy.
+   *
+   * The half-picture worry the old name carried is still honoured: it throws
+   * *before* emitting anything, so no partial set escapes.
+   */
+  it('raises the provider’s refusal rather than reporting an empty economy', async () => {
+    await expect(worldbankEconomy.run(GERMANY, context(null, false))).rejects.toThrow(
+      /worldbank_economy/,
+    )
   })
 
   it('skips an indicator with no value instead of printing a blank figure', async () => {

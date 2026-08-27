@@ -20,6 +20,7 @@
  * topic's weight. Passive, read-only, no key.
  */
 import type { Evidence, Source, SourceContext } from '../types'
+import { expectOk } from '../fetch-guard'
 
 const WIKI_HEADERS = {
   Accept: 'application/json',
@@ -65,7 +66,7 @@ export const wikipediaTrending: Source = {
     const { y, m, d } = ymd()
     const url = `https://en.wikipedia.org/api/rest_v1/feed/featured/${y}/${m}/${d}`
     const res = await ctx.fetch(url, { headers: WIKI_HEADERS })
-    if (!res.ok) return []
+    expectOk('wikipedia_trending', res)
     const j = (await res.json().catch(() => null)) as WikiFeatured | null
     const articles = j?.mostread?.articles ?? []
     const date = j?.mostread?.date ?? `${y}-${m}-${d}`
@@ -121,7 +122,7 @@ export const wikimediaPageviews: Source = {
     const { y, m, d } = ymd(yesterday)
     const url = `https://wikimedia.org/api/rest_v1/metrics/pageviews/top/en.wikipedia/all-access/${y}/${m}/${d}`
     const res = await ctx.fetch(url, { headers: WIKI_HEADERS })
-    if (!res.ok) return []
+    expectOk('wikimedia_pageviews', res)
     const j = (await res.json().catch(() => null)) as PageviewsResponse | null
     const articles = j?.items?.[0]?.articles ?? []
     return articles

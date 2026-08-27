@@ -4,6 +4,7 @@
  * (Admiralty A2).
  */
 import type { Evidence, Source } from '../types'
+import { expectOk } from '../fetch-guard'
 
 interface RdapEvent {
   eventAction?: string
@@ -43,7 +44,10 @@ export const rdap: Source = {
     const retrievedAt = new Date().toISOString()
     const url = `https://rdap.org/domain/${encodeURIComponent(input.value)}`
     const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    // A 404 here is the provider answering: no such record. Every other
+    // status is a refusal, and a refusal is not an empty result.
+    if (res.status === 404) return []
+    expectOk('rdap', res)
     const j = (await res.json().catch(() => null)) as RdapResponse | null
     if (!j) return []
 

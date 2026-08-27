@@ -1,5 +1,17 @@
-import { describe, it, expect, vi, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { investigateDomain, normalizeDomain } from './domain'
+import { clearSourceCache } from '../engine/source-cache'
+
+/**
+ * The source cache lives in module scope and is shared by every test in this
+ * file, so without this a case that stubs a failing provider legitimately
+ * replays the previous case's good answer — and the assertion that "a failed
+ * provider yields nothing" fails for a reason that has nothing to do with the
+ * behaviour under test. These cases were never independent; they only looked
+ * it while sources swallowed their own failures.
+ */
+beforeEach(() => clearSourceCache())
+
 
 /**
  * These tests exercise the real sources and orchestration against realistic

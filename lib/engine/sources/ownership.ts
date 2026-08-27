@@ -9,6 +9,7 @@
  * Every edge is an official filed relationship with its source and timestamp.
  */
 import type { Evidence, Source } from '../types'
+import { expectOk } from '../fetch-guard'
 
 const BTC = /^(bc1[a-z0-9]{20,80}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$/
 
@@ -54,7 +55,10 @@ async function fetchRelated(
   path: string,
 ): Promise<LeiRecord[]> {
   const res = await ctx.fetch(`https://api.gleif.org/api/v1/lei-records/${encodeURIComponent(lei)}/${path}`)
-  if (!res.ok) return []
+  // A 404 here is the provider answering: no such record. Every other
+  // status is a refusal, and a refusal is not an empty result.
+  if (res.status === 404) return []
+  expectOk('ownership', res)
   const j = (await res.json().catch(() => null)) as LeiResponse | null
   return j?.data ?? []
 }
@@ -72,7 +76,7 @@ export const gleifOwnership: Source = {
     const searchRes = await ctx.fetch(
       `https://api.gleif.org/api/v1/lei-records?filter[entity.legalName]=${encodeURIComponent(q)}&page[size]=1`,
     )
-    if (!searchRes.ok) return []
+    expectOk('gleif_ownership', searchRes)
     const search = (await searchRes.json().catch(() => null)) as LeiResponse | null
     const root = search?.data?.[0]
     if (!root) return []

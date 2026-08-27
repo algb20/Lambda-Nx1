@@ -4,6 +4,7 @@
  * 404 means "no exposure data", which is a valid result, not an error.
  */
 import type { Evidence, Source } from '../types'
+import { expectOk } from '../fetch-guard'
 
 interface InternetDbResponse {
   ip?: string
@@ -26,7 +27,7 @@ export const internetdb: Source = {
     const url = `https://internetdb.shodan.io/${encodeURIComponent(ip)}`
     const res = await ctx.fetch(url)
     if (res.status === 404) return []
-    if (!res.ok) return []
+    expectOk('internetdb', res)
     const j = (await res.json().catch(() => null)) as InternetDbResponse | null
     if (!j) return []
 

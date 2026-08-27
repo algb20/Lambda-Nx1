@@ -42,6 +42,7 @@
  * company has told a regulator about its own finances.
  */
 import type { Evidence, Source } from '../types'
+import { expectOk } from '../fetch-guard'
 
 export type CompanyFactKind = 'identity' | 'financial' | 'filing' | 'ranking'
 
@@ -248,7 +249,7 @@ export const secCompanyProfile: Source = {
     if (!query) return []
 
     const tickersRes = await ctx.fetch('https://www.sec.gov/files/company_tickers.json')
-    if (!tickersRes.ok) return []
+    expectOk('sec_edgar', tickersRes)
     const tickerBody = (await tickersRes.json().catch(() => null)) as Record<string, TickerRow> | null
     if (!tickerBody) return []
 
@@ -425,6 +426,12 @@ export const secLargestFilers: Source = {
       const res = await ctx.fetch(
         `https://data.sec.gov/api/xbrl/frames/us-gaap/Assets/USD/${frame}.json`,
       )
+      /**
+       * EXHAUSTION-IS-EMPTY: this walks back through recent quarters until one
+       * is populated. A 404 on a quarter the SEC has not compiled yet is the
+       * expected answer, not a refusal, so exhausting the candidates means "no
+       * quarter is published" rather than "the provider would not serve us".
+       */
       if (!res.ok) continue
       const body = (await res.json().catch(() => null)) as FrameBody | null
       const rows = (body?.data ?? []).filter((r) => typeof r.val === 'number' && r.entityName)

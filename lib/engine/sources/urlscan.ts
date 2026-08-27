@@ -3,6 +3,7 @@
  * scans. Passive (queries urlscan's database, never the target). Keyless.
  */
 import type { Evidence, Source } from '../types'
+import { expectOk } from '../fetch-guard'
 
 interface UrlscanPage {
   domain?: string
@@ -32,7 +33,7 @@ export const urlscan: Source = {
     const retrievedAt = new Date().toISOString()
     const url = `https://urlscan.io/api/v1/search/?q=domain:${encodeURIComponent(input.value)}&size=1`
     const res = await ctx.fetch(url)
-    if (!res.ok) return []
+    expectOk('urlscan', res)
     const j = (await res.json().catch(() => null)) as UrlscanSearch | null
     const page = j?.results?.[0]?.page
     const resultUrl = j?.results?.[0]?.result ?? url

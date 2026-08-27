@@ -29,6 +29,7 @@
  * reference table.
  */
 import type { Evidence, Source, SourceContext, SourceInput } from '../types'
+import { expectOk } from '../fetch-guard'
 
 /** SDMX-JSON, reduced to the shape these calls actually return. */
 interface SdmxJson {
@@ -162,7 +163,7 @@ export const ecbYieldCurve: Source = {
   minIntervalMs: 60_000,
   async run(_input: SourceInput, ctx: SourceContext): Promise<Evidence[]> {
     const res = await ctx.fetch(CURVE_URL, { headers: { Accept: 'application/json' } })
-    if (!res.ok) return []
+    expectOk('ecb_yield_curve', res)
     const all = readSdmxSeries(await res.json())
 
     const out: Evidence[] = []
@@ -213,7 +214,7 @@ export const ecbPolicyRate: Source = {
   minIntervalMs: 60_000,
   async run(_input: SourceInput, ctx: SourceContext): Promise<Evidence[]> {
     const res = await ctx.fetch(MRO_URL, { headers: { Accept: 'application/json' } })
-    if (!res.ok) return []
+    expectOk('ecb_policy_rate', res)
     const latest = readSdmx(await res.json()).pop()
     if (!latest) return []
     return [
@@ -273,7 +274,7 @@ export const referenceRates: Source = {
   minIntervalMs: 60_000,
   async run(_input: SourceInput, ctx: SourceContext): Promise<Evidence[]> {
     const res = await ctx.fetch(FX_URL, { headers: { Accept: 'application/json' } })
-    if (!res.ok) return []
+    expectOk('ecb_reference_rates', res)
     const json = (await res.json()) as FrankfurterResponse
     const rates = json?.rates
     const date = typeof json?.date === 'string' ? json.date : null
