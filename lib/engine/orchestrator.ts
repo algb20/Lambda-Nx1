@@ -43,6 +43,20 @@ export interface CollectOptions {
   registry?: Registry
   /** Override the per-source deadline (tests use a short one). */
   timeoutMs?: number
+  /**
+   * Read only these sources, when given.
+   *
+   * A filter rather than a second registry, because a registry is the thing a
+   * *capability* is registered against and a subset of a fan-out is not a
+   * different capability. Building a throwaway registry to express "the fast
+   * fourteen" would mean every caller that wanted a subset had to reconstruct
+   * the registration order, and two registries of the same sources can drift.
+   *
+   * An empty result is an error rather than an empty answer: naming sources
+   * that do not exist is a typo, and silently reading nothing is exactly the
+   * laundered refusal this engine spent a pass removing.
+   */
+  only?: ReadonlySet<string>
 }
 
 export interface CollectOutput {
@@ -219,9 +233,16 @@ export async function collect(
   const reg = opts.registry ?? defaultRegistry
   const mode: CollectMode = opts.mode ?? 'first'
   const timeoutMs = opts.timeoutMs ?? SOURCE_TIMEOUT_MS
-  const sources = reg.sourcesFor(input.capability)
-  if (sources.length === 0) {
+  const registered = reg.sourcesFor(input.capability)
+  if (registered.length === 0) {
     throw new Error(`No source registered for capability "${input.capability}"`)
+  }
+  const sources = opts.only ? registered.filter((s) => opts.only!.has(s.key)) : registered
+  if (sources.length === 0) {
+    throw new Error(
+      `No source for "${input.capability}" matched the requested subset ` +
+        `(${[...opts.only!].slice(0, 3).join(', ')}…)`,
+    )
   }
 
   let results: SourceResult[]

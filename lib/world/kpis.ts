@@ -93,6 +93,17 @@ export const CATALOGUE_SIZE = (Object.keys(CATEGORY_META) as EventCategory[]).le
 export function buildKpis(report: WorldEventsReport, now: number = Date.now()): Kpi[] {
   const { summary, fusion, coverageSummary } = report
 
+  /**
+   * Whether this is the bootstrap pass.
+   *
+   * It changes what several of these figures *mean*, and saying so is not
+   * optional. `14 of 174 feeds` during first light is a healthy state; the same
+   * figure on a full sweep is an outage. A strip that rendered them identically
+   * would be teaching the reader to distrust the one number on this page that
+   * exists to be trusted.
+   */
+  const firstLight = report.tier === 'first-light'
+
   /* ---- On the map ---------------------------------------------------- */
   // `total` includes events with no coordinate. They are real and they are
   // listed; they are simply not drawable, and a map that quietly dropped them
@@ -176,13 +187,16 @@ export function buildKpis(report: WorldEventsReport, now: number = Date.now()): 
     },
     {
       key: 'feeds',
-      label: 'Feeds',
+      label: firstLight ? 'Feeds · first' : 'Feeds',
       value: `${summary.sourcesOk}`,
       unit: `of ${feedTotal}`,
       detail:
-        summary.sourcesFailed > 0
+        (firstLight
+          ? 'First pass — the fourteen worldwide hazard authorities, read so the map has something true on it while the rest are still being asked. The count climbs when the full sweep lands. '
+          : '') +
+        (summary.sourcesFailed > 0
           ? `${summary.sourcesFailed} refused outright and ${summary.sourcesEmpty} answered with nothing. A refusal is our blind spot; an empty answer is the world being quiet.`
-          : `${summary.sourcesEmpty} answered with nothing — a quiet beat, not a fault. None refused.`,
+          : `${summary.sourcesEmpty} answered with nothing — a quiet beat, not a fault. None refused.`),
       tone: feedTone,
     },
     {

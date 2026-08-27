@@ -51,11 +51,61 @@ import {
   type WorldEvent,
   type WorldEventsReport,
 } from './world-events-shared'
+import { FIRST_LIGHT, type SweepTier } from './first-light'
 import { recordSweep } from './self-audit'
 import { legibleTitle } from '@/lib/analysis/legible'
 
 /** Worst first, so the states an operator must act on sort to the top. */
 const STATUS_ORDER = { failed: 0, empty: 1, cached: 2, ok: 3 } as const
+
+/**
+ * How long a completed sweep is served again before another is run.
+ *
+ * ## Why this exists
+ *
+ * Every request to `/api/world` ran a fresh fan-out across 174 providers, and
+ * every page load makes two of them. That was measurable: driving the browser
+ * suite — fifty page visits across five viewports — saturated the server badly
+ * enough that the world report stopped arriving inside thirty seconds, and the
+ * first diagnosis was a layout bug. Fifty readers would do the same thing to a
+ * deployment, and a hundred would do it to the providers.
+ *
+ * It is also a charter matter, not only a speed one. Section 3 requires us to
+ * respect rate limits; asking a national weather service 174 times because 174
+ * people opened a page in the same minute is exactly what that rule is about.
+ * The per-source cache already spares most providers the actual request — that
+ * is why refused sources return in 5ms — but the orchestration still runs, and
+ * politeness that depends on every source having declared an interval is not
+ * politeness we control.
+ *
+ * ## Why thirty seconds
+ *
+ * The browser refreshes every 120s, so a sweep is never asked for more often
+ * than that by one reader. Thirty seconds collapses a *burst* — many readers
+ * arriving together, or one reader's two-tier bootstrap — into one sweep, while
+ * guaranteeing nobody is shown a picture more than half a minute staler than
+ * the one they would have got. `generatedAt` is not rewritten, so the age a
+ * reader sees is the true age of the sweep and not the age of the cache hit.
+ */
+export const SWEEP_CACHE_MS = 30_000
+
+/** The last completed sweep per tier, and when it finished. */
+const lastSweep = new Map<SweepTier, { at: number; report: WorldEventsReport }>()
+
+/**
+ * A sweep already running for this tier.
+ *
+ * Separate from the cache and just as necessary: without it, ten readers
+ * arriving in the same second all miss the cache and all start a fan-out, which
+ * is the exact stampede the cache exists to prevent. They share this instead.
+ */
+const running = new Map<SweepTier, Promise<WorldEventsReport>>()
+
+/** Test seam: forget the memo, so a case can observe a real sweep. */
+export function resetSweepCache(): void {
+  lastSweep.clear()
+  running.clear()
+}
 
 // Re-exported so existing importers keep one obvious entry point.
 export * from './world-events-shared'
@@ -353,19 +403,77 @@ function toSignal(event: WorldEvent): Signal {
   }
 }
 
-/** Build the live picture. Returns whatever the reachable sources gave us. */
-export async function getWorldEvents(): Promise<WorldEventsReport> {
+/**
+ * Build the live picture. Returns whatever the reachable sources gave us.
+ *
+ * `tier` chooses how much of the world to read before answering:
+ *
+ * - **`full`** (the default) reads all 174 feeds. Profiled here at ~2.5s for
+ *   the measured half and ~0.6s for news, run concurrently.
+ * - **`first-light`** reads the fourteen worldwide hazard authorities only —
+ *   see `first-light.ts` for why those fourteen and not the other 121. It is
+ *   for the first paint, and the report it returns says so on the wire.
+ *
+ * The two tiers run the *same* code, so a first-light report is a smaller
+ * picture and never a differently-shaped one: the same fusion, the same
+ * coverage model, the same honesty about what refused. That mattered more than
+ * any speed: a bootstrap path that took a shortcut through the analysis would
+ * put a picture on screen that the full sweep then contradicts.
+ */
+export async function getWorldEvents(
+  opts: { tier?: SweepTier } = {},
+): Promise<WorldEventsReport> {
+  const tier: SweepTier = opts.tier ?? 'full'
+
+  const cached = lastSweep.get(tier)
+  if (cached && Date.now() - cached.at < SWEEP_CACHE_MS) return cached.report
+
+  const already = running.get(tier)
+  if (already) return already
+
+  const run = runSweep(tier)
+    .then((report) => {
+      // Recorded only on success. Caching a thrown sweep would turn one bad
+      // minute into thirty seconds of guaranteed failure for everyone.
+      lastSweep.set(tier, { at: Date.now(), report })
+      return report
+    })
+    .finally(() => running.delete(tier))
+  running.set(tier, run)
+  return run
+}
+
+/** One sweep, with no caching of its own. Everything above decides when to call it. */
+async function runSweep(tier: SweepTier): Promise<WorldEventsReport> {
   registerWorldEventsGateway()
   registerNewsGateway()
   // The declarative catalogue: dozens of official hazard, health and advisory
   // feeds that would otherwise each need a module of their own.
   registerCatalogSources()
 
-  // Two capabilities, run concurrently: a slow news provider must not delay the
-  // measured-events layer that the map mainly depends on.
+  /**
+   * Two capabilities, run concurrently.
+   *
+   * The comment here used to say a slow news provider must not delay the
+   * measured layer the map depends on. That is the right concern and the
+   * profile puts it the other way round — 135 measured feeds at 2,491ms against
+   * 39 news feeds at 565ms — so concurrency protects *news* from the map, not
+   * the map from news. Stated correctly because the wrong version nearly bought
+   * a bootstrap tier that would have saved nothing.
+   *
+   * On the first-light pass the news half is skipped outright rather than
+   * filtered: nothing in it is a global feed with a coordinate, so it can
+   * contribute no mark to the first map, and asking anyway would spend 565ms to
+   * add rows a reader has not scrolled to yet.
+   */
   const [measured, reported] = await Promise.all([
-    collect({ capability: 'world_events', value: '' }, { mode: 'all' }),
-    collect({ capability: 'news', value: '' }, { mode: 'all' }),
+    collect(
+      { capability: 'world_events', value: '' },
+      { mode: 'all', ...(tier === 'first-light' ? { only: FIRST_LIGHT } : {}) },
+    ),
+    tier === 'first-light'
+      ? Promise.resolve({ capability: 'news' as const, value: '', evidence: [], results: [] })
+      : collect({ capability: 'news', value: '' }, { mode: 'all' }),
   ])
 
   const results = [...measured.results, ...reported.results]
@@ -559,6 +667,7 @@ export async function getWorldEvents(): Promise<WorldEventsReport> {
 
   return {
     generatedAt: new Date().toISOString(),
+    tier,
     events,
     unplaceable,
     categories,
