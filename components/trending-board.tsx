@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/card'
 import { NewsTicker, type TickerItem } from '@/components/news-ticker'
 import type { ChainRadarReport } from '@/lib/modules/chain-radar'
 import type { WorldEventsReport } from '@/lib/modules/world-events-shared'
+import { discardBody } from '@/lib/http/discard'
 
 /**
  * The trending board — three lanes of what the world is doing right now, each
@@ -62,7 +63,14 @@ function useFeed<T>(url: string): { data: T | null; failed: boolean } {
   useEffect(() => {
     let alive = true
     fetch(url, { cache: 'no-store' })
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((r) => {
+        // See lib/http/discard.ts: a body nobody reads holds the connection.
+        if (!r.ok) {
+          discardBody(r)
+          return Promise.reject(new Error(String(r.status)))
+        }
+        return r.json()
+      })
       .then((d) => {
         if (!alive) return
         if (d?.error) setFailed(true)

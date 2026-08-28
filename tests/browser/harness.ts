@@ -246,8 +246,22 @@ export async function visit(
   const broke: string[] = []
   page.on('pageerror', (err) => broke.push(String(err.message).slice(0, 200)))
   page.on('requestfailed', (req) => {
-    if (req.url().includes('/api/')) {
-      broke.push(`request failed: ${new URL(req.url()).pathname} — ${req.failure()?.errorText}`)
+    /**
+     * A cancelled request is not a failed one.
+     *
+     * `lib/http/discard` cancels response bodies the app has decided not to
+     * read — that is the fix that lets a page reach quiescence at all. Chromium
+     * reports each of those as `net::ERR_ABORTED`, and this handler flagged
+     * them as breakage, so the suite called the fix a fault. `ERR_ABORTED` also
+     * covers a navigation that superseded an in-flight request, which is
+     * likewise the browser working.
+     *
+     * What remains reportable is a request that genuinely could not complete:
+     * DNS, TLS, connection refused, timeout.
+     */
+    const why = req.failure()?.errorText ?? ''
+    if (req.url().includes('/api/') && !why.includes('ERR_ABORTED')) {
+      broke.push(`request failed: ${new URL(req.url()).pathname} — ${why}`)
     }
   })
   page.on('response', (res) => {

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useI18n } from '@/lib/i18n'
+import { discardBody } from '@/lib/http/discard'
 
 /**
  * Whole-interface translation.
@@ -161,7 +162,7 @@ export function AutoTranslate({ children }: { children: React.ReactNode }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ texts: sources, to: locale }),
         })
-        if (!res.ok) return
+        if (!res.ok) return discardBody(res)
         const data = (await res.json()) as { translations?: string[]; unavailable?: string }
         const out = data.translations
         if (!Array.isArray(out) || out.length !== sources.length) return

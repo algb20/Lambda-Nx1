@@ -193,15 +193,10 @@ export function catalogSummary(usage: UsageContext = LAMBDA_USAGE) {
  * exactly the same answer for a different purpose: to stop one publisher owning
  * the page through many feeds.
  *
- * Reusing it means the two can never disagree about who is speaking. Built once
- * and memoised; an unknown key is its own origin, which is the safe default —
- * it constrains nothing that was not already constrained.
+ * There is one implementation of it, in `./origins`, and it is generated from
+ * this file's `independence` fields. Server code reaches it through here as it
+ * always has; the browser imports `./origins` directly and so no longer
+ * downloads 192 KB of feed definitions to answer a lookup. See that module and
+ * `scripts/build-origin-index.ts` for the measurement behind the split.
  */
-let originIndex: Map<string, string> | null = null
-
-export function originOf(sourceKey: string): string {
-  if (!originIndex) {
-    originIndex = new Map(CATALOG.map((s) => [s.key, s.independence ?? s.key]))
-  }
-  return originIndex.get(sourceKey) ?? sourceKey
-}
+export { originOf, SOURCE_ORIGINS } from './origins'

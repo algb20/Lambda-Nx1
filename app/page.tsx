@@ -1,23 +1,86 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { HomeFeed } from "@/components/home-feed"
-import { IntelligenceDashboard } from "@/components/intelligence-dashboard"
-import { MonitoringDashboard } from "@/components/monitor-dashboard"
-import { CalibrationScoreboard } from "@/components/calibration-scoreboard"
-import { GlobeWorkspace } from "@/components/globe-workspace"
+import dynamic from "next/dynamic"
 import { FollowByEmail } from "@/components/follow-by-email"
-import { LiveColumns } from "@/components/live-columns"
-import { UserPreferences } from "@/components/user-preferences"
 import { BottomNav } from "@/components/bottom-nav"
 import { shellContainerFor } from "@/lib/shell-width"
 import { CommandPalette } from '@/components/command-palette'
 import { SideNav } from "@/components/side-nav"
-import { ContextRail } from "@/components/context-rail"
 import { Header } from "@/components/header"
 import { ErrorBoundary } from "@/components/error-boundary"
+import { PanelSkeleton } from "@/components/panel-skeleton"
 import { HOME_TAB, pathForTab, resolveTab, tabDef, type Tab } from "@/lib/navigation"
-import { MarketsPanel } from "@/components/markets-panel"
+
+/**
+ * One tab's code arrives when that tab is on screen — not before.
+ *
+ * ## The measurement
+ *
+ * Every panel in the product was a static import here, so webpack put all of
+ * them in one chunk and every route loaded all of it. Measured against the
+ * production build in a phone-sized Chromium: **1,032 kB of JavaScript decoded
+ * (308 kB over the wire) on every single route**, `/pricing` included — a page
+ * that is a price list and carried the globe, the atlas, five dashboards and
+ * the whole gateway console with it.
+ *
+ * A visitor opening the map paid to download the monitoring board, the markets
+ * tables, the account screen and the 2,500-line investigation console before
+ * the map could start. On the mid-range Android that Pi Browser runs on, that
+ * is not a byte count — it is seconds of parse and compile before the first
+ * useful frame.
+ *
+ * ## Why `next/dynamic` and not a lazy route
+ *
+ * These are panels of one page, not five documents (see the note on
+ * `pushState` below). `next/dynamic` keeps that: the shell stays one page, and
+ * only the panel currently rendered is fetched.
+ *
+ * **`ssr` stays on.** Each tab is prerendered at its own URL by
+ * `app/[tab]/page.tsx`, so the server still renders the real panel into the
+ * HTML — a crawler sees the product, a deep link paints on the first frame, and
+ * Next preloads exactly the chunk that render used. Turning SSR off here would
+ * buy nothing and hand every tab URL back to the spinner it took work to
+ * escape.
+ *
+ * The skeleton is for the other path: switching tab in a live session, where
+ * the chunk is fetched on demand and a blank main area would read as a hang.
+ */
+const HomeFeed = dynamic(() => import("@/components/home-feed").then((m) => m.HomeFeed), {
+  loading: () => <PanelSkeleton label="Feed" />,
+})
+const IntelligenceDashboard = dynamic(
+  () => import("@/components/intelligence-dashboard").then((m) => m.IntelligenceDashboard),
+  { loading: () => <PanelSkeleton label="Investigate" /> },
+)
+const MonitoringDashboard = dynamic(
+  () => import("@/components/monitor-dashboard").then((m) => m.MonitoringDashboard),
+  { loading: () => <PanelSkeleton label="Radar" /> },
+)
+const CalibrationScoreboard = dynamic(
+  () => import("@/components/calibration-scoreboard").then((m) => m.CalibrationScoreboard),
+)
+const MarketsPanel = dynamic(() => import("@/components/markets-panel").then((m) => m.MarketsPanel), {
+  loading: () => <PanelSkeleton label="Markets" />,
+})
+const UserPreferences = dynamic(
+  () => import("@/components/user-preferences").then((m) => m.UserPreferences),
+  { loading: () => <PanelSkeleton label="Account" /> },
+)
+const GlobeWorkspace = dynamic(
+  () => import("@/components/globe-workspace").then((m) => m.GlobeWorkspace),
+  { loading: () => <PanelSkeleton label="World surface" /> },
+)
+const LiveColumns = dynamic(() => import("@/components/live-columns").then((m) => m.LiveColumns))
+/**
+ * The rail never renders below 1280px — it checks a real media query and
+ * returns null — so on a phone it was pure download. `ssr: false` makes that
+ * literal: a narrow screen never fetches it at all, and a wide one picks it up
+ * after the page it is meant to sit beside is already on screen.
+ */
+const ContextRail = dynamic(() => import("@/components/context-rail").then((m) => m.ContextRail), {
+  ssr: false,
+})
 
 /**
  * The shell.
