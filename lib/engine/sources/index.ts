@@ -89,7 +89,18 @@ export const procurementGatewaySources: Source[] = [usaspending, worldbankProjec
 
 export const ownershipGatewaySources: Source[] = [gleifOwnership]
 
-export const newsGatewaySources: Source[] = [gdeltNews, wikiInTheNews, usgsQuakes, reliefWeb]
+/**
+ * `reliefWeb` is deliberately absent — see the catalogue row below for the
+ * measured evidence and the owner action it needs.
+ *
+ * It has to be removed **here** and not only switched off in the catalogue row:
+ * `registerNewsGateway` registers this array, and the rows are the visible
+ * record beside it. Setting `enabled: false` on a row and leaving the source in
+ * this list would have been a flag that changes nothing — the exact shape of
+ * dishonesty this codebase has spent the session removing, committed while
+ * documenting an outage.
+ */
+export const newsGatewaySources: Source[] = [gdeltNews, wikiInTheNews, usgsQuakes]
 
 export const marketsBoardSources: Source[] = [
   coingeckoTop,
@@ -186,7 +197,29 @@ export const newsGatewayCatalog: CatalogRow[] = [
   { key: 'gdelt', name: 'GDELT global news', capability: 'news', passive: true, enabled: true },
   { key: 'wikipedia_itn', name: 'Wikipedia In the news', capability: 'news', passive: true, enabled: true },
   { key: 'usgs_quakes', name: 'USGS earthquakes (live, geolocated)', capability: 'news', passive: true, enabled: true },
-  { key: 'reliefweb', name: 'ReliefWeb / UN OCHA (humanitarian)', capability: 'news', passive: true, enabled: true },
+  /**
+   * Disabled on measured evidence, and it needs an owner action rather than a
+   * code change.
+   *
+   * Read from the deployed site on 2026-08-27: `reliefweb: provider answered
+   * 410` — the only failing feed in a 174-source sweep. Probed directly:
+   *
+   *   v1  →  **410 Gone**.  The API we were calling has been retired.
+   *   v2  →  **403**, and ReliefWeb says why in the body:
+   *          "You are not using an approved appname. Kindly request an appname
+   *          from ReliefWeb here: https://apidoc.reliefweb.int/parameters#appname"
+   *
+   * That 403 is theirs and not our egress proxy — it arrived as their own JSON
+   * error while a control request to USGS from the same shell returned 200.
+   *
+   * So the successor exists and is reachable, and using it requires a name
+   * **registered with UN OCHA**. Left in the catalogue and switched off, which
+   * is this project's rule for a route that needs a credential: the gap stays
+   * visible and named rather than becoming a feed that fails every sweep, or
+   * disappearing so nobody remembers humanitarian reporting is thinner without
+   * it. Re-enable after registering, and move the coded source to v2.
+   */
+  { key: 'reliefweb', name: 'ReliefWeb / UN OCHA (humanitarian)', capability: 'news', passive: true, enabled: false },
 ]
 
 export const marketsBoardCatalog: CatalogRow[] = [
