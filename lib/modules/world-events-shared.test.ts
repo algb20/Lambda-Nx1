@@ -5,8 +5,10 @@ import {
   describeWindow,
   detectionLagMinutes,
   eventTimeMs,
+  believableObservation,
   fusedByEventId,
   hasCoordinate,
+  MAX_CLOCK_SKEW_MS,
   humanHours,
   lagBandOf,
   latencyProfile,
@@ -585,5 +587,70 @@ describe('hasCoordinate — nothing is plotted at a guess', () => {
 
   it('rejects an infinite coordinate', () => {
     expect(hasCoordinate({ lat: Number.POSITIVE_INFINITY, lon: 10 })).toBe(false)
+  })
+})
+
+/**
+ * A publisher's clock can be wrong, and one wrong clock was pinning the board.
+ *
+ * Read from the deployed site: `newestAt` was **44.5 minutes after the sweep
+ * that produced it**. Fifteen events carried future timestamps, all from one
+ * outlet, spread evenly ahead of the present — a publisher stamping local time
+ * as UTC, not fifteen things that had not happened yet.
+ *
+ * `ageWords` clamps a negative age to zero, so those rendered as "just now", and
+ * because `newestObservation` takes the newest of everything, one bad clock
+ * pinned the whole live edge to "just now" permanently. That is the fault fixed
+ * earlier the same day arriving through a different door: then it was *our*
+ * clock reported as the world's freshness, now it was a publisher's.
+ */
+describe('believableObservation — a future observation is a bad clock', () => {
+  const NOW = Date.parse('2026-08-27T23:58:03.788Z')
+
+  it('accepts a time in the past', () => {
+    expect(believableObservation('2026-08-27T22:00:00.000Z', NOW)).toBe(true)
+  })
+
+  /** The measured case: 44.5 minutes ahead of the sweep that found it. */
+  it('rejects the 44-minute lead measured in production', () => {
+    expect(believableObservation('2026-08-28T00:42:33.000Z', NOW)).toBe(false)
+  })
+
+  /**
+   * Not zero tolerance. Clocks disagree by seconds, and an item published a
+   * moment before we read it can legitimately carry a stamp slightly ahead.
+   */
+  it('allows ordinary clock skew', () => {
+    expect(believableObservation(new Date(NOW + 60_000).toISOString(), NOW)).toBe(true)
+    expect(believableObservation(new Date(NOW + MAX_CLOCK_SKEW_MS - 1).toISOString(), NOW)).toBe(
+      true,
+    )
+  })
+
+  it('refuses anything past the skew allowance', () => {
+    expect(believableObservation(new Date(NOW + MAX_CLOCK_SKEW_MS + 1000).toISOString(), NOW)).toBe(
+      false,
+    )
+  })
+
+  it('treats a missing or unparseable time as unbelievable, not as now', () => {
+    expect(believableObservation(null, NOW)).toBe(false)
+    expect(believableObservation('shortly', NOW)).toBe(false)
+  })
+
+  /**
+   * Rejected rather than clamped. Clamping to now would hide the bad clock and
+   * produce the same false "just now" — the event becomes *untimed*, which the
+   * model already has a word for and which `summary.untimed` counts on screen.
+   */
+  it('makes a future-dated event untimed, so the count shows it', () => {
+    const ev = (observedAt: string | null) => ({ observedAt })
+    const future = '2026-08-28T00:42:33.000Z'
+    const rejected = believableObservation(future, NOW) ? future : null
+    expect(rejected).toBeNull()
+    expect(untimedCount([ev(rejected)])).toBe(1)
+    expect(newestObservation([ev(rejected), ev('2026-08-27T20:00:00.000Z')])).toBe(
+      '2026-08-27T20:00:00.000Z',
+    )
   })
 })

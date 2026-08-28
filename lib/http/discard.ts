@@ -19,11 +19,39 @@
  * idle in 2.8 seconds and **`/monitor`, `/intelligence` and `/account` never
  * reached it at all**. Each held a socket for a body of thirty characters.
  *
- * What that costs a user: the `load` event never fires, so anything waiting on
- * it — a browser's own progress indicator, a Lighthouse or CrUX measurement, a
- * `load`-gated script — waits forever, and the page reads as still-loading long
- * after it is usable. On a phone the connection is held with it. The three
- * routes that did this are three of the five tabs in the product.
+ * ## What it actually costs, and a claim of ours that was wrong
+ *
+ * This paragraph used to say the `load` event never fires. **It does.** Measured
+ * on a build without this fix, in a real browser, `load` fired on exactly the
+ * three routes said to be affected:
+ *
+ * | route | `load` | `networkidle` |
+ * |---|---|---|
+ * | `/` | 191ms | 9,821ms |
+ * | `/monitor` | **150ms** | **never (20s)** |
+ * | `/intelligence` | **153ms** | **never (20s)** |
+ * | `/account` | **141ms** | **never (20s)** |
+ *
+ * `load` fires when the document and its *declared* subresources finish. A
+ * `fetch` a script starts is not part of that accounting, so an unread body
+ * cannot delay it, and nothing gated on `load` waits at all.
+ *
+ * The real cost is quiescence, which is a different and narrower thing:
+ *
+ * - **The page never goes quiet.** Anything that waits for the network to
+ *   settle waits forever — Lighthouse's fully-loaded style metrics, and our own
+ *   browser suite, which hit this from the other side the same week and spent
+ *   two wrong diagnoses on it (`tests/browser/harness.ts`).
+ * - **A socket is held per abandoned response.** On a phone that keeps the
+ *   radio from idling, which is a battery cost rather than a latency one. Under
+ *   HTTP/1.1 it also occupies one of roughly six connections per origin and
+ *   makes later requests queue; under HTTP/2, which this deployment serves, it
+ *   costs a stream out of a much larger budget, so that part is real but small.
+ *
+ * The fix is worth having on the quiescence argument alone. It is written down
+ * this way because the first version of this comment claimed a user-visible
+ * page-load win that the measurement does not support, and a fix defended by a
+ * wrong reason is one somebody later removes for the right one.
  *
  * ## Why a named function rather than `void res.text()`
  *

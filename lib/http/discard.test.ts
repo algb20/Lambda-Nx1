@@ -70,7 +70,52 @@ const ABANDONS = [
   /if\s*\(\s*!\w+\.ok\s*\)\s*return(\s|$)/,
   /if\s*\(\s*\w+\.status\s*===\s*\d{3}\s*\)\s*return(\s|$)/,
   /\w+\.ok\s*\?\s*\w+\.json\(\)\s*:\s*(null|Promise\.reject|undefined)/,
+  /**
+   * The positive guard, and the one this scan originally missed.
+   *
+   *     if (aRes.ok) setAlerts((await aRes.json()).alerts ?? [])
+   *
+   * Reads the body on the happy path and has no else branch at all, so every
+   * *unhappy* status — 429, 500, a 401 on a second call — leaks exactly as the
+   * early-return form did. Found by the browser suite, not by this file: under
+   * the app's own rate limit `/api/alerts` answered 429 and `/monitor` stopped
+   * reaching quiescence again, days after it was declared fixed.
+   *
+   * That is the lesson worth keeping. This scan was written around the *shape*
+   * of the bug that had been noticed, and the fault is not a shape — it is
+   * "a response whose body no path reads". A guard built from examples will
+   * always trail the thing it guards, which is why the browser test that
+   * measures the actual behaviour is the one that has to be authoritative.
+   */
 ]
+
+/**
+ * The positive guard, which needs a stricter rule than the others.
+ *
+ *     if (aRes.ok) setAlerts((await aRes.json()).alerts ?? [])
+ *
+ * It reads the body on the happy path and has no else branch, so every unhappy
+ * status — 429, 500, a 401 on a second call — leaks exactly as the early-return
+ * form did.
+ *
+ * It is listed apart because `SETTLED` cannot judge it. That rule accepts "the
+ * body was read nearby", and here the read is *inside the guard*: it happens
+ * only when the response was ok, which is the one case that was never the
+ * problem. A read cannot settle this shape. Only an explicit release can.
+ *
+ * ## How it was found, which is the part worth remembering
+ *
+ * Not by this file. The browser suite measured `/monitor` failing to reach
+ * quiescence again, days after the leak was declared fixed — under the app's own
+ * rate limit `/api/alerts` answered 429 and the body was dropped unread.
+ *
+ * This scan was written around the *shape* of the bug that had been noticed, and
+ * the fault is not a shape: it is "a response whose body no path reads". A guard
+ * built from examples will always trail the thing it guards, which is why
+ * `tests/browser/quiescence.browser.ts` — which measures the behaviour rather
+ * than the text — is the authority, and this file is the fast early warning.
+ */
+const POSITIVE_GUARDS = [/if\s*\(\s*\w+\.ok\s*\)[^\n]*\.(json|text)\(\)/]
 
 /**
  * What settles the matter, near the line that walks away: the body was
@@ -100,13 +145,22 @@ describe('no client fetch abandons a response body', () => {
 
   it.each(files)('%s', (file) => {
     const lines = readFileSync(join(process.cwd(), file), 'utf8').split('\n')
+    const near = (i: number) => lines.slice(Math.max(0, i - WINDOW), i + WINDOW + 1)
     const offenders = lines
       .map((line, i) => ({ line, i }))
-      .filter(({ line }) => ABANDONS.some((re) => re.test(line)))
-      .filter(
-        ({ i }) =>
-          !lines.slice(Math.max(0, i - WINDOW), i + WINDOW + 1).some((near) => SETTLED.test(near)),
-      )
+      .filter(({ line, i }) => {
+        // The early-exit forms: settled by a release *or* by a read, because a
+        // body already read is not abandoned.
+        if (ABANDONS.some((re) => re.test(line))) {
+          return !near(i).some((l) => SETTLED.test(l))
+        }
+        // The positive guard: only an explicit release settles it, since the
+        // read it contains happens on the one path that was never leaking.
+        if (POSITIVE_GUARDS.some((re) => re.test(line))) {
+          return !near(i).some((l) => /discardBody/.test(l))
+        }
+        return false
+      })
       .map(({ line, i }) => `${file}:${i + 1}  ${line.trim()}`)
 
     expect(

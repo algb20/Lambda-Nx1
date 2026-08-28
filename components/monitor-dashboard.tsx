@@ -38,7 +38,14 @@ export function MonitoringDashboard() {
     const data = await res.json()
     setMonitors(data.monitors ?? [])
     const aRes = await fetch('/api/alerts')
+    // Both branches, because only one of them was ever handled. When this read
+    // the body on the ok path alone, every other status — a 429 from our own
+    // rate limit, a 401 on this second call — dropped a body unread and held
+    // the socket, so `/monitor` stopped reaching quiescence again days after
+    // that leak was declared fixed. Found by the browser suite, not by the
+    // pattern scan, which is why both exist.
     if (aRes.ok) setAlerts((await aRes.json()).alerts ?? [])
+    else discardBody(aRes)
   }, [])
 
   useEffect(() => {

@@ -207,7 +207,7 @@ function HazardBox({ box }: { box: Box }) {
             key={key}
             onClick={() => setTab(key)}
             aria-pressed={tab === key}
-            className={`flex-1 px-2 py-1 text-[10px] font-medium transition-colors ${
+            className={`touch-target flex-1 px-2 py-1 text-[10px] font-medium transition-colors ${
               tab === key
                 ? 'bg-primary/10 text-primary'
                 : 'text-muted-foreground hover:bg-muted/60'

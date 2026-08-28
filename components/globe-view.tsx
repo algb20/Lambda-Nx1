@@ -1023,17 +1023,6 @@ export function GlobeView() {
         ) : null}
 
         {/*
-          How much of the analysis to show at once.
-
-          In the band with the layer chips because it is the same kind of
-          control — it changes what the page shows, not what the data is. In a
-          settings panel it would be configured once and forgotten, and the
-          whole value of it is switching: Minimal to glance, Extreme to work a
-          developing event, and back.
-        */}
-        <DensityControl density={density} onChange={chooseDensity} />
-
-        {/*
           The sentence naming the selected layer. It keeps its own line on a
           phone — squeezed into a band beside five chips it would wrap to two
           words a line — and joins the band from `lg`, where there is room for
@@ -1089,7 +1078,24 @@ export function GlobeView() {
         Measured after: 52% phone · 45% laptop · 33% desktop.
       */}
       <div className="flex flex-col gap-3">
-        <div className="order-3 xl:order-1">
+        <div className="order-3 space-y-3 xl:order-1">
+          {/*
+            How much of the analysis to show at once.
+
+            It was in the title band with the layer chips, on the reasoning that
+            both change what the page shows rather than what the data is. The
+            reasoning is right and the placement was not: measured on a 390px
+            phone, four more buttons wrapped that band from 134px to **228px**
+            and pushed the map from 438px down to 532px — 63% of the screen,
+            past the limit the browser suite holds this page to.
+
+            So it moves in with the scrubber, which is the same kind of control
+            and already sits below the canvas under `xl` and above it from
+            there. Where height is the scarce resource, a control over the map
+            belongs under the map — the rule the scrubber and the layer rail
+            already follow.
+          */}
+          <DensityControl density={density} onChange={chooseDensity} />
         {isEventLayer && report ? (
           <TimeScrubber
             window={timeWindow}
@@ -1315,7 +1321,7 @@ export function GlobeView() {
                   <li key={r.event.id}>
                     <button
                       onClick={() => setSelectedId(r.event.id)}
-                      className="flex w-full items-start gap-2 text-left text-[11px] transition-colors hover:bg-muted/40"
+                      className="touch-target flex w-full items-start gap-2 text-left text-[11px] transition-colors hover:bg-muted/40"
                     >
                       <span
                         className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full"
@@ -1484,7 +1490,7 @@ export function GlobeView() {
               <li key={r.event.id}>
                 <button
                   onClick={() => setSelectedId(r.event.id)}
-                  className="flex w-full items-start gap-2 py-1.5 text-left transition-colors hover:bg-muted/40"
+                  className="touch-target flex w-full items-start gap-2 py-1.5 text-left transition-colors hover:bg-muted/40"
                 >
                   <span
                     className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full"

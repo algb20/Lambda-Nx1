@@ -39,6 +39,7 @@ import {
   CATEGORY_META,
   REGION_LABEL,
   dedupeEvents,
+  believableObservation,
   newestObservation,
   operationalOrder,
   regionOf,
@@ -366,7 +367,12 @@ export function toEvent(e: Evidence, index: number): WorldEvent | null {
      * the time in the payload bag for a while, and an archived record replayed
      * from that era must not silently lose its date.
      */
-    observedAt: str(e.publishedAt) ?? str(data.observedAt),
+    observedAt: believableObservation(
+      str(e.publishedAt) ?? str(data.observedAt),
+      Date.parse(e.retrievedAt) || Date.now(),
+    )
+      ? (str(e.publishedAt) ?? str(data.observedAt))
+      : null,
     // Carried from the source's own string by the adapter and the feed parser.
     // Null where a feed stated no zone at all, which is common and honest — the
     // reader is then shown their own time, labelled as theirs.
