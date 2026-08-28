@@ -15,12 +15,24 @@ interface SessionPayload {
 /** The shortest secret we will sign with. Below this, HMAC is theatre. */
 export const MIN_SESSION_SECRET_LENGTH = 16
 
+/**
+ * Whether a given value is a secret this module will actually sign with.
+ *
+ * Exported because the health probe has to answer the same question, and when
+ * it answered it independently it answered differently: it checked presence, so
+ * a six-character `SESSION_SECRET` reported "configured" while every sign-in
+ * threw here. One predicate, both callers, no room for them to drift.
+ */
+export function isUsableSessionSecret(value: string | undefined): boolean {
+  return typeof value === 'string' && value.length >= MIN_SESSION_SECRET_LENGTH
+}
+
 function secret(): string {
   const s = process.env.SESSION_SECRET
-  if (!s || s.length < MIN_SESSION_SECRET_LENGTH) {
+  if (!isUsableSessionSecret(s)) {
     throw new Error('SESSION_SECRET is not set (needs a strong random string, 16+ chars).')
   }
-  return s
+  return s as string
 }
 
 /**
@@ -33,8 +45,7 @@ function secret(): string {
  * it writes, not after.
  */
 export function canIssueSessions(): boolean {
-  const s = process.env.SESSION_SECRET
-  return typeof s === 'string' && s.length >= MIN_SESSION_SECRET_LENGTH
+  return isUsableSessionSecret(process.env.SESSION_SECRET)
 }
 
 function sign(payload: string): string {

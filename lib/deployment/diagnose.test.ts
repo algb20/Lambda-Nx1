@@ -190,3 +190,119 @@ describe('a database that is configured and broken', () => {
     expect(check.action).toMatch(/map|gateway/i)
   })
 })
+
+/**
+ * The live deployment that produced these tests.
+ *
+ * `/api/health` answered **503** because `SESSION_SECRET` was unset — a running
+ * server refusing correctly. This page showed one red card reading "something
+ * inside it is failing / read the server log", and stopped: the map, the
+ * gateways and the database were all working and none of them was reported,
+ * and the one fact the reader needed was sitting in the JSON the page had
+ * already fetched.
+ */
+describe('a 503 that is a refusal, not a fault', () => {
+  const refusing = (extra: Array<Record<string, unknown>> = []) =>
+    json(
+      {
+        status: 'unhealthy',
+        version: '0.1.0',
+        checks: [
+          {
+            name: 'session_secret',
+            status: 'degraded',
+            detail: 'SESSION_SECRET not set — session signing throws, so sign-in is unavailable',
+            required: true,
+          },
+          {
+            name: 'database',
+            status: 'degraded',
+            detail: 'no DATABASE_URL — persistence-backed features are disabled (keyless intel still works)',
+            required: false,
+          },
+          ...extra,
+        ],
+      },
+      503,
+    )
+
+  const run = (extra?: Array<Record<string, unknown>>) =>
+    diagnose({ health: refusing(extra), world: world(2882), board: board(11) })
+
+  it('does not stop the page — every other check still runs', () => {
+    const ids = run().map((c) => c.id)
+    expect(ids).toContain('server')
+    expect(ids).toContain('outbound')
+    expect(ids).toContain('gateways')
+    expect(ids).toContain('database')
+  })
+
+  it('reports the server as up, because it answered with a full report', () => {
+    expect(run().find((c) => c.id === 'server')?.state).toBe('ok')
+  })
+
+  /** The whole repair, in one assertion. */
+  it('names the unset setting instead of sending the reader to a server log', () => {
+    const signIn = run().find((c) => c.id === 'sign-in')
+    expect(signIn?.state).toBe('fail')
+    expect(signIn?.detail).toContain('SESSION_SECRET')
+    expect(signIn?.action).toContain('SESSION_SECRET')
+    expect(run().every((c) => !(c.action ?? '').includes('Read the server log'))).toBe(true)
+  })
+
+  /** Sign-in being down must not read as "the platform is down". */
+  it('says the keyless product is unaffected', () => {
+    expect(run().find((c) => c.id === 'sign-in')?.detail).toContain('unaffected')
+  })
+
+  it('still treats an unreadable 5xx as a broken server', () => {
+    const broken = diagnose({
+      health: json({ error: 'boom' }, 500),
+      world: world(0),
+      board: board(0),
+    })
+    expect(broken).toHaveLength(1)
+    expect(broken[0].id).toBe('server')
+    expect(broken[0].state).toBe('fail')
+  })
+
+  it('relays the mail check, as a warning rather than a failure', () => {
+    const withMail = run([
+      {
+        name: 'mail',
+        status: 'off',
+        detail: 'no mail provider — MAIL_PROVIDER=resend is set, but RESEND_API_KEY is not.',
+        required: false,
+      },
+    ])
+    const check = withMail.find((c) => c.id === 'mail')
+    expect(check?.state).toBe('warn')
+    expect(check?.detail).toContain('RESEND_API_KEY')
+    // Pi sign-in needs no mail, so this is a missing capability, not an outage.
+    expect(check?.action).toContain('Pi sign-in works without it')
+  })
+
+  it('reports sign-in and mail as ok when they are', () => {
+    const good = diagnose({
+      health: json({
+        status: 'healthy',
+        checks: [
+          { name: 'session_secret', status: 'ok', detail: 'configured', required: true },
+          { name: 'mail', status: 'ok', detail: 'mail configured via brevo over HTTPS', required: false },
+        ],
+      }),
+      world: world(10),
+      board: board(3),
+    })
+    expect(good.find((c) => c.id === 'sign-in')?.state).toBe('ok')
+    expect(good.find((c) => c.id === 'mail')?.state).toBe('ok')
+  })
+
+  /** A report that never mentions them says nothing about them. */
+  it('omits both checks entirely when the health report does not carry them', () => {
+    const ids = diagnose({ health: json(health('ok')), world: world(1), board: board(1) }).map(
+      (c) => c.id,
+    )
+    expect(ids).not.toContain('mail')
+  })
+})

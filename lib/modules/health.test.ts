@@ -241,3 +241,79 @@ describe('telling the owner which half is missing', () => {
     expect(detail).not.toContain('xkeysib-super-secret-value')
   })
 })
+
+/**
+ * The probe agreeing with the thing it probes.
+ *
+ * `lib/auth/session` refuses any secret shorter than 16 characters. This check
+ * asked only whether the variable was present, so `SESSION_SECRET=lambda`
+ * reported a green "configured" while every sign-in threw — the readiness probe
+ * asserting exactly the thing it exists to disprove. Both sides now call
+ * `isUsableSessionSecret`, and these tests hold them together.
+ */
+describe('the session secret, judged by the signer’s own rule', () => {
+  const secretCheck = (value?: string) =>
+    buildHealthReport({ env: value === undefined ? {} : { SESSION_SECRET: value } }).checks.find(
+      (c) => c.name === 'session_secret',
+    )!
+
+  it('accepts a secret long enough to sign with', () => {
+    expect(secretCheck('s'.repeat(32)).status).toBe('ok')
+  })
+
+  it('refuses one the signer would refuse, and says how short it is', () => {
+    const check = secretCheck('lambda')
+    expect(check.status).toBe('degraded')
+    expect(check.detail).toContain('6 characters')
+    expect(check.detail).toContain('16')
+  })
+
+  it('reports the length but never the secret', () => {
+    expect(secretCheck('short-secret').detail).not.toContain('short-secret')
+  })
+
+  it('distinguishes "not set" from "set but too short"', () => {
+    expect(secretCheck().detail).toContain('not set')
+    expect(secretCheck('abc').detail).toContain('but only')
+  })
+
+  /** A short secret is still a failure of a *required* check. */
+  it('makes the whole report unhealthy, not merely degraded', () => {
+    expect(buildHealthReport({ env: { SESSION_SECRET: 'abc' } }).status).toBe('unhealthy')
+  })
+})
+
+/**
+ * The variable an operator reaches for first.
+ *
+ * `MAIL_PROVIDER=resend` was accepted by the environment, ignored by the
+ * provider factory, and unmentioned by this check — so the advice could be
+ * followed exactly and still leave mail off.
+ */
+describe('MAIL_PROVIDER, reported rather than ignored', () => {
+  const mail = (env: Record<string, string | undefined>) =>
+    buildHealthReport({ env: { SESSION_SECRET: 's'.repeat(32), ...env } }).checks.find(
+      (c) => c.name === 'mail',
+    )!
+
+  it('names the key a chosen provider still needs', () => {
+    const check = mail({ MAIL_PROVIDER: 'resend', MAIL_FROM: 'a@b.co' })
+    expect(check.status).toBe('off')
+    expect(check.detail).toContain('MAIL_PROVIDER=resend')
+    expect(check.detail).toContain('RESEND_API_KEY')
+  })
+
+  it('reports the provider by name once it works, and that a variable chose it', () => {
+    const check = mail({ MAIL_PROVIDER: 'brevo', BREVO_API_KEY: 'k', MAIL_FROM: 'a@b.co' })
+    expect(check.status).toBe('ok')
+    expect(check.detail).toContain('brevo')
+    expect(check.detail).toContain('MAIL_PROVIDER')
+  })
+
+  it('flags a value it does not recognise instead of silently dropping it', () => {
+    const check = mail({ MAIL_PROVIDER: 'sendgrid', RESEND_API_KEY: 'k', MAIL_FROM: 'a@b.co' })
+    expect(check.status).toBe('ok') // The working key still sends.
+    expect(check.detail).toContain('MAIL_PROVIDER=sendgrid')
+    expect(check.detail).toContain('ignored')
+  })
+})
