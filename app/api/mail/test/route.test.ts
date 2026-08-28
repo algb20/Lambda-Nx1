@@ -72,11 +72,17 @@ describe('the operator gate', () => {
 })
 
 describe('diagnosing a configuration', () => {
+  // These assert the *content* of the advice — which variable is blamed, which
+  // one is asked for — rather than a sentence. An earlier version of this file
+  // pinned the exact words, so improving the wording broke the tests while the
+  // behaviour was unchanged, which teaches the wrong lesson on a red suite.
   it('names the missing sender when only a key is set', async () => {
     process.env.BREVO_API_KEY = 'xkeysib-x'
     const body = await (await GET(req())).json()
     expect(body.configured).toBe(false)
-    expect(body.problems.join(' ')).toContain('MAIL_FROM is not set')
+    const advice = body.problems.join(' ')
+    expect(advice).toContain('BREVO_API_KEY')
+    expect(advice).toContain('MAIL_FROM')
   })
 
   /** The leftover that silently overrides a perfectly good key. */
@@ -85,7 +91,37 @@ describe('diagnosing a configuration', () => {
     process.env.MAIL_FROM = 'Lambda <no-reply@lambdanx.app>'
     process.env.MAIL_PROVIDER = 'disabled'
     const body = await (await GET(req())).json()
-    expect(body.problems.join(' ')).toContain('MAIL_PROVIDER=disabled is overriding')
+    expect(body.configured).toBe(false)
+    expect(body.problems.join(' ')).toContain('MAIL_PROVIDER=disabled')
+  })
+
+  /**
+   * The variable that reads like the answer and used to do nothing.
+   *
+   * `MAIL_PROVIDER=resend` was lowercased, compared against two values, and
+   * discarded. The route then advised setting a mail provider to an operator
+   * looking at a variable called `MAIL_PROVIDER` they had already set.
+   */
+  it('tells an operator who set MAIL_PROVIDER which key it still needs', async () => {
+    process.env.MAIL_PROVIDER = 'resend'
+    process.env.MAIL_FROM = 'Lambda <no-reply@lambdanx.app>'
+    const body = await (await GET(req())).json()
+    expect(body.configured).toBe(false)
+    const advice = body.problems.join(' ')
+    expect(advice).toContain('MAIL_PROVIDER=resend')
+    expect(advice).toContain('RESEND_API_KEY')
+  })
+
+  it('reports which variable chose the transport once one is working', async () => {
+    process.env.MAIL_PROVIDER = 'resend'
+    process.env.RESEND_API_KEY = 're_x'
+    process.env.MAIL_FROM = 'Lambda <no-reply@lambdanx.app>'
+    const body = await (await GET(req())).json()
+    expect(body.configured).toBe(true)
+    expect(body.transport).toBe('https')
+    expect(body.provider).toBe('resend')
+    expect(body.chosenBy).toBe('MAIL_PROVIDER')
+    expect(body.problems).toEqual([])
   })
 
   it('warns that log mode never actually sends', async () => {

@@ -23,7 +23,10 @@
  *     single most likely thing to have gone wrong with a self-hosted build.
  *  2. **Can the server reach the outside world?** The health probe reports it.
  *     A server that answers but cannot fetch means a firewall, not a bug.
- *  3. **Is a database configured?** Only accounts and cross-device preferences
+ *  3. **Can it sign anyone in, and can it send mail?** Both fail invisibly:
+ *     the map, the panels and the gateways all work without either, so the
+ *     only symptom is "registration is broken" with nothing to point at.
+ *  4. **Is a database configured?** Only accounts and cross-device preferences
  *     need one. Saying so stops a person configuring Postgres to fix a map.
  *
  * Each check names what it proves, what it does not, and the one action that
@@ -113,13 +116,32 @@ export function diagnose(input: {
     return checks
   }
 
-  if (input.health.status >= 500) {
+  /**
+   * A 5xx that came back as a full health report is not a broken server.
+   *
+   * `/api/health` answers 503 when a *required* setting is unset — a correct,
+   * deliberate refusal from a server that is running perfectly. This branch used
+   * to treat it as a fault, print "something inside it is failing", tell the
+   * reader to go and read a server log, and `return` — so the outbound, gateway
+   * and database checks never ran and the page showed a single red card.
+   *
+   * That is the failure this whole module exists to prevent, committed by the
+   * module itself. The health body was already in hand, it already named the
+   * unset setting, and the page sent the operator to a log file to find out
+   * something it was holding. On a serverless host, "read the server log" is
+   * advice most owners cannot act on at all.
+   *
+   * So: if the report names its failing checks, say their names and carry on
+   * down the page. Only an unreadable 5xx is treated as a server fault.
+   */
+  const failedRequired = requiredFailures(input.health.body)
+  if (input.health.status >= 500 && failedRequired.length === 0) {
     checks.push({
       id: 'server',
       title: 'The app’s own server',
       state: 'fail',
-      detail: `/api/health answered ${input.health.status}. The server is running and something inside it is failing.`,
-      action: 'Read the server log — the health body names which check failed.',
+      detail: `/api/health answered ${input.health.status} and its body names no failing check, so the fault is upstream of the report itself.`,
+      action: 'Read the server log — the error happened before the health report could be built.',
     })
     return checks
   }
@@ -131,6 +153,64 @@ export function diagnose(input: {
     detail: `Route handlers are running and answered in ${input.health.ms} ms. This is the check that decides whether anything else can work.`,
     action: null,
   })
+
+  /**
+   * Sign-in, named on the page instead of hidden behind a 503.
+   *
+   * `session_secret` is the only check `/api/health` marks required, and until
+   * now it was the one thing this page could not say. A deployment with no
+   * `SESSION_SECRET` shows a working map, working gateways and working news —
+   * and every attempt to create an account throws. The reader has no way to
+   * connect those two facts, so the symptom they report is "registration is
+   * broken", which sends everyone looking at the registration code.
+   */
+  const session = findCheck(input.health.body, 'session_secret')
+  if (session && session.status !== 'ok') {
+    checks.push({
+      id: 'sign-in',
+      title: 'Accounts and sign-in',
+      state: 'fail',
+      detail: `${session.detail} Everything that needs no account — the map, the panels, the news, every gateway — is unaffected and working.`,
+      action:
+        'Set SESSION_SECRET to a long random string (32+ characters; `openssl rand -base64 32` produces one), then redeploy. It is yours alone: it signs session cookies, and changing it signs everyone out.',
+    })
+  } else if (session) {
+    checks.push({
+      id: 'sign-in',
+      title: 'Accounts and sign-in',
+      state: 'ok',
+      detail: 'Sessions can be signed, so sign-up and sign-in work.',
+      action: null,
+    })
+  }
+
+  /**
+   * Mail, for the same reason.
+   *
+   * Without a provider, email sign-up and password reset answer 503 and hide
+   * themselves in the form — correct behaviour, and invisible. `warn`, not
+   * `fail`: Pi sign-in needs no mail at all, so this is a missing capability
+   * rather than a broken deployment, and the wording has to keep those apart.
+   */
+  const mail = findCheck(input.health.body, 'mail')
+  if (mail && mail.status !== 'ok') {
+    checks.push({
+      id: 'mail',
+      title: 'Email sign-up and password reset',
+      state: 'warn',
+      detail: mail.detail,
+      action:
+        'Only needed for email accounts — Pi sign-in works without it. GET /api/mail/test (with ADMIN_SECRET) reports exactly which variable is missing, and POST sends a real message.',
+    })
+  } else if (mail) {
+    checks.push({
+      id: 'mail',
+      title: 'Email sign-up and password reset',
+      state: 'ok',
+      detail: mail.detail,
+      action: null,
+    })
+  }
 
   // ── 2. Can the server reach the internet? ─────────────────────────────────
   const world = input.world
@@ -270,6 +350,24 @@ export function diagnose(input: {
   }
 
   return checks
+}
+
+/**
+ * The names of the required checks the health report says are failing.
+ *
+ * Used to tell apart the two things a 503 from `/api/health` can mean: a server
+ * that broke before it could report (nothing named), and a server that is
+ * running correctly and refusing because a required setting is unset (named).
+ * They need opposite advice, and collapsing them cost the reader every other
+ * check on the page.
+ */
+function requiredFailures(body: unknown): string[] {
+  if (!body || typeof body !== 'object') return []
+  const checks = (body as HealthShape).checks
+  if (!Array.isArray(checks)) return []
+  return checks
+    .filter((c) => c.required === true && c.status !== 'ok' && typeof c.name === 'string')
+    .map((c) => c.name as string)
 }
 
 function countEvents(body: unknown): number | null {

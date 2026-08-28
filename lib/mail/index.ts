@@ -17,6 +17,10 @@
 import type { MailProvider, MailResult } from './types'
 import { parseSmtpUrl, smtpProvider } from './smtp'
 import { httpMailFromEnv, httpMailProvider } from './http'
+import { planMail } from './config'
+
+export { planMail, HTTP_MAIL_KEYS, MAIL_PROVIDER_VALUES } from './config'
+export type { MailPlan, MailMode, HttpMailService } from './config'
 
 export type { MailMessage, MailProvider, MailResult } from './types'
 
@@ -61,25 +65,41 @@ let cached: MailProvider | null = null
  * at all.
  */
 export function createMailProvider(env: NodeJS.ProcessEnv = process.env): MailProvider {
-  const choice = (env.MAIL_PROVIDER ?? '').trim().toLowerCase()
-  if (choice === 'disabled') return disabledProvider
-  if (choice === 'log') return logProvider()
-
   /**
-   * An HTTPS provider is preferred over SMTP when both are present.
+   * The plan is the decision; this function only builds what it names.
    *
-   * Not a matter of taste. This product's primary hosts are Netlify and Vercel
-   * functions, where outbound connections on the SMTP ports are commonly
-   * refused or silently dropped — so a correct `SMTP_URL` can work on a laptop
-   * and time out in production. Port 443 is the one outbound path a serverless
-   * function is guaranteed, so if an operator has configured both, the one that
-   * will actually deliver is the one to use.
+   * `planMail` is the single place that reads `MAIL_PROVIDER` — including the
+   * values this function used to lowercase and then ignore. `MAIL_PROVIDER=
+   * resend` now selects Resend, and if `RESEND_API_KEY` is absent it refuses
+   * *as Resend* rather than quietly falling through to another key or to SMTP:
+   * an operator who names a provider and receives mail from a different one has
+   * been misled by the switch they used in order to be explicit.
+   *
+   * An HTTPS provider is preferred over SMTP when both are present and nothing
+   * forced a choice. Not a matter of taste. This product's primary hosts are
+   * Netlify and Vercel functions, where outbound connections on the SMTP ports
+   * are commonly refused or silently dropped — so a correct `SMTP_URL` can work
+   * on a laptop and time out in production. Port 443 is the one outbound path a
+   * serverless function is guaranteed.
    */
-  const http = httpMailFromEnv(env)
-  if (http) return httpMailProvider(http)
+  const plan = planMail(env)
+
+  if (plan.mode === 'log') return logProvider()
+  if (plan.mode === 'off') {
+    if (plan.problem) console.error(`[mail] ${plan.problem}`)
+    return disabledProvider
+  }
+
+  if (plan.mode === 'http') {
+    const http = httpMailFromEnv(env)
+    // `planMail` already established that the key and sender are both present,
+    // so this cannot be null; the guard is here so a future change to either
+    // side degrades to a refusal instead of a thrown request handler.
+    if (http) return httpMailProvider(http)
+    return disabledProvider
+  }
 
   const url = (env.SMTP_URL ?? '').trim()
-  if (!url) return disabledProvider
   try {
     return smtpProvider(parseSmtpUrl(url, env.MAIL_FROM?.trim() || undefined))
   } catch (error) {

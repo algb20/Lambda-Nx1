@@ -32,10 +32,11 @@
  * Nothing in the app knows which is in use (charter rule #4).
  */
 import type { MailMessage, MailProvider, MailResult } from './types'
+import { HTTP_MAIL_KEYS, planMail, type HttpMailService } from './config'
 
 export interface HttpMailConfig {
   /** Which service. Decides the endpoint, the auth header and the body shape. */
-  service: 'resend' | 'brevo' | 'postmark'
+  service: HttpMailService
   apiKey: string
   /** The `From:` address. Must be one the provider has verified for you. */
   from: string
@@ -157,27 +158,28 @@ export function httpMailProvider(config: HttpMailConfig): MailProvider {
 /**
  * Build one from the environment, or null if none is configured.
  *
+ * Which service — and whether the environment adds up to a usable one at all —
+ * is decided by `planMail`, not here. That function is the single reader of
+ * `MAIL_PROVIDER`, `MAIL_FROM` and the three keys; this one turns its verdict
+ * into a config object. Before that split, the choice was made independently
+ * here, in the health check and in the operator route, and they disagreed.
+ *
  * The sender address is required and not defaulted. Every one of these services
  * rejects a `From:` on a domain you have not verified, so guessing one would
  * turn a clear configuration error into a runtime failure on the first sign-up.
+ * When the environment falls short, the reason is logged rather than swallowed:
+ * a returned `null` says only "no HTTPS mail", and the operator needs to know
+ * which of the two halves they are missing.
  */
 export function httpMailFromEnv(env: Record<string, string | undefined>): HttpMailConfig | null {
-  const from = env.MAIL_FROM?.trim()
-  const candidates: Array<[HttpMailConfig['service'], string | undefined]> = [
-    ['resend', env.RESEND_API_KEY],
-    ['brevo', env.BREVO_API_KEY],
-    ['postmark', env.POSTMARK_TOKEN],
-  ]
-  for (const [service, key] of candidates) {
-    const apiKey = key?.trim()
-    if (!apiKey) continue
-    if (!from) {
-      console.error(
-        `[mail] ${service.toUpperCase()} key is set but MAIL_FROM is not — no sender address, so nothing can be sent.`,
-      )
-      return null
-    }
-    return { service, apiKey, from }
+  const plan = planMail(env)
+  if (plan.mode !== 'http' || !plan.service) {
+    if (plan.problem && plan.mode === 'off') console.error(`[mail] ${plan.problem}`)
+    return null
   }
-  return null
+  return {
+    service: plan.service,
+    apiKey: (env[HTTP_MAIL_KEYS[plan.service]] as string).trim(),
+    from: (env.MAIL_FROM as string).trim(),
+  }
 }

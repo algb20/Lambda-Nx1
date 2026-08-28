@@ -30,7 +30,7 @@
 import { NextResponse } from 'next/server'
 import { adminGate } from '@/lib/social/admin'
 import { createMailProvider } from '@/lib/mail'
-import { httpMailFromEnv } from '@/lib/mail/http'
+import { planMail } from '@/lib/mail/config'
 import { senderShape } from '@/lib/mail/sender'
 
 export const runtime = 'nodejs'
@@ -48,35 +48,31 @@ export async function GET(request: Request): Promise<Response> {
   if (refusal) return refusal
 
   const provider = createMailProvider()
-  const http = httpMailFromEnv(process.env)
+  const plan = planMail(process.env)
   const sender = senderShape(process.env.MAIL_FROM)
 
+  /**
+   * Every problem comes from the plan, except the one the plan cannot see.
+   *
+   * `planMail` knows which variables are set; it deliberately does not parse
+   * `MAIL_FROM`, because "is this a valid address" is a different question from
+   * "is mail configured", and only this route needs it. So: the plan's verdict,
+   * then the sender's shape.
+   */
   const problems: string[] = []
-  if (!provider.configured) {
-    problems.push(
-      'No provider is active. Set MAIL_FROM plus one of RESEND_API_KEY, BREVO_API_KEY or POSTMARK_TOKEN — and note that a key without MAIL_FROM is deliberately not counted, because every one of these services rejects a From on a domain it has not verified.',
-    )
-  }
-  if (!sender.present) problems.push('MAIL_FROM is not set, so there is no sender address.')
+  if (plan.problem) problems.push(plan.problem)
   if (sender.present && !sender.domain) {
     problems.push(
       `MAIL_FROM does not contain an address (got ${JSON.stringify(process.env.MAIL_FROM?.slice(0, 40))}). It must be an email address, optionally with a display name: Lambda <no-reply@yourdomain.com>.`,
-    )
-  }
-  const forced = (process.env.MAIL_PROVIDER ?? '').trim().toLowerCase()
-  if (forced === 'disabled') {
-    problems.push('MAIL_PROVIDER=disabled is overriding your key. Clear it.')
-  }
-  if (forced === 'log') {
-    problems.push(
-      'MAIL_PROVIDER=log is overriding your key: codes go to the server log and are never sent. Clear it for a real deployment.',
     )
   }
 
   return NextResponse.json({
     provider: provider.name,
     configured: provider.configured,
-    transport: http ? 'https' : provider.configured ? 'smtp' : 'none',
+    /** How the message would leave, and whether a variable chose that or we inferred it. */
+    transport: plan.mode === 'http' ? 'https' : plan.mode === 'smtp' ? 'smtp' : 'none',
+    chosenBy: plan.forced ? 'MAIL_PROVIDER' : plan.mode === 'off' ? null : 'the keys that are set',
     sender,
     /**
      * The domain the sender is on, restated as the question the operator has to
