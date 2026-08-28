@@ -411,6 +411,52 @@ export interface WorldEventsReport {
  * event nobody can age, and inventing one is the fault this function exists to
  * make impossible. An unparseable string counts as no time rather than as 1970.
  */
+/**
+ * How far ahead of the sweep a publisher's timestamp may be before we stop
+ * believing it.
+ *
+ * Not zero. Clocks disagree by seconds, and a feed published a moment before we
+ * read it can legitimately carry a stamp a little ahead of ours. Five minutes
+ * is generous for skew and far short of the failure this exists for.
+ */
+export const MAX_CLOCK_SKEW_MS = 5 * 60_000
+
+/**
+ * Whether a stated observation time can be believed.
+ *
+ * ## The measurement
+ *
+ * Read from the deployed site: `newestAt` was **44.5 minutes after the sweep
+ * that produced it**. Fifteen events carried timestamps in the future, all from
+ * one Nigerian outlet, spread evenly ahead of the present — the signature of a
+ * publisher stamping local time as UTC rather than of anything happening.
+ *
+ * ## Why this matters more than fifteen wrong rows
+ *
+ * `ageWords` clamps a negative age with `Math.max(0, …)`, so a future timestamp
+ * renders as **"just now"** — and because `newestObservation` takes the newest
+ * of everything, one outlet's bad clock pinned the whole board's live edge to
+ * "just now" permanently.
+ *
+ * That is exactly the fault fixed earlier today, arriving through a different
+ * door. Then it was *our* clock being reported as the world's freshness; now it
+ * is a publisher's wrong clock doing the same thing. The lesson is the same one
+ * this codebase keeps relearning: a figure that cannot express staleness will
+ * report health forever.
+ *
+ * ## Rejected rather than clamped
+ *
+ * Clamping a future stamp to now would hide it and produce the same false "just
+ * now". An event we cannot honestly age is an event with no time, which the
+ * model already has a word for — it becomes untimed, and `summary.untimed`
+ * counts it where a reader can see it.
+ */
+export function believableObservation(observedAt: string | null, nowMs: number): boolean {
+  if (!observedAt) return false
+  const t = Date.parse(observedAt)
+  return Number.isFinite(t) && t <= nowMs + MAX_CLOCK_SKEW_MS
+}
+
 export function newestObservation(events: Array<Pick<WorldEvent, 'observedAt'>>): string | null {
   return events.reduce<string | null>((newest, e) => {
     if (!e.observedAt) return newest

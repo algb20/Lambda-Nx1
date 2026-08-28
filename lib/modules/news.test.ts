@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
+import { newsGatewayCatalog, newsGatewaySources } from '@/lib/engine/sources'
 import { investigateNews } from './news'
 import { clearSourceCache } from '../engine/source-cache'
 
@@ -123,36 +124,34 @@ describe('investigateNews', () => {
     expect(q!.sourceUrl).toBe('https://earthquake.usgs.gov/earthquakes/eventpage/us1')
   })
 
-  it('includes ReliefWeb humanitarian reports (country-tagged, linked to origin)', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn((u: string) => {
-        const host = new URL(u).hostname
-        if (host === 'api.reliefweb.int')
-          return Promise.resolve(
-            res({
-              data: [
-                {
-                  fields: {
-                    title: 'Flooding displaces thousands in region X',
-                    url: 'https://reliefweb.int/report/x/flooding',
-                    date: { created: '2026-07-29T08:00:00Z' },
-                    primary_country: { name: 'Kenya' },
-                  },
-                },
-              ],
-            }),
-          )
-        return Promise.resolve(res({ articles: [] })) // GDELT empty for this topic
-      }),
-    )
-    const r = await investigateNews('flooding')
-    const rw = r.items.find((i) => i.sourceKey === 'reliefweb')
-    expect(rw).toBeDefined()
-    expect(rw!.claim).toBe('Flooding displaces thousands in region X')
-    expect(rw!.sourceUrl).toBe('https://reliefweb.int/report/x/flooding')
-    expect(rw!.admiralty).toEqual({ source: 'B', info: 2 })
-    expect(r.summary.countries).toContain('Kenya')
+  /**
+   * ReliefWeb is switched off, and this case records why rather than vanishing.
+   *
+   * Measured on the deployed site on 2026-08-27: `reliefweb: provider answered
+   * 410` — the only failing feed in a 174-source sweep. Probed directly, the v1
+   * API we called is **410 Gone**, and v2 answers **403** with ReliefWeb's own
+   * words: *"You are not using an approved appname. Kindly request an appname
+   * from ReliefWeb."* That 403 is theirs, not our egress proxy — a control
+   * request to USGS from the same shell returned 200.
+   *
+   * The adapter in `lib/engine/sources/news.ts` is not wrong and is not
+   * deleted; the endpoint under it was retired and the successor needs a name
+   * registered with UN OCHA. So the source is out of `newsGatewaySources` and
+   * its catalogue row is marked inactive, which is this project's rule for a
+   * route that needs a credential: the gap stays visible and named.
+   *
+   * **To reverse:** register an appname with ReliefWeb, point the adapter at
+   * v2, put `reliefWeb` back in `newsGatewaySources`, and restore this case to
+   * the end-to-end assertion it used to be. It is left failing-shaped on
+   * purpose — an inactive source that no test mentions is one nobody remembers
+   * to bring back.
+   */
+  it('leaves ReliefWeb out of the news gateway until an appname is approved', () => {
+    expect(newsGatewaySources.map((s) => s.key)).not.toContain('reliefweb')
+    // The row survives, so the gap is documented rather than forgotten.
+    const row = newsGatewayCatalog.find((r) => r.key === 'reliefweb')
+    expect(row, 'the catalogue must still name the source it is not using').toBeDefined()
+    expect(row!.enabled).toBe(false)
   })
 
   it('degrades gracefully when a provider is down (stays non-empty via the other)', async () => {
