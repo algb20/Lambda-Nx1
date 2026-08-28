@@ -7,6 +7,7 @@ import { NameList } from '@/components/panel-section'
 import { TimeStamp } from '@/components/time-stamp'
 import type { CountryRisk } from '@/lib/analysis/country-risk'
 import type { CorridorWatch } from '@/lib/analysis/corridors'
+import { discardBody } from '@/lib/http/discard'
 
 /**
  * Country instability, shown the way it has to be shown.
@@ -71,7 +72,8 @@ export function CountryDossier() {
       setDetail(null)
       try {
         const res = await fetch(`/api/countries?iso=${encodeURIComponent(iso)}`, { cache: 'no-store' })
-        if (res.ok) setDetail(((await res.json()) as { country: CountryRisk }).country)
+        if (!res.ok) return discardBody(res)
+        setDetail(((await res.json()) as { country: CountryRisk }).country)
       } catch {
         /* the row stays open with the summary it already has */
       }

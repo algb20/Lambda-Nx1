@@ -28,18 +28,70 @@ import type { Posture } from '@/lib/security/posture'
  * costs a moment of reassurance and buys the only thing that makes the
  * reassurance worth anything.
  */
+/** Where the session's answer lives. Per tab, cleared when the tab closes. */
+const CACHE_KEY = 'lambda.posture.v1'
+
+function readCachedPosture(): Posture | null {
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as Posture
+    // Shape-checked, not trusted: storage is editable and survives a deploy.
+    return Array.isArray(parsed?.checks) && typeof parsed.lawful === 'boolean' ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+function cachePosture(posture: Posture): void {
+  try {
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify(posture))
+  } catch {
+    /* Storage blocked or full — the badge just asks again next time. */
+  }
+}
+
 export function PostureBadge({ label }: { label: string }) {
   const [posture, setPosture] = useState<Posture | null>(null)
   const [failed, setFailed] = useState(false)
 
   useEffect(() => {
     let alive = true
+
+    /**
+     * Once a session, not once a page.
+     *
+     * This first fetched on every mount, and the browser suite caught what that
+     * costs: a **429** on `/api/posture` across five routes. The gateway limit
+     * is 30 requests a minute per address, so a badge that re-checks on every
+     * navigation spends a thirtieth of a reader's whole budget re-answering a
+     * question whose answer is a property of the *deployment* — it cannot change
+     * between two clicks, only between two deploys.
+     *
+     * `sessionStorage` is the right store for exactly that lifetime: it clears
+     * when the tab closes, so a redeploy is picked up by the next visit, and it
+     * is per-tab, so nothing is shared with another origin or another session.
+     * A blocked or full store is not an error — the badge simply falls back to
+     * asking, which is what it did before.
+     */
+    const cached = readCachedPosture()
+    if (cached) {
+      setPosture(cached)
+      return () => {
+        alive = false
+      }
+    }
+
     fetch('/api/posture', { cache: 'no-store' })
       .then(async (res) => {
         const body = (await res.json()) as Posture & { error?: string }
         if (!alive) return
-        if (!res.ok || body.error) setFailed(true)
-        else setPosture(body)
+        if (!res.ok || body.error) {
+          setFailed(true)
+          return
+        }
+        setPosture(body)
+        cachePosture(body)
       })
       .catch(() => {
         if (alive) setFailed(true)

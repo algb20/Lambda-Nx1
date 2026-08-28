@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { ALL_MODES, type Mode } from '@/lib/gateways'
 import { TimeStamp } from '@/components/time-stamp'
+import { discardBody } from '@/lib/http/discard'
 
 /**
  * What this account has already investigated.
@@ -54,9 +55,15 @@ export function HistoryPanel({
       const res = await fetch(`/api/investigations?q=${encodeURIComponent(q)}`, {
         cache: 'no-store',
       })
-      if (res.status === 401) return setState('anonymous')
-      if (res.status === 503) return setState('no-db')
-      if (!res.ok) return setState('error')
+      // These decide from the status and never read the body, so the body has
+      // to be let go of explicitly — an abandoned stream holds the connection
+      // open for the life of the page. See lib/http/discard.ts.
+      if (!res.ok) {
+        discardBody(res)
+        if (res.status === 401) return setState('anonymous')
+        if (res.status === 503) return setState('no-db')
+        return setState('error')
+      }
       const data = await res.json()
       setEntries(Array.isArray(data?.entries) ? data.entries : [])
       setState('ready')
@@ -79,6 +86,7 @@ export function HistoryPanel({
       })
       // Drop it locally only when the server confirms; otherwise the row would
       // vanish from the screen and stay in the database.
+      discardBody(res)
       if (res.ok) setEntries((prev) => prev.filter((e) => e.id !== id))
     } finally {
       setBusyId(null)

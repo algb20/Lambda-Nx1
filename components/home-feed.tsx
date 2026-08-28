@@ -8,6 +8,7 @@ import { TrendingBoard } from '@/components/trending-board'
 import { PinnedGateways } from '@/components/pinned-gateways'
 import { XLikeFeed } from '@/components/x-like-feed'
 import type { PublicPost } from '@/lib/posts'
+import { discardBody } from '@/lib/http/discard'
 
 type NavTab =
   | 'intelligence' | 'monitor' | 'ideas' | 'calibration' | 'globe' | 'preferences'
@@ -33,7 +34,15 @@ export function HomeFeed({ onNavigate }: { onNavigate: (tab: NavTab) => void }) 
   useEffect(() => {
     let alive = true
     fetch('/api/posts?limit=30')
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((r) => {
+        // A rejected response is never read, so release its body rather than
+        // leaving the stream open for the life of the page (lib/http/discard.ts).
+        if (!r.ok) {
+          discardBody(r)
+          return Promise.reject(new Error(String(r.status)))
+        }
+        return r.json()
+      })
       // Defensive: a provider or proxy returning an unexpected shape must not
       // crash the whole feed. An empty feed is a bad day; a blank page is a bug.
       .then((d: { posts?: PublicPost[]; degraded?: boolean; detail?: string }) => {

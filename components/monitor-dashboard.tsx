@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { RadarKnowledgeBase } from '@/components/radar-knowledge-base'
 import type { Monitor, Alert } from '@/lib/db'
+import { discardBody } from '@/lib/http/discard'
 
 const INTERVALS: Array<{ label: string; minutes: number }> = [
   { label: 'Hourly', minutes: 60 },
@@ -27,6 +28,9 @@ export function MonitoringDashboard() {
   const refresh = useCallback(async () => {
     const res = await fetch('/api/monitors')
     if (res.status === 401) {
+      // Decided from the status; the body is never read, so it is released
+      // explicitly. See lib/http/discard.ts.
+      discardBody(res)
       setAuthed(false)
       return
     }
@@ -34,7 +38,14 @@ export function MonitoringDashboard() {
     const data = await res.json()
     setMonitors(data.monitors ?? [])
     const aRes = await fetch('/api/alerts')
+    // Both branches, because only one of them was ever handled. When this read
+    // the body on the ok path alone, every other status — a 429 from our own
+    // rate limit, a 401 on this second call — dropped a body unread and held
+    // the socket, so `/monitor` stopped reaching quiescence again days after
+    // that leak was declared fixed. Found by the browser suite, not by the
+    // pattern scan, which is why both exist.
     if (aRes.ok) setAlerts((await aRes.json()).alerts ?? [])
+    else discardBody(aRes)
   }, [])
 
   useEffect(() => {

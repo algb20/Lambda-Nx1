@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useSyncExternalStore, type ReactNode } from "react";
+import dynamic from "next/dynamic";
 import { PiAuthProvider, usePiAuth } from "@/contexts/pi-auth-context";
 import { schedulePiProbe } from "@/lib/auth/pi-probe";
 import { I18nProvider } from "@/lib/i18n";
-import { StandaloneSignInPrompt } from "./standalone-auth";
 import { AuthLoadingScreen } from "./auth-loading-screen";
-import { FeedbackButton } from "./feedback-button";
 import { AutoTranslate } from "./auto-translate";
 import { PrefsProvider } from "./prefs-provider";
 import { shouldBlockApp } from "@/lib/auth/pi-client";
@@ -14,6 +13,28 @@ import { subscribeToSurface, surfaceOnServer, surfaceSnapshot } from "@/lib/auth
 import { refreshViewer } from "@/lib/auth/viewer";
 import { pingVisit } from "@/lib/visit";
 import { installDomResilience } from "@/lib/dom-resilience";
+
+/**
+ * Two pieces of chrome that render nothing on the first frame, fetched after it.
+ *
+ * The sign-in offer returns null until the session has been read, and it drags
+ * the whole shared sign-in form in with it — 500 lines that a signed-in
+ * visitor, and every visitor who never signs in, downloaded on every page. The
+ * feedback button is a floating affordance that nobody is looking for in the
+ * first 200ms of a page load.
+ *
+ * `ssr: false` on both, deliberately: neither has any server output to preserve
+ * — the prompt renders null there by design and the button is chrome, not
+ * content — so this removes them from the first load without changing a
+ * character of the prerendered HTML.
+ */
+const StandaloneSignInPrompt = dynamic(
+  () => import("./standalone-auth").then((m) => m.StandaloneSignInPrompt),
+  { ssr: false },
+);
+const FeedbackButton = dynamic(() => import("./feedback-button").then((m) => m.FeedbackButton), {
+  ssr: false,
+});
 
 /**
  * Pi mode shell.
