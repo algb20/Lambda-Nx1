@@ -43,39 +43,46 @@ function gitSha() {
 }
 
 /**
- * The `studio` profile — a runnable bundle under Pi App Studio's 1 MB ceiling.
+ * The `studio` profile — the smallest honest view of the application.
  *
- * ## Why a second profile rather than a smaller repository
+ * ## What it is for, and what changed
  *
- * Pi App Studio accepts an upload of **one megabyte**. The full source bundle is
- * 1.4 MB zipped and cannot be made to fit by tidying: it is not bloated, it is a
- * real application with 117 test files, 26 documents and nineteen migration
- * snapshots. Deleting any of those to satisfy an upload limit would be trading a
- * permanent loss for a temporary convenience — the tests are the reason the
- * gateways can be trusted, and charter §6 makes them part of "done".
+ * Pi App Studio accepts an upload of **one megabyte**, and this profile was
+ * written to fit it. **It no longer does, and that is not a defect to hide.**
+ * Measured at the commit this paragraph was written: the full bundle is
+ * **3752 KB**, the studio bundle **1329 KB**. The product outgrew the ceiling.
  *
- * So nothing is deleted. A second, smaller *view* of the same commit is built,
- * containing exactly what is needed to install and run:
+ * The previous version of this comment described a tree that no longer exists —
+ * "117 test files, 26 documents, nineteen migration snapshots", a full bundle of
+ * 1.4 MB. It is now 192 test files, 27 documents and 23 migrations, and none of
+ * those numbers were updated as they changed. A stale comment about sizes on the
+ * one file whose entire job is to measure sizes is worth more than an
+ * embarrassment: it is why nobody knew the profile had stopped working until
+ * somebody ran it. The check below is now asserted by a test, not by memory.
  *
- *  - **Tests** — 624 KB. They prove the code; they do not execute it.
- *  - **`docs/`** — 397 KB. The request ledger alone is 155 KB.
- *  - **`db/migrations/meta/`** — 720 KB of drizzle-kit snapshots, used only to
- *    *generate* the next migration. The `.sql` files themselves stay, so a
- *    database can still be built from zero — which is the property that
- *    actually matters (charter rule #4).
+ * ## What is held back, and why each one is safe to hold back
+ *
+ *  - **Tests** — they prove the code; they do not execute it.
+ *  - **`docs/`** — the request ledger alone is 222 KB.
+ *  - **`db/migrations/meta/`** — drizzle-kit snapshots, used only to *generate*
+ *    the next migration. The `.sql` files stay, so a database can still be built
+ *    from zero, which is the property that actually matters (charter rule #4).
  *  - **`.claude/`** — agent definitions for our own tooling.
- *  - **`package-lock.json`** — 224 KB, the largest single file in the tree, and
- *    the one that pushed this bundle over the line as the product grew. Pi App
- *    Studio runs its own `npm install`, and `package.json` carries the real
- *    version constraints; the lockfile pins the exact resolution. Dropping it
- *    here trades reproducible installs for fitting the uploader at all, and
- *    that trade is stated rather than made quietly: **the full bundle keeps
- *    it**, and anyone doing serious work should use that one. See docs/RUNNING.
+ *  - **`package-lock.json`** — the lockfile pins the exact resolution; a host
+ *    runs its own `npm install` and `package.json` carries the real constraints.
+ *    This trades reproducible installs for size, and the trade is stated rather
+ *    than made quietly: **the full bundle keeps it**, and anyone doing serious
+ *    work should use that one. See docs/RUNNING.
  *  - **`scripts/`** — the packaging and maintenance tooling. It builds the
  *    bundle; it is not needed to run what the bundle contains.
+ *  - **The submission logos and the dashboard screenshot** — see below. These
+ *    were 1.56 MB of a 2.88 MB bundle, more than half of it, and no page loads
+ *    any of them.
  *
  * What ships is the application. What is held back is the apparatus around it,
- * all of which stays in the repository the bundle was cut from.
+ * all of which stays in the repository the bundle was cut from. Once that is
+ * true, a bundle still over the ceiling means the *application* is over the
+ * ceiling, and the answer is not to cut into it — see the error thrown below.
  *
  * ## The ceiling is in bytes, and which byte matters
  *
@@ -84,17 +91,35 @@ function gitSha() {
  * *decimal* million: a bundle between the two is reported as too close to
  * trust, because which of the two the far end means is not knowable from here.
  */
-const STUDIO_EXCLUDE = [
+export const STUDIO_EXCLUDE = [
   /\.test\.[tj]sx?$/,
   /^docs\//,
   /^db\/migrations\/meta\//,
   /^\.claude\//,
   /^scripts\//,
   /^package-lock\.json$/,
+  /**
+   * Large raster assets that no running page loads.
+   *
+   * Three files were **1.56 MB of a 2.88 MB bundle** — more than half of it,
+   * and none of it code:
+   *
+   *  - `public/branding/world-pi-logo-*-1024.png` (1.2 MB) are the 1024×1024
+   *    logos prepared for *submission forms*. A store or portal upload field
+   *    reads them; the app never requests either one.
+   *  - `dash-laptop.png` (357 KB) is a screenshot of the dashboard, kept at the
+   *    repository root for documentation.
+   *
+   * They belong in the repository and in the full bundle. They have no place in
+   * a bundle whose entire purpose is to be small enough to upload — a logo
+   * sized for an upload form should not be the reason an upload is refused.
+   */
+  /^dash-laptop\.png$/,
+  /^public\/branding\//,
 ]
 
 /** All tracked, non-excluded files (git is the source of truth for what ships). */
-function listFiles(profile = 'full') {
+export function listFiles(profile = 'full') {
   let files
   try {
     files = sh('git ls-files').split('\n').filter(Boolean)
@@ -179,7 +204,7 @@ function pkgVersion(dep) {
 }
 
 /** Pi App Studio refuses an upload larger than this. */
-const STUDIO_LIMIT_BYTES = 1024 * 1024
+export const STUDIO_LIMIT_BYTES = 1024 * 1024
 
 /**
  * The stricter reading of "one megabyte".
@@ -265,10 +290,28 @@ function main() {
     // Loud, and a failure. A bundle that quietly exceeds the ceiling is
     // discovered by the upload being rejected, which is a worse place to find
     // out than here.
+    /**
+     * The advice this used to give was "trim STUDIO_EXCLUDE further", and it
+     * has stopped being true. Everything that is not application code is
+     * already out: the tests, the documents, the tooling, the lockfile, the
+     * migration snapshots and the submission logos. What remains is `lib`,
+     * `app`, `components` and the migrations — the product. Trimming further
+     * means shipping a bundle that is not this application, which is a worse
+     * outcome than an upload that does not fit.
+     *
+     * So the message says what is actually true, and names the path that does
+     * not have a ceiling: Pi App Studio is not where a server-rendered app is
+     * hosted. The Developer Portal registers a *hosted domain*; the code stays
+     * where it is served from.
+     */
     throw new Error(
       `studio bundle is ${(zipped / 1024).toFixed(0)} KB, over Pi App Studio's ${
         STUDIO_LIMIT_BYTES / 1024
-      } KB limit. Trim STUDIO_EXCLUDE further.`,
+      } KB ceiling by ${((zipped - STUDIO_LIMIT_BYTES) / 1024).toFixed(0)} KB.\n` +
+        `  Everything that is not application source is already excluded, so the remainder is lib/, app/,\n` +
+        `  components/ and the migrations. Cutting into those ships a bundle that is not this application.\n` +
+        `  A server-rendered app is not uploaded to Pi App Studio in any case: register the hosted domain in\n` +
+        `  the Pi Developer Portal and the code stays where it is served from. Use the full bundle for handoff.`,
     )
   }
 }
