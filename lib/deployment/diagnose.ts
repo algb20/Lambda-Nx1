@@ -307,6 +307,33 @@ export function diagnose(input: {
    * (see `lib/db/errors`), so the honest answer is to relay it rather than to
    * re-derive a worse one here.
    */
+  /**
+   * An open database, named before anything else about the database.
+   *
+   * Read from the deep probe's own field rather than by matching words in a
+   * sentence: `/api/health?deep=1` puts the whole `DatabaseProbe` in the body,
+   * and a structured fact should not be recovered from prose that somebody will
+   * reword. Without this branch the exposure arrived here as
+   * `dbCheck.status !== 'ok'` and was printed as "the database is not usable" —
+   * which is the opposite of true and sends the reader to the connection
+   * settings. The database is perfectly usable. That is the problem.
+   */
+  const open = unprotectedTables(input.health.body)
+  if (open && open.length > 0) {
+    checks.push({
+      id: 'database-exposure',
+      title: 'Database — open to the public API',
+      state: 'fail',
+      detail:
+        `${open.length} table(s) have row-level security switched off. Supabase turns a project's ` +
+        `REST API on by default and its anon key is public by design — it ships to every browser — so ` +
+        `these are readable, writable and deletable by anyone who knows the project URL: ` +
+        `${open.slice(0, 6).join(', ')}${open.length > 6 ? `, +${open.length - 6} more` : ''}.`,
+      action:
+        'Run db/ops/rls-remediation.sql in the Supabase SQL editor now — it is idempotent and changes nothing for this app, which connects as the owner and bypasses RLS. Then set DATABASE_URL and run `npm run db:migrate` so migration 0022 is recorded and this cannot recur.',
+    })
+  }
+
   const dbCheck = findCheck(input.health.body, 'database')
   if (dbCheck === null) {
     checks.push({
@@ -361,6 +388,22 @@ export function diagnose(input: {
  * They need opposite advice, and collapsing them cost the reader every other
  * check on the page.
  */
+/**
+ * The deep probe's list of tables with row-level security off, or null when the
+ * body carries no probe (a shallow `/api/health`) or the probe could not ask.
+ *
+ * Structured, not string-matched: `null` and `[]` mean different things here —
+ * "we could not ask" and "we asked and nothing is open" — and only one of them
+ * may ever be reported as safe.
+ */
+function unprotectedTables(body: unknown): string[] | null {
+  if (!body || typeof body !== 'object') return null
+  const probe = (body as { database?: { unprotectedTables?: unknown } }).database
+  if (!probe || typeof probe !== 'object') return null
+  const open = probe.unprotectedTables
+  return Array.isArray(open) ? (open.filter((t) => typeof t === 'string') as string[]) : null
+}
+
 function requiredFailures(body: unknown): string[] {
   if (!body || typeof body !== 'object') return []
   const checks = (body as HealthShape).checks

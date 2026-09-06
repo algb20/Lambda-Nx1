@@ -41,6 +41,33 @@ export interface DatabaseProbe {
   expectedMigrations: number | null
   /** Tables the schema declares that the database does not have. */
   missingTables: string[]
+  /**
+   * Tables in `public` that exist with row-level security switched **off**, or
+   * `null` when we could not read the catalogue.
+   *
+   * ## Why the probe asks this, when a test already checks it
+   *
+   * `lib/db/rls.test.ts` proves every table in our schema and in our migrations
+   * carries `ENABLE ROW LEVEL SECURITY`. It passed the whole time a live
+   * database sat with all twenty-four tables open, because it reads files. The
+   * migration that closes them, `0022_rls_every_table`, had simply never been
+   * run against that database.
+   *
+   * So the repository was right, the suite was green, and the exposure was
+   * real. The only thing that can tell those apart is asking the database, and
+   * before this field the probe's happy path was:
+   *
+   *     connected to PostgreSQL 15.8 in 42ms; all 24 tables present  → ok
+   *
+   * `ok` over a `credentials` table of password hashes readable by anyone
+   * holding the project's public anon key. Every table present is not the same
+   * as every table protected, and reporting the first as though it settled the
+   * second is the exact failure this project keeps removing.
+   *
+   * `null` is not `[]`. An empty list means we asked and nothing was open; null
+   * means we could not ask, and those must not read the same.
+   */
+  unprotectedTables: string[] | null
   /** Scrubbed reason, when the probe could not complete. */
   error: string | null
   /**
@@ -111,6 +138,7 @@ const unreachable = (
   appliedMigrations: null,
   expectedMigrations,
   missingTables: [],
+  unprotectedTables: null,
   error,
   hint: extra.hint ?? null,
   code: extra.code ?? null,
@@ -177,6 +205,39 @@ export async function probeDatabase(
       appliedMigrations = null
     }
 
+    /**
+     * Which tables are open, asked of the database rather than of our files.
+     *
+     * `pg_class.relrowsecurity` is the switch itself — not a policy count, and
+     * not what a migration intended. `relkind = 'r'` keeps it to ordinary
+     * tables: views and foreign tables have no RLS flag to read and would
+     * report as open forever.
+     *
+     * Deliberately every table in `public`, not only the ones our schema
+     * declares. A table left behind by an older schema, or created by hand, is
+     * reachable through the same public API as ours and is exactly the one
+     * nobody would think to check.
+     */
+    let unprotectedTables: string[] | null = null
+    try {
+      const rows = (await withDeadline(
+        db.execute(sql`
+          select c.relname as table_name
+          from pg_class c
+          join pg_namespace n on n.oid = c.relnamespace
+          where n.nspname = 'public' and c.relkind = 'r' and c.relrowsecurity = false
+          order by c.relname
+        `),
+        timeoutMs,
+      )) as unknown as Array<{ table_name?: string }>
+      unprotectedTables = rows.map((r) => r.table_name).filter(Boolean) as string[]
+    } catch {
+      // Could not read the catalogue. `null`, never `[]` — "we did not ask" and
+      // "we asked and all is well" are different answers and the second one is
+      // a claim we would not be able to support.
+      unprotectedTables = null
+    }
+
     return {
       reachable: true,
       latencyMs,
@@ -184,6 +245,7 @@ export async function probeDatabase(
       appliedMigrations,
       expectedMigrations,
       missingTables,
+      unprotectedTables,
       error: null,
       hint: null,
       code: null,
@@ -221,6 +283,28 @@ export function describeProbe(probe: DatabaseProbe): {
     const code = probe.code ? ` [${probe.code}]` : ''
     return { status: 'off', detail: probe.hint ? `${cause}${code} — ${probe.hint}` : `${cause}${code}` }
   }
+  /**
+   * Reported before anything else that is merely incomplete, because it is the
+   * only one of these that is a live exposure rather than a missing feature.
+   *
+   * `off`, not `degraded`. Supabase turns a project's PostgREST API on by
+   * default and its anon key is public by design — it ships to every browser.
+   * Row-level security is the only thing between that key and a table in
+   * `public`. A deployment in this state is not a degraded database; it is an
+   * open one, and `credentials` holds password hashes.
+   */
+  if (probe.unprotectedTables !== null && probe.unprotectedTables.length > 0) {
+    const open = probe.unprotectedTables
+    return {
+      status: 'off',
+      detail:
+        `${open.length} table(s) in public have row-level security switched OFF and are readable, ` +
+        `writable and deletable by anyone holding this project's public anon key: ` +
+        `${open.slice(0, 8).join(', ')}${open.length > 8 ? `, +${open.length - 8} more` : ''}. ` +
+        `The repository closes this in db/migrations/0022_rls_every_table.sql — run "npm run db:migrate" ` +
+        `against this database, or apply db/ops/rls-remediation.sql in the SQL editor for an immediate fix.`,
+    }
+  }
   if (probe.missingTables.length > 0) {
     return {
       status: 'degraded',
@@ -241,10 +325,20 @@ export function describeProbe(probe: DatabaseProbe): {
       detail: `connected, every table present, but ${probe.appliedMigrations}/${probe.expectedMigrations} migrations are recorded as applied`,
     }
   }
+  /**
+   * The happy line says what was actually established, including the part we
+   * could not establish. It used to end at "all 24 tables present", which reads
+   * as a clean bill of health and was one over a database with every table
+   * open.
+   */
+  const protection =
+    probe.unprotectedTables === null
+      ? '; row-level security could not be read'
+      : ' and protected by row-level security'
   return {
     status: 'ok',
     detail: `connected to ${probe.serverVersion ?? 'postgres'} in ${probe.latencyMs}ms; all ${
       declaredTables().length
-    } tables present`,
+    } tables present${protection}`,
   }
 }
