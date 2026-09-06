@@ -8,6 +8,7 @@ const base: DatabaseProbe = {
   appliedMigrations: 14,
   expectedMigrations: 14,
   missingTables: [],
+  unprotectedTables: [],
   error: null,
 }
 
@@ -131,4 +132,86 @@ describe('probeDatabase', () => {
     expect(probe.error).toBeTruthy()
     expect(probe.error).not.toContain('p@127.0.0.1')
   }, 10_000)
+})
+
+/**
+ * The incident this was written after.
+ *
+ * Supabase reported `rls_disabled_in_public` on the live project. The
+ * repository was not at fault: every table carries `ENABLE ROW LEVEL SECURITY`
+ * in both the schema and the migrations, and `lib/db/rls.test.ts` proves it.
+ * That test passed the entire time the live database sat with all twenty-four
+ * tables open, because it reads files — and `0022_rls_every_table` had never
+ * been run against that database.
+ *
+ * So the suite was green, the code was right, and `credentials` — password
+ * hashes — was readable by anyone holding the project's public anon key. The
+ * probe's verdict over exactly that database was:
+ *
+ *     connected to PostgreSQL 15.8 in 42ms; all 24 tables present → ok
+ *
+ * Every table present is not every table protected. These tests hold the two
+ * apart.
+ */
+describe('an open table is not a healthy database', () => {
+  it('refuses to call a reachable database ok while a table is open', () => {
+    const { status } = describeProbe({ ...base, unprotectedTables: ['credentials'] })
+    expect(status, 'RLS off on any table is an exposure, not a degradation').toBe('off')
+  })
+
+  it('names the open tables and what an anon key can do to them', () => {
+    const { detail } = describeProbe({
+      ...base,
+      unprotectedTables: ['credentials', 'users', 'verification_codes'],
+    })
+    expect(detail).toContain('credentials')
+    expect(detail).toContain('anon key')
+    expect(detail).toMatch(/readable, writable and deletable/)
+  })
+
+  it('points at both the permanent fix and the immediate one', () => {
+    const { detail } = describeProbe({ ...base, unprotectedTables: ['users'] })
+    expect(detail).toContain('0022_rls_every_table')
+    expect(detail).toContain('db/ops/rls-remediation.sql')
+  })
+
+  /** A long list must not become a wall of text; the count carries it. */
+  it('truncates a long list and says how many more', () => {
+    const many = Array.from({ length: 24 }, (_, i) => `t${i}`)
+    const { detail } = describeProbe({ ...base, unprotectedTables: many })
+    expect(detail).toContain('24 table(s)')
+    expect(detail).toContain('+16 more')
+  })
+
+  /**
+   * The exposure outranks the incomplete migration. Both may be true — an
+   * unmigrated database is often how the tables came to be open — but only one
+   * of them is live right now.
+   */
+  it('reports the exposure before missing tables or migration drift', () => {
+    const { status, detail } = describeProbe({
+      ...base,
+      missingTables: ['posts'],
+      appliedMigrations: 11,
+      unprotectedTables: ['credentials'],
+    })
+    expect(status).toBe('off')
+    expect(detail).toContain('credentials')
+  })
+
+  /**
+   * `null` is "we could not ask", and it must not be dressed as "we asked and
+   * all is well" — the distinction this whole session has been about.
+   */
+  it('says so when it could not read the catalogue, instead of implying safety', () => {
+    const { status, detail } = describeProbe({ ...base, unprotectedTables: null })
+    expect(status).toBe('ok')
+    expect(detail).toContain('could not be read')
+    expect(detail).not.toContain('protected by row-level security')
+  })
+
+  it('states the protection positively when it did ask and found none open', () => {
+    const { detail } = describeProbe({ ...base, unprotectedTables: [] })
+    expect(detail).toContain('protected by row-level security')
+  })
 })

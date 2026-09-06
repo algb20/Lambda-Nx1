@@ -306,3 +306,63 @@ describe('a 503 that is a refusal, not a fault', () => {
     expect(ids).not.toContain('mail')
   })
 })
+
+/**
+ * The Supabase alert, on the page that exists to explain a broken deployment.
+ *
+ * `rls_disabled_in_public`: tables in `public` with row-level security off, and
+ * a project whose REST API is on by default with a public anon key. Before this
+ * branch existed the exposure reached this page as "the database is not usable"
+ * — the opposite of true, and advice that sends the reader to the connection
+ * settings of a database that is connecting perfectly.
+ */
+describe('a database that is open rather than broken', () => {
+  const withProbe = (unprotectedTables: string[] | null) =>
+    json({
+      status: 'healthy',
+      checks: [
+        { name: 'session_secret', status: 'ok', detail: 'configured', required: true },
+        { name: 'database', status: 'ok', detail: 'connected to PostgreSQL 15.8', required: false },
+      ],
+      database: { reachable: true, unprotectedTables },
+    })
+
+  const run = (open: string[] | null) =>
+    diagnose({ health: withProbe(open), world: world(10), board: board(3) })
+
+  it('names the exposure, the tables and what the anon key can do', () => {
+    const check = run(['credentials', 'users']).find((c) => c.id === 'database-exposure')
+    expect(check?.state).toBe('fail')
+    expect(check?.detail).toContain('credentials')
+    expect(check?.detail).toContain('anon key')
+  })
+
+  it('gives the immediate fix and the permanent one, in that order', () => {
+    const check = run(['credentials']).find((c) => c.id === 'database-exposure')
+    expect(check?.action).toContain('rls-remediation.sql')
+    expect(check?.action).toContain('db:migrate')
+  })
+
+  /** The reader must not be sent to fix a connection that is working. */
+  it('does not describe an open database as unusable', () => {
+    const check = run(['users']).find((c) => c.id === 'database-exposure')
+    expect(check?.detail).not.toContain('not usable')
+  })
+
+  it('says nothing when the probe asked and found nothing open', () => {
+    expect(run([]).some((c) => c.id === 'database-exposure')).toBe(false)
+  })
+
+  /** A shallow health body carries no probe; silence is the honest answer. */
+  it('says nothing when there was no deep probe to read', () => {
+    expect(run(null).some((c) => c.id === 'database-exposure')).toBe(false)
+    const shallow = diagnose({ health: json(health('ok')), world: world(1), board: board(1) })
+    expect(shallow.some((c) => c.id === 'database-exposure')).toBe(false)
+  })
+
+  it('truncates a long list rather than printing a wall of names', () => {
+    const many = Array.from({ length: 24 }, (_, i) => `t${i}`)
+    const check = run(many).find((c) => c.id === 'database-exposure')
+    expect(check?.detail).toContain('+18 more')
+  })
+})
