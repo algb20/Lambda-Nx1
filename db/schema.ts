@@ -300,7 +300,20 @@ export const entityLinks = pgTable(
     relation: text('relation').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index('entity_links_investigation_idx').on(t.investigationId)],
+  (t) => [
+    index('entity_links_investigation_idx').on(t.investigationId),
+    /**
+     * The two ends of every edge.
+     *
+     * Traversing the graph — "what links to this entity?" — read these columns
+     * with no index behind either, so every hop was a sequential scan of the
+     * whole table, and deleting an entity scanned it twice more to enforce the
+     * cascade. Found by asking the catalogue which foreign keys had no index,
+     * not by reading the queries.
+     */
+    index('entity_links_from_idx').on(t.fromEntityId),
+    index('entity_links_to_idx').on(t.toEntityId),
+  ],
 )
 
 // ── Scans (each source run + our own cache/archive of the raw result) ─────────
@@ -324,7 +337,10 @@ export const scans = pgTable(
     result: jsonb('result'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index('scans_investigation_idx').on(t.investigationId)],
+  (t) => [
+    index('scans_investigation_idx').on(t.investigationId),
+    index('scans_source_idx').on(t.sourceKey),
+  ],
 )
 
 // ── Evidence (per-fact documentation, reference §5.4) ─────────────────────────
@@ -352,7 +368,14 @@ export const evidence = pgTable(
     raw: jsonb('raw'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index('evidence_investigation_idx').on(t.investigationId)],
+  (t) => [
+    index('evidence_investigation_idx').on(t.investigationId),
+    // Both foreign keys, so "the evidence for this entity" and "everything this
+    // source produced" stop being full scans, and a cascade delete stops being
+    // one too.
+    index('evidence_entity_idx').on(t.entityId),
+    index('evidence_source_idx').on(t.sourceKey),
+  ],
 )
 
 // ── Monitoring & alerts (product side of the Radar) ──────────────────────────
@@ -571,6 +594,14 @@ export const visitors = pgTable(
     unique('visitors_subject_uq').on(t.subjectKey),
     index('visitors_country_idx').on(t.countryCode),
     index('visitors_last_seen_idx').on(t.lastSeenAt),
+    /**
+     * The rows belonging to one person.
+     *
+     * Needed by erasure, which now has to find and anonymise them: without it,
+     * deleting one account scans every visitor row. It is also what the foreign
+     * key uses to enforce `ON DELETE SET NULL`.
+     */
+    index('visitors_user_idx').on(t.userId),
   ],
 )
 

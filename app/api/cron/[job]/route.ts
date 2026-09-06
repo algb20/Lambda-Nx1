@@ -5,6 +5,7 @@ import { PublishJobUnavailableError, runPublishJob } from '@/lib/modules/publish
 import { recheckQuarantine } from '@/lib/engine/catalog/recheck'
 import { runFullRadar, runInternalRadarSweep, runRadarSweep } from '@/lib/radar'
 import { selfOrigin } from '@/lib/http/self-origin'
+import { repo } from '@/lib/db'
 
 /**
  * GET /api/cron/[job] — the one door a scheduler comes through.
@@ -34,7 +35,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 
-const JOBS = ['publish', 'radar', 'radar-monitors', 'radar-watch', 'sources'] as const
+const JOBS = ['publish', 'radar', 'radar-monitors', 'radar-watch', 'sources', 'retention'] as const
 type Job = (typeof JOBS)[number]
 
 const isJob = (value: string): value is Job => (JOBS as readonly string[]).includes(value)
@@ -100,6 +101,19 @@ async function run(job: Job): Promise<unknown> {
       return { monitors: await runRadarSweep() }
     case 'radar-watch':
       return { watch: await runInternalRadarSweep() }
+    /**
+     * Retention: delete what has no purpose left.
+     *
+     * The expired-code sweep was opportunistic — it ran when a code was issued,
+     * so a deployment with no sign-ups never swept, and the addresses those
+     * codes were sent to stayed forever. Charter §3 says store only what a task
+     * needs; an expired code needs nothing.
+     */
+    case 'retention': {
+      const codes = await repo.verification.sweep()
+      return { expiredCodesDeleted: codes }
+    }
+
     case 'sources': {
       /**
        * Coverage that only heals when a person remembers is coverage that
