@@ -17,6 +17,7 @@ import {
 import { ALL_MODES } from '@/lib/gateways'
 import { BOARDS } from '@/lib/modules/board-shared'
 import { originOf } from '@/lib/engine/catalog'
+import { NO_ORIGIN_REASON, selfOrigin } from '@/lib/http/self-origin'
 
 /**
  * POST /api/mcp — the Model Context Protocol endpoint.
@@ -268,7 +269,19 @@ async function runTool(name: string, args: Record<string, unknown>, request: Req
       // live call caught this: `statements` returned a 404 HTML page, which the
       // agent would have relayed as "the gateway is down" rather than "the URL
       // was wrong". `gatewayPath` is the one place that mapping lives.
-      const origin = new URL(request.url).origin
+      /**
+       * The origin comes from configuration, never from the request.
+       *
+       * This line read `new URL(request.url).origin`, which Next.js builds from
+       * the incoming `Host` / `X-Forwarded-Host`. A caller could therefore
+       * choose the host our own server fetched — `169.254.169.254`, a loopback
+       * port, anything inside the deployment's network — and receive up to 300
+       * characters of the answer back through `toolError`. The gateway name was
+       * validated and the path was fixed; the host was free, and the host is the
+       * whole of a server-side request forgery.
+       */
+      const origin = selfOrigin(request)
+      if (!origin) return toolError(NO_ORIGIN_REASON)
       const res = await fetch(`${origin}${gatewayPath(gateway)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

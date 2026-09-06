@@ -67,6 +67,18 @@ export class RateLimiter {
     private readonly now: () => number = Date.now,
   ) {}
 
+  /**
+   * Forget every bucket.
+   *
+   * A test seam, and named as one. Without it a suite either shares counters
+   * between cases — so a test passes because an *earlier* test filled a bucket,
+   * which is a pass for the wrong reason — or works around it by inventing a
+   * fresh address per assertion, which hides what is actually being measured.
+   */
+  reset(): void {
+    this.buckets.clear()
+  }
+
   check(key: string): RateLimitResult {
     const now = this.now()
     let bucket = this.buckets.get(key)

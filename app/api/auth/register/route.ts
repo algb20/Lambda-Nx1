@@ -4,6 +4,7 @@ import { defaultStandaloneDeps } from '@/lib/auth/standalone-deps'
 import { attachSession } from '@/lib/auth/cookie'
 import { normalizeUsername } from '@/lib/auth/policy'
 import { accountsUnavailable, databaseUnavailable } from '@/lib/auth/code-flow'
+import { signInRateLimit } from '@/lib/auth/sign-in-limit'
 
 /**
  * POST /api/auth/register { email, password } — standalone (off-Pi) sign-up.
@@ -36,6 +37,11 @@ export async function POST(request: Request) {
   const email = typeof body.email === 'string' ? body.email : ''
   const password = typeof body.password === 'string' ? body.password : ''
   const username = typeof body.username === 'string' ? body.username : ''
+
+  // Unauthenticated account creation, and it was unthrottled — see
+  // lib/auth/sign-in-limit on the exemption this fills in.
+  const limited = signInRateLimit(request, email)
+  if (limited) return limited
   /**
    * The real name, which this route was silently dropping.
    *

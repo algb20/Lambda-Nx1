@@ -4,6 +4,7 @@ import { cronGate } from '@/lib/cron/auth'
 import { PublishJobUnavailableError, runPublishJob } from '@/lib/modules/publish-job'
 import { recheckQuarantine } from '@/lib/engine/catalog/recheck'
 import { runFullRadar, runInternalRadarSweep, runRadarSweep } from '@/lib/radar'
+import { selfOrigin } from '@/lib/http/self-origin'
 
 /**
  * GET /api/cron/[job] — the one door a scheduler comes through.
@@ -82,10 +83,8 @@ export async function GET(request: Request, context: { params: Promise<{ job: st
 async function run(job: Job): Promise<unknown> {
   switch (job) {
     case 'publish': {
-      const h = await headers()
-      const host = h.get('x-forwarded-host') ?? h.get('host') ?? ''
-      const proto = h.get('x-forwarded-proto') ?? 'https'
-      const result = await runPublishJob({ origin: host ? `${proto}://${host}` : '' })
+      // Configuration, not the caller's headers — see lib/http/self-origin.
+      const result = await runPublishJob({ origin: selfOrigin(await headers()) ?? '' })
       return {
         considered: result.considered,
         publishedCount: result.published.length,

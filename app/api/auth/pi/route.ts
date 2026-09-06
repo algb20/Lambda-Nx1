@@ -4,6 +4,7 @@ import { attachSession } from '@/lib/auth/cookie'
 import { repo } from '@/lib/db'
 import { isUsernameConflict, piHandleFor } from '@/lib/auth/pi-identity'
 import { publicNameFor } from '@/lib/users/public-name'
+import { signInRateLimit } from '@/lib/auth/sign-in-limit'
 
 /**
  * POST /api/auth/pi  { pi_auth_token }
@@ -15,6 +16,11 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
+  // Unauthenticated token exchange. There is no claimed identity to key on
+  // until the token is verified, so the per-caller budget carries this one.
+  const limited = signInRateLimit(request)
+  if (limited) return limited
+
   let body: { pi_auth_token?: unknown; accessToken?: unknown }
   try {
     body = await request.json()

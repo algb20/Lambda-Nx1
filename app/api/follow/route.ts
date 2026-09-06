@@ -6,6 +6,7 @@ import { mailConfigured, mailer } from '@/lib/mail'
 import { followConfirmEmail } from '@/lib/mail/templates'
 import { codeRateLimit, readJson, str } from '@/lib/auth/code-flow'
 import { SUBMIT_REPLY, TOKEN_BYTES, normaliseEmail } from '@/lib/followers/subscription'
+import { NO_ORIGIN_REASON, selfOrigin } from '@/lib/http/self-origin'
 
 /**
  * POST /api/follow { email, locale } — ask to be sent the brief.
@@ -29,14 +30,26 @@ import { SUBMIT_REPLY, TOKEN_BYTES, normaliseEmail } from '@/lib/followers/subsc
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-/** Where the links in the message point. */
-function originOf(request: Request): string {
-  const url = new URL(request.url)
-  // Behind a proxy the request URL is the internal one; the forwarded headers
-  // are what the reader's browser will actually be able to reach.
-  const host = request.headers.get('x-forwarded-host') ?? url.host
-  const proto = request.headers.get('x-forwarded-proto') ?? url.protocol.replace(':', '')
-  return `${proto}://${host}`
+/**
+ * Where the links in the message point — read from configuration, never from
+ * the request.
+ *
+ * This function used to take `x-forwarded-host`, reasoning that behind a proxy
+ * the forwarded headers are what the reader's browser can actually reach. True,
+ * and it made the header a way to choose the domain of a link we then *email to
+ * somebody else*, carrying their confirmation token. Setting one header sent
+ * the victim a link on the attacker's host with the victim's token in it.
+ *
+ * A managed edge normally overwrites those headers, which is why nothing had
+ * gone wrong; that is the platform's control and not ours, and charter rule #4
+ * says this has to survive a move to a plain Node host that has no such thing.
+ *
+ * `null` when it cannot be established, and the caller refuses. A confirmation
+ * email is exactly the wrong place to guess: a link to nowhere is a support
+ * ticket, and a link to the wrong somewhere is the hole.
+ */
+function originOf(request: Request): string | null {
+  return selfOrigin(request)
 }
 
 export async function POST(request: Request) {
@@ -96,6 +109,12 @@ export async function POST(request: Request) {
   })
 
   const origin = originOf(request)
+  if (!origin) {
+    // Refuse rather than send a message whose links cannot be trusted. The row
+    // above is already written; the reader simply gets no email until this
+    // deployment is told its own address.
+    return NextResponse.json({ error: NO_ORIGIN_REASON }, { status: 503 })
+  }
   const result = await mailer().send(
     followConfirmEmail({
       to: email,
