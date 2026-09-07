@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { adminGate } from '@/lib/social/admin'
 import { PublishJobUnavailableError, runPublishJob } from '@/lib/modules/publish-job'
+import { selfOrigin } from '@/lib/http/self-origin'
 
 /**
  * POST /api/publish/run — the operator's handle on the publisher.
@@ -23,12 +24,10 @@ export async function POST(request: Request) {
   if (denied) return denied
 
   const dryRun = new URL(request.url).searchParams.get('dry') === '1'
-  const h = await headers()
-  const host = h.get('x-forwarded-host') ?? h.get('host') ?? ''
-  const proto = h.get('x-forwarded-proto') ?? 'https'
+  const origin = selfOrigin(await headers()) ?? ''
 
   try {
-    const result = await runPublishJob({ dryRun, origin: host ? `${proto}://${host}` : '' })
+    const result = await runPublishJob({ dryRun, origin })
     return NextResponse.json({
       dryRun: result.dryRun,
       considered: result.considered,

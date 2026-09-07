@@ -3,6 +3,7 @@ import { classifyIdentifier, loginUser } from '@/lib/auth/standalone'
 import { defaultStandaloneDeps } from '@/lib/auth/standalone-deps'
 import { attachSession } from '@/lib/auth/cookie'
 import { accountsUnavailable, databaseUnavailable } from '@/lib/auth/code-flow'
+import { signInRateLimit } from '@/lib/auth/sign-in-limit'
 
 /**
  * POST /api/auth/login { identifier, password } — off-Pi sign-in.
@@ -42,6 +43,15 @@ export async function POST(request: Request) {
         ? body.email
         : ''
   const password = typeof body.password === 'string' ? body.password : ''
+
+  /**
+   * Throttled here, after the identifier is known, so the per-account bucket
+   * can see which account is being guessed at. `/api/auth/` is exempt from the
+   * gateway limit by design; this is the tighter policy that exemption assumed
+   * existed. See lib/auth/sign-in-limit.
+   */
+  const limited = signInRateLimit(request, identifier)
+  if (limited) return limited
 
   try {
     const { userId } = await loginUser(identifier, password, defaultStandaloneDeps)

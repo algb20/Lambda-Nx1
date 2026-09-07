@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { repo, isDbConfigured } from '@/lib/db'
 import { adminGate } from '@/lib/social/admin'
 import { deliver } from '@/lib/social/broadcast'
+import { selfOrigin } from '@/lib/http/self-origin'
 
 /**
  * POST /api/admin/social/test { id } — send one real message to a channel.
@@ -31,14 +32,12 @@ export async function POST(request: Request) {
   const channel = id ? await repo.socialChannels.getById(id) : undefined
   if (!channel) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  const h = await headers()
-  const host = h.get('x-forwarded-host') ?? h.get('host') ?? 'lambda-nx.vercel.app'
-  const proto = h.get('x-forwarded-proto') ?? 'https'
+  const origin = selfOrigin(await headers()) ?? ''
 
   const result = await deliver(channel, {
     title: 'Lambda — channel test',
     body: 'If you can read this, the channel is connected and Lambda can publish to it.',
-    url: `${proto}://${host}`,
+    url: origin,
     kind: 'post',
     author: null,
     publishedAt: new Date().toISOString(),

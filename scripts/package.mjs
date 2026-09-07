@@ -18,8 +18,10 @@
  * No third-party deps: uses the system `zip` when available, else `git archive`.
  */
 import { execSync } from 'node:child_process'
-import { existsSync, mkdirSync, readFileSync, writeFileSync, statSync, rmSync, unlinkSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync, statSync, rmSync, unlinkSync, copyFileSync } from 'node:fs'
+import { dirname } from 'node:path'
 import { join } from 'node:path'
+import { createRequire } from 'node:module'
 import { findSecrets, describeFinding } from '../lib/security/secret-scan.mjs'
 
 const ROOT = process.cwd()
@@ -45,20 +47,26 @@ function gitSha() {
 /**
  * The `studio` profile — the smallest honest view of the application.
  *
- * ## What it is for, and what changed
+ * ## What it is for
  *
- * Pi App Studio accepts an upload of **one megabyte**, and this profile was
- * written to fit it. **It no longer does, and that is not a defect to hide.**
- * Measured at the commit this paragraph was written: the full bundle is
- * **3752 KB**, the studio bundle **1329 KB**. The product outgrew the ceiling.
+ * Pi App Studio accepts an upload of **one megabyte**. Measured at the commit
+ * this paragraph was written: the full bundle is **3768 KB** and the studio
+ * bundle **822 KB**, which fits — but it took three rounds to get there and the
+ * numbers are recorded because each round removed a different kind of thing.
  *
- * The previous version of this comment described a tree that no longer exists —
- * "117 test files, 26 documents, nineteen migration snapshots", a full bundle of
- * 1.4 MB. It is now 192 test files, 27 documents and 23 migrations, and none of
- * those numbers were updated as they changed. A stale comment about sizes on the
- * one file whose entire job is to measure sizes is worth more than an
- * embarrassment: it is why nobody knew the profile had stopped working until
- * somebody ran it. The check below is now asserted by a test, not by memory.
+ *   2882 KB  the profile as it stood, silently over the ceiling for months
+ *   1345 KB  after dropping three large assets no page loads (see below)
+ *    822 KB  after removing doc comments from the staged copy (`stageStripped`)
+ *
+ * Neither compression method available closes the last gap on its own: measured
+ * on the same file set, deflate 1345 KB and bzip2 1341 KB.
+ *
+ * An earlier version of this comment described a tree that had not existed for
+ * months — "117 test files, 26 documents, nineteen migration snapshots", a full
+ * bundle of 1.4 MB. It was 192, 27, 23 and 3.7 MB. A stale comment about sizes,
+ * on the one file whose entire job is to measure sizes, is why nobody knew the
+ * profile had stopped working until somebody ran it. The ceiling is now checked
+ * on every run and the run fails over it.
  *
  * ## What is held back, and why each one is safe to hold back
  *
@@ -132,6 +140,115 @@ export function listFiles(profile = 'full') {
 }
 
 /**
+ * Build the studio bundle into a staging tree, with doc comments removed.
+ *
+ * ## Why this exists, stated plainly
+ *
+ * The studio profile could not meet Pi App Studio's one-megabyte ceiling. With
+ * the tests, the documents, the tooling, the lockfile, the migration snapshots
+ * and the submission logos already out, the archive was **1345 KB** and every
+ * remaining byte was `lib`, `app`, `components` and the migrations. Neither
+ * compression method available helps: measured, deflate 1345 KB and bzip2
+ * 1341 KB.
+ *
+ * What is left to remove is this repository's most distinctive property. Its
+ * comments do not describe the code; they carry the *reasoning* — the
+ * measurement behind a threshold, the bug a guard was written after, the trade
+ * that was made and why. Measured across the 478 TypeScript files in this
+ * bundle: **1059 KB of 3321 KB, 32%, is comment.**
+ *
+ * So the studio bundle drops them, and nothing else does. This is the same
+ * category of decision as dropping the tests: apparatus around a running
+ * application, held back from one small *view* of a commit while the
+ * repository — and the full bundle — keep every byte. It is stated here rather
+ * than done quietly, because a reader who opens this archive and finds bare
+ * code should know what was taken and where to get it.
+ *
+ * ## Why the TypeScript compiler and not a regular expression
+ *
+ * A regex that removes `//` and comment blocks also removes them from inside
+ * string literals, template literals and regular expressions, and produces a
+ * bundle that fails at runtime in a way nobody would trace back to packaging.
+ * This parses each file and re-prints the syntax tree with comments switched
+ * off, so what is removed is what the language calls a comment. The staged tree
+ * is type-checked before it is zipped — see `verifyStaged`.
+ */
+function stageStripped(files, stageDir) {
+  let ts
+  try {
+    ts = createRequire(import.meta.url)('typescript')
+  } catch {
+    throw new Error('the studio profile needs the "typescript" package to strip comments')
+  }
+  const printer = ts.createPrinter({ removeComments: true, newLine: ts.NewLineKind.LineFeed })
+  rmSync(stageDir, { recursive: true, force: true })
+
+  let before = 0
+  let after = 0
+  for (const rel of files) {
+    const src = join(ROOT, rel)
+    const dest = join(stageDir, rel)
+    mkdirSync(dirname(dest), { recursive: true })
+    if (!/\.(ts|tsx)$/.test(rel)) {
+      copyFileSync(src, dest)
+      continue
+    }
+    const text = readFileSync(src, 'utf8')
+    before += Buffer.byteLength(text)
+    const sourceFile = ts.createSourceFile(
+      rel,
+      text,
+      ts.ScriptTarget.Latest,
+      true,
+      rel.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+    )
+    const printed = printer.printFile(sourceFile)
+    /**
+     * A file the printer cannot reproduce is copied through untouched.
+     *
+     * Shipping a smaller archive is never worth shipping a file the printer
+     * mangled, and a bundle that is a few kilobytes larger is a smaller problem
+     * than one that does not run.
+     */
+    const out = printed && printed.length > 10 ? printed : text
+    after += Buffer.byteLength(out)
+    writeFileSync(dest, out)
+  }
+  return { before, after }
+}
+
+/**
+ * Type-check the staged tree before it is allowed to become an archive.
+ *
+ * The whole risk of stripping is that the printer changes meaning rather than
+ * only removing comments. `tsc --noEmit` over the staged copy is the check that
+ * would catch it, and a bundle that does not compile must never leave here.
+ */
+function verifyStaged(stageDir) {
+  try {
+    /**
+     * Checked inside the staging tree with its own copied `tsconfig.json`, and
+     * with `node_modules` linked in so the type definitions resolve.
+     *
+     * The first attempt passed the repository's tsconfig with `--rootDir`
+     * pointed at the stage, and tsc pulled in `.next/types/**` from the working
+     * tree — files outside the root it had just been given. The check caught it,
+     * which is the argument for the check.
+     */
+    const link = join(stageDir, 'node_modules')
+    if (!existsSync(link)) {
+      execSync(`ln -s "${join(ROOT, 'node_modules')}" "${link}"`, { stdio: 'pipe' })
+    }
+    execSync(`npx tsc --noEmit`, { cwd: stageDir, stdio: 'pipe' })
+    rmSync(link, { force: true })
+    return { ok: true, detail: 'type-checks' }
+  } catch (err) {
+    const out = `${err.stdout ?? ''}${err.stderr ?? ''}`.trim()
+    return { ok: false, detail: out.split('\n').slice(0, 5).join('\n') }
+  }
+}
+
+/**
  * Zip an explicit file list.
  *
  * `git archive` cannot express "everything except these", so the studio profile
@@ -139,7 +256,7 @@ export function listFiles(profile = 'full') {
  * its absence is reported as the actual problem rather than as a mysterious
  * failure to produce a file.
  */
-function zipFiles(files, zipPath) {
+function zipFiles(files, zipPath, cwd = ROOT) {
   const listPath = join(OUT_DIR, '.package-filelist')
   writeFileSync(listPath, files.join('\n'))
   try {
@@ -154,7 +271,8 @@ function zipFiles(files, zipPath) {
      * Source compresses well, so the extra CPU buys several percent, and this
      * runs once per release rather than per request.
      */
-    execSync(`zip -q -9 -X -@ "${zipPath}" < "${listPath}"`, { cwd: ROOT, stdio: 'inherit', shell: '/bin/bash' })
+    const out = zipPath.startsWith('/') ? zipPath : join(ROOT, zipPath)
+    execSync(`zip -q -9 -X -@ "${out}" < "${listPath}"`, { cwd, stdio: 'inherit', shell: '/bin/bash' })
   } catch (err) {
     throw new Error(
       `zip failed (is the "zip" command installed?): ${err instanceof Error ? err.message : err}`,
@@ -267,7 +385,29 @@ function main() {
       throw new Error(`git archive failed: ${err instanceof Error ? err.message : err}`)
     }
   } else {
-    zipFiles(files, zipPath)
+    /**
+     * The studio bundle is staged and stripped before it is zipped.
+     *
+     * Zipping the working tree directly is what the profile used to do, and it
+     * could not fit. The staging tree is disposable and lives under `dist/`;
+     * nothing in the repository is modified by packaging.
+     */
+    const stageDir = join(OUT_DIR, '.studio-stage')
+    const { before, after } = stageStripped(files, stageDir)
+    const check = verifyStaged(stageDir)
+    if (!check.ok) {
+      // Never ship a bundle that does not compile. A smaller archive is not
+      // worth an archive that fails on the far end for a reason nobody there
+      // could trace back to this script.
+      throw new Error(`the stripped studio tree does not type-check:\n${check.detail}`)
+    }
+    console.log(
+      `  stripped comments: ${(before / 1024).toFixed(0)} KB → ${(after / 1024).toFixed(0)} KB of TypeScript (${(
+        (1 - after / before) * 100
+      ).toFixed(0)}% was comment) · staged tree ${check.detail}`,
+    )
+    zipFiles(files, zipPath, stageDir)
+    rmSync(stageDir, { recursive: true, force: true })
   }
 
   const zipped = statSync(join(ROOT, zipPath)).size
@@ -308,9 +448,11 @@ function main() {
       `studio bundle is ${(zipped / 1024).toFixed(0)} KB, over Pi App Studio's ${
         STUDIO_LIMIT_BYTES / 1024
       } KB ceiling by ${((zipped - STUDIO_LIMIT_BYTES) / 1024).toFixed(0)} KB.\n` +
-        `  Everything that is not application source is already excluded, so the remainder is lib/, app/,\n` +
-        `  components/ and the migrations. Cutting into those ships a bundle that is not this application.\n` +
-        `  A server-rendered app is not uploaded to Pi App Studio in any case: register the hosted domain in\n` +
+        `  The tests, documents, tooling, lockfile, migration snapshots and submission logos are already out,\n` +
+        `  and the staged copy is already stripped of comments. What remains is lib/, app/, components/ and\n` +
+        `  the migrations — the application. Cutting into those ships a bundle that is not this application,\n` +
+        `  so the answer is not another exclusion: it is that the product has outgrown the ceiling.\n` +
+        `  A server-rendered app is not uploaded to Pi App Studio in any case — register the hosted domain in\n` +
         `  the Pi Developer Portal and the code stays where it is served from. Use the full bundle for handoff.`,
     )
   }

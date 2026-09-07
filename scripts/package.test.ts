@@ -105,3 +105,73 @@ describe('the studio profile holds back apparatus, not application', () => {
     expect(STUDIO_EXCLUDE.some((re: RegExp) => re.test('lib/engine/catalog/index.ts'))).toBe(false)
   })
 })
+
+/**
+ * The comment stripper, which is what lets the studio bundle fit at all.
+ *
+ * It removes 32% of the TypeScript in that bundle — 1059 KB of 3321 KB — and
+ * the only thing standing between that and a broken archive is that it removes
+ * *comments* and nothing else. A regular expression could not make that
+ * promise: `//` inside a string literal, a template literal or a regular
+ * expression is not a comment, and a bundle mangled that way fails on the far
+ * end for a reason nobody there could trace back to packaging.
+ *
+ * So it parses and re-prints the syntax tree, and these hold it to that.
+ */
+describe('stripping comments removes comments and nothing else', () => {
+  const strip = async (source: string, tsx = false) => {
+    const ts = (await import('typescript')).default
+    const printer = ts.createPrinter({ removeComments: true, newLine: ts.NewLineKind.LineFeed })
+    const kind = tsx ? ts.ScriptKind.TSX : ts.ScriptKind.TS
+    const file = ts.createSourceFile(tsx ? 'x.tsx' : 'x.ts', source, ts.ScriptTarget.Latest, true, kind)
+    return printer.printFile(file)
+  }
+
+  it('removes a block comment and a line comment', async () => {
+    const out = await strip('/** doc */\nexport const a = 1 // trailing\n')
+    expect(out).not.toContain('doc')
+    expect(out).not.toContain('trailing')
+    expect(out).toContain('export const a = 1')
+  })
+
+  /** The case a regular expression gets wrong. */
+  it('keeps a comment marker that lives inside a string', async () => {
+    const out = await strip('export const url = "https://example.com/a//b"\n')
+    expect(out).toContain('https://example.com/a//b')
+  })
+
+  it('keeps one inside a template literal', async () => {
+    const out = await strip('export const t = `a // not a comment ${1} /* nor this */`\n')
+    expect(out).toContain('// not a comment')
+    expect(out).toContain('/* nor this */')
+  })
+
+  it('keeps one inside a regular expression literal', async () => {
+    const out = await strip('export const re = /https?:\\/\\/example/\n')
+    expect(out).toContain('example')
+  })
+
+  it('preserves types, exports and JSX', async () => {
+    const out = await strip(
+      '/** doc */\nexport function C({ n }: { n: number }) {\n  return <div title="a // b">{n}</div>\n}\n',
+      true,
+    )
+    expect(out).not.toContain('doc')
+    expect(out).toContain('export function C')
+    expect(out).toContain('n: number')
+    expect(out).toContain('a // b')
+  })
+
+  /**
+   * The stripped tree is type-checked before it is zipped, and a bundle that
+   * does not compile must never leave the packager. This asserts the guard
+   * exists rather than re-running it: `npm run package:studio` is where it runs,
+   * and it throws.
+   */
+  it('is gated on the staged tree type-checking', async () => {
+    const { readFileSync } = await import('node:fs')
+    const source = readFileSync('scripts/package.mjs', 'utf8')
+    expect(source).toContain('verifyStaged')
+    expect(source).toContain('does not type-check')
+  })
+})

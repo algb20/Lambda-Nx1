@@ -18,7 +18,7 @@ export const SCHEMA_SQL = `-- Lambda NX — the whole schema, in one paste.
 --
 -- Safe to run more than once. Every statement is guarded, so a partial
 -- earlier run does not have to be unpicked before this one.
--- Covers 23 migrations, 0000_init.sql … 0022_rls_every_table.sql.
+-- Covers 24 migrations, 0000_init.sql … 0023_fk_indexes.sql.
 
 -- ─────────────────────────────────────────────────────────────
 -- 0000_init.sql
@@ -983,7 +983,38 @@ ALTER TABLE "sources" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "source_health_daily" ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE "blobs" ENABLE ROW LEVEL SECURITY;
+
+-- ─────────────────────────────────────────────────────────────
+-- 0023_fk_indexes.sql
+
+-- Indexes for the six foreign keys that had none.
+--
+-- Found by asking the catalogue rather than by reading queries: every
+-- single-column foreign key whose column had no index behind it. Postgres does
+-- not create one automatically, and the cost lands in two places that are easy
+-- to miss until the tables are large.
+--
+--   * **Every join and lookup through that column is a sequential scan.**
+--     \`entity_links.from_entity_id\` and \`to_entity_id\` are the two ends of the
+--     graph — "what links to this entity?" is the ontology's central question,
+--     and it read the whole table.
+--   * **Every delete on the parent scans the child** to enforce the referential
+--     action. \`entities\` cascades into \`entity_links\` twice, and \`users\`
+--     into \`visitors\`. Account erasure is exactly that delete.
+--
+-- \`IF NOT EXISTS\` so this is safe on a database that already has any of them.
+CREATE INDEX IF NOT EXISTS "entity_links_from_idx" ON "entity_links" ("from_entity_id");
+
+CREATE INDEX IF NOT EXISTS "entity_links_to_idx" ON "entity_links" ("to_entity_id");
+
+CREATE INDEX IF NOT EXISTS "evidence_entity_idx" ON "evidence" ("entity_id");
+
+CREATE INDEX IF NOT EXISTS "evidence_source_idx" ON "evidence" ("source_key");
+
+CREATE INDEX IF NOT EXISTS "scans_source_idx" ON "scans" ("source_key");
+
+CREATE INDEX IF NOT EXISTS "visitors_user_idx" ON "visitors" ("user_id");
 `
 
 /** How many migrations this schema was folded from. */
-export const SCHEMA_MIGRATION_COUNT = 23
+export const SCHEMA_MIGRATION_COUNT = 24

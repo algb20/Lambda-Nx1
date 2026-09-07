@@ -55,6 +55,7 @@ export const SCHEDULED_JOBS = [
   'radar-monitors',
   'radar-watch',
   'sources',
+  'retention',
 ] as const
 export type ScheduledJob = (typeof SCHEDULED_JOBS)[number]
 
@@ -100,6 +101,12 @@ export const SCHEDULE: JobSchedule[] = [
     everyMinutes: 1440,
     why:
       "Re-asks the quarantined sources whether they work again. Coverage that only heals when somebody remembers is coverage that decays: eight days after the quarantine was written, six of its fifty-one entries were back and nothing in the platform knew. Daily, because a publisher that fixes its feed does not fix it twice in an afternoon, and because these are hosts that have already refused us once.",
+  },
+  {
+    job: 'retention',
+    everyMinutes: 1440,
+    why:
+      'Deletes verification codes whose expiry has passed. The sweep also runs opportunistically when a code is issued, which is enough on a busy deployment and nothing at all on a quiet one — no sign-ups means no sweeps, so the last codes issued before things went quiet keep the addresses they were sent to indefinitely. Daily rather than hourly because an expired code is inert: it cannot be redeemed, so the harm is holding an address for no purpose (charter §3), and a day is a proportionate window for that.',
   },
   /**
    * `radar` is deliberately absent from the Netlify clock — see `UNSCHEDULED`.

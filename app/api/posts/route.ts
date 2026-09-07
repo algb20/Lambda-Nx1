@@ -8,6 +8,7 @@ import { broadcast, channelsForAutoPublish } from '@/lib/social/broadcast'
 import { publicNameFor } from '@/lib/users/public-name'
 import { considerPublishing } from '@/lib/modules/self-drive'
 import { runPublishJob } from '@/lib/modules/publish-job'
+import { selfOrigin } from '@/lib/http/self-origin'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -69,7 +70,7 @@ export async function GET(request: Request) {
   const newestAuto = rows.find((row) => row.authorUserId === null)?.createdAt ?? null
   considerPublishing({
     newestAt: newestAuto,
-    run: () => runPublishJob({ origin: new URL(request.url).origin }),
+    run: () => runPublishJob({ origin: selfOrigin(request) ?? '' }),
   })
 
   return NextResponse.json({
@@ -99,9 +100,7 @@ export async function POST(request: Request) {
   const parsed = validatePostInput(body as Record<string, unknown>)
   if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
 
-  const h = await headers()
-  const host = h.get('x-forwarded-host') ?? h.get('host') ?? ''
-  const proto = h.get('x-forwarded-proto') ?? 'https'
+  const origin = selfOrigin(await headers()) ?? ''
 
   const created = await repo.posts.create({
     authorUserId: user.id,
@@ -119,8 +118,8 @@ export async function POST(request: Request) {
   // Broadcast after the post is safely stored, and only to channels that were
   // explicitly switched on. An unlisted post is never broadcast — publishing it
   // to a channel would defeat the only thing "unlisted" means.
-  if (created.visibility === 'public' && host) {
-    await broadcastPost(created, `${proto}://${host}`)
+  if (created.visibility === 'public' && origin) {
+    await broadcastPost(created, origin)
   }
 
   return NextResponse.json({ post: toPublicPost(created) }, { status: 201 })

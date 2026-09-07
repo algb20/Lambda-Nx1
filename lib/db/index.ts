@@ -185,14 +185,86 @@ export const repo = {
      * people are reading, and keeping a name attached to them would defeat the
      * deletion.
      *
+     * ## What the schema could not reach, and now this does
+     *
+     * The paragraph above was true about the cascades and wrong about the
+     * result, and the gap was measured rather than reasoned about — a real
+     * PostgreSQL 16, an account created, `DELETE FROM users`, then a query for
+     * anything still naming that person:
+     *
+     *     visitors.display_name     -> 'Erase Me'
+     *     visitors.country_name     -> 'Saudi Arabia'
+     *     verification_codes.email  -> 'erase@me.co'
+     *
+     * `on delete set null` clears `visitors.user_id`. It does not clear
+     * `display_name`, `country_name` or `region`, so the row was detached from
+     * the account and still identified the person — "keeping a name attached to
+     * them would defeat the deletion", written directly above the code that
+     * kept the name. And `verification_codes` and `email_followers` key on an
+     * email address with no foreign key to `users` at all, so nothing reached
+     * them: a sign-up code and a mailing-list subscription outlived the account.
+     *
+     * So erasure is now four steps in one transaction — either all of it
+     * happens or none of it does, because a half-erased person is worse than an
+     * un-erased one:
+     *
+     *  1. Read the addresses this account is known by, **before** the delete
+     *     cascades `credentials` away and takes the email with it.
+     *  2. Anonymise the visitor rows: the counters stay, every identifying
+     *     field goes. That is the distinction the comment above draws, actually
+     *     applied — an aggregate that no longer describes anybody is not
+     *     personal data, and destroying it would lose a legitimate record.
+     *  3. Delete the codes and the subscription for those addresses.
+     *  4. Delete the user, and let the cascades do what they already did well.
+     *
      * Returns the row that was removed so the caller can clean up what the
      * database cannot reach (the avatar in object storage), or undefined if the
      * account was already gone — which makes a repeated request harmless.
      */
     async remove(id: string): Promise<User | undefined> {
       const db = getDb()
-      const [row] = await db.delete(s.users).where(eq(s.users.id, id)).returning()
-      return row
+      return db.transaction(async (tx) => {
+        const [user] = await tx.select().from(s.users).where(eq(s.users.id, id)).limit(1)
+        if (!user) return undefined
+
+        /**
+         * Every address this account answers to.
+         *
+         * `credentials.email` for a standalone sign-in, and `external_id` when
+         * that is what the provider identifies them by — it holds the email for
+         * a standalone account and an opaque uid for a Pi one, so it is only
+         * counted when it looks like an address rather than assumed to be one.
+         */
+        const creds = await tx
+          .select({ email: s.credentials.email })
+          .from(s.credentials)
+          .where(eq(s.credentials.userId, id))
+        const addresses = [...creds.map((c) => c.email), user.externalId]
+          .filter((e): e is string => typeof e === 'string' && e.includes('@'))
+          .map((e) => e.trim().toLowerCase())
+        const unique = [...new Set(addresses)]
+
+        // The counters survive; nothing that names a person does.
+        await tx
+          .update(s.visitors)
+          .set({
+            userId: null,
+            provider: null,
+            displayName: null,
+            countryCode: null,
+            countryName: null,
+            region: null,
+          })
+          .where(eq(s.visitors.userId, id))
+
+        if (unique.length > 0) {
+          await tx.delete(s.verificationCodes).where(inArray(s.verificationCodes.email, unique))
+          await tx.delete(s.emailFollowers).where(inArray(s.emailFollowers.email, unique))
+        }
+
+        const [row] = await tx.delete(s.users).where(eq(s.users.id, id)).returning()
+        return row
+      })
     },
   },
 
@@ -564,7 +636,19 @@ export const repo = {
       return rows.length > 0
     },
 
-    /** Drop expired rows. Called opportunistically when a code is issued. */
+    /**
+     * Drop expired rows.
+     *
+     * Called opportunistically when a code is issued — which is enough on a
+     * busy deployment and nothing at all on a quiet one: no sign-ups means no
+     * sweeps, so the last codes issued before things went quiet sit there with
+     * the addresses they were sent to, indefinitely. A verification code that
+     * has expired has no purpose left, and an address kept for no purpose is
+     * exactly what data minimisation forbids (charter §3).
+     *
+     * So it is also a scheduled job now — `/api/cron/retention` — and this stays
+     * the one implementation both paths call.
+     */
     async sweep(now: Date = new Date()): Promise<number> {
       const db = getDb()
       const rows = await db

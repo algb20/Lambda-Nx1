@@ -10,6 +10,7 @@ import {
   type Dossier,
 } from '@/lib/export/dossier'
 import { toEvidenceList } from '@/lib/export/payload'
+import { selfOrigin } from '@/lib/http/self-origin'
 
 /**
  * POST /api/export/share — give a dossier a public address.
@@ -42,11 +43,15 @@ function permalinkFor(origin: string, id: string) {
   return { url: postPermalink(origin, id), id }
 }
 
+/**
+ * Where a shared dossier's permalink points.
+ *
+ * Read from configuration rather than from `X-Forwarded-Host`: this string goes
+ * into a link the author hands to somebody else, and a header the caller writes
+ * must not be able to choose the domain that link leads to.
+ */
 async function requestOrigin(): Promise<string> {
-  const h = await headers()
-  const host = h.get('x-forwarded-host') ?? h.get('host') ?? ''
-  const proto = h.get('x-forwarded-proto') ?? 'https'
-  return host ? `${proto}://${host}` : ''
+  return selfOrigin(await headers()) ?? ''
 }
 
 export async function POST(request: Request) {

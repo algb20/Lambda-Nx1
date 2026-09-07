@@ -5,6 +5,7 @@ import { isDbConfigured, repo } from '@/lib/db'
 import { getStorageProvider, deleteByPrefix } from '@/lib/storage'
 import { keyFromAvatarPath } from '@/lib/modules/avatar'
 import { normalizeFullName } from '@/lib/auth/standalone'
+import { clearSession } from '@/lib/auth/cookie'
 
 /**
  * DELETE /api/account — erase the signed-in account.
@@ -144,6 +145,8 @@ export async function DELETE(request: Request) {
 /** A response that also revokes the session cookie. */
 function clearedResponse(payload: Record<string, unknown>): NextResponse {
   const res = NextResponse.json(payload)
-  res.cookies.set(SESSION_COOKIE, '', { httpOnly: true, path: '/', maxAge: 0 })
+  // Through the shared helper: this route spelled the attributes out itself and
+  // had drifted from `attachSession` exactly as the logout route had.
+  clearSession(res)
   return res
 }
