@@ -125,3 +125,33 @@ describe('reading stored preferences', () => {
     expect(prefsEqual(changed, DEFAULT_PREFS)).toBe(false)
   })
 })
+
+/**
+ * The reference layer's switch.
+ *
+ * Its own boolean rather than a sixth `layer` value, because it is not an
+ * alternative to the five data layers — it is drawn underneath whichever of
+ * them is showing.
+ */
+describe('the places layer preference', () => {
+  it('is on by default, so a first visit can tell where it is looking', () => {
+    expect(DEFAULT_PREFS.globe.places).toBe(true)
+  })
+
+  it('round-trips a reader’s choice to switch it off', () => {
+    const parsed = parsePrefs({ ...DEFAULT_PREFS, globe: { ...DEFAULT_PREFS.globe, places: false } })
+    expect(parsed.globe.places).toBe(false)
+  })
+
+  /**
+   * A corrupt or missing value falls back to the default, not to `false`.
+   * Silently stripping the map of the only thing naming a location is a worse
+   * failure than ignoring a bad stored value.
+   */
+  it('falls back to the default rather than to off', () => {
+    for (const bad of [undefined, null, 'yes', 1, {}]) {
+      const parsed = parsePrefs({ ...DEFAULT_PREFS, globe: { ...DEFAULT_PREFS.globe, places: bad } })
+      expect(parsed.globe.places, JSON.stringify(bad)).toBe(DEFAULT_PREFS.globe.places)
+    }
+  })
+})
