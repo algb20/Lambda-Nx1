@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Stage** | Master / Repository / Claude Reconciliation & Current-System Baseline — requested as `30.27.8.R`; that identifier is already assigned in the Master (see **CONF-P05**). Working label in this document: **RB**. |
+| **Stage** | **30.27.8.RB** — Master / Repository / Claude Reconciliation & Current-System Baseline (ID AGREED 2026-10-03, decision 1; see CONF-P05 and §14). |
 | **Status** | REQUIRED → RESEARCH / AUDIT. Audit performed; every reconciliation below is PROPOSED unless marked AGREED. Nothing in this document is IMPLEMENTED against the Master. |
 | **Date** | 2026-10-03 |
 | **Evidence base** | Repository `algb20/Lambda-Nx1`, branch `claude/bittorent-network-app-c8j9pv`, commit `8f9c713`, working tree clean. Test run 2026-10-03: 197 test files passed, 1 skipped (198); 2750 tests passed, 10 skipped (2760); `tsc --noEmit` exit 0. Live observations are dated individually. |
@@ -968,3 +968,95 @@ CURRENT REPOSITORY → BASELINE AUDIT → RECONCILIATION → MASTER
 ---
 
 *End of RECONCILED MASTER BASELINE — 2026-10-03. Evidence: commit `8f9c713`; register entries are reproducible from the cited paths and line numbers.*
+
+---
+
+## 14. Decisions of 2026-10-03 and register status (append — earlier text kept as written)
+
+### 14.1 Owner decisions (ledger R293) — AGREED
+
+| # | Decision |
+|---|---|
+| 1 | This stage is **30.27.8.RB**. R stays Artifact / Export / Publication / Share. 30.27.9 is not used. |
+| 2 | **S** is the operational resumption point, subject to verification of its record. M and all earlier stages are historical record. A Continuity Reconciliation between M and S is required. |
+| 3 | Maintenance authorised for the six defects and the dependency vulnerability, conservative only. Path: REPRODUCE → ROOT CAUSE → PATCH → TEST → REGRESSION → VERIFY → REPORT. |
+| 4 | Automatic publication to **Production** is paused until the R contract passes test, failure test and acceptance. CI, builds, previews/staging and tests continue. |
+| 5 | Lambda NX and World Pi are separate. The logos are separated after a reference check. Table `"L"` is ORPHAN/UNKNOWN: audit it, then remove it only through a documented, reversible migration. Follow-up: no involvement with the World Pi repository. |
+| 6 | Missing source texts are never guessed. Anything that depends on them is **BLOCKED — SOURCE SPEC MISSING**. |
+| 7 | Update CLAUDE.md as an execution document. Precedence: MASTER → APPROVED PHASE SPEC → TASK HANDOFF → CLAUDE.md → CODE. |
+| 8 | SPECIFIED ≠ IMPLEMENTED, and the status ladder IMPLEMENTED / INTEGRATED / TESTED / EVALUATED / ACCEPTED, each with its own evidence. |
+| 9 | A change plan precedes any significant change: SCOPE → … → STATUS. |
+| 10 | On conflict: create a Conflict/Continuity Record and apply the latest approved decision after verification; never delete the older one. |
+
+### 14.2 Register status after 30.27.8.RB work
+
+"FIXED (L1)" means the Existing System defect is corrected with test evidence. It does not change any Master status.
+
+| Entry | Status | Evidence |
+|---|---|---|
+| CONF-G01 Who researches | **RESOLVED** — decision 7 | CLAUDE.md §0, §2 rule 2, rule 8; agent descriptions `field-scout`, `source-hunter` |
+| CONF-G02 Standing instructions vs stop-at-gap | **RESOLVED** — maintenance lane, authorised per batch | Decision 3; CLAUDE.md §9 |
+| CONF-G03 Definition of Done vs completion chain | **RESOLVED** | CLAUDE.md §6 renamed "Repository merge gate — not Master COMPLETE" |
+| CONF-G04 Product identity | **RESOLVED** | CLAUDE.md §1 labelled as current implementation surface |
+| CONF-G05 Two status systems | **RESOLVED** | CLAUDE.md §0, §2 rule 5 |
+| CONF-G06 "One million sources" target | **OPEN** — keep / relabel / retire | Reach is now reported by unit (M-03); the target itself is undecided |
+| CONF-G07 "No redesign" vs new surfaces | **OPEN** — no decision recorded | — |
+| CONF-P01 2026-09-19 "NEXT 30.27" | **SUPERSEDED (historical)** | Decision 2 |
+| CONF-P02 "M — immediate continuation target" | **RESOLVED** — S operational, M history | Decision 2; `CONTINUITY_M_S.md` CR-01 |
+| CONF-P03 Dating inconsistencies | **SUPERSEDED (historical)** by §70.16 and decision 2 | — |
+| CONF-P04 Letters B, C, I, J | **OPEN** | — |
+| CONF-P05 Stage-ID collision | **RESOLVED** — 30.27.8.RB | Decision 1 |
+| CONF-V01 Two ladders | **OPEN** (direction AGREED: map, not merge) | §7 |
+| CONF-V02 Admiralty preserved | **OPEN** (direction AGREED) | §7.3; CLAUDE.md §6 |
+| CONF-V03 Gate order | **OPEN** | — |
+| CONF-V04 Confidence counted keys | **FIXED (L1)** | `MAINTENANCE_BATCH_01.md` M-02 |
+| CONF-F01 Forecast wording | **RESOLVED** | CLAUDE.md §1 |
+| CONF-F02 Calibration overclaim | **FIXED (L1)** | M-04 |
+| CONF-X01 World Pi artefacts | **RESOLVED** for the logos: removed from the tree after a reference check (only `scripts/package.mjs` named them, in a comment), recoverable from commit `6cdd821` (sha256 `fa4e7fe3…`, `7d21a615…`). The World Pi repository was not touched. `scripts/prepare-logo.py` is generic tooling and is **kept** — no decision recorded on it. | §14.3 |
+| CONF-X02 Pi absent from the Master | **OPEN** — Master entry required (research owner) | CLAUDE.md §10 records Pi's role on the execution side |
+| CONF-X03 Auth "switch" | **PARTIAL** — message and documentation corrected (M-06). Registering standalone in the factory is OPEN (MR-13). | M-06 |
+| CONF-S01, S02, S06, A01 | **BLOCKED — SOURCE SPEC MISSING** (30.26; 30.27.6 not closed) | Decision 6 |
+| CONF-S03 Health taxonomy | **OPEN** — research required | — |
+| CONF-A03 MCP version | **OPEN** — research required | — |
+| CONF-L01 Automatic publishing | **PARTIAL** — Production deployment pause decided (decision 4), **not yet applied** (§14.4). Content auto-publishing on the running deployment continues (§14.4). | — |
+| CONF-Q01 NUL bytes | **FIXED (L1)** — 5 files, not 1 | M-01 |
+| CONF-Q02 Reach units | **FIXED (L1)** | M-03 |
+| CONF-Q03 Monitors description | **WITHDRAWN — false finding** (audit misread) | M-05 |
+| CONF-D01 Table `"L"` | **RESOLVED** — quarantined, reversible | §14.5 |
+
+### 14.3 World Pi separation
+
+- **References checked:** `app`, `components`, `lib`, `scripts` and config. The only references were `scripts/package.mjs` (a comment and a studio-bundle exclusion rule, both kept — the comment now records the separation) and the `public/branding/README.md` that described the logos.
+- **Removed from the tree:** `public/branding/` (the two PNGs and their README).
+- **Restore, if ever needed:** `git checkout 6cdd821 -- public/branding/`. That commit is on `origin/main` and on this branch.
+- **Not touched:** the World Pi repository. Per the owner's follow-up, Lambda NX has no involvement with it. A read-only clone made before that follow-up was deleted unmodified.
+
+### 14.4 Production deployment — decision 4, NOT YET APPLIED
+
+- **Live observation (2026-10-03):** the production site is `lambdanx.netlify.app`, Netlify project `lambdanx`. It deploys `main` automatically: the current deploy `6ac10a06…` is commit `9c19303` (a Dependabot merge), `context: production`, `locked: null`, so auto-publishing is **on**. The site name recorded in the baseline (`melodious-tiramisu-8edae7`) is not in this account's project list. §1.3 of this document is superseded by this observation.
+- **Why Claude did not apply it:** the Netlify tools available to this session can read projects and deploys, but have **no lock / "stop auto publishing" operation**, and the session holds no Netlify token. Nothing was changed on Netlify.
+- **Owner action** (Netlify keeps building and serving deploy previews while Production stays fixed):
+  1. Open Netlify → project **lambdanx** → **Deploys**.
+  2. On the current published deploy, choose **Lock to stop auto publishing** (or **Stop auto publishing**).
+  3. Reverse it later with **Start auto publishing**.
+- **Separate question (CONF-L01):** the running deployment's scheduler still runs the `publish` job every 20 minutes, which auto-publishes *content* (posts) on that Production site. Freezing deployments does not stop it. There is no existing switch to pause it without new code. Decision required: whether content auto-publishing is also paused, and how.
+
+### 14.5 Orphan table `"L"` — audit and quarantine (decision 5)
+
+Audit evidence (read-only, 2026-10-03):
+- Absent from schema, migrations and code.
+- Shape is the dashboard template (identity `id` + `created_at`).
+- **Never written** — 0 rows, identity sequence `is_called = false`, 0 inserts / updates / deletes.
+- No foreign keys, views, triggers, policies or functions reference it.
+- It was the sole member of the `supabase_realtime` publication, with 0 subscriptions.
+- 0 mentions in 24 h of logs across 9 services.
+- Created by hand between `group_members` and `blobs`.
+
+The migration (`db/ops/orphan-L-quarantine.sql`) moves it to the non-exposed schema `lambda_orphaned`, removes it from the publication and revokes the `service_role` grant. `db/ops/orphan-L-restore.sql` reverses every step.
+
+| Check | Result |
+|---|---|
+| Local round trip (PostgreSQL 16, Supabase roles and publication mimicked) | Before = after-restore, identical. Both scripts safe to repeat. The guard refuses when rows exist. |
+| Live, before | `public."L"` present, publication member, service_role ALL, 25 tables in `public` |
+| Live, after (2026-10-03) | `public."L"` absent; `lambda_orphaned."L"` present with 0 rows; publication members 0; no grants; sequence moved with the table; **24 tables in `public`, 0 without RLS**; anon / authenticated have no USAGE on the schema |
+| DROP | **Not performed.** A separate later owner decision once the quarantine has stood. |

@@ -112,9 +112,11 @@ export const STUDIO_EXCLUDE = [
    * Three files were **1.56 MB of a 2.88 MB bundle** — more than half of it,
    * and none of it code:
    *
-   *  - `public/branding/world-pi-logo-*-1024.png` (1.2 MB) are the 1024×1024
-   *    logos prepared for *submission forms*. A store or portal upload field
-   *    reads them; the app never requests either one.
+   *  - `public/branding/world-pi-logo-*-1024.png` (1.2 MB) were 1024×1024
+   *    logos prepared for *submission forms*, belonging to World Pi — a
+   *    separate project. They were separated from this tree on 2026-10-03
+   *    (ledger R293; recoverable from commit 6cdd821). The rule stays so that
+   *    upload-sized branding never rides in the studio bundle again.
    *  - `dash-laptop.png` (357 KB) is a screenshot of the dashboard, kept at the
    *    repository root for documentation.
    *
