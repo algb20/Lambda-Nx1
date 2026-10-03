@@ -148,6 +148,27 @@
       "when": 1787198094021,
       "tag": "0020_preferences",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1787257429000,
+      "tag": "0021_email_followers",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1787818175000,
+      "tag": "0022_rls_every_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1788730137000,
+      "tag": "0023_fk_indexes",
+      "breakpoints": true
     }
   ]
 }
