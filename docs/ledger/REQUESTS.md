@@ -2921,3 +2921,21 @@ Drizzle أو Admiralty أو `CLAUDE.md` أو الشيفرة القائمة.
 **لم يُغيَّر أيّ كود، ولا CLAUDE.md.** العيوب المكتشفة (gradeConfidence يعدّ المفاتيح لا
 الأصول المستقلّة، وبايت NUL في analysis.ts، ووصف Brier غير المنفّذ، ووحدة CT، ووصف
 المراقبات، ورسالة المصادقة القديمة) سُجّلت «OPEN — not fixed» بانتظار تفويض مسار الصيانة.
+
+## R293 — اعتماد القرارات العشرة الرسمية، ثم Continuity Reconciliation وMaintenance Audit
+
+**الطلب (نصّ القرارات كما وردت، مختصرًا بأمانة):**
+1. اسم المرحلة **30.27.8.RB** (R محجوز للنشر/التصدير/المشاركة). لا 30.27.9 حاليًا.
+2. **S** نقطة الاستئناف التشغيلية بشرط التحقق من سجلها. لا عودة إلى M كمرحلة عمل جديدة. M وكل ما سبق يبقى سجلًا تاريخيًا. مطلوب Continuity Reconciliation بين M وS. ممنوع حذف أو تجاوز تاريخ سابق بصمت.
+3. تفويض بإصلاح العيوب الستة وثغرة الاعتمادية كصيانة محافظة فقط:
+   REPRODUCE → ROOT CAUSE → PATCH → TEST → REGRESSION TEST → VERIFY → REPORT.
+4. إيقاف النشر التلقائي إلى Production مؤقتًا حتى يُغلق عقد النشر/التصدير/المشاركة. لا يُوقَف CI ولا build ولا preview/staging ولا الاختبارات.
+5. Lambda NX وWorld Pi منفصلان: نقل/فصل الشعارين بعد التحقق من المراجع. الجدول "L" لا يُحذف الآن: ORPHAN/UNKNOWN، ثم audit كامل، ثم إزالته عبر migration موثقة قابلة للتراجع إن ثبت أنه غير مستخدم.
+6. لا تخمين لنصوص 30.26 و30.27.2–5 والمرحلتين 28/29. أي جزء يعتمد عليها يُسجَّل **BLOCKED — SOURCE SPEC MISSING**.
+7. تحديث CLAUDE.md كوثيقة تنفيذ لا مرجع معماري منافس. الأولوية:
+   MASTER → APPROVED PHASE SPEC → TASK HANDOFF → CLAUDE.md → CODE.
+8. SPECIFIED ≠ IMPLEMENTED، وسلّم الحالات: IMPLEMENTED/INTEGRATED/TESTED/EVALUATED/ACCEPTED.
+9. قبل أي تغيير كبير: SCOPE → REQUIREMENTS → DEPENDENCIES → CONTRACTS → IMPACT → IMPLEMENTATION → TESTS → ACCEPTANCE → STATUS.
+10. عند التعارض: Conflict/Continuity Record (المصدر، التاريخ، النطاق)، ثم يُطبَّق الأحدث المعتمد بعد التحقق، ولا يُحذف القديم.
+
+**الترتيب المطلوب:** Continuity Reconciliation وMaintenance Audit أولًا، ثم الإصلاحات المصرّح بها، ولا يُعتبر شيء مكتملًا قبل إثباته.

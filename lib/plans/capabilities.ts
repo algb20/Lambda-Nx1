@@ -175,7 +175,7 @@ export const CAPABILITIES: Capability[] = [
     id: 'calibration',
     name: 'Calibration ledger',
     description:
-      'Our own assessments scored against what actually happened, with Brier and log scores and a domain breakdown.',
+      'Our own assessments scored against what actually happened: a weighted accuracy, overall, by author and by confidence band.',
     family: 'analysis',
     minPlan: 'pro',
     status: 'built-not-gated',

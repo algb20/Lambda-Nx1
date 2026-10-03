@@ -385,7 +385,7 @@ export class TranslationCache {
   constructor(private readonly max = 5_000) {}
 
   static key(text: string, locale: string): string {
-    return `${locale} ${text}`
+    return `${locale}\u0000${text}`
   }
 
   get(text: string, locale: string): string | undefined {

@@ -1,7 +1,11 @@
 /**
- * lib/auth — the app's only auth entry point. Selects the provider by env
- * (AUTH_PROVIDER, default 'pi'). The standalone provider is registered here in
- * phase P12 without changing any screen or flow.
+ * lib/auth — selects the Pi identity provider by env (AUTH_PROVIDER, default
+ * 'pi'). Pi tokens are verified server-side through the provider returned here.
+ *
+ * Standalone email/password sign-in is not selected through this switch: it
+ * runs alongside Pi, at the same time, through its own routes
+ * (`/api/auth/login`, `/api/auth/register`, backed by `./standalone`). The two
+ * identities coexist in one deployment; neither replaces the other.
  */
 import type { AuthProvider } from './types'
 import { piAuthProvider } from './pi'
@@ -15,7 +19,9 @@ export function getAuthProvider(): AuthProvider {
       return piAuthProvider
     default:
       throw new Error(
-        `AUTH_PROVIDER="${name}" is not configured. Available: pi (standalone arrives in P12).`,
+        `AUTH_PROVIDER="${name}" is not a provider this switch selects. Available: pi. ` +
+          'Standalone email/password sign-in needs no setting here: it runs alongside Pi ' +
+          'through /api/auth/login and /api/auth/register.',
       )
   }
 }

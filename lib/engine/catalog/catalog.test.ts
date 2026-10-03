@@ -11,6 +11,9 @@ import {
   SOURCE_FAMILIES,
   livePublisherReach,
   plannedPublisherReach,
+  reachByUnit,
+  REACH_UNITS,
+  isPublisherUnit,
 } from './index'
 import { independenceGroup, sourceHost } from './types'
 import { licenceProblem, partitionByLicence, LAMBDA_USAGE, nonCommercial, needsAgreement, PUBLIC_DOMAIN } from './licence'
@@ -256,7 +259,7 @@ describe('catalogue scale', () => {
 describe('source families', () => {
   it('gives every family an auditable basis for its reach', () => {
     for (const f of SOURCE_FAMILIES) {
-      expect(f.publishers, f.key).toBeGreaterThan(0)
+      expect(f.reach, f.key).toBeGreaterThan(0)
       // A reach number nobody can check is marketing.
       expect(f.basis.length, f.key).toBeGreaterThan(40)
       expect(f.endpoint.startsWith('https://'), f.key).toBe(true)
@@ -272,6 +275,34 @@ describe('source families', () => {
   it('reaches beyond a million publishers once the planned families land', () => {
     // The standing target. Stated as reach, which is what it is.
     expect(plannedPublisherReach()).toBeGreaterThan(1_000_000)
+  })
+
+  /**
+   * Regression: the certificate-transparency family put ten billion
+   * *certificates* into the publishers field, and the live reach summed them
+   * with news outlets into one 10,549,740,110 headline — a number dominated by
+   * a unit that is not publishers at all. Reach is reported per unit, and only
+   * the publisher units are ever summed as "publishers".
+   */
+  it('declares what each reach figure counts', () => {
+    for (const f of SOURCE_FAMILIES) expect(REACH_UNITS, f.key).toContain(f.unit)
+  })
+
+  it('never counts records as publishers', () => {
+    const records = SOURCE_FAMILIES.filter((f) => !isPublisherUnit(f.unit))
+    expect(records.map((f) => f.key)).toContain('certificate_transparency')
+    const ct = SOURCE_FAMILIES.find((f) => f.key === 'certificate_transparency')!
+    expect(livePublisherReach()).toBeLessThan(ct.reach)
+    expect(plannedPublisherReach()).toBe(
+      SOURCE_FAMILIES.filter((f) => isPublisherUnit(f.unit)).reduce((n, f) => n + f.reach, 0),
+    )
+  })
+
+  it('reports every unit separately and loses nothing', () => {
+    const byUnit = reachByUnit()
+    const total = Object.values(byUnit).reduce((n, v) => n + v, 0)
+    expect(total).toBe(SOURCE_FAMILIES.reduce((n, f) => n + f.reach, 0))
+    expect(byUnit.certificates).toBeGreaterThan(0)
   })
 
   it('carries a licence on every family, checked by the same registry', () => {

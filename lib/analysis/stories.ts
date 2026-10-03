@@ -284,7 +284,7 @@ export function storyId(reports: StoryReport[]): string {
   const material = reports
     .map((r) => r.sourceUrl ?? r.claim)
     .sort()
-    .join(' ')
+    .join('\u0000')
   let h1 = 0x811c9dc5
   let h2 = 0x01000193
   for (let i = 0; i < material.length; i++) {
