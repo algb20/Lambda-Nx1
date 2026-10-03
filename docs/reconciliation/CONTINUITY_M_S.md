@@ -177,3 +177,34 @@ Legend:
 > S exit gate: 7 of 27 rows BLOCKED — SOURCE SPEC MISSING (rows 2, 3, 7, 8, 9, 14, 26).
 >
 > No content conflict exists between M and S (§3). Phase 30: NOT COMPLETE. Phase 31: BLOCKED.
+
+---
+
+## 7. Correction record — "missing" means *not supplied to Claude* (2026-10-03, ledger R294)
+
+- **Source:** the owner, forwarding the research assistant's check of the project library.
+- **Scope:** CR-02, CR-03, CR-04 and §4 of this document. The same wording appears in the baseline and in CLAUDE.md §2 rule 2.
+- **Correction:** the texts recorded as missing **exist in the owner's project library**:
+  - 30.26 Data Contracts;
+  - 30.27.2, 30.27.3, 30.27.4 and 30.27.5;
+  - Phase 28 Technology Intelligence, in `Lambda_NX_Master_Living_Blueprint_v13_Phase_29_Live_Intelligence`;
+  - Phase 29, in later and consolidated Master copies;
+  - the consolidated Master, `Lambda_NX_Master_Living_Implementation_Blueprint_2026-09-26_CONSOLIDATED.md`.
+
+  The detailed A–P texts are not certain: some may exist only inside the consolidated Master rather than as separate files.
+- **What remains true:**
+  - Those texts were **not in the two files supplied to Claude**. Every finding above is correct *relative to those inputs*.
+  - The real problem is that the specification has not reached Claude as **one coherent, unambiguous handoff** — not that the research is lost.
+- **Status wording, from now on:**
+  - **NOT SUPPLIED TO CLAUDE** — the text exists in the library but was not supplied. This replaces "SOURCE SPEC MISSING" for the items listed above.
+  - **BLOCKED — SOURCE SPEC MISSING** — kept only for text that the reconstruction finds genuinely absent.
+- **Next step (owner, R294):** Master Reconstruction & Claude Handoff Reconciliation.
+  1. Collect every version.
+  2. Take the latest version of each part.
+  3. Merge 30.26, 30.27.2–6, A–P, Phase 28, Phase 29 and M→S.
+  4. Detect conflicts, and supersede older conflicting text explicitly.
+  5. Fix one source per contract.
+  6. Label SPECIFIED / REQUIRED / IMPLEMENTED.
+  7. Identify what Claude still lacks, then issue the final Claude package.
+
+  No programming against these contracts until then.

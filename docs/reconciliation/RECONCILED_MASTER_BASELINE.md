@@ -1060,3 +1060,21 @@ The migration (`db/ops/orphan-L-quarantine.sql`) moves it to the non-exposed sch
 | Live, before | `public."L"` present, publication member, service_role ALL, 25 tables in `public` |
 | Live, after (2026-10-03) | `public."L"` absent; `lambda_orphaned."L"` present with 0 rows; publication members 0; no grants; sequence moved with the table; **24 tables in `public`, 0 without RLS**; anon / authenticated have no USAGE on the schema |
 | DROP | **Not performed.** A separate later owner decision once the quarantine has stood. |
+
+---
+
+## 15. Decisions of 2026-10-03, later (ledger R294) — append
+
+| Entry | New status | Evidence |
+|---|---|---|
+| **CONF-L01** — content auto-publishing | **RESOLVED** — **paused**. `publish` is moved from `SCHEDULE` to `UNSCHEDULED` with the owner's reason, and removed from the Vercel fallback and `vercel.json`. Route, job and manual `/api/publish/run` are kept. A test fails if it becomes due on any tick, or gains a fallback slot. | `lib/ops/schedule.ts`; `lib/ops/schedule.test.ts` (3 new tests fail on the old schedule); `docs/DEPLOY.md` |
+| **CONF-G06** — "one million sources" | **RESOLVED — KEEP** (owner). Counted as publishers by unit (CLAUDE.md §2a, M-03). | `SOURCE_POPULATION_PLAN.md` |
+| "SOURCE SPEC MISSING" for 30.26, 30.27.2–5, Phase 28/29 | **Corrected → NOT SUPPLIED TO CLAUDE.** The texts exist in the owner's library. A–P to be checked during reconstruction. | `CONTINUITY_M_S.md` §7 |
+
+**Live observation (2026-10-03):**
+- The `posts` table holds **95** rows: 94 by the system author "Lambda" and 1 by a user.
+- The last automatic post was **2026-08-27 11:27 UTC**. There are **0** posts in the last 7 days and **0** social channels.
+- Automatic publishing had therefore already stopped in practice on Production, consistent with the database having been paused and the deployment's environment being incomplete. The schedule change makes the stop deliberate, and keeps it in force when deploys resume.
+- The "52 posts" figure in §1.4 was wrong, most likely read from a planner estimate rather than a count, and is superseded by this count.
+
+**Production deployment lock** (§14.4) remains an **owner action** on Netlify. The schedule change above sits on this branch only: it reaches Production only through a merge to `main` and a deploy, both of which are paused.

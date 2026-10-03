@@ -98,8 +98,11 @@ families **extend, never replace** this method. Family roadmap: `docs/GATEWAYS.m
      example a specified source's live response shape.
    - Claude reports anything else it observes as **DISCOVERED**, with evidence, and never
      adopts it on its own. The Radar (`docs/RADAR.md`) gathers such observations.
-   - Missing specification text is never guessed. A dependent item is recorded
-     **BLOCKED — SOURCE SPEC MISSING**.
+   - Specification text Claude does not have is never guessed. A dependent item is
+     recorded as one of:
+     - **NOT SUPPLIED TO CLAUDE** — the text exists in the owner's library, but no one
+       has handed it over;
+     - **BLOCKED — SOURCE SPEC MISSING** — the text is confirmed absent.
 3. **Our own technology.** We build our own engine, algorithms, storage and analysis —
    not a thin wrapper over someone else's product. Inspire from the best, then build
    stronger in our own way.
@@ -269,6 +272,10 @@ SCOPE → REQUIREMENTS → DEPENDENCIES → CONTRACTS → IMPACT → IMPLEMENTAT
 Publication / Export / Share contract (30.27.8.R) is closed and has passed test, failure
 test and acceptance. CI, builds, previews/staging and automated tests continue. Do not
 publish to Production.
+
+Scheduled **content** publication (`publish` job) is paused for the same reason (R294):
+it sits in `UNSCHEDULED` in `lib/ops/schedule.ts`, and a test fails if it is scheduled
+again before the owner lifts the pause.
 
 ## 10. Project boundary
 
