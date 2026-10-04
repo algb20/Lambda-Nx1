@@ -29,6 +29,7 @@ import {
   Link2 as LinkIcon,
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { PoweredByCoinGecko } from '@/components/powered-by-coingecko'
 import { KpiStrip } from '@/components/kpi-strip'
 import { LayerRail } from '@/components/layer-rail'
 import { allLayers, onlyLayer } from '@/lib/world/layers'
@@ -1252,6 +1253,7 @@ export function GlobeView() {
       {layer === 'liquidity' ? (
         <Card className="p-3">
           <h4 className="mb-1 text-xs font-semibold">Where the liquidity sits</h4>
+          <PoweredByCoinGecko className="mb-1" />
           {!chain ? (
             <p className="text-[11px] text-muted-foreground">Reading venue data…</p>
           ) : chain.venueCountries.length === 0 ? (

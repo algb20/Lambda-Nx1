@@ -6,6 +6,7 @@ import { licenceProblem } from '@/lib/engine/catalog/licence'
 import { Registry, registry } from '@/lib/engine/registry'
 import * as sources from '@/lib/engine/sources'
 import { opensky } from '@/lib/engine/sources/geo'
+import { CODED_SOURCE_LICENCES } from '@/lib/engine/sources/licences'
 import type { Source } from '@/lib/engine/types'
 
 /**
@@ -133,6 +134,45 @@ describe('S invariant 4 — no source runs around the licence gate', () => {
     expect(licenceBoundaryViolations(before)).toEqual([
       'opensky → opensky-network.org: refused by opensky_states (commercial)',
     ])
+  })
+})
+
+describe('S invariant 4 — every coded source declares what its terms allow (NEW-03)', () => {
+  const registered = () => {
+    for (const [name, fn] of Object.entries(sources)) {
+      if (/^register[A-Z]/.test(name) && typeof fn === 'function') (fn as () => void)()
+    }
+    const catalogue = new Set(CATALOG.map((c) => c.key))
+    return [...new Set(registry.capabilities().flatMap((c) => registry.sourcesFor(c).map((s) => s.key)))].filter(
+      (k) => !catalogue.has(k),
+    )
+  }
+
+  it('has a licence entry for every registered coded source', () => {
+    const keys = registered()
+    expect(keys.length).toBeGreaterThan(50)
+    expect(keys.filter((k) => !(k in CODED_SOURCE_LICENCES))).toEqual([])
+  })
+
+  it('registers no source whose terms refuse this product', () => {
+    const refused = Object.entries(CODED_SOURCE_LICENCES)
+      .filter(([, l]) => l.state === 'refused')
+      .map(([k]) => k)
+    expect(refused).toEqual(expect.arrayContaining(['opensky', 'opensanctions', 'urlscan', 'shodan.internetdb']))
+    expect(registered().filter((k) => refused.includes(k))).toEqual([])
+  })
+
+  it('marks verified only what was read, with the evidence and a commercial-use licence', () => {
+    for (const [key, l] of Object.entries(CODED_SOURCE_LICENCES)) {
+      if (l.state === 'unverified') {
+        expect(l.reason.length, key).toBeGreaterThan(10)
+        continue
+      }
+      expect(l.checked, key).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+      expect(l.evidence.length, key).toBeGreaterThan(20)
+      if (l.state === 'verified') expect(l.licence.commercialUse, key).toBe(true)
+      else expect(l.licence.commercialUse, key).toBe(false)
+    }
   })
 })
 

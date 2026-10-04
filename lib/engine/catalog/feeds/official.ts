@@ -1,5 +1,5 @@
 import type { CatalogSource } from '../types'
-import { PUBLIC_DOMAIN, ccBy, publicFeed } from '../licence'
+import { PUBLIC_DOMAIN, ccBy, nonCommercial, publicFeed } from '../licence'
 
 /**
  * Institutional and official publication.
@@ -275,7 +275,13 @@ export const OFFICIAL_SOURCES: CatalogSource[] = [
     topics: ['sanctions', 'corporate'],
     coverage: 'global',
     admiralty: 'B',
-    licence: ccBy('OpenSanctions', 'https://www.opensanctions.org/licensing/'),
+    /**
+     * Was recorded as CC BY. The publisher's own licensing page (read
+     * 2026-10-04): "Creative Commons 4.0 Attribution NonCommercial"; commercial
+     * use needs a paid licence. Recorded as non-commercial, so the licence gate
+     * withholds it from this paid product (batch 06).
+     */
+    licence: nonCommercial('OpenSanctions — CC BY-NC 4.0 (commercial use requires a paid licence)', 'https://www.opensanctions.org/licensing/'),
     minIntervalSec: 86400,
     keyless: true,
     note: 'Consolidated sanctions and PEP data, assembled from official lists.',

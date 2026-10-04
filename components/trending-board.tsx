@@ -9,6 +9,7 @@ import {
   CheckCheck,
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { PoweredByCoinGecko } from '@/components/powered-by-coingecko'
 import { NewsTicker, type TickerItem } from '@/components/news-ticker'
 import type { ChainRadarReport } from '@/lib/modules/chain-radar'
 import type { WorldEventsReport } from '@/lib/modules/world-events-shared'
@@ -246,6 +247,7 @@ function ChainLane() {
       more={
         data ? (
           <div className="space-y-2.5">
+            {data.market || data.venues.length > 0 ? <PoweredByCoinGecko /> : null}
             {data.market ? (
               <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
                 <span>

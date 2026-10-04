@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { AlertCircle, Loader2, RefreshCw } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { PoweredByCoinGecko } from '@/components/powered-by-coingecko'
 import { Label, useCurated, useT } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import type { ChainRadarReport } from '@/lib/modules/chain-radar'
@@ -144,6 +145,7 @@ export function MarketsPanel() {
               Live prices, network conditions and where the volume actually trades. Every figure
               carries the agency that measured it and when.
             </p>
+            <PoweredByCoinGecko className="mt-1" />
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             {age ? <span className="tabular-nums">Read {age}</span> : null}

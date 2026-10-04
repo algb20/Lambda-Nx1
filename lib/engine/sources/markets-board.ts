@@ -129,26 +129,49 @@ export const coingeckoTop: Source = {
  * central bank beats a live price we are not permitted to take.
  */
 interface FredSeries {
-  /** FRED series id, e.g. `SP500`. */
+  /** FRED series id, e.g. `VIXCLS`. */
   id: string
   name: string
   cls: AssetClass
   unit?: string
+  /**
+   * Who the data belongs to. FRED's terms (fred.stlouisfed.org/legal) allow
+   * commercial use of "Public Domain: Citation requested" and "Copyrighted:
+   * Citation required" series "provided that appropriate attribution is given
+   * to FRED as well as the original source", so the origin travels with the
+   * row rather than being left to the linked page.
+   */
+  origin: string
 }
 
-const FRED_SERIES: FredSeries[] = [
-  // Indices — the ones a reader recognises without a legend.
-  { id: 'SP500', name: 'S&P 500', cls: 'indices', unit: '' },
-  { id: 'DJIA', name: 'Dow Jones Industrial Average', cls: 'indices', unit: '' },
-  { id: 'NASDAQCOM', name: 'Nasdaq Composite', cls: 'indices', unit: '' },
-  { id: 'WILL5000PRFC', name: 'Wilshire 5000 (full cap)', cls: 'indices', unit: '' },
-  { id: 'VIXCLS', name: 'VIX volatility index', cls: 'indices', unit: '' },
-  // Commodities — energy and metals, the ones that move everything else.
-  { id: 'DCOILWTICO', name: 'Crude Oil (WTI)', cls: 'commodities' },
-  { id: 'DCOILBRENTEU', name: 'Brent Crude', cls: 'commodities' },
-  { id: 'DHHNGSP', name: 'Natural Gas (Henry Hub)', cls: 'commodities' },
-  { id: 'GASREGW', name: 'US Retail Gasoline', cls: 'commodities' },
+/**
+ * Only series FRED marks as usable in a commercial product.
+ *
+ * ## What was removed, and why (batch 06, 2026-10-04)
+ *
+ * - `SP500`, `DJIA`, `NASDAQCOM` — FRED labels each **"Copyrighted:
+ *   Pre-approval required"**: the data belongs to S&P Dow Jones Indices and
+ *   Nasdaq, and use needs their prior permission, which we do not hold.
+ * - `WILL5000PRFC` — FRED **removed the Wilshire indexes on 2024-06-03**; the
+ *   series page now redirects to that announcement and the CSV answers 404.
+ *   It had been a dead request on every refresh.
+ *
+ * The board therefore shows fewer stock indices. That is the honest size of
+ * what we may publish; a fuller index section needs a licence or another
+ * provider whose terms allow it.
+ */
+export const FRED_SERIES: FredSeries[] = [
+  // Indices — FRED: "Copyrighted: Citation required".
+  { id: 'VIXCLS', name: 'VIX volatility index', cls: 'indices', unit: '', origin: 'Cboe' },
+  // Commodities — FRED: "Public Domain: Citation requested".
+  { id: 'DCOILWTICO', name: 'Crude Oil (WTI)', cls: 'commodities', origin: 'U.S. EIA' },
+  { id: 'DCOILBRENTEU', name: 'Brent Crude', cls: 'commodities', origin: 'U.S. EIA' },
+  { id: 'DHHNGSP', name: 'Natural Gas (Henry Hub)', cls: 'commodities', origin: 'U.S. EIA' },
+  { id: 'GASREGW', name: 'US Retail Gasoline', cls: 'commodities', origin: 'U.S. EIA' },
 ]
+
+/** Series FRED says need the copyright holder's permission — never on the board. */
+export const FRED_PRE_APPROVAL_REQUIRED = ['SP500', 'DJIA', 'NASDAQCOM'] as const
 
 /**
  * The last two observations of a FRED series.
@@ -189,7 +212,7 @@ function fredSource(key: string, cls: AssetClass): Source {
      * hint that the cause was our own politeness rather than FRED's.
      *
      * 300 ms is still deliberate spacing on a static CSV download built to be
-     * fetched, and it puts nine series comfortably inside the budget.
+     * fetched, and it keeps every series comfortably inside the budget.
      */
     minIntervalMs: 300,
     async run(_input, ctx) {
@@ -229,7 +252,7 @@ function fredSource(key: string, cls: AssetClass): Source {
             symbol: s.id,
             // The date travels in the name, because a daily close presented
             // without its date reads as a live quote and is not one.
-            name: `${s.name} · ${latest.date}`,
+            name: `${s.name} · ${s.origin} via FRED · ${latest.date}`,
             price: latest.value,
             change,
             unit: s.unit ?? '$',

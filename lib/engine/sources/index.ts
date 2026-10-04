@@ -67,21 +67,32 @@ import { piNetworkChain, ethereumChain, solanaChain, exchangeVenues, multiChainS
 import { ckanFederation, openDataActivePortalCount } from './opendata'
 import { ecbYieldCurve, ecbPolicyRate, referenceRates } from './rates'
 
-export const moduleOneSources: Source[] = [
-  cloudflareDns,
-  googleDns,
-  rdap,
-  crtsh,
-  wayback,
-  urlscan,
-  internetdb,
-]
+/**
+ * `urlscan` and `internetdb` (Shodan) are out of the domain gateway (batch 06).
+ * Their own terms, read 2026-10-04:
+ * - Shodan InternetDB: "free for non-commercial use … If you're using the
+ *   InternetDB API to make money then you need an enterprise license."
+ * - urlscan.io: "Commercial use of any part of our service requires express
+ *   written permission."
+ * This product has paid tiers. The adapters stay for the day a licence or
+ * permission exists; the report hides the two empty sections.
+ */
+export const moduleOneSources: Source[] = [cloudflareDns, googleDns, rdap, crtsh, wayback]
 
 export const moduleTwoSources: Source[] = [usernameWeb, xposedornot, gravatar]
 
 export const threatGatewaySources: Source[] = [feodo, urlhaus, threatfox]
 
-export const financeGatewaySources: Source[] = [opensanctions, gleif, mempool]
+/**
+ * OpenSanctions is out of the gateway (batch 06). Two facts, both measured on
+ * 2026-10-04: its hosted API answers **401 "No API key provided"** to every
+ * keyless call, so the source had been failing on each use; and its data is
+ * **CC BY-NC 4.0** — "commercial use requires a paid license"
+ * (opensanctions.org/licensing). This product has paid tiers. The adapter is
+ * kept for the day a commercial licence and key exist; sanctions coverage
+ * continues through the official lists in the catalogue.
+ */
+export const financeGatewaySources: Source[] = [gleif, mempool]
 
 export const marketsGatewaySources: Source[] = [coingecko, edgar, frankfurter, worldbankEconomy]
 
@@ -163,8 +174,9 @@ export const moduleOneSourceCatalog: CatalogRow[] = [
   { key: 'rdap', name: 'RDAP registration', capability: 'whois', passive: true, enabled: true },
   { key: 'crtsh', name: 'crt.sh Certificate Transparency', capability: 'subdomains', passive: true, enabled: true },
   { key: 'wayback', name: 'Wayback Machine', capability: 'archive', passive: true, enabled: true },
-  { key: 'urlscan', name: 'urlscan.io', capability: 'tech', passive: true, enabled: true },
-  { key: 'shodan.internetdb', name: 'Shodan InternetDB', capability: 'ip_reputation', passive: true, enabled: true },
+  // Withheld: commercial use needs urlscan's written permission / a Shodan enterprise licence.
+  { key: 'urlscan', name: 'urlscan.io', capability: 'tech', passive: true, enabled: false },
+  { key: 'shodan.internetdb', name: 'Shodan InternetDB', capability: 'ip_reputation', passive: true, enabled: false },
 ]
 
 export const moduleTwoSourceCatalog: CatalogRow[] = [
@@ -180,7 +192,8 @@ export const threatGatewayCatalog: CatalogRow[] = [
 ]
 
 export const financeGatewayCatalog: CatalogRow[] = [
-  { key: 'opensanctions', name: 'OpenSanctions', capability: 'sanctions', passive: true, enabled: true },
+  // Withheld: API key and a commercial licence required — see financeGatewaySources.
+  { key: 'opensanctions', name: 'OpenSanctions', capability: 'sanctions', passive: true, enabled: false },
   { key: 'gleif', name: 'GLEIF (LEI)', capability: 'sanctions', passive: true, enabled: true },
   { key: 'mempool', name: 'mempool.space (BTC)', capability: 'wallet', passive: true, enabled: true },
 ]

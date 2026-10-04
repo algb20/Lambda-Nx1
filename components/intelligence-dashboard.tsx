@@ -28,6 +28,7 @@ import {
 } from 'lucide-react'
 import { Sparkles, Building2, Scale, FileText, Mic, Pickaxe, Sun, Satellite, Megaphone, Coins, Waves, BadgeCheck } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { PoweredByCoinGecko } from '@/components/powered-by-coingecko'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -1575,9 +1576,11 @@ function BoardView({ r, onReload, loading }: { r: MarketsBoardReport; onReload: 
         ))
       )}
       <p className="px-1 text-[11px] text-muted-foreground">
-        Quotes from public sources (CoinGecko · Stooq · ECB), shown as published — never a
-        prediction. Change shown is intraday vs. session open where available.
+        Shown as published — never a prediction. Crypto from CoinGecko; indices and commodities
+        are FRED daily closes (Federal Reserve Bank of St. Louis, with the original source named on
+        each row), dated; FX from the ECB via Frankfurter.
       </p>
+      <PoweredByCoinGecko className="px-1" />
     </div>
   )
 }

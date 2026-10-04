@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Loader2, RefreshCw, RotateCcw, ZoomIn, ZoomOut, AlertCircle } from 'lucide-react'
 import { TimeStamp } from '@/components/time-stamp'
+import { PoweredByCoinGecko } from '@/components/powered-by-coingecko'
 import type { ConstellationNode, ConstellationReport } from '@/lib/modules/constellation'
 
 /**
@@ -406,6 +407,7 @@ export function ConstellationView() {
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <h3 className="text-base font-bold lg:text-lg">Correlation constellation</h3>
+        <PoweredByCoinGecko />
         {report ? (
           <span className="rounded-full border border-border px-2 py-0.5 text-[10px] tabular-nums text-muted-foreground">
             {report.summary.assetsUsed} of {report.summary.assetsRead} assets ·{' '}
