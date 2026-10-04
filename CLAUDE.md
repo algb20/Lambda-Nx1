@@ -139,17 +139,41 @@ families **extend, never replace** this method. Family roadmap: `docs/GATEWAYS.m
 1. **No temporary solutions.** Every point is built *finally*. A module is "done" only
    when it: works for real, is tested with real tests, handles errors and edge cases,
    is documented, and contains **no `TODO`/mock/`Math.random()` placeholders**. See §6.
-2. **Research boundary.** Architecture research and adoption decisions belong to the
-   research stage and the Master, not to Claude.
-   - Claude verifies the facts needed to implement an *already specified* contract, for
-     example a specified source's live response shape.
-   - Claude reports anything else it observes as **DISCOVERED**, with evidence, and never
-     adopts it on its own. The Radar (`docs/RADAR.md`) gathers such observations.
-   - Specification text Claude does not have is never guessed. A dependent item is
-     recorded as one of:
-     - **NOT SUPPLIED TO CLAUDE** — the text exists in the owner's library, but no one
-       has handed it over;
-     - **BLOCKED — SOURCE SPEC MISSING** — the text is confirmed absent.
+2. **Research and correction boundary (owner R312, 2026-10-04 — refines the earlier
+   "implementation-only" wording).** Claude is **not** the architectural owner.
+   - **Never allowed:** inventing requirements; silent redesign; removing difficult
+     requirements; downgrading contracts; replacing approved architecture; silent
+     contract changes; fabricating historical decisions.
+   - **Authorized and expected:**
+     - inspect the repository before changing it;
+     - research official and current documentation;
+     - verify standards, APIs, dependencies, versions and claims;
+     - detect contradictions, missing contracts, stale assumptions, broken links, bad
+       configuration, security issues and defects;
+     - fix a defect when the correct fix is clear and consistent with the approved
+       architecture — the smallest compatible correction;
+     - research a verified official replacement for a moved, failed or obsolete source.
+   - **A new architectural decision** is never invented silently. It is recorded with:
+     problem, evidence, alternatives, recommended decision, impact, migration
+     requirements, tests, acceptance criteria and status. It is flagged for owner
+     approval when it materially changes the architecture.
+   - **Missing major specifications** are reconstructed from these sources, in this order:
+     1. the Master;
+     2. project documents;
+     3. the repository;
+     4. prior approved decisions;
+     5. official standards;
+     6. authoritative documentation;
+     7. research evidence.
+
+     Reconstructed text is labelled **RECONSTRUCTED**. Unrecoverable history is marked
+     **MISSING HISTORICAL SOURCE**, with a **CURRENT RECONSTRUCTION PROPOSAL** that is
+     never presented as an earlier decision.
+   - Ordinary corrective engineering is not blocked by a missing future specification.
+   - Superseded wording, kept for history: "Claude verifies the facts needed to implement
+     an *already specified* contract … reports anything else as DISCOVERED and never
+     adopts it on its own". The labels NOT SUPPLIED TO CLAUDE and BLOCKED — SOURCE SPEC
+     MISSING remain valid for text that exists elsewhere or is confirmed absent.
 3. **Our own technology.** We build our own engine, algorithms, storage and analysis —
    not a thin wrapper over someone else's product. Inspire from the best, then build
    stronger in our own way.
@@ -290,7 +314,11 @@ Records live in `docs/reconciliation/`: the Contradiction Register in the baseli
 - **Operational resumption point: 30.27.8.S — Cross-Contract Consistency / Closure Gate**
   (owner, R302). Step 1 of the R301 pipeline (Canonical Reconciliation) is closed for
   W1, W2, W4 and W5. Audit, recovery and consolidation continue as preparation for S.
-  **No code changes (R299).**
+  ~~No code changes (R299).~~ **Superseded by R312:**
+  - corrective maintenance and the contract-recovery task proceed under §2 rule 2;
+  - Master subsystems are still coded only after their contract is closed, starting
+    from the Build Package for the first executable unit;
+  - Production stays locked (R306).
 - 30.27.8 letter sequence (owner, R302): A → B → C → D → E → F → G → H → I → J → K → L →
   M → N → O → P → Q → R → S. M–R are preserved history, not a return point.
 - Verification ladders are preserved as independent frameworks until S defines a
@@ -331,7 +359,7 @@ SCOPE → REQUIREMENTS → DEPENDENCIES → CONTRACTS → IMPACT → IMPLEMENTAT
 | Lane | What it covers | Precondition |
 |---|---|---|
 | Audit | Read, test and inspect, including read-only inspection of live systems. | Always allowed. |
-| Maintenance | Defects and security in the Existing System. No new architecture, schema or contract. Path: REPRODUCE → ROOT CAUSE → PATCH → TEST → REGRESSION TEST → VERIFY → REPORT. | Explicit owner authorisation per batch. Batch 01: `docs/reconciliation/MAINTENANCE_BATCH_01.md`. |
+| Maintenance | Defects and security in the Existing System. No new architecture, schema or contract. Path: REPRODUCE → ROOT CAUSE → PATCH → TEST → REGRESSION TEST → VERIFY → REPORT. | Standing authorisation since R312, for defects whose correct fix is clear and consistent with the approved architecture, and for verified repair of moved or failed sources. Each batch is still recorded (`docs/reconciliation/MAINTENANCE_BATCH_NN.md`). Anything that changes architecture, schema or contract is flagged for approval. *(Before R312: explicit owner authorisation per batch.)* |
 | Implementation | A Master subsystem. | A closed implementation package (Master §70.6). Otherwise stop and report the exact gap. |
 
 **Live systems** — database, hosting, environment, DNS:
