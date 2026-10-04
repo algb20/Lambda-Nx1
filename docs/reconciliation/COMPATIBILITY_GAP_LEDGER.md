@@ -155,3 +155,23 @@ Each follows CONFLICT → EVIDENCE → IMPACT → PROPOSED RESOLUTION → APPROV
 | Conflicts open | SC-08, SC-09, SC-03, SC-04, PI-01, GAP-S1–S4, CONF-S01, CONF-S03, D-03 |
 | Conflicts resolved this round | SC-01 (Phase 28); SC-02 (statuses recorded); the Forecast row |
 | IMPLEMENTED against the Blueprint | **0** |
+
+---
+
+## 5. Decision record — 2026-10-04 (ledger R300)
+
+### SC-08 — Phase 29 → **RESOLVED (owner decision)**
+
+> «اعتمد Phase 29 = Live Intelligence كما في النص الحرفي»
+
+| Item | Decision / effect |
+|---|---|
+| **Phase 29** | **Live Intelligence** — the verbatim document: `# PHASE 29 — Real-Time Intelligence Fabric + Live Coverage + Source Synchronization + Broadcast Intelligence`. Build Package §58.3, lines 4047–6780, 29.0–29.109, `SPECIFIED / AGREED — NOT IMPLEMENTED`; library source `…v13_Phase_29_Live_Intelligence.md`. |
+| Supplement §3, "Phase 29 — Technology Intelligence" | **Superseded as a phase label.** Its text is kept as the content of Master **section** §29 (Technology intelligence), as SC-01 already did for §28. Nothing is deleted. |
+| Owner's R298 "Phase 29 — Companies & Facilities Intelligence" | **Superseded as a phase label.** The description is **kept in full**. In the Build Package, Companies & Facilities is domain section §37. **Still OPEN:** whether the description becomes an extension of §37 or a separately numbered stage. That question was not part of this decision and is not assumed. |
+| Implementation | Unchanged: **NOT IMPLEMENTED**. Precursor code only (G48). |
+| Code | None changed |
+
+**Phase identities now settled:**
+- Phase 28 = Technology Intelligence (SC-01, R298).
+- Phase 29 = Live Intelligence (SC-08, R300).

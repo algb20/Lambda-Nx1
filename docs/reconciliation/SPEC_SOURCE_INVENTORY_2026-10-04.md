@@ -217,3 +217,16 @@ The repository's 2,770 passing tests prove **repository behaviour**. None of the
 - The CLAUDE.md ↔ Master hierarchy will be set formally **after** this inventory. Until then, the existing text of CLAUDE.md (R293) stays as recorded, unchanged.
 - Do not change Pi Network, Netlify, Supabase, Next.js or the current structure, nor the forecasting, Phase 28–30 or A–P stages, on conjecture.
 - **Next, owner-led:** one Canonical Reconciliation against the Master Blueprint, then the correct resumption point.
+
+---
+
+## 7. Update — owner decision R300
+
+- **Phase 29 = Live Intelligence**, as in the verbatim text (U3 §58.3).
+- In the §4 summary table, the Phase 29 row moves from "CONFLICTING (SC-08 OPEN)" to **FOUND — conflict resolved**.
+- Placing the Companies & Facilities description (U6) remains open: an extension of Build §37, or a separately numbered stage.
+
+**Counts after R300:**
+- CONFLICTING: 6 (was 7).
+- FOUND complete: 2.
+- IMPLEMENTED: 0.

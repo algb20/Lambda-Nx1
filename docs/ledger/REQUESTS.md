@@ -3125,3 +3125,14 @@ Drizzle أو Admiralty أو `CLAUDE.md` أو الشيفرة القائمة.
   - المالك دمج PR #74 في `main` (65e1cc6)، لكن Production ما زال على `9c19303`، فلم يُنشر شيء جديد.
   - وجود القفل على مستوى الموقع لم يُتحقَّق منه (UV).
 - **الـhierarchy:** نص `CLAUDE.md` الحالي (R293) يبقى كما هو دون تعديل حتى يقرّر المالك رسميًا بعد الجرد.
+
+## R300 — «اعتمد Phase 29 = Live Intelligence كما في النص الحرفي» (2026-10-04)
+
+**القرار:** المرحلة 29 = **Live Intelligence**، أي النص الحرفي «Real-Time Intelligence Fabric + Live Coverage + Source Synchronization + Broadcast Intelligence» (حزمة البناء §58.3).
+
+**الأثر (توثيق فقط، دون أي كود):**
+- **SC-08 حُسم.**
+- تسمية الملحق «Phase 29 = Technology» أُلغيت كاسم مرحلة، ونصّه محفوظ كمحتوى للقسم §29 في الـMaster.
+- تسمية «Phase 29 = Companies & Facilities» (R298) أُلغيت كاسم مرحلة، ووصفها محفوظ كاملًا. **بقي مفتوحًا:** هل يصبح امتدادًا للقسم §37 أم مرحلة برقم مستقل.
+- الهويات المحسومة: المرحلة 28 = Technology، والمرحلة 29 = Live.
+- التنفيذ ما زال: NOT IMPLEMENTED.
