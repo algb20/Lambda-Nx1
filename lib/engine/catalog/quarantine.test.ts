@@ -37,6 +37,17 @@ describe('the 2026-10-04 observations', () => {
     expect(isQuarantined('si_volcano_weekly')).toBe(false)
   })
 
+  /**
+   * Released 2026-10-04 by the owner (ledger R311), after the recheck in
+   * `docs/reconciliation/AUDIT_PASS_2026-10-04_R310.md` §4: 200, 50 items,
+   * the newest from the same day, headlines readable. The 2026-08-22 bar —
+   * it parses, it has items, and one of them is recent — not a status code.
+   */
+  it('releases SCMP once it answers with readable, current items', () => {
+    expect(isQuarantined('scmp_news')).toBe(false)
+    expect(CATALOG.some((s) => s.key === 'scmp_news')).toBe(true)
+  })
+
   it('names only keys the catalogue holds, each once', () => {
     const keys = QUARANTINE.map((e) => e.key)
     expect(new Set(keys).size).toBe(keys.length)

@@ -39,6 +39,13 @@
  * `sec_litigation`, `cisa_advisories`, `nsidc_news`, `redhat_security`,
  * `kyivindependent` — each had an item within two days.
  *
+ * The same bar released `scmp_news` on 2026-10-04 (owner, ledger R311). It
+ * had answered 403, then 405 on 2026-08-22; the recheck that day read 50
+ * items, the newest from that afternoon, with readable headlines, and its
+ * robots.txt does not disallow the feed path (it asks a 10 s crawl delay; we
+ * poll every 1800 s). Its entry is removed here and kept as history in
+ * `docs/reconciliation/MAINTENANCE_BATCH_03.md`.
+ *
  * Two entries also named keys that no longer exist in the catalogue at all
  * (`sec_edgar_filings`, `meteoalarm_europe`). A quarantine entry for a record
  * nobody holds withholds nothing; they are gone.
@@ -121,8 +128,6 @@ export const QUARANTINE: QuarantinedSource[] = [
   q('eu_sanctions_map', 'bot-blocked', 403, 'Returns HTML rather than the declared feed; the Council press feed covers the same designations.'),
   q('alarabiya', 'bot-blocked', 403),
   q('ahram_egypt', 'bot-blocked', 403),
-  { key: 'scmp_news', reason: 'bot-blocked', status: 405, observedOn: REPROBED,
-    note: 'Now 405 Method Not Allowed rather than 403 — a different refusal, still a refusal.' },
   q('nation_kenya', 'bot-blocked', 403),
   q('map_morocco', 'bot-blocked', 403),
   q('ethiopia_addisstandard', 'bot-blocked', 403),
