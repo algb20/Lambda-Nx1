@@ -329,7 +329,11 @@ export const NATIONAL_SOURCES: CatalogSource[] = [
     key: 'who_afro',
     name: 'WHO Africa — outbreaks and emergencies',
     publisher: 'World Health Organization — Regional Office for Africa',
-    url: 'https://www.afro.who.int/rss/news.xml',
+    // "Emergencies and outbreaks", listed on https://www.afro.who.int/rss-feeds
+    // — the same dataset under its current address. It answers, but its newest
+    // item is from 2025, so the record stays quarantined as frozen.
+    url: 'https://www.afro.who.int/rss/emergencies.xml',
+    formerUrls: [{ url: 'https://www.afro.who.int/rss/news.xml', until: '2026-10-04', why: '404 since 2026-08-14' }],
     kind: 'rss',
     discipline: 'humint',
     topics: ['health'],

@@ -246,6 +246,34 @@ describe('a headline built from a record that has none', () => {
   })
 })
 
+/**
+ * WHO's outbreak API gives each notice only a relative path. A finding must
+ * cite the notice, not the API it was read from — and a template that cannot
+ * produce a whole address must not produce half of one.
+ */
+describe('a citation built from a record that has only a relative path', () => {
+  const who = { ...base, path: 'value', map: { title: 'Title', urlTemplate: 'https://www.who.int/item{ItemDefaultUrl}' } }
+
+  it('cites the record page the template builds', async () => {
+    const [item] = await catalogSource(who).run(
+      NO_INPUT,
+      ctxReturning({ value: [{ Title: 'Ebola — DRC', ItemDefaultUrl: '/2026-DON618' }] }),
+    )
+    expect(item.sourceUrl).toBe('https://www.who.int/item/2026-DON618')
+  })
+
+  it('falls back to the declared address when the field is missing', async () => {
+    const [item] = await catalogSource(who).run(NO_INPUT, ctxReturning({ value: [{ Title: 'No path' }] }))
+    expect(item.sourceUrl).toBe(base.url)
+  })
+
+  it('never cites something that is not an http(s) address', async () => {
+    const source = catalogSource({ ...who, map: { title: 'Title', urlTemplate: '{ItemDefaultUrl}' } })
+    const [item] = await source.run(NO_INPUT, ctxReturning({ value: [{ Title: 'Bad', ItemDefaultUrl: 'javascript:alert(1)' }] }))
+    expect(item.sourceUrl).toBe(base.url)
+  })
+})
+
 
 /**
  * A frozen address can be quietly, permanently wrong. NVD returns its catalogue

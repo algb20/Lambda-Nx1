@@ -251,7 +251,14 @@ export const HAZARD_SOURCES: CatalogSource[] = [
     key: 'reliefweb_disasters',
     name: 'ReliefWeb disasters',
     publisher: 'UN OCHA',
-    url: 'https://api.reliefweb.int/v2/disasters?appname=lambda-nx&limit=50&sort[]=date:desc&profile=list',
+    url: 'https://api.reliefweb.int/v2/disasters?limit=50&sort[]=date:desc&profile=list',
+    // The approved appname comes from the deployment, as the note below says.
+    // It used to be written into `url` as `lambda-nx`, so setting the variable
+    // would have changed nothing (found 2026-10-04, batch 04).
+    urlFor: () =>
+      `https://api.reliefweb.int/v2/disasters?appname=${encodeURIComponent(
+        process.env.RELIEFWEB_APPNAME?.trim() ?? '',
+      )}&limit=50&sort[]=date:desc&profile=list`,
     kind: 'json',
     path: 'data',
     discipline: 'humint',

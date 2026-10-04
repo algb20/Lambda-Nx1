@@ -55,3 +55,67 @@ describe('the 2026-10-04 observations', () => {
     expect(['bse_india', 'nasa_donki'].filter((k) => !known.has(k))).toEqual([])
   })
 })
+
+/**
+ * Moved-source repair of 2026-10-04 (owner R312; maintenance batch 04).
+ *
+ * Each repair was verified against the publisher's own listing of its feeds,
+ * read, and checked against robots.txt before the record changed. A record
+ * whose new address answers but is frozen, refused by robots, or needs a
+ * registration keeps its quarantine entry — a repaired URL is not a release.
+ */
+describe('the moved-source repair of 2026-10-04', () => {
+  const record = (key: string) => {
+    const found = CATALOG.find((s) => s.key === key)
+    if (!found) throw new Error(`${key} missing from the catalogue`)
+    return found
+  }
+
+  it.each([
+    ['who_don', 'https://www.who.int/api/news/diseaseoutbreaknews'],
+    ['ecdc_threats', 'https://www.ecdc.europa.eu/en/taxonomy/term/1505/feed'],
+    ['bis_press', 'https://www.bis.org/doclist/all_pressrels.rss'],
+    ['annahar_lebanon', 'https://www.annahar.com/rss'],
+  ])('releases %s at its verified address', (key, prefix) => {
+    expect(isQuarantined(key)).toBe(false)
+    expect(record(key).url.startsWith(prefix)).toBe(true)
+  })
+
+  it.each(['who_don', 'ecdc_threats', 'bis_press', 'annahar_lebanon', 'who_afro', 'eluniversal_mx', 'reliefweb_reports'])(
+    'keeps the old address of %s as history',
+    (key) => {
+      const former = record(key).formerUrls ?? []
+      expect(former.length).toBeGreaterThan(0)
+      expect(former.every((f) => f.url !== record(key).url && /^\d{4}-\d{2}-\d{2}$/.test(f.until))).toBe(true)
+    },
+  )
+
+  it('keeps a repaired feed out when its new address is frozen or refused', () => {
+    expect(quarantineFor('who_afro')?.reason).toBe('frozen')
+    expect(quarantineFor('eluniversal_mx')?.reason).toBe('bot-blocked')
+  })
+
+  it('treats ReliefWeb as a registration, read from the deployment and never written here', () => {
+    for (const key of ['reliefweb_reports', 'reliefweb_disasters']) {
+      const r = record(key)
+      expect(quarantineFor(key)?.reason).toBe('credential')
+      expect(r.keyless).toBe(false)
+      expect(r.keyEnv).toBe('RELIEFWEB_APPNAME')
+      expect(r.url).not.toMatch(/appname=/)
+      expect(r.url).toMatch(/\/v2\//)
+    }
+  })
+
+  it('puts the deployment appname into the ReliefWeb request', () => {
+    const before = process.env.RELIEFWEB_APPNAME
+    process.env.RELIEFWEB_APPNAME = 'example-approved-name'
+    try {
+      for (const key of ['reliefweb_reports', 'reliefweb_disasters']) {
+        expect(record(key).urlFor?.(new Date())).toContain('appname=example-approved-name')
+      }
+    } finally {
+      if (before === undefined) delete process.env.RELIEFWEB_APPNAME
+      else process.env.RELIEFWEB_APPNAME = before
+    }
+  })
+})

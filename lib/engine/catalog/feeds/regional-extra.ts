@@ -107,7 +107,10 @@ export const REGIONAL_EXTRA_SOURCES: CatalogSource[] = [
     key: 'annahar_lebanon',
     name: 'النهار',
     publisher: 'An-Nahar',
-    url: 'https://www.annahar.com/rss/latest-news.xml',
+    // The publisher's own /rss (verified 2026-10-04: 50 items, newest that day;
+    // robots.txt does not disallow it).
+    url: 'https://www.annahar.com/rss',
+    formerUrls: [{ url: 'https://www.annahar.com/rss/latest-news.xml', until: '2026-10-04', why: '404 since 2026-08-14' }],
     kind: 'rss',
     discipline: 'osint',
     topics: ['news'],
@@ -280,7 +283,11 @@ export const REGIONAL_EXTRA_SOURCES: CatalogSource[] = [
     key: 'eluniversal_mx',
     name: 'El Universal',
     publisher: 'El Universal (Mexico)',
-    url: 'https://www.eluniversal.com.mx/rss.xml',
+    // The publisher's current feed. It answers (100 items, 2026-10-04), but
+    // robots.txt has denied every agent by default since 2026-09-24, so the
+    // record stays quarantined as a refusal — see quarantine.ts.
+    url: 'https://www.eluniversal.com.mx/arc/outboundfeeds/rss/?outputType=xml',
+    formerUrls: [{ url: 'https://www.eluniversal.com.mx/rss.xml', until: '2026-10-04', why: '404 since 2026-08-14' }],
     kind: 'rss',
     discipline: 'osint',
     topics: ['news'],

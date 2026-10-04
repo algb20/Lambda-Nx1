@@ -238,6 +238,18 @@ export interface CatalogSource {
      * than publishing half a sentence.
      */
     titleTemplate?: string
+    /**
+     * The record's own page, built from its fields, for publishers whose API
+     * gives only a relative path. Same `{field}` rules as `titleTemplate`; the
+     * result is used only if it is an absolute http(s) URL, otherwise the
+     * ordinary `url` lookup applies. It is a link for the reader — the engine
+     * never fetches it, so it does not widen the guardrail's host list.
+     *
+     * WHO's Disease Outbreak News API carries `ItemDefaultUrl: "/2026-DON618"`;
+     * without this every finding would cite the API endpoint instead of the
+     * outbreak notice it came from.
+     */
+    urlTemplate?: string
     title?: string
     url?: string
     time?: string
@@ -246,6 +258,14 @@ export interface CatalogSource {
     summary?: string
     magnitude?: string
   }
+
+  /**
+   * Addresses this record used before, newest first — kept when a publisher
+   * moves a feed and the record is repaired (owner R312: "preserve the old URL
+   * as historical metadata"). `until` is the date the replacement was verified;
+   * `why` is what was observed at the old address. Never fetched.
+   */
+  formerUrls?: { url: string; until: string; why: string }[]
 
   /** Off by default when a source is heavy, noisy, or in trial. */
   enabled?: boolean

@@ -151,11 +151,13 @@ export const reliefWeb: Source = {
   minIntervalMs: 1500,
   async run(input, ctx) {
     const topic = input.value.trim()
-    const params = new URLSearchParams({ appname: 'lambda-nx', limit: '10' })
+    // v2 with the appname ReliefWeb approved for this deployment (required
+    // since 1 November 2025); v1 answers 410. See `newsGatewayCatalog`.
+    const params = new URLSearchParams({ appname: process.env.RELIEFWEB_APPNAME?.trim() ?? '', limit: '10' })
     params.append('sort[]', 'date:desc')
     for (const f of ['title', 'url', 'date', 'primary_country']) params.append('fields[include][]', f)
     if (topic.length >= 2) params.append('query[value]', topic)
-    const url = `https://api.reliefweb.int/v1/reports?${params.toString()}`
+    const url = `https://api.reliefweb.int/v2/reports?${params.toString()}`
     const res = await ctx.fetch(url)
     expectOk('reliefweb', res)
     const j = (await res.json().catch(() => null)) as ReliefWebResponse | null
