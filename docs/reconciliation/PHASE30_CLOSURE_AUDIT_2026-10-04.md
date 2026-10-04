@@ -358,7 +358,7 @@ SP = SOURCE-PRESERVED summary (M0 §70.8 / BP §58.5). RC = RECONSTRUCTED / CONS
 | Migrations | 24 in `db/migrations` | EXISTING / KEEP | The future migration contract per table (BP §53) |
 | API routes | 84 `route.ts` under `app/api` | EXISTING / **MIGRATE** | BP §10.2: no table semantics as public contract; Problem Details, version and idempotency all **REQUIRED** |
 | Middleware | `middleware.ts`: caller limit + `no-store` on all `/api` | EXISTING / KEEP | Limits now in `config/rate-limits.json` (batch 05) |
-| Source registry | 247 catalogue records (`lib/engine/catalog`), 117 coded sources (`lib/engine/sources`), licence registry, quarantine (39), daily recheck, 180 independence groups | EXISTING / **MIGRATE** | BP §31 Source Control Plane; licence for coded sources **REQUIRED** (NEW-03) |
+| Source registry | 247 catalogue records (`lib/engine/catalog`); 117 coded source definitions (`lib/engine/sources`), of which 74 are registered in gateways; licence registry for catalogue records and, since batch 06, for coded sources (`lib/engine/sources/licences.ts`); quarantine (39); daily recheck; 180 independence groups | EXISTING / **MIGRATE** | BP §31 Source Control Plane; 60 coded-source terms still unread (NEW-03) |
 | Ingestion | Sweeps via `/api/world`, `/api/cron/[job]`, host budget, fetch-guard | EXISTING / MIGRATE | Phase 29 pipeline; retry contract REQUIRED (NEW-05) |
 | UI | 9 pages, tab shell, shadcn/ui | EXISTING / KEEP (design preservation) | 30.27.2 / Q are REQUIRED |
 | Connectors (AI) | `lib/ai` (Anthropic SDK 0.115.0), MCP server `app/api/mcp` (6 tools) | EXISTING / MIGRATE | A / C / E gates are REQUIRED |
