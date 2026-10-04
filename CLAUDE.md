@@ -61,6 +61,17 @@ Execution Package governs. In particular, follow its:
 
 A Master subsystem is coded only from a task sheet in the Build Package §53 format.
 
+**Incremental development (owner rules R296, 2026-10-04):**
+- Lambda NX exists and evolves incrementally. There is no rewrite.
+- Existing code is mapped to the target. It is never assumed to conform:
+  `docs/reconciliation/INVENTORY_AND_GAPS_2026-10-04.md`.
+- A gap does not stop the project. It moves through
+  `GAP → RESEARCH REQUIRED → SPECIFICATION → CONTRACT → IMPLEMENTATION → TEST → ACCEPTANCE`.
+  Only implementation of the affected part waits.
+- Conflicts move through `CONFLICT → EVIDENCE → IMPACT → PROPOSED RESOLUTION → APPROVAL`.
+- Architecture is never changed because a name, version or implementation detail
+  differs, until the official or project source proves it.
+
 ## 1. What this project is
 
 > This section describes the **current implementation surface** (the Existing
