@@ -3136,3 +3136,31 @@ Drizzle أو Admiralty أو `CLAUDE.md` أو الشيفرة القائمة.
 - تسمية «Phase 29 = Companies & Facilities» (R298) أُلغيت كاسم مرحلة، ووصفها محفوظ كاملًا. **بقي مفتوحًا:** هل يصبح امتدادًا للقسم §37 أم مرحلة برقم مستقل.
 - الهويات المحسومة: المرحلة 28 = Technology، والمرحلة 29 = Live.
 - التنفيذ ما زال: NOT IMPLEMENTED.
+
+## R301 — الشركات والمنشآت كـDomain Pack، والحوكمة، ومسار الاستئناف (2026-10-04)
+
+**القرارات (من المالك):**
+1. **الشركات والمنشآت = Domain Pack / Intelligence Domain** مستقل، لا مرحلة جديدة، ولا يُدمج داخل §37 بما يُفقده استقلاله.
+   - يُحفظ كل ما جُهّز سابقًا تحت اسم «Phase 29 Companies & Facilities».
+   - يرتبط بـ: Technology، وSupply Chain، وFinancial/Market، وGeospatial/EO، وInfrastructure، وResources/Materials، وEvents/Evidence، وWeb/News/Filings، وGeopolitical.
+2. **الحوكمة:**
+   - `CLAUDE.md` يحكم المستودع الحالي والتنفيذ الفعلي.
+   - الـMaster يحكم الهدف المعماري، والبحث، والمواصفات، والعقود، والمراحل، ومعايير القبول.
+   - بينهما طبقة صريحة: Current-System Reality → Target Architecture → Migration/Implementation Contracts.
+3. **التعارضات لا تُعتمد كما هي، بل يُعمل عليها واحدًا واحدًا:**
+   - Canonical Timeline؛
+   - Unified Verification Model؛
+   - Current System Baseline؛
+   - مكان التنبّؤ في الـMaster؛
+   - استعادة النصوص؛
+   - تدقيق التنفيذ بالأدلة.
+4. **نقطة الاستئناف:** CANONICAL RECONCILIATION → CURRENT-SYSTEM AUDIT → MISSING-SPEC RECOVERY → CONTRACT CONSOLIDATION → RESUME. لا انتقال إلى Phase 31.
+5. **فئات النصوص:** RECOVERED EXACT TEXT / RECOVERED DECISIONS-SPECIFICATION CONTENT / MISSING — MUST NOT INVENT.
+
+**ما نُفِّذ (توثيق فقط، دون أي كود):**
+- `docs/reconciliation/CANONICAL_RECONCILIATION.md`: القرارات، وجدول الحوكمة بطبقاته الثلاث، وحالة المسار (الخطوة 1 قيد التنفيذ)، وست مسارات عمل W1–W6 لكل منها أدلة ومقترح وقرار مطلوب، وسجل الـDomain Pack.
+- **أهم المقترحات:**
+  - **W1:** خطّان زمنيان: خطّ المواصفات (آخره S المحجوبة) وخطّ العمل (المسار أعلاه).
+  - **W2:** نموذج واحد يحمل الأبعاد كلها (البوابة L0–L7، وحالة الحقيقة، وAdmiralty، والدرجة القديمة، والاستقلالية) دون دمجها في رقم واحد. سلّم A يُسجَّل مُستبدَلًا بهذه الأبعاد مع جدول تحويل لا يفقد معلومة.
+  - **W4:** التنبّؤ طبقة في نواة الذكاء، بعد Inference وقبل Monitoring، ولا يكتب في الحالة المعتمدة.
+- **`CLAUDE.md`:** تحديث §0 (تقسيم الحوكمة R301-2) و§7 (حالة المراحل ومسار العمل). نص R293 محفوظ في هذا السجل كتاريخ.

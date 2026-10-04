@@ -6,7 +6,19 @@
 > architectural reference — that is the Master Living Implementation Blueprint —
 > and it never competes with it.
 
-## 0. Precedence and status (owner decisions, 2026-10-03 — ledger R293)
+## 0. Precedence and status (owner decisions R293, restated R301 — 2026-10-04)
+
+**Governance split (R301-2):**
+- **CLAUDE.md** governs the current repository and actual execution.
+- **The Master Living Blueprint** governs the target architecture, research,
+  specifications, contracts, phases and acceptance criteria.
+- Between them sits an explicit layer:
+  **Current-System Reality → Target Architecture → Migration/Implementation Contracts.**
+- Neither cancels the other. The existing system is not treated as absent, and the
+  Blueprint is not lowered to match the code.
+- Working document: `docs/reconciliation/CANONICAL_RECONCILIATION.md`.
+
+The chain below (R293) applies to target matters:
 
 **Order of authority**, highest first:
 
@@ -274,9 +286,14 @@ When two files or two decisions conflict:
 Records live in `docs/reconciliation/`: the Contradiction Register in the baseline, and
 `CONTINUITY_M_S.md`.
 
-**Phase state (2026-10-03):**
-- Operational resumption point: **30.27.8.S** — BLOCKED by the Build Package's own terms
-  (§29.4) until its source contracts are consolidated and its open conflicts decided.
+**Phase state (2026-10-04, R301):**
+- **Working point:** the pipeline `CANONICAL RECONCILIATION → CURRENT-SYSTEM AUDIT →
+  MISSING-SPEC RECOVERY → CONTRACT CONSOLIDATION → RESUME`. The next stage is fixed
+  formally only after RESUME. **No code changes until then (R299).**
+- Latest *specification* stage recorded in the Master: **30.27.8.S** — BLOCKED by the
+  Build Package's own terms (§29.4).
+- Phase 28 = Technology Intelligence. Phase 29 = Live Intelligence (R300).
+  Companies & Facilities Intelligence is a **Domain Pack**, not a phase (R301-1).
 - 30.27.8.M is history only.
 - Phase 30 is NOT COMPLETE. Phase 31 is BLOCKED until Phase 30 closes.
 - This reconciliation stage is **30.27.8.RB**. R remains Artifact / Export /
