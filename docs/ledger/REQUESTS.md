@@ -3195,3 +3195,36 @@ Drizzle أو Admiralty أو `CLAUDE.md` أو الشيفرة القائمة.
 **ما نُفِّذ (توثيق فقط):**
 - `CANONICAL_RECONCILIATION.md` §5: القرارات، وملاحظات الدقّة، وجدول أعمال S، وإعادة تصنيف W5، ومتابعة D-03، وحالة المسار.
 - `CLAUDE.md` §7: حالة المراحل.
+
+## R303 — تجميد معماري، وقائمة GAP/CONFLICT فقط (2026-10-04)
+
+**الطلب (ملخّص أمين):**
+- **Architecture Freeze**، لا إعادة تصميم.
+- لا كود، ولا Phase 31، ولا اختراع لمواصفات ناقصة، ولا إعادة تصميم لـ30.26 أو 30.27.2–5.
+- لا IMPLEMENTED لمجرد وجود كود مشابه، ولا حذف لمتطلبات سابقة، ولا استبدال لقرارات سابقة دون اعتماد صريح.
+- **مرجع استمرارية مؤقت:** Phase 28 = Technology، **Phase 29 = Companies & Facilities**، **Phase 30 = Supply Chain**، و30.25 Gap Audit، و30.26 Data Contracts، و30.27 Interface Contracts، مع قائمة مواصفات 30.27.
+- الفصل بين Existing System وTarget Architecture.
+- فصل Lambda عن World Pi لا يعني إزالة Pi Network، وهذا قرار معماري مستقل.
+- التنبّؤ جزء من الـpipeline.
+- Verification Taxonomy Reconciliation رسمية دون اختراع mapping، مع الحفاظ على Admiralty.
+- **قائمة GAP/CONFLICT فقط**، بستة أصناف: SOURCE-AVAILABLE وSOURCE-MISSING وCONFLICT وNEEDS-RECONCILIATION وIMPLEMENTATION-VERIFIED وIMPLEMENTATION-NOT-VERIFIED.
+- انتظار وثيقة Canonical Reconciliation قبل تعديل `CLAUDE.md` أو إعادة هيكلة الكود.
+
+**ما نُفِّذ (توثيق فقط):** `docs/reconciliation/GAP_CONFLICT_LIST_2026-10-04.md`. **لم يُعدَّل `CLAUDE.md` ولا الكود.**
+
+**أهم ما في القائمة:**
+- **C2 — تعارض:** «Phase 29 = Companies & Facilities» يخالف قرارَي المالك اليوم:
+  - R300: «اعتمد Phase 29 = Live Intelligence كما في النص الحرفي»؛
+  - R301-1: الشركات والمنشآت Domain Pack لا مرحلة.
+
+  ويخالف النص الحرفي في حزمة البناء (§58.3). **لم يُطبَّق**، لأن R303 نفسه يمنع استبدال قرار سابق دون اعتماد صريح.
+- **C3 — تعارض:** «Phase 30 = Supply Chain» يخالف كل المصادر:
+  - في كل المصادر Phase 30 هي مرحلة العقود والإغلاق (30.25–30.27 ثم S)؛
+  - النص الحرفي للمرحلة 28 يقول «Phase 25 supply-chain intelligence» (السطر 3393)؛
+  - وR303 نفسه يضع 30.25 و30.26 و30.27 تحت رقم 30.
+- **I1:** «Capability & Conformance» غير موجودة في أي ملف وصلني (SOURCE-MISSING).
+- **C4:** نص 30.25 غير موجود في أي ملف وصلني.
+- **X2:** لم تُحذف أي واجهة لـPi Network؛ المحذوف شعارا World Pi فقط.
+- **X3:** `CLAUDE.md` لم يعد يلغي التنبّؤ منذ R293.
+- **X5:** `CLAUDE.md` يحمل الآن سطور R300 وR301-1 التي تعارض C2. يبقى كما هو حتى تحسم المصالحة.
+- **التحقّق من التنفيذ:** 0 مواصفة من الـMaster مُتحقَّق من تنفيذها.
