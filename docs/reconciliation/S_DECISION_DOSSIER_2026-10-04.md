@@ -1,9 +1,15 @@
-# 30.27.8.S — Decision Dossier (prepared for the owner / research owner)
+# 30.27.8.S — Open-Question List (Claude-prepared; NOT a source)
+
+> **Status correction — owner R308, 2026-10-04.** This file is **not** a project source and holds **no decisions**.
+> It was written by Claude on 2026-10-04 (R307) as a list of eight open questions, drawn from earlier conflict records (GAP-S1, SC-09, CONF-S01, R302 W2 and W1, R302 §5.1, R304 §3, CONF-S03).
+> No original "S decisions" document has been supplied to Claude. **That source is MISSING SOURCE.**
+> Per R308 these questions are **not** pending owner decisions now. They are **DEFERRED** until the Master reconciliation, which the owner leads.
+> The "Proposed" lines below are Claude's suggestions only. They must not be cited as decisions, adopted, or treated as a source for the reconciliation.
 
 | | |
 |---|---|
 | **Prepared** | 2026-10-04, ledger R307 ("اعمل المطلوب بنفسك") |
-| **What this is** | The evidence and options for each decision that S needs before it can close. It is **preparation**, not a decision. |
+| **What this is** | Claude's list of the open questions S would need answered, with evidence and options. **Not a source, not a decision** (see the status correction above). |
 | **What this is not** | Architecture by Claude. Every "Proposed" line is a recommendation awaiting approval. Nothing here is adopted, and no specification text is invented: where a source is missing, the entry says so. |
 | **Why S needs it** | Build Package §29.4: "S is **BLOCKED** until all required source contracts are supplied/consolidated and all unresolved conflicts have explicit decisions." §55: no implementation package until S confirms closure. |
 | **Code changed** | None by this document |

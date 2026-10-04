@@ -136,3 +136,67 @@ R303 lists them "among" those prepared. The list is **not exhaustive**: N, O, P,
 | **X5** — CLAUDE.md timing | **RESOLVED.** The Reconciliation Record `RECORD_PHASE_SEQUENCE_R304.md` was written first; CLAUDE.md §7 was updated after it. |
 
 All other items in this list are unchanged. Nothing was marked IMPLEMENTED.
+
+---
+
+## 8. Owner statement R308 — documentation gaps first (2026-10-04)
+
+**Owner direction:** close the documentation and reconciliation gap first; the Master reconciliation is **owner-led**. Claude's role after it is SPECIFICATION → CODE → TEST → REPORT. Claude does not do research, architecture, or guessed requirements. Anything not clearly documented stays MISSING / RESEARCH REQUIRED / DECISION REQUIRED / BLOCKED. "We have it in the conversation" is **not** a substitute for project files.
+
+**Instructions in force:** no Phase 31 · Production not opened · no missing text invented · no change to Pi, Netlify, Supabase, Next.js or the system structure on Claude's own initiative. **Code changed by this entry:** none.
+
+### 8.1 New conflict
+
+| ID | Conflict | Evidence | Status |
+|---|---|---|---|
+| **C2-R308** | R308 states **"Phase 29 — Companies & Facilities Intelligence: SPECIFIED"** and asks for Phase 29 to link directly to Technology Intelligence. | **Earlier explicit owner decisions on the same day:** R300 «اعتمد Phase 29 = Live Intelligence كما في النص الحرفي»; R304 "Phase 29 = Live Intelligence … Companies & Facilities ≠ replacement for Phase 29 … no retroactive conversion". **Source:** Build Package §58.3, verbatim `# PHASE 29 — Real-Time Intelligence Fabric …`. CLAUDE.md §7 records R304. | **OPEN — not applied.** R308 itself forbids replacing an earlier decision without recording it, so R304 stays in force in every record (CLAUDE.md unchanged) until the owner states which holds. The owner's *content* point — Companies & Facilities is an Intelligence Domain linked to entities, facilities, technology, events, evidence, sources and changes, not a company table — **agrees** with R301-1 and R304 and is recorded under the C&F Domain Pack. |
+
+### 8.2 Status of each item named in R308
+
+| Item | Owner statement (R308) | Recorded class | Implementation |
+|---|---|---|---|
+| **30.26 Data Contracts** | Documented in part. At least: canonical object / event contracts; canonical envelope; schema / versioning; provenance; temporal / spatial semantics; evidence relationships; compatibility; data / event boundaries; canonical storage vs derived indexes, search, vector and cache; Data Contract Registry / Contract Registry concepts. **The owner will rebuild and document the final version before implementation.** | Scope: AGREED (owner-stated). Full text: **MISSING SOURCE** in final form. Final executable version: **BLOCKED — owner to author.** | NOT IMPLEMENTED; **implementation BLOCKED** |
+| **30.27.2** UIAction + Shared Analytical Context | Semantic UIAction (not a raw click); AI/Agent never mutates UI or canonical truth directly; Client View / Analytical Context / Workspace / Execution states separated; context versioning; risk classes; accessibility | Decisions: AGREED (owner-stated). Final executable text: **pending the owner's consolidated version** | BLOCKED |
+| **30.27.3** Streaming / Incremental Sync | SNAPSHOT / INCREMENTAL SYNC / LIVE STREAM / JOB PROGRESS / WEBHOOK; PAGE_CURSOR / CHANGE_CURSOR / RESUME_POSITION / PIT_CONTEXT; checkpoint / resume / replay; at-least-once; idempotent consumers; resync on cursor expiry; degraded states | as above | BLOCKED |
+| **30.27.4** Versioning / Compatibility | The 8 version kinds; compatibility classes; lifecycle DRAFT → … → RETIRED; Contract Change Ledger; schema-compatible ≠ semantic-compatible | as above | BLOCKED |
+| **30.27.5** Idempotency / Concurrency / Pagination / PIT | Idempotency contract; request fingerprint; ETag / If-Match; 409 / 412; opaque cursor; page / change / resume / PIT separation; PIT Context; no future leakage; historical pagination bound to PIT | as above | BLOCKED |
+| **Phase 28** Technology Intelligence | SPECIFIED; not IMPLEMENTED. No complete standalone copy in the owner's current context. | **SPECIFIED.** Claude holds the Build Package §58.2 extract, which the package labels a verbatim extract of v12. The **standalone v12 file is MISSING SOURCE**. The extract is not to be treated as the reconciled final text until the owner's Master update. | NOT IMPLEMENTED |
+| **Phase 29** | See C2-R308 | **CONFLICT** | NOT IMPLEMENTED |
+| **A–P** | Not available in full. Parts and decisions are spread across the work record. Recovery / reconciliation will follow, with per-stage status DISCOVERED → RESEARCHED → AGREED → SPECIFIED → REQUIRED → IMPLEMENTED → INTEGRATED → TESTED → EVALUATED → ACCEPTED, **never raised automatically**. | Full text **MISSING SOURCE**. Claude does not fill gaps by inference. | NOT IMPLEMENTED |
+| **"Eight S decisions"** | Not in the owner's current context. | **MISSING SOURCE.** The file `S_DECISION_DOSSIER_2026-10-04.md` is Claude's *question list*, relabelled on 2026-10-04 as **not a source and not decisions — DEFERRED**. Per R308 these are not pending decisions now. | — |
+| **Gmail / missing files** | Do not reconnect Gmail or rely on it. Record unavailable sources. | **MISSING SOURCE / DEPENDENCY.** Gmail is not reconnected and not used. | — |
+
+### 8.3 NASA DONKI
+
+| Field | Record |
+|---|---|
+| Classification | **DEPENDENCY / CREDENTIAL REQUIRED.** There is no NASA API key. |
+| Production | **Not a working source in Production.** |
+| Design | **Kept.** The catalogue record (`lib/engine/catalog/feeds/science.ts`) is unchanged. It is withheld only by a dated quarantine entry (2026-10-04, 429 on the shared `DEMO_KEY`), which the recheck can release. |
+| What is not done | No placeholder or fake key; no mock data; no automatic substitution by another NASA endpoint. A keyless lawful alternative may be researched later and adopted only by a documented decision. |
+| Failure isolation (evidence that one source cannot break the registry or core) | **LO 2026-10-04:** Production's `/api/diagnose` reported 3 failed feeds (incl. DONKI) while 135 contributed in the same sweep. **RT:** `lib/engine/no-laundered-refusals.test.ts` keeps refusals reported as failures rather than silently empty. Quarantine withholds a source without touching the record (`quarantine.test.ts`). |
+
+### 8.4 The "30 requests/minute" figure
+
+| Field | Record |
+|---|---|
+| What it is | An **Existing-System constant**: `GATEWAY_LIMIT = { limit: 30, windowMs: 60_000 }` in `lib/rate-limit.ts:43`, used at 8 call sites. It is **not** a documented contract or decision. |
+| Status | **DECISION REQUIRED.** Nothing in the architecture is to be built on 30 as a global limit. |
+| Gap | The owner requires the final figures as a documented **contract / configuration**, not a number buried in code. Today they are buried in code — recorded as a GAP. **Not changed now.** |
+| Dimensions the owner requires kept apart, mapped to what exists today (RP) | **Provider rate limit** → per-source `minIntervalSec` (catalogue record field, `catalog/types.ts:173`) plus a per-host shared budget (`lib/engine/host-budget.ts`). **Lambda source-specific limit** → the same `minIntervalSec`; one source declares its own (`procurement.ts`, limit 5). **Tenant limit** → NONE (no tenant model). **User / caller limit** → `GATEWAY_LIMIT` 30/min, `WRITE_LIMIT` 10/min, `SIGN_IN_LIMIT` 10/min, `SIGN_IN_SUBJECT_LIMIT` 20/min, `CODE_LIMIT` 10/min. **Capability limit** → NONE as a limit (plans gate features, not rates). **Global concurrency** → partial: CKAN `MAX_CONCURRENCY = 6`; world-events concurrency notes; no global cap. **Retry budget** → NONE as a contract. **Burst limit** → NONE (fixed window only). |
+| Side observation | The browser suites share the `GATEWAY_LIMIT` budget (batch 02 §3.2). This is part of the same DECISION REQUIRED. |
+
+### 8.5 Production
+
+**LOCKED** (R306). No new work raises it automatically. Not opened, deployed, credential-changed, or used for external side effects without explicit gates.
+
+### 8.6 Pipeline (owner-led, R308)
+
+```
+Existing Repository + CLAUDE.md + Master Living Blueprint + Research Rules + Phase 28 + Phase 29
++ 30.26 + 30.27.2–5 + A–P + S Decisions
+  → SOURCE INVENTORY → CONFLICT DETECTION → DECISION RECONCILIATION → MASTER UPDATE
+  → IMPLEMENTATION-SAFE SPEC → Claude (SPECIFICATION → CODE → TEST → REPORT)
+```
+
+Claude's existing source inventory (`SPEC_SOURCE_INVENTORY_2026-10-04.md`) and this list are **inputs** to that pipeline, not substitutes for it.
