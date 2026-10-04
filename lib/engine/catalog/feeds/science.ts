@@ -54,10 +54,16 @@ export const SCIENCE_SOURCES: CatalogSource[] = [
      *
      * The entry required `NASA_API_KEY` and so was never fetched at all — space
      * weather was simply absent unless an operator happened to have registered.
-     * `DEMO_KEY` is NASA's own published anonymous key: 30 requests an hour and
-     * 50 a day per address, which at the hourly interval below leaves room to
-     * spare. A real key, when one is set, lifts that ceiling without changing
-     * anything else.
+     * `DEMO_KEY` is NASA's own published anonymous key. This comment used to say
+     * "30 requests an hour and 50 a day per address, which leaves room to
+     * spare"; NASA's own headers disagree. Measured 2026-10-04 from one address:
+     * `429`, `x-ratelimit-limit: 10`, `retry-after: 18589` (about five hours) —
+     * and the key is shared by every anonymous caller on that address, which on
+     * a serverless host is many. So the demo key is not a working path for a
+     * scheduled source; the record is quarantined (`nasa_donki`) until the
+     * deployment sets `NASA_API_KEY`. The key is read from the environment
+     * below and never written into this repository, a URL in a finding, or a
+     * log line: findings cite the declared `url`, which carries `DEMO_KEY`.
      *
      * `type=all` because the parameter defaults to flares only, and a
      * geomagnetic storm is the notification that matters most here.

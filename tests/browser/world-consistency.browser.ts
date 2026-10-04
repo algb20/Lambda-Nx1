@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { BASE, boxOf, closeBrowser, serverIsUp, visit, VIEWPORTS } from './harness'
+import { BASE, boxOf, closeBrowser, serverIsUp, visit, visitorHeaders, VIEWPORTS } from './harness'
 
 /**
  * The page must tell one story.
@@ -21,7 +21,7 @@ async function worldSummary(): Promise<{
   untimed: number
   generatedAt: string
 }> {
-  const res = await fetch(`${BASE}/api/world`, { signal: AbortSignal.timeout(60_000) })
+  const res = await fetch(`${BASE}/api/world`, { headers: visitorHeaders(), signal: AbortSignal.timeout(60_000) })
   const body = (await res.json()) as {
     generatedAt: string
     summary: { total: number; placed: number; newestAt: string | null; untimed: number }

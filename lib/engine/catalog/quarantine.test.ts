@@ -119,3 +119,12 @@ describe('the moved-source repair of 2026-10-04', () => {
     }
   })
 })
+
+describe('licences found wrong during the 2026-10-04 repair', () => {
+  it('does not treat Open-Meteo\'s free API as usable in a commercial product', async () => {
+    const { licenceProblem } = await import('./licence')
+    const record = CATALOG.find((s) => s.key === 'open_meteo_severe')!
+    expect(record.licence.commercialUse).toBe(false)
+    expect(licenceProblem(record.licence)).toBe('commercial')
+  })
+})

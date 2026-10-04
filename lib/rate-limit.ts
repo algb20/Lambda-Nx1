@@ -22,6 +22,8 @@
  * Pure and clock-injectable, so the behaviour is tested rather than assumed.
  */
 
+import { callerLimit } from '@/lib/limits'
+
 export interface RateLimitResult {
   ok: boolean
   /** Requests still available in the current window. */
@@ -39,11 +41,11 @@ export interface RateLimitOptions {
   windowMs: number
 }
 
-/** The gateways fan out to several third-party providers per call. */
-export const GATEWAY_LIMIT: RateLimitOptions = { limit: 30, windowMs: 60_000 }
+/** The gateways fan out to several third-party providers per call. Value: `config/rate-limits.json`. */
+export const GATEWAY_LIMIT: RateLimitOptions = callerLimit('gateway')
 
-/** Writes are cheaper to serve but more attractive to abuse. */
-export const WRITE_LIMIT: RateLimitOptions = { limit: 10, windowMs: 60_000 }
+/** Writes are cheaper to serve but more attractive to abuse. Value: `config/rate-limits.json`. */
+export const WRITE_LIMIT: RateLimitOptions = callerLimit('write')
 
 interface Bucket {
   count: number

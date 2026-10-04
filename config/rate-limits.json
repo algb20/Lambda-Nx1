@@ -1,0 +1,40 @@
+{
+  "$comment": "Caller-facing rate limits of the Existing System, moved here from code on 2026-10-04 (owner R312) without changing any value. These limit how often ONE CALLER may hit OUR API; they are not provider (source) limits, which live on each catalogue record as minIntervalSec. Final figures are DECISION REQUIRED (R308); see docs/reconciliation/RATE_LIMITS_2026-10-04.md. Counters are in-memory, per running instance, fixed window.",
+  "callerLimits": {
+    "gateway": {
+      "limit": 30,
+      "windowSeconds": 60,
+      "key": "caller address",
+      "appliesTo": "every /api route except the UNLIMITED prefixes in lib/api-scope.ts (middleware.ts)",
+      "purpose": "Protect the goodwill of the public providers each gateway call fans out to; one looping client must not exhaust them for everyone."
+    },
+    "write": {
+      "limit": 10,
+      "windowSeconds": 60,
+      "key": "caller address",
+      "appliesTo": "write routes that use writeLimiter",
+      "purpose": "Writes are cheap to serve but more attractive to abuse."
+    },
+    "signIn": {
+      "limit": 10,
+      "windowSeconds": 60,
+      "key": "caller address",
+      "appliesTo": "every sign-in surface (lib/auth/sign-in-limit.ts)",
+      "purpose": "Raise the cost of password guessing from one address."
+    },
+    "signInSubject": {
+      "limit": 20,
+      "windowSeconds": 60,
+      "key": "hash of the identity being claimed",
+      "appliesTo": "every sign-in surface (lib/auth/sign-in-limit.ts)",
+      "purpose": "Stop one account being hammered from many addresses, while staying above signIn so typing someone's email cannot lock them out."
+    },
+    "code": {
+      "limit": 10,
+      "windowSeconds": 60,
+      "key": "caller address",
+      "appliesTo": "verification-code requests (lib/auth/code-flow.ts)",
+      "purpose": "Each request can send an email; generous for a person, useless as a mail cannon."
+    }
+  }
+}

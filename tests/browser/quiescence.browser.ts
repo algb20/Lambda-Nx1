@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { BASE, closeBrowser, getBrowser, serverIsUp, VIEWPORTS } from './harness'
+import { BASE, closeBrowser, getBrowser, serverIsUp, visitorHeaders, VIEWPORTS } from './harness'
 
 /**
  * The page goes quiet.
@@ -71,6 +71,7 @@ describe.runIf(process.env.SKIP_BROWSER !== '1')('abandoned responses do not hol
 
       for (const path of MUST_SETTLE) {
         const ctx = await browser.newContext({
+          extraHTTPHeaders: visitorHeaders(),
           viewport: { width: desktop.width, height: desktop.height },
         })
         const page = await ctx.newPage()

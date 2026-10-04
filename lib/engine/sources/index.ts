@@ -109,7 +109,15 @@ export const marketsBoardSources: Source[] = [
   frankfurterBoard,
 ]
 
-export const geoGatewaySources: Source[] = [nominatim, opensky]
+/**
+ * OpenSky is out of the gateway, matching its catalogue record and the
+ * reconciled baseline (§34: "OpenSky excluded by the licence gate"): its terms
+ * require a prior agreement for commercial REST use, and this product has paid
+ * tiers. The coded adapter had stayed in this list, so the gateway called the
+ * same API the licence registry refuses — found 2026-10-04 (batch 05). The
+ * adapter is kept for the day an agreement exists.
+ */
+export const geoGatewaySources: Source[] = [nominatim]
 
 export const researchGatewaySources: Source[] = [openalex, crossref, pubmed, githubTrend, arxiv, hackerNews]
 
@@ -235,7 +243,8 @@ export const marketsBoardCatalog: CatalogRow[] = [
 
 export const geoGatewayCatalog: CatalogRow[] = [
   { key: 'nominatim', name: 'Nominatim (OpenStreetMap)', capability: 'geo', passive: true, enabled: true },
-  { key: 'opensky', name: 'OpenSky Network (flights)', capability: 'geo', passive: true, enabled: true },
+  // Withheld until a commercial agreement with OpenSky exists — see geoGatewaySources.
+  { key: 'opensky', name: 'OpenSky Network (flights)', capability: 'geo', passive: true, enabled: false },
 ]
 
 export const researchGatewayCatalog: CatalogRow[] = [

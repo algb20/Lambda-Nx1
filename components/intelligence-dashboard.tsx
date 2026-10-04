@@ -125,7 +125,7 @@ const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: s
   { id: 'markets', label: 'Markets', icon: LineChart, placeholder: 'BTC, AAPL, or USD/EUR' },
   { id: 'procurement', label: 'Contracts', icon: Gavel, placeholder: 'company, agency or project name' },
   { id: 'ownership', label: 'Ownership', icon: Network, placeholder: 'company / legal-entity name' },
-  { id: 'geo', label: 'Geo', icon: MapPin, placeholder: 'place, "lat,lon", or aircraft ICAO24 hex' },
+  { id: 'geo', label: 'Geo', icon: MapPin, placeholder: 'place or "lat,lon"' },
   { id: 'research', label: 'Research', icon: Microscope, placeholder: 'a topic, technology or research question' },
   { id: 'reference', label: 'Facts', icon: BookOpen, placeholder: 'a company, person or place — structured facts' },
   { id: 'open-data', label: 'Open data', icon: Library, placeholder: 'a subject — searched across every national catalogue at once' },
@@ -917,8 +917,7 @@ function GeoView({ r }: { r: GeoReport }) {
         <h4 className="mb-1 text-sm font-semibold">Geospatial results</h4>
         {r.findings.length === 0 ? (
           <p className="py-2 text-sm text-muted-foreground">
-            No public geospatial match. Try a place, a &quot;lat,lon&quot; pair, or an aircraft
-            ICAO24 hex.
+            No public geospatial match. Try a place or a &quot;lat,lon&quot; pair.
           </p>
         ) : (
           r.findings.map((e, i) => (
