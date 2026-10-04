@@ -200,3 +200,13 @@ Existing Repository + CLAUDE.md + Master Living Blueprint + Research Rules + Pha
 ```
 
 Claude's existing source inventory (`SPEC_SOURCE_INVENTORY_2026-10-04.md`) and this list are **inputs** to that pipeline, not substitutes for it.
+
+### 8.7 Resolution of C2-R308 — owner, ledger R309
+
+> «Phase 29 تبقى Live Intelligence كما في R304»
+
+| Item | Status |
+|---|---|
+| **C2-R308** | **RESOLVED — Phase 29 = Live Intelligence, as in R304.** The R308 phrase "Phase 29 — Companies & Facilities Intelligence" is superseded as a phase label. Its content stays recorded under the Companies & Facilities **Domain Pack** (R301-1), linked to Technology Intelligence and the World Model. |
+| CLAUDE.md | No change needed. §7 already records R304. |
+| Implementation | Unchanged — NOT IMPLEMENTED |
