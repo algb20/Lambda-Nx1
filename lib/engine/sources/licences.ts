@@ -43,7 +43,6 @@ const ABUSE_CH_REFUSED: CodedLicence = {
   evidence:
     '"Access to the abuse.ch Platforms is provided only to: Authenticated Users"; commercial use "may require a paid subscription, which will be managed by Spamhaus". ThreatFox and URLhaus APIs answered 401 without a key.',
 }
-const UNREAD: CodedLicence = { state: 'unverified', reason: 'Provider terms not yet read for commercial use.' }
 
 const COINGECKO: CodedLicence = {
   state: 'verified',
@@ -70,6 +69,22 @@ const US_GOV: CodedLicence = {
   checked: CHECKED,
   evidence:
     'Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105). Agencies: FAA, Federal Register (NARA/GPO), NOAA, U.S. Treasury USAspending, USGS.',
+}
+
+const FRANKFURTER: CodedLicence = {
+  state: 'verified',
+  licence: { id: 'frankfurter', name: 'Frankfurter API (rates under each provider\'s terms)', commercialUse: true, storage: true, redistribute: true, attribution: 'European Central Bank', termsUrl: 'https://frankfurter.dev/' },
+  checked: CHECKED,
+  evidence: 'Frankfurter: free, open-source, "no quotas", rate-limited against abuse; "the rates themselves fall under each provider\'s terms". ECB terms (read the same day) allow reuse with the ECB cited and modifications stated.',
+  condition: 'ECB named as source; computed changes declared as computed.',
+}
+
+const MEMPOOL: CodedLicence = {
+  state: 'verified',
+  licence: { id: 'mempool-public-api', name: 'mempool.space public API', commercialUse: true, storage: true, redistribute: true, termsUrl: 'https://mempool.space/docs/api/rest' },
+  checked: CHECKED,
+  evidence: 'API docs: "we enforce rate limits … HTTP 429 … Consider an enterprise sponsorship if you need higher API limits." No restriction on commercial use is stated.',
+  condition: 'Stay within the public rate limits; enterprise sponsorship only if more is needed.',
 }
 
 const FRED_CITED: CodedLicence = {
@@ -293,6 +308,49 @@ export const CODED_SOURCE_LICENCES: Record<string, CodedLicence> = {
       'Hugging Face terms read 2026-10-04: users must not "reproduce, republish, license any of our proprietary materials" without written permission, and say nothing specific about the Daily Papers listing. Whether that curated listing is their proprietary material is a DECISION REQUIRED.',
   },
 
+  bis_speeches: {
+    state: 'refused',
+    licence: needsAgreement('Bank for International Settlements', 'https://www.bis.org/terms_conditions.htm'),
+    checked: CHECKED,
+    evidence: 'BIS terms: users may "download, display, print out, photocopy or redistribute any BIS Material for non-commercial purposes"; commercial reproduction needs written permission.',
+  },
+  frankfurter: FRANKFURTER,
+  frankfurter_board: FRANKFURTER,
+  ecb_reference_rates: FRANKFURTER,
+  wikidata: {
+    state: 'verified',
+    licence: { ...CC0, termsUrl: 'https://www.wikidata.org/wiki/Wikidata:Licensing' },
+    checked: CHECKED,
+    evidence: 'Wikidata licensing: "All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero."',
+  },
+  mempool: MEMPOOL,
+  mempool_network: MEMPOOL,
+  radio_browser: {
+    state: 'verified',
+    licence: { id: 'radio-browser', name: 'Radio Browser API', commercialUse: true, storage: true, redistribute: true, termsUrl: 'https://api.radio-browser.info/' },
+    checked: CHECKED,
+    evidence: '"This API is completely free and open source"; it may be used "in free and non free software"; clients must "send a speaking http agent string".',
+  },
+  iso_mic_registry: {
+    state: 'verified',
+    licence: { id: 'iso-10383-terms', name: 'ISO 10383 MIC website terms', commercialUse: true, storage: true, redistribute: false, termsUrl: 'https://www.iso20022.org/sites/default/files/2020-02/ISO10383_Terms_of_use.pdf' },
+    checked: CHECKED,
+    evidence: 'ISO 10383 terms of use: the material "is intended to be used and reproduced freely"; a non-exclusive right to use it, "excluding the right to reproduce all or substantial part of this website for the purpose of making such reproductions available to third parties".',
+    condition: 'Individual venue-code lookups only; the list is never republished whole.',
+  },
+  official_statements: {
+    state: 'unverified',
+    reason:
+      'Several publishers, read 2026-10-04: White House — "government-produced materials … are not copyright protected" (third-party content CC BY 3.0). United Nations — "News-related material can be used as long as the appropriate credit is given and the United Nations is advised"; other material needs written permission. Notifying the UN is an owner action — DECISION REQUIRED. EC, ECB, Fed, GOV.UK and IAEA feeds not yet read individually.',
+  },
+  'dns.google': { state: 'unverified', reason: 'Google Public DNS is governed by the Google APIs Terms of Service, which were not read in full on 2026-10-04.' },
+  'dns.cloudflare': { state: 'unverified', reason: 'Cloudflare\'s 1.1.1.1 pages read on 2026-10-04 cover privacy only, not permitted use.' },
+  wayback: { state: 'unverified', reason: 'The Internet Archive terms page could not be read on 2026-10-04 (help site did not resolve).' },
+  wikimedia_pageviews: { state: 'unverified', reason: 'The Analytics API page read on 2026-10-04 does not state the licence of pageview data.' },
+  courtlistener: { state: 'unverified', reason: 'courtlistener.com/terms answered 403 to the reader on 2026-10-04.' },
+  gdacs: { state: 'unverified', reason: 'GDACS terms page answered 404 on 2026-10-04.' },
+  crtsh: { state: 'unverified', reason: 'crt.sh publishes no terms of use; Certificate Transparency logs are public by design, but no provider statement was found.' },
+
   // ── Read, and ambiguous: an owner decision, not a guess ───────────────────
   xposedornot: {
     state: 'unverified',
@@ -306,32 +364,15 @@ export const CODED_SOURCE_LICENCES: Record<string, CodedLicence> = {
   },
 
   // ── Not yet read ──────────────────────────────────────────────────────────
-  bis_speeches: UNREAD,
-  celestrak: UNREAD,
-  ckan_federation: UNREAD,
-  courtlistener: UNREAD,
-  crtsh: UNREAD,
-  crypto_news: UNREAD,
-  'dns.cloudflare': UNREAD,
-  'dns.google': UNREAD,
-  ecb_reference_rates: UNREAD,
-  ethereum_rpc: UNREAD,
-  factcheck: UNREAD,
-  frankfurter: UNREAD,
-  frankfurter_board: UNREAD,
-  gdacs: UNREAD,
-  hackernews: UNREAD,
-  iso_mic_registry: UNREAD,
-  iss_position: UNREAD,
-  mempool: UNREAD,
-  mempool_network: UNREAD,
-  official_statements: UNREAD,
-  openalex: UNREAD,
-  pi_network: UNREAD,
-  radio_browser: UNREAD,
-  rdap: UNREAD,
-  'username.web': UNREAD,
-  wayback: UNREAD,
-  wikidata: UNREAD,
-  wikimedia_pageviews: UNREAD,
+  celestrak: { state: 'unverified', reason: 'CelesTrak\'s site (webmaster page read 2026-10-04) states no terms of use; not yet found elsewhere.' },
+  ckan_federation: { state: 'unverified', reason: 'Each portal\'s metadata licence is recorded in lib/engine/registries/ckan/portals.ts (earlier work, not re-read on 2026-10-04), but the federation does not gate on those licences — a GAP recorded in batch 08.' },
+  crypto_news: { state: 'unverified', reason: 'Several publishers\' RSS feeds (minepi.com, blog.ethereum.org, solana.com, …); their terms not yet read individually.' },
+  ethereum_rpc: { state: 'unverified', reason: 'PublicNode terms for its public Ethereum RPC not yet read.' },
+  factcheck: { state: 'unverified', reason: 'Several fact-checkers\' RSS feeds (Snopes, Full Fact, PolitiFact, …); their terms not yet read individually.' },
+  hackernews: { state: 'unverified', reason: 'The HN Search (Algolia) API page read on 2026-10-04 states no terms or limits.' },
+  iss_position: { state: 'unverified', reason: 'wheretheiss.at terms not yet read.' },
+  openalex: { state: 'unverified', reason: 'OpenAlex help pages did not render their licence text on 2026-10-04.' },
+  pi_network: { state: 'unverified', reason: 'Pi Network is Lambda NX\'s own identity and payment platform (CLAUDE.md §10); the Pi developer terms for its public mainnet API were not read on 2026-10-04.' },
+  rdap: { state: 'unverified', reason: 'rdap.org redirects to each registry\'s RDAP service; registry terms vary and were not read.' },
+  'username.web': { state: 'unverified', reason: 'Checks public profile URLs on several sites (GitHub, GitLab, dev.to, …); each site\'s terms on automated access not yet read.' },
 }

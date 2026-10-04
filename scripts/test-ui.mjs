@@ -63,6 +63,11 @@ if (alreadyRunning) {
   server = spawn('npx', ['next', 'start', '-p', PORT], {
     stdio: ['ignore', 'pipe', 'pipe'],
     env: process.env,
+    // Its own process group, so stopping it stops `next-server` too. Killing
+    // only the `npx` wrapper left `next-server` holding the port, and the next
+    // run then *reused* that server — testing an old build and reporting it as
+    // the new one (seen three times on 2026-10-04).
+    detached: true,
   })
   // Kept, not discarded: when the suite fails because the server did, this is
   // the only place that says why.
@@ -72,7 +77,7 @@ if (alreadyRunning) {
 
   if (!(await waitForServer())) {
     console.error(`The server never answered on ${BASE}. Its output:\n${log.join('')}`)
-    server.kill('SIGTERM')
+    process.kill(-server.pid, 'SIGTERM')
     process.exit(1)
   }
 }
@@ -96,11 +101,20 @@ const code = await run('npx', ['vitest', 'run', '--config', 'vitest.browser.conf
   BASE,
 })
 
+/** Signal the whole process group: the wrapper and the server it started. */
+function stopServer(signal) {
+  try {
+    process.kill(-server.pid, signal)
+  } catch {
+    // Already gone.
+  }
+}
+
 if (server) {
-  server.kill('SIGTERM')
+  stopServer('SIGTERM')
   // A SIGTERM Next does not honour would leave the port held for the next run.
-  await sleep(500)
-  if (!server.killed) server.kill('SIGKILL')
+  await sleep(1000)
+  if (await isUp()) stopServer('SIGKILL')
 }
 
 process.exit(code)

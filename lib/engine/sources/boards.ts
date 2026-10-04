@@ -890,11 +890,16 @@ export const statementsSource: Source = {
   },
 }
 
+/**
+ * `officialsSource` (BIS central-bank speeches) is withheld (batch 08). BIS
+ * terms (bis.org/terms_conditions.htm, read 2026-10-04) allow BIS material to
+ * be redistributed "for non-commercial purposes"; commercial reproduction needs
+ * the BIS's written permission. The adapter is kept.
+ */
 export const BOARD_SOURCES: Source[] = [
   statementsSource,
   courtsSource,
   regulationSource,
-  officialsSource,
   resourcesSource,
   powerGridSource,
   spaceWeatherSource,

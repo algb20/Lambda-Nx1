@@ -97,7 +97,7 @@ export const BOARDS: BoardDefinition[] = [
     key: 'officials',
     capability: 'officials',
     title: 'Officials & statements',
-    note: 'What central bank governors actually said, in their own words, collected by the BIS. Public acts of office — never private life.',
+    note: 'Withheld: this board reads central-bank speeches collected by the BIS, whose terms allow reproduction for non-commercial purposes only; commercial use needs the BIS’s written permission, which Lambda NX does not yet hold.',
     searchable: true,
   },
   {

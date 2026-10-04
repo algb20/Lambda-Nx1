@@ -66,6 +66,11 @@ export async function boardReport(
   sources = registry,
 ): Promise<BoardReport> {
   if (sources === registry) registerBoards()
+  // A board with no permitted source has not looked; returning an empty board
+  // would read as "nothing happened" (S invariant 15). Say so instead.
+  if (sources.sourcesFor(capability).length === 0) {
+    throw new Error(`The ${board} board has no permitted source at the moment — see its note for why.`)
+  }
   const generatedAt = new Date().toISOString()
 
   const r = await collect({ capability, value: subject.trim() }, { registry: sources, mode: 'all' })

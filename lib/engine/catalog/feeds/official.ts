@@ -1,5 +1,5 @@
 import type { CatalogSource } from '../types'
-import { PUBLIC_DOMAIN, WHO_TERMS, ccBy, nonCommercial, publicFeed } from '../licence'
+import { PUBLIC_DOMAIN, WHO_TERMS, ccBy, needsAgreement, nonCommercial, publicFeed } from '../licence'
 
 /**
  * Institutional and official publication.
@@ -245,7 +245,10 @@ export const OFFICIAL_SOURCES: CatalogSource[] = [
     topics: ['economy', 'official'],
     coverage: 'global',
     admiralty: 'A',
-    licence: publicFeed('Bank for International Settlements', 'https://www.bis.org/terms_conditions.htm'),
+    // BIS terms (read 2026-10-04): redistribution "for non-commercial
+    // purposes"; commercial reproduction needs written permission. This
+    // reverses the batch-04 release under a feed-syndication licence (batch 08).
+    licence: needsAgreement('Bank for International Settlements', 'https://www.bis.org/terms_conditions.htm'),
     minIntervalSec: 7200,
     keyless: true,
   },
