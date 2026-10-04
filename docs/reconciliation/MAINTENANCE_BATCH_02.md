@@ -69,3 +69,20 @@
 The first run, on 15.5.25 at the start of R307, gave **12 passed, 1 failed**. The failure was `places.browser.ts › draws place labels by default`. The page recorded `429 /api/posture`, `429 /api/world` ×2 and `429 /api/preferences`, and the test counts any failed request as "the page threw". These 429s are the application's **own rate limiter** (30 requests/min per caller), which the four suites exceed when run back to back from one address. They are not a fault in the place-names layer. The limit itself is an open owner decision from the earlier session.
 
 Re-run results after the upgrade: appended below.
+
+### 3.2 Browser re-run after the upgrade (Next.js 15.5.27), 2026-10-04
+
+| Run | Result |
+|---|---|
+| `places.browser.ts` alone, on a fresh server | **4 / 4 passed** |
+| All four suites, via `npm run test:ui` (fresh build, fresh server) | **12 / 13 passed** |
+
+The one failure in the full run is `layout.browser.ts › holds every page inside every width`: `/intelligence broke: 429 /api/posture · 429 /api/preferences` and `/monitor broke: 429 /api/posture · 429 /api/calibration`.
+
+**Same cause as before the upgrade.** The application's own `GATEWAY_LIMIT` (30 requests/min per caller, `lib/rate-limit.ts:43`) is exhausted by four suites running back to back from one address, and the harness counts any failed request as a broken page. The failing test moved (places before, layout now) while the count stayed 12/13. That is the signature of a shared budget, not of a defect in either page. **No regression from the upgrade.**
+
+**An intermediate run is void.** A leftover server from the first run held port 3111 (`EADDRINUSE`). The new server could not start, and the suite read old HTML that referenced chunks the new build no longer had (HTTP 400). That was a fault in Claude's local test environment, cleared before the re-run above.
+
+**DISCOVERED — not fixed (outside this batch):** the browser suites and the app's rate limit share one budget. Fixing it means either a test-only allowance or a change to the 30/min limit, and **the limit itself is an open owner decision**. Recorded for a future batch.
+
+**Batch status:** M2-01, M2-02 and M2-03 are done and verified (REPO-TESTED). Not deployed (R306).
