@@ -345,6 +345,12 @@ Publication / Export / Share contract (30.27.8.R) is closed and has passed test,
 test and acceptance. CI, builds, previews/staging and automated tests continue. Do not
 publish to Production.
 
+**Production stays on deploy `9c19303` with its database connection unrepaired (R306).**
+Production's `DATABASE_URL` currently fails, and that deploy predates the `publish` pause.
+Repairing the connection would let it auto-publish again. Do not change Production's
+`DATABASE_URL` or `CRON_SECRET`, and do not deploy, without a new explicit owner decision
+(`docs/reconciliation/CURRENT_SYSTEM_AUDIT_2026-10-04.md` §6).
+
 Scheduled **content** publication (`publish` job) is paused for the same reason (R294):
 it sits in `UNSCHEDULED` in `lib/ops/schedule.ts`, and a test fails if it is scheduled
 again before the owner lifts the pause.

@@ -151,3 +151,18 @@ The step-1 classification (`INVENTORY_AND_GAPS_2026-10-04.md` §C.2) is **confir
 | 3. Missing-spec recovery | Waits on the files listed in `CANONICAL_RECONCILIATION.md` §5.3 |
 | 4. Contract consolidation | Feeds S |
 | Resumption point | 30.27.8.S — no code (R299) |
+
+---
+
+## 6. Owner decision on AF-2 — ledger R306 (2026-10-04)
+
+> «اعتمد الخيار (أ) وأبقِ القفل»
+
+| Item | Decision / consequence |
+|---|---|
+| **Decision** | **Option (a).** Production stays locked on deploy `9c19303`. Production's `DATABASE_URL` is **not** repaired until the Publication contract (30.27.8.R) is closed and accepted. |
+| Reason, as recorded | Repairing the connection without a new deploy would let the pre-pause code resume scheduled `publish`. Deploying now would break the Production pause. |
+| **Accepted consequences** | Production stays without a working database (AF-1). Persistence, sign-in and source-health writes fail. Production keeps `sharp` 0.35.3 (AF-2), which the pause accepts. |
+| Standing rule | Nobody updates Production's `DATABASE_URL`, removes or rotates `CRON_SECRET`, or deploys to Production while this decision stands. Any of these needs a new explicit owner decision. |
+| Not verified by Claude | Whether a Netlify site-level lock is set (`locked: null` on the deploy record). In practice Production has not moved since 2026-10-03, including after the PR #74 merge. |
+| Claude actions | None. Recorded only. |
