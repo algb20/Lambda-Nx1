@@ -71,6 +71,13 @@ A Master subsystem is coded only from a task sheet in the Build Package §53 for
 - Conflicts move through `CONFLICT → EVIDENCE → IMPACT → PROPOSED RESOLUTION → APPROVAL`.
 - Architecture is never changed because a name, version or implementation detail
   differs, until the official or project source proves it.
+- Current repository technologies (Next.js, Netlify/Vercel, Supabase, Drizzle, Pi
+  adapters) are **existing implementation constraints**, not canonical architecture
+  decisions (R298).
+- No destructive rewrite happens until an explicit migration or replacement decision
+  exists (R298).
+- Every Blueprint ↔ Existing System difference and every specification conflict goes in
+  `docs/reconciliation/COMPATIBILITY_GAP_LEDGER.md` until it is decided.
 
 ## 1. What this project is
 
