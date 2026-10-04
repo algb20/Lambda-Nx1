@@ -32,6 +32,7 @@ import { Card } from '@/components/ui/card'
 import { KpiStrip } from '@/components/kpi-strip'
 import { LayerRail } from '@/components/layer-rail'
 import { allLayers, onlyLayer } from '@/lib/world/layers'
+import { LABEL_BUDGET } from '@/lib/geo/places'
 import {
   NameList,
   PanelSection,
@@ -858,6 +859,11 @@ export function GlobeView() {
   const [override, setOverride] = useState<ReadonlyMap<string, boolean>>(() => new Map())
 
   const density = prefs.globe.density
+  const showPlaces = prefs.globe.places
+  const togglePlaces = useCallback(
+    () => update((p) => ({ ...p, globe: { ...p.globe, places: !p.globe.places } })),
+    [update],
+  )
 
   const sectionCollapsed = useCallback(
     (id: string) => override.get(id) ?? collapsedAt(density, id),
@@ -1095,7 +1101,36 @@ export function GlobeView() {
             belongs under the map — the rule the scrubber and the layer rail
             already follow.
           */}
-          <DensityControl density={density} onChange={chooseDensity} />
+          <div className="flex flex-wrap items-center gap-2">
+            <DensityControl density={density} onChange={chooseDensity} />
+            {/*
+              The reference layer's switch, beside the control that decides how
+              much of it appears. Two controls over one thing, kept together:
+              splitting them across the page is how a reader ends up turning
+              names on and concluding they do not work, because the density they
+              set is `minimal` and `minimal` means none.
+            */}
+            <button
+              type="button"
+              onClick={togglePlaces}
+              aria-pressed={showPlaces}
+              title={
+                density === 'minimal'
+                  ? 'Place names are off at the minimal density, whichever way this is set.'
+                  : showPlaces
+                    ? 'Place names are drawn under the events. Click to hide them.'
+                    : 'Show place names under the events.'
+              }
+              className={`touch-target inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors ${
+                showPlaces
+                  ? 'border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-300'
+                  : 'border-border/60 text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <MapPin className="h-3.5 w-3.5" aria-hidden />
+              <span>Places</span>
+            </button>
+          </div>
         {isEventLayer && report ? (
           <TimeScrubber
             window={timeWindow}
@@ -1187,6 +1222,15 @@ export function GlobeView() {
                  * merging either would destroy the thing being shown.
                  */
                 clusterRadius={isEventLayer ? CLUSTER_RADIUS_PX : 0}
+                /**
+                 * The reference layer, under whichever data layer is showing.
+                 *
+                 * The density level decides how many names, so the one axis the
+                 * reader already set governs this too rather than adding a
+                 * second knob — and `minimal` maps to zero, which is what
+                 * `minimal` has to mean.
+                 */
+                labelBudget={showPlaces ? LABEL_BUDGET[density] : 0}
               />
             </ErrorBoundary>
           </Card>

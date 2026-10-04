@@ -70,6 +70,19 @@ export interface Prefs {
      * density knob would have left the product unable to say what "dense" means.
      */
     density: Density
+    /**
+     * Whether the reference layer — place names — is drawn under the events.
+     *
+     * Its own switch rather than a sixth value of `layer`, because it is not a
+     * *view of the data*: the five layers are alternatives to one another and
+     * this one is drawn beneath whichever of them is showing. How many names
+     * appear is then decided by `density`, not by a second knob.
+     *
+     * Default on. Somebody opening a world map for the first time should be
+     * able to tell where they are looking, and the layer is quiet enough that
+     * it costs a reader who does not want it one click.
+     */
+    places: boolean
   }
   /** Gateways pinned to the front page, in the user's own order. */
   homeGateways: string[]
@@ -88,6 +101,7 @@ export const DEFAULT_PREFS: Prefs = {
     panels: [],
     panelSize: 'regular',
     density: DEFAULT_DENSITY,
+    places: true,
   },
   homeGateways: [],
 }
@@ -149,6 +163,10 @@ export function parsePrefs(raw: unknown): Prefs {
       panels: idList(globe.panels, 32),
       panelSize: size,
       density: parseDensity(globe.density),
+      // Anything stored that is not a boolean falls back to the default rather
+      // than to `false`: a corrupt value should not silently strip the map of
+      // the only thing telling a reader where they are.
+      places: typeof globe.places === 'boolean' ? globe.places : DEFAULT_PREFS.globe.places,
     },
     homeGateways: idList(input.homeGateways, MAX_HOME_GATEWAYS),
   }

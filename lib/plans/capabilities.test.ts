@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import {
   CAPABILITIES,
@@ -137,5 +137,36 @@ describe('how much of the paid tier is actually enforced', () => {
     expect(disagreements.sort()).toEqual(
       ['finance', 'ownership', 'procurement'].sort(),
     )
+  })
+})
+
+/**
+ * Regression: the calibration entry promised "Brier and log scores and a
+ * domain breakdown" while `scoreboard()` computes a weighted accuracy, by
+ * author and by confidence band, and nothing else. Brier and log scores need a
+ * stated probability, and our claims carry a categorical confidence grade —
+ * they cannot be computed from what is stored, so the text was not merely
+ * ahead of the code but unreachable by it. The pricing table called the same
+ * claims "our forecasts"; the platform has no forecasting engine, and the
+ * Master keeps Forecast distinct from an assessment.
+ */
+describe('the calibration ledger claims only what it computes', () => {
+  const calibration = CAPABILITIES.find((c) => c.id === 'calibration')!
+
+  it('promises no metric the scoreboard does not produce', () => {
+    expect(calibration.description).not.toMatch(/brier|log[- ]?score|domain breakdown|topic breakdown/i)
+  })
+
+  it('names what the scoreboard actually reports', () => {
+    expect(calibration.description).toMatch(/accuracy/i)
+    expect(calibration.description).toMatch(/author/i)
+    expect(calibration.description).toMatch(/confidence/i)
+  })
+
+  it('does not sell assessments as forecasts on the price list', () => {
+    const pricing = readFileSync(join(APP, 'pricing/page.tsx'), 'utf8')
+    const line = pricing.split('\n').find((l) => l.trim().startsWith('calibration:'))
+    expect(line, 'pricing label for calibration').toBeTruthy()
+    expect(line).not.toMatch(/forecast/i)
   })
 })

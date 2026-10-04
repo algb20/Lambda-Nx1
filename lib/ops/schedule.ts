@@ -79,12 +79,6 @@ export interface JobSchedule {
  */
 export const SCHEDULE: JobSchedule[] = [
   {
-    job: 'publish',
-    everyMinutes: 20,
-    why:
-      "Roughly the interval at which the underlying publishers themselves update. Faster spends their goodwill for nothing new; slower and the front page is a thing a reader learns to stop revisiting.",
-  },
-  {
     job: 'radar-monitors',
     everyMinutes: 20,
     why:
@@ -109,7 +103,8 @@ export const SCHEDULE: JobSchedule[] = [
       'Deletes verification codes whose expiry has passed. The sweep also runs opportunistically when a code is issued, which is enough on a busy deployment and nothing at all on a quiet one — no sign-ups means no sweeps, so the last codes issued before things went quiet keep the addresses they were sent to indefinitely. Daily rather than hourly because an expired code is inert: it cannot be redeemed, so the harm is holding an address for no purpose (charter §3), and a day is a proportionate window for that.',
   },
   /**
-   * `radar` is deliberately absent from the Netlify clock — see `UNSCHEDULED`.
+   * `radar` is deliberately absent from the Netlify clock, and `publish` is
+   * paused — see `UNSCHEDULED` for both.
    */
 ]
 
@@ -123,6 +118,22 @@ export const SCHEDULE: JobSchedule[] = [
  * third clock.
  */
 export const UNSCHEDULED: Partial<Record<ScheduledJob, string>> = {
+  /**
+   * Paused by owner decision (2026-10-03, ledger R294), not retired.
+   *
+   * Automatic publication is an external effect, and the contract that governs
+   * it — Master 30.27.8.R, Artifact / Export / Publication / Share — is not yet
+   * closed, tested or accepted. Until it is, nothing publishes on a clock. The
+   * job, its route and the human-triggered `/api/publish/run` all remain, so
+   * the pipeline is intact and an operator can still run it deliberately.
+   *
+   * It had been scheduled every 20 minutes — "roughly the interval at which the
+   * underlying publishers themselves update". To resume, move it back into
+   * `SCHEDULE` with that cadence and restore its Vercel slot, once R passes its
+   * acceptance gate.
+   */
+  publish:
+    'paused by owner decision 2026-10-03 (R294) until the Publication contract 30.27.8.R is closed and accepted; manual runs remain available',
   radar:
     'runs both halves at once: unnecessary on Netlify where each half has its own cadence, and essential on Vercel where two daily slots is the whole budget',
 }
@@ -163,19 +174,16 @@ export function dueJobs(now: Date, tickMinutes = 20): ScheduledJob[] {
  * Not derived from `SCHEDULE` by rounding, because rounding would silently make
  * the fallback look equivalent. Two jobs at once a day is the entire budget, so
  * they are chosen rather than computed: `publish`, because a front page that
- * never renews is the most visible failure; and `radar`, because it runs *both*
- * halves and so covers monitors and the watchlist in the one remaining slot.
+ * never renews is the most visible failure (paused since 2026-10-03 — see
+ * `UNSCHEDULED`); and `radar`, because it runs *both* halves and so covers
+ * monitors and the watchlist in the one remaining slot.
  *
  * A deployment that needs the twenty-minute cadence runs on Netlify, or on a
  * Vercel plan without the cap. Which is a real answer, and a better one than a
  * config file that fails the build.
  */
 export const VERCEL_FALLBACK: Array<{ path: string; schedule: string; costs: string }> = [
-  {
-    path: '/api/cron/publish',
-    schedule: '0 6 * * *',
-    costs: 'the front page renews once a day instead of three times an hour',
-  },
+  // `publish` held the first slot ('0 6 * * *'); it is paused — see `UNSCHEDULED`.
   {
     path: '/api/cron/radar',
     schedule: '30 7 * * *',

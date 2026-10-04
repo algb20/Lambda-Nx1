@@ -1,10 +1,82 @@
-# Lambda NX — Project Charter & Working Rules
+# Lambda NX — Execution Charter & Working Rules
 
-> This file is the durable contract for the project. It is read at the start of
-> every session. Follow it exactly. It is the single source of truth for *how* we
-> build, independent of any one conversation.
+> This file is the durable **execution and execution-governance** contract for the
+> repository. It is read at the start of every session. Follow it exactly. It
+> governs *how* the repository is built and operated. It is **not** the
+> architectural reference — that is the Master Living Implementation Blueprint —
+> and it never competes with it.
+
+## 0. Precedence and status (owner decisions, 2026-10-03 — ledger R293)
+
+**Order of authority**, highest first:
+
+```
+MASTER LIVING BLUEPRINT
+→ APPROVED PHASE SPECIFICATION
+→ TASK HANDOFF
+→ CLAUDE.md IMPLEMENTATION RULES (this file)
+→ CODE
+```
+
+Nothing in this file cancels a Master requirement. Where this file and the Master
+disagree, record a conflict (§7) — do not resolve it by choosing.
+
+**SPECIFIED ≠ IMPLEMENTED.** Use the status words only with the evidence each
+requires:
+
+| Status | Requires |
+|---|---|
+| IMPLEMENTED | code exists for the specified contract |
+| INTEGRATED | it is wired into the running system |
+| TESTED | its tests exist and pass |
+| EVALUATED | its evaluation has been run |
+| ACCEPTED | it passed the Master acceptance gate |
+
+Repository facts are reported with the evidence classes of
+`docs/reconciliation/RECONCILED_MASTER_BASELINE.md` §0.2: REPO-PRESENT, REPO-TESTED,
+LIVE-OBSERVED (dated), NOT PRESENT, UNVERIFIED. Repository tests prove repository
+behaviour. They are not Master acceptance.
+
+**Three layers, never mixed:**
+- Existing System — what the repository and deployments contain.
+- Master Specification — the target.
+- Claude Execution Contract — this file.
+
+The current reconciled state is in `docs/reconciliation/`.
+
+**Owner handoff of 2026-10-04** (`docs/reconciliation/PACKAGE_INTAKE_2026-10-04.md`).
+The owner holds both documents. The repository is public, so it stores their
+fingerprints only:
+- **Build Package** — `Lambda_NX_MASTER_RECONCILED_CLAUDE_BUILD_PACKAGE_2026-10-04.md`. The
+  reconciled Master target, sha256 `6a056334…`.
+- **Execution Package** — `Lambda_NX_CLAUDE_EXECUTION_PACKAGE_2026-10-04.md`, sha256
+  `4569844a…`.
+
+The Execution Package is the owner's execution contract. This file adds the repository
+specifics: branch, ledger, lanes and live-system rules. Where the two differ, the
+Execution Package governs. In particular, follow its:
+- pre-coding checklist (§6);
+- stop conditions (§32);
+- implementation report format (§31).
+
+A Master subsystem is coded only from a task sheet in the Build Package §53 format.
+
+**Incremental development (owner rules R296, 2026-10-04):**
+- Lambda NX exists and evolves incrementally. There is no rewrite.
+- Existing code is mapped to the target. It is never assumed to conform:
+  `docs/reconciliation/INVENTORY_AND_GAPS_2026-10-04.md`.
+- A gap does not stop the project. It moves through
+  `GAP → RESEARCH REQUIRED → SPECIFICATION → CONTRACT → IMPLEMENTATION → TEST → ACCEPTANCE`.
+  Only implementation of the affected part waits.
+- Conflicts move through `CONFLICT → EVIDENCE → IMPACT → PROPOSED RESOLUTION → APPROVAL`.
+- Architecture is never changed because a name, version or implementation detail
+  differs, until the official or project source proves it.
 
 ## 1. What this project is
+
+> This section describes the **current implementation surface** (the Existing
+> System). The product's target identity and architecture are defined by the
+> Master.
 
 Lambda NX is a **real, legal, multi-gateway intelligence platform**. Its first and core
 family is **OSINT & intelligence-analysis**; the *same engine* powers additional lawful
@@ -23,9 +95,18 @@ shadcn/ui + its tab layout). We *realize* the fake features as real ones — we 
 redesign. New gateways reuse the same UI language.
 
 **Continuity of intent.** We did not change the app's original goal (an intelligence /
-monitoring / analysis platform). We merged and organized what the app aimed at + the OSINT
-reference + our research into a *real* version, and removed only what was impossible or
-unlawful (future-prediction "forecasts", "quantum/agentic swarm", mass surveillance).
+monitoring / analysis platform). We merged and organized what the app aimed at, the OSINT
+reference and our research into a *real* version. We removed only what was impossible or
+unlawful:
+- **unevaluated future predictions presented as fact** (the original app's fake
+  "forecasts");
+- "quantum/agentic swarm" claims;
+- mass surveillance.
+
+Governed forecasting stays in the Intelligence Core as the Master specifies (§19–§20). It
+must be calibrated, evaluated, point-in-time and carry explicit uncertainty, with
+**Forecast ≠ Scenario ≠ Truth ≠ Event**. No forecasting engine exists in the repository
+today.
 
 **Monetization (future).** Subscription tiers (free + paid), gated through the payments
 layer: free gives core access with limits; paid unlocks all gateways, the AI-analyst,
@@ -39,9 +120,17 @@ families **extend, never replace** this method. Family roadmap: `docs/GATEWAYS.m
 1. **No temporary solutions.** Every point is built *finally*. A module is "done" only
    when it: works for real, is tested with real tests, handles errors and edge cases,
    is documented, and contains **no `TODO`/mock/`Math.random()` placeholders**. See §6.
-2. **Comprehensive research, always.** Do not rely only on what the user provides. For
-   every area, research the best/newest/strongest option, including things not yet
-   noticed. The Radar (`docs/RADAR.md`) automates this continuously.
+2. **Research boundary.** Architecture research and adoption decisions belong to the
+   research stage and the Master, not to Claude.
+   - Claude verifies the facts needed to implement an *already specified* contract, for
+     example a specified source's live response shape.
+   - Claude reports anything else it observes as **DISCOVERED**, with evidence, and never
+     adopts it on its own. The Radar (`docs/RADAR.md`) gathers such observations.
+   - Specification text Claude does not have is never guessed. A dependent item is
+     recorded as one of:
+     - **NOT SUPPLIED TO CLAUDE** — the text exists in the owner's library, but no one
+       has handed it over;
+     - **BLOCKED — SOURCE SPEC MISSING** — the text is confirmed absent.
 3. **Our own technology.** We build our own engine, algorithms, storage and analysis —
    not a thin wrapper over someone else's product. Inspire from the best, then build
    stronger in our own way.
@@ -49,15 +138,25 @@ families **extend, never replace** this method. Family roadmap: `docs/GATEWAYS.m
    we own, so we can swap **database (Supabase↔any Postgres), hosting (Netlify↔Vercel↔
    self-host), and Pi-vs-standalone auth/payments** with a provider switch only — never
    an app rewrite. See `docs/ARCHITECTURE.md`.
-5. **Living task list.** The master checklist is tracked in the task tool and mirrored in
-   `docs/PLAN.md`. Update it on every step. Never skip a point or a test.
+5. **Living task list.** The repository backlog is tracked in the task tool and mirrored
+   in `docs/PLAN.md`. Update it on every step. Never skip a point or a test.
+   - "Done" in `docs/PLAN.md` means at most REPO-PRESENT + REPO-TESTED.
+   - Master statuses are set only through the Master's own gates (§0).
 6. **One engine, many gateways.** Every new capability is a new source/family over the
    *same* engine (guardrail + registry + analysis core) — never a parallel stack. The
    passive-only and legal guardrails (§3) apply to every family, always.
 7. **Preserve the design.** Keep the existing shell and visual language; realize fake as
    real without redesigning (see §1).
-8. **Beat the field, permanently.** This is a standing instruction, not a one-off task,
-   and it must never need repeating:
+8. **Beat the field, permanently.**
+   - **Ownership:** continuous study of the field is a research-stage duty. Its findings
+     reach the code only through the Master and an approved specification (§0, rule 2).
+   - **Source target:** the "one million" figure is reported only as **labelled reach, by
+     unit**, never summed across units (`lib/engine/catalog/families.ts`, `ReachUnit`).
+     The owner decided to **keep** the target (2026-10-03, R294; CONF-G06). The plan and
+     the proposed honest acceptance bar — at least 1 M live publishers *excluding the
+     single largest family* — are in `docs/reconciliation/SOURCE_POPULATION_PLAN.md`.
+
+   The original instruction, kept for the record:
    - **Source population is a headline target: one million and rising.** Counted
      honestly — see §2a. Never report a source number that mixes integrations with
      indexed publishers.
@@ -131,7 +230,17 @@ If a request would cross these lines, stop and raise it with the user.
   when a unit is complete. Never push to another branch without explicit permission.
 - Never commit secrets. All keys (`PI_API_KEY`, DB URLs, etc.) are environment variables.
 
-## 6. Definition of Done (per module)
+## 6. Repository merge gate (per module) — not Master COMPLETE
+
+Passing this gate yields at most **REPO-PRESENT + REPO-TESTED**. Master completion runs
+through the Master's chain:
+
+```
+SPECIFICATION → SCHEMA → API → IMPLEMENTATION → INTEGRATION → TEST → EVALUATION
+→ FAILURE TEST → ACCEPTANCE → COMPLETE
+```
+
+Nothing is reported Fixed or Implemented without repository and test evidence.
 
 - [ ] Real implementation — no mock data, no `Math.random()`, no stubbed returns.
 - [ ] Behind the correct isolation layer (no direct vendor calls in app code).
@@ -141,3 +250,66 @@ If a request would cross these lines, stop and raise it with the user.
 - [ ] Findings carry source link, timestamp, Admiralty rating, confidence grade.
 - [ ] Documented (what it does, sources used, limits).
 - [ ] Task marked complete in the living list.
+
+The Admiralty rating and confidence grade stay as they are: separate dimensions, preserved
+historically and never converted into a Master verification ladder (baseline §7).
+
+## 7. Conflicts and continuity
+
+When two files or two decisions conflict:
+
+1. Do not choose at random, and do not delete the older one.
+2. Create a **Conflict/Continuity Record** stating source, date, scope, the exact conflict
+   and its impact.
+3. Apply only the **latest approved** decision, and only after verifying it.
+4. Mark the older statement superseded, keeping it as history.
+
+Records live in `docs/reconciliation/`: the Contradiction Register in the baseline, and
+`CONTINUITY_M_S.md`.
+
+**Phase state (2026-10-03):**
+- Operational resumption point: **30.27.8.S** — BLOCKED by the Build Package's own terms
+  (§29.4) until its source contracts are consolidated and its open conflicts decided.
+- 30.27.8.M is history only.
+- Phase 30 is NOT COMPLETE. Phase 31 is BLOCKED until Phase 30 closes.
+- This reconciliation stage is **30.27.8.RB**. R remains Artifact / Export /
+  Publication / Share.
+
+## 8. Before any significant change
+
+Show the change plan before writing code:
+
+```
+SCOPE → REQUIREMENTS → DEPENDENCIES → CONTRACTS → IMPACT → IMPLEMENTATION → TESTS
+→ ACCEPTANCE → STATUS
+```
+
+## 9. Work lanes
+
+| Lane | What it covers | Precondition |
+|---|---|---|
+| Audit | Read, test and inspect, including read-only inspection of live systems. | Always allowed. |
+| Maintenance | Defects and security in the Existing System. No new architecture, schema or contract. Path: REPRODUCE → ROOT CAUSE → PATCH → TEST → REGRESSION TEST → VERIFY → REPORT. | Explicit owner authorisation per batch. Batch 01: `docs/reconciliation/MAINTENANCE_BATCH_01.md`. |
+| Implementation | A Master subsystem. | A closed implementation package (Master §70.6). Otherwise stop and report the exact gap. |
+
+**Live systems** — database, hosting, environment, DNS:
+- every write needs explicit owner authorisation **per action**;
+- record it in the ledger with before/after evidence;
+- keep it reversible where possible (e.g. `db/ops/orphan-L-quarantine.sql` with its
+  `orphan-L-restore.sql`).
+
+**Production deployment is paused** (owner decision 4, 2026-10-03) until the
+Publication / Export / Share contract (30.27.8.R) is closed and has passed test, failure
+test and acceptance. CI, builds, previews/staging and automated tests continue. Do not
+publish to Production.
+
+Scheduled **content** publication (`publish` job) is paused for the same reason (R294):
+it sits in `UNSCHEDULED` in `lib/ops/schedule.ts`, and a test fails if it is scheduled
+again before the owner lifts the pause.
+
+## 10. Project boundary
+
+- Lambda NX and World Pi are separate projects. Lambda NX work never touches the World Pi
+  repository.
+- Pi Network is part of Lambda NX's Existing System, as its identity provider, payment
+  provider and Pi Browser distribution channel. It does not imply World Pi.

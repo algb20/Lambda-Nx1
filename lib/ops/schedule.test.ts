@@ -108,7 +108,6 @@ describe('what is due on a tick', () => {
 
   it('runs the frequent jobs on every tick', () => {
     for (const minute of [0, 20, 40]) {
-      expect(dueJobs(at(minute))).toContain('publish')
       expect(dueJobs(at(minute)), 'a saved monitor is only useful if it sweeps').toContain(
         'radar-monitors',
       )
@@ -150,5 +149,30 @@ describe('what is due on a tick', () => {
     for (const minute of [0, 20, 40]) {
       for (const job of dueJobs(at(minute))) expect(scheduled.has(job)).toBe(true)
     }
+  })
+})
+
+/**
+ * Automatic publication is paused by owner decision (2026-10-03, ledger R294)
+ * until the Publication contract (Master 30.27.8.R) is closed and accepted.
+ * Publishing is an external effect; it must not resume by accident — through a
+ * merge that restores the old cadence, or a Vercel slot nobody noticed.
+ */
+describe('automatic publication is paused', () => {
+  it('is due on no tick of the day', () => {
+    for (let hour = 0; hour < 24; hour++) {
+      for (const minute of [0, 20, 40]) {
+        expect(dueJobs(new Date(Date.UTC(2026, 9, 3, hour, minute)))).not.toContain('publish')
+      }
+    }
+  })
+
+  it('is excused with the decision that paused it, not silently dropped', () => {
+    expect(UNSCHEDULED.publish).toMatch(/owner decision/)
+    expect(SCHEDULED_JOBS).toContain('publish')
+  })
+
+  it('has no slot on the fallback host either', () => {
+    expect(VERCEL_FALLBACK.some((c) => c.path.endsWith('/publish'))).toBe(false)
   })
 })

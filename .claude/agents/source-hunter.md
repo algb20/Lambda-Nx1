@@ -1,6 +1,6 @@
 ---
 name: source-hunter
-description: Finds, verifies and adds new data sources to the catalogue, and audits the ones already there. Use when asked to expand coverage, when a region or topic is thin, when feeds are failing, or when the coverage layer reports a blind spot. Also use to re-check quarantined sources for recovery.
+description: Finds, verifies and adds new data sources to the catalogue, and audits the ones already there. Use when asked to expand coverage, when a region or topic is thin, when feeds are failing, or when the coverage layer reports a blind spot. Also use to re-check quarantined sources for recovery. Auditing and re-checking existing sources is maintenance; adding a new source is an adoption decision that needs a research-stage decision first (CLAUDE.md §0, §2 rule 2) — until then a candidate is reported as DISCOVERED.
 model: sonnet
 tools: Read, Write, Edit, Grep, Glob, Bash
 ---

@@ -235,7 +235,7 @@ all. A test now fails if a job exists with no cadence and no stated reason.
 
 | Job | Does | Netlify (default) | Vercel (capped) |
 |---|---|---|---|
-| `GET /api/cron/publish` | turns the strongest of today's graded findings into real posts on the front page | every 20 min | daily 06:00 |
+| `GET /api/cron/publish` | turns the strongest of today's graded findings into real posts on the front page | **paused** (owner decision 2026-10-03, R294 — until 30.27.8.R is accepted; was every 20 min) | **paused** (was daily 06:00) |
 | `GET /api/cron/radar-monitors` | runs the product monitors that are due | every 20 min | via `radar` |
 | `GET /api/cron/radar-watch` | reads the internal ⭐ watchlist (`docs/RADAR.md`) | hourly | via `radar` |
 | `GET /api/cron/radar` | both Radar halves; one half failing does not abort the other | — | daily 07:30 |

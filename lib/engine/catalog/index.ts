@@ -14,7 +14,7 @@ import { CRYPTO_SOURCES } from './feeds/crypto'
 import { FACTCHECK_SOURCES } from './feeds/factcheck'
 import { KEYED_SOURCES } from './feeds/keyed'
 import { partitionByLicence, requiredAttributions, LAMBDA_USAGE, type UsageContext } from './licence'
-import { SOURCE_FAMILIES, livePublisherReach, plannedPublisherReach } from './families'
+import { SOURCE_FAMILIES, livePublisherReach, plannedPublisherReach, reachByUnit } from './families'
 import { isQuarantined } from './quarantine'
 
 export * from './types'
@@ -168,10 +168,15 @@ export function catalogSummary(usage: UsageContext = LAMBDA_USAGE) {
       keyless: CATALOG.filter((s) => s.keyless).length,
       hosts: catalogHosts().length,
     },
-    /** Publishers reachable *through* those integrations. Reach, not effort. */
+    /**
+     * Publishers reachable *through* those integrations. Reach, not effort.
+     * `live` and `planned` count publisher units only; records (certificates,
+     * papers, citations) appear in `byUnit` and nowhere else — see `ReachUnit`.
+     */
     reach: {
       live: livePublisherReach(),
       planned: plannedPublisherReach(),
+      byUnit: reachByUnit(SOURCE_FAMILIES, 'live'),
       families: SOURCE_FAMILIES.length,
     },
     /**

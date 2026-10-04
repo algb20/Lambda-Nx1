@@ -77,3 +77,69 @@ describe('row-level security covers every table', () => {
     expect(schema).not.toMatch(/DISABLE ROW LEVEL SECURITY/i)
   })
 })
+
+/**
+ * A migration file that the migration runner will never run.
+ *
+ * `drizzle-kit migrate` does not read the directory. It reads
+ * `db/migrations/meta/_journal.json` and applies the files that journal names,
+ * in the order it names them. A `.sql` file with no entry is invisible to it:
+ * it sits in the repository, passes review, is quoted in a commit message, and
+ * is never executed against any database.
+ *
+ * Three were in that state when this test was written — `0021_email_followers`,
+ * `0022_rls_every_table` and `0023_fk_indexes`. The second is the one that
+ * closes row-level security on every table, so the fix for a live security
+ * alert had been committed in a form the tooling could not apply, and
+ * `rls.test.ts` above passed the whole time because it reads the file. The
+ * third was added by this session, repeating the mistake it was about to find.
+ *
+ * This is the cheapest possible check and it closes the whole class.
+ */
+describe('every migration is reachable by the migration runner', () => {
+  const journalTags = (): string[] => {
+    const journal = JSON.parse(
+      readFileSync(join(process.cwd(), 'db/migrations/meta/_journal.json'), 'utf8'),
+    ) as { entries: Array<{ tag: string; idx: number; when: number }> }
+    return journal.entries.map((e) => e.tag)
+  }
+
+  const sqlFiles = (): string[] =>
+    readdirSync(join(process.cwd(), 'db/migrations'))
+      .filter((f) => f.endsWith('.sql'))
+      .map((f) => f.replace(/\.sql$/, ''))
+      .sort()
+
+  it('names every .sql file in the journal', () => {
+    const tags = new Set(journalTags())
+    const unreachable = sqlFiles().filter((f) => !tags.has(f))
+    expect(
+      unreachable,
+      'these migrations exist as files and would never be applied: drizzle-kit reads the journal, not the directory',
+    ).toEqual([])
+  })
+
+  it('names no migration the journal has lost', () => {
+    const files = new Set(sqlFiles())
+    const orphans = journalTags().filter((t) => !files.has(t))
+    expect(orphans, 'the journal points at a migration that is not in the repository').toEqual([])
+  })
+
+  /** Order is what the runner applies; a repeated or out-of-sequence index reorders history. */
+  it('indexes the journal in a strict, gapless sequence', () => {
+    const journal = JSON.parse(
+      readFileSync(join(process.cwd(), 'db/migrations/meta/_journal.json'), 'utf8'),
+    ) as { entries: Array<{ idx: number; when: number; tag: string }> }
+    const idxs = journal.entries.map((e) => e.idx)
+    expect(idxs).toEqual(idxs.map((_, i) => i))
+  })
+
+  it('orders the journal by time, so a replay matches the history it records', () => {
+    const journal = JSON.parse(
+      readFileSync(join(process.cwd(), 'db/migrations/meta/_journal.json'), 'utf8'),
+    ) as { entries: Array<{ when: number }> }
+    for (let i = 1; i < journal.entries.length; i += 1) {
+      expect(journal.entries[i].when).toBeGreaterThan(journal.entries[i - 1].when)
+    }
+  })
+})

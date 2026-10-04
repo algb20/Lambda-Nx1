@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Plus, Minus, RotateCcw, Globe2, Map as MapIcon } from 'lucide-react'
 import { ATLAS } from '@/lib/geo/atlas'
+import { chooseLabels, LABEL_BUDGET, PLACES } from '@/lib/geo/places'
 import { clusterByScreenDistance, meanCoordinate, type ScreenCluster } from '@/lib/geo/cluster'
 import { glyphFor } from '@/lib/geo/glyphs'
 import {
@@ -97,6 +98,19 @@ const GRATICULE_AXIS = 'rgba(56, 189, 248, 0.30)'
 const POINT_DEFAULT = '#22c55e'
 /** HUD readouts: the same cyan as the coastlines, so the instrument reads as one. */
 const HUD_TEXT = 'rgba(147, 220, 255, 0.9)'
+/**
+ * The reference layer — deliberately the quietest thing on the canvas.
+ *
+ * Place names exist to tell a reader where a marker *is*. The moment they
+ * compete with the markers for attention they have stopped doing that and
+ * started being decoration, so they are drawn dim, small, and underneath
+ * everything the sweep produced.
+ */
+const PLACE_DOT = 'rgba(147, 220, 255, 0.35)'
+const PLACE_TEXT = 'rgba(186, 230, 253, 0.62)'
+/** A capital is a slightly brighter dot, never a different colour or a larger word. */
+const PLACE_DOT_CAPITAL = 'rgba(147, 220, 255, 0.6)'
+const PLACE_HALO = 'rgba(4, 9, 15, 0.75)'
 
 interface Camera {
   globe: GlobeCamera
@@ -113,6 +127,7 @@ export function WorldSurface({
   showToggle = true,
   onSelect,
   clusterRadius = 0,
+  labelBudget = 0,
 }: {
   points: SurfacePoint[]
   arcs?: SurfaceArc[]
@@ -128,7 +143,36 @@ export function WorldSurface({
    * wrong for a layer of hundreds of events. See `lib/geo/cluster.ts`.
    */
   clusterRadius?: number
+  /**
+   * How many place names to label, or 0 for none.
+   *
+   * The reference layer: the permanent world under the events. Every other
+   * layer on this canvas is a view of one sweep and disappears when the sweep is
+   * quiet, so nothing said where anything *was* — a marker at 34.05, -118.24 is
+   * a dot near a coastline until the word "Los Angeles" is beside it.
+   *
+   * A budget rather than a boolean because the useful question is not whether to
+   * show names but how many the reader wants competing for the same pixels;
+   * `LABEL_BUDGET` in `lib/geo/places` maps the density levels onto it.
+   */
+  labelBudget?: number
 }) {
+  /**
+   * Read inside the animation loop, so a density change takes effect on the
+   * next frame without re-creating the loop — the same pattern the points and
+   * the cluster radius already use.
+   */
+  const labelBudgetRef = useRef(labelBudget)
+  labelBudgetRef.current = labelBudget
+
+  /**
+   * What the last frame actually put on the canvas, published as an attribute.
+   * Set only when the number changes, so a 60fps loop does not schedule 60
+   * React renders a second.
+   */
+  const [labelsDrawn, setLabelsDrawn] = useState(0)
+  const labelsDrawnRef = useRef(0)
+
   const [internalMode, setInternalMode] = useState<ViewMode>(modeProp ?? 'globe')
   const mode = modeProp ?? internalMode
   const setMode = useCallback(
@@ -382,6 +426,53 @@ export function WorldSurface({
       ctx.strokeStyle = COAST_EDGE
       ctx.lineWidth = zoom > 3 ? 1.1 : 0.7
       ctx.stroke(landPath)
+
+      // ---- Places (the reference layer) --------------------------------------
+      // Drawn after the coastlines and before everything the sweep produced, so
+      // it sits literally underneath the events. Projection first, then
+      // selection: which labels collide is a question about the reader's screen,
+      // and only the screen can answer it — the same order the signals below
+      // use, and the same clusterer.
+      const budget = labelBudgetRef.current
+      if (budget === 0 && labelsDrawnRef.current !== 0) {
+        // Switched off: say so, rather than leaving the last count behind.
+        labelsDrawnRef.current = 0
+        setLabelsDrawn(0)
+      }
+      if (budget > 0) {
+        const onScreen: Array<{ x: number; y: number; item: (typeof PLACES)[number] }> = []
+        for (const place of PLACES) {
+          // The array is in importance order and the budget is small, so this
+          // stops as soon as enough candidates are on screen to fill it several
+          // times over. Without the cap a spin projects 1251 points per frame to
+          // draw thirty labels.
+          if (onScreen.length >= budget * 6) break
+          const pr = project(place.lat, place.lon)
+          if (pr.visible) onScreen.push({ x: pr.x, y: pr.y, item: place })
+        }
+
+        const labels = chooseLabels(onScreen, { budget })
+        if (labels.length !== labelsDrawnRef.current) {
+          labelsDrawnRef.current = labels.length
+          setLabelsDrawn(labels.length)
+        }
+        ctx.font = '10px ui-sans-serif, system-ui, sans-serif'
+        ctx.textAlign = 'left'
+        ctx.textBaseline = 'middle'
+        for (const label of labels) {
+          ctx.fillStyle = label.place.isCapital ? PLACE_DOT_CAPITAL : PLACE_DOT
+          ctx.beginPath()
+          ctx.arc(label.x, label.y, label.place.isCapital ? 1.8 : 1.3, 0, Math.PI * 2)
+          ctx.fill()
+          // A dark halo behind the word, because the same label has to stay
+          // readable over deep ocean and over lit land.
+          ctx.lineWidth = 2.5
+          ctx.strokeStyle = PLACE_HALO
+          ctx.strokeText(label.place.name, label.x + 5, label.y)
+          ctx.fillStyle = PLACE_TEXT
+          ctx.fillText(label.place.name, label.x + 5, label.y)
+        }
+      }
 
       // ---- Arcs -------------------------------------------------------------
       if (arcSamples.length > 0) {
@@ -839,6 +930,20 @@ export function WorldSurface({
        * fabricated coordinate from a real one, and it costs one attribute.
        */
       data-plotted={points.length}
+      /**
+       * How many place labels the last frame drew.
+       *
+       * The same argument as `data-plotted` above, for the same reason: a
+       * canvas cannot be asked what is on it. Without this, "the reference
+       * layer is on" and "the reference layer drew something" are the same
+       * observation from outside, and the difference between them is the whole
+       * feature — a budget of thirty that selects zero places is a switch that
+       * does nothing and looks identical to one that works.
+       *
+       * Written from inside the animation loop, so it reports what was drawn
+       * rather than what was intended.
+       */
+      data-labels={labelsDrawn}
     >
       <canvas
         ref={canvasRef}

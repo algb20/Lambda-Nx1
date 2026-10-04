@@ -245,6 +245,28 @@ describe('analysis — confidence grading (never assert from one source)', () =>
   it('possible with a single non-reliable source', () => {
     expect(gradeConfidence([ev('c', 's1')])).toBe('possible')
   })
+
+  /**
+   * Regression: the grade counted distinct source *keys*, so two feeds from one
+   * publisher corroborated each other. Charter §2a — independent origins are
+   * the only number that belongs in a confidence score — and Master §13:
+   * "twenty copies of one original report do not equal twenty independent
+   * confirmations". The pairs below share one independence group in the
+   * catalogue (`who_afro`/`who_don` → `who`).
+   */
+  it('does not confirm a claim from two feeds of one publisher', () => {
+    expect(
+      gradeConfidence([ev('c', 'who_afro', { source: 'A', info: 1 }), ev('c', 'who_don', { source: 'A', info: 1 })]),
+    ).toBe('probable')
+  })
+  it('does not raise a single publisher to probable by its feed count', () => {
+    expect(gradeConfidence([ev('c', 'who_afro'), ev('c', 'who_don'), ev('c', 'who_emro')])).toBe('possible')
+  })
+  it('still confirms when the reliable feeds come from different publishers', () => {
+    expect(
+      gradeConfidence([ev('c', 'who_afro', { source: 'A', info: 1 }), ev('c', 'worldbank_debarred', { source: 'B', info: 2 })]),
+    ).toBe('confirmed')
+  })
 })
 
 describe('analysis — dedupe & pivot graph', () => {

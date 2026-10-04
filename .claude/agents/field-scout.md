@@ -1,6 +1,6 @@
 ---
 name: field-scout
-description: Discovers what competing intelligence platforms actually do, by calling their machine surfaces rather than reading their marketing. Use when asked to research, compare, or benchmark against other platforms, when looking for capabilities we lack, or when hunting for new data sources and missions. Charter §2 rule 8 requires this continuously, not on request.
+description: Discovers what competing intelligence platforms actually do, by calling their machine surfaces rather than reading their marketing. Use when asked to research, compare, or benchmark against other platforms, when looking for capabilities we lack, or when hunting for new data sources and missions. Findings are evidence for the research stage, labelled DISCOVERED — never adopted into code without a Master decision and an approved specification (CLAUDE.md §0, §2 rules 2 and 8).
 model: sonnet
 tools: Read, Write, Edit, Grep, Glob, Bash, WebFetch, WebSearch
 ---
