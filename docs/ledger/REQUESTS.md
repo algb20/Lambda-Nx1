@@ -3228,3 +3228,22 @@ Drizzle أو Admiralty أو `CLAUDE.md` أو الشيفرة القائمة.
 - **X3:** `CLAUDE.md` لم يعد يلغي التنبّؤ منذ R293.
 - **X5:** `CLAUDE.md` يحمل الآن سطور R300 وR301-1 التي تعارض C2. يبقى كما هو حتى تحسم المصالحة.
 - **التحقّق من التنفيذ:** 0 مواصفة من الـMaster مُتحقَّق من تنفيذها.
+
+## R304 — تثبيت التسلسل: Phase 29 = Live، وPhase 30 = Contract Closure (2026-10-04)
+
+**القرار (من المالك):**
+- **Phase 29 = Live Intelligence** في التسلسل التاريخي المعتمد. مواصفتها الحرفية لا تُحذف ولا تُستبدل، وما توزّع منها لاحقًا على طبقات أخرى يُوثَّق كـintegration/coverage mapping.
+- **Phase 30 = Contract Hardening / Closure:** 30.25 → 30.26 → 30.27، ثم الإغلاق والتحقق قبل Phase 31.
+- **Supply Chain ≠ Phase 30:** هي domain/intelligence coverage، ولا تغيّر نقطة الاستئناف.
+- **Companies & Facilities ≠ بديل لـPhase 29:** مجال لاحق مرتبط، يوضع في موضعه في الـMaster ويُربط بـTechnology وبالـWorld Model، دون إعادة كتابة التاريخ.
+- لا يُعتبر شيء IMPLEMENTED بسبب هذا التصحيح.
+- **نقطة العمل لا تتغير:** نواصل من عقود Phase 30.
+- **الترتيب المطلوب:** Reconciliation Record أولًا، ثم تحديث `CLAUDE.md` بحيث لا يبقى فيه تعارض مع الـMaster.
+
+**ما نُفِّذ (توثيق فقط، دون أي كود):**
+- `docs/reconciliation/RECORD_PHASE_SEQUENCE_R304.md` يربط R300 وR301-1 وPhase 28 وPhase 29 الحرفية وPhase 30 و30.25→30.26→30.27 ومواصفة Supply Chain:
+  - مواصفة Supply Chain موجودة في القسم §24 من الـMaster، وفي §23 من الـhandoff، وفي §38 من حزمة البناء. والنص الحرفي للمرحلة 28 يذكر «Phase 25 supply-chain intelligence»، لكن وثيقة Phase 25 نفسها لم تصلني.
+  - التسميات المُلغاة (Phase 29 = Technology، وPhase 29 = C&F، وPhase 30 = Supply Chain) محفوظة كتاريخ.
+  - **Live integration/coverage mapping (مرشّح):** أقسام Phase 29 الفرعية مقابل العقود اللاحقة على مستوى العناوين، مع الأقسام التي تبقى حصرًا تحت Phase 29. لا يُلغى أي قسم، والتأكيد بند من بنود S.
+- **تحديث `CLAUDE.md` §7 بعد السجل:** التسلسل النهائي. فحصتُ بقية الأقسام، ولا تعارض آخر مع الـMaster في هذه النقاط.
+- في قائمة الفجوات: C2 وC3 وX5 حُسمت.

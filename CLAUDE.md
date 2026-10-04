@@ -299,8 +299,19 @@ Records live in `docs/reconciliation/`: the Contradiction Register in the baseli
   canonical truth. The Calibration Ledger is an evaluation record, not a forecast (R302).
 - Text classes: SOURCE-PRESERVED / CONSOLIDATED / RECONSTRUCTED. Never write ORIGINAL
   without the original text (R302).
-- Phase 28 = Technology Intelligence. Phase 29 = Live Intelligence (R300).
-  Companies & Facilities Intelligence is a **Domain Pack**, not a phase (R301-1).
+- **Phase sequence (R304, `docs/reconciliation/RECORD_PHASE_SEQUENCE_R304.md`):**
+  - Phase 28 = Technology Intelligence.
+  - **Phase 29 = Live Intelligence.** The verbatim specification ("Real-Time Intelligence
+    Fabric …") is retained and authoritative. Later integration into other layers is
+    documented as a coverage mapping, never as deletion.
+  - **Phase 30 = Contract Hardening / Closure:** 30.25 Gap Audit → 30.26 Data Contracts →
+    30.27 Interface Contracts → 30.27.8 … S. Closure and verification come before any
+    move to Phase 31.
+  - **Supply Chain ≠ Phase 30.** It is domain / intelligence coverage.
+  - **Companies & Facilities ≠ a replacement for Phase 29.** It is a Domain Pack
+    (R301-1), linked to Technology Intelligence and the World Model.
+  - The working point is unchanged. The phases are not re-ordered, and nothing is
+    IMPLEMENTED because of this correction.
 - 30.27.8.M is history only.
 - Phase 30 is NOT COMPLETE. Phase 31 is BLOCKED until Phase 30 closes.
 - This reconciliation stage is **30.27.8.RB**. R remains Artifact / Export /

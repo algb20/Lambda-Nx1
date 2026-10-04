@@ -124,3 +124,15 @@ R303 lists them "among" those prepared. The list is **not exhaustive**: N, O, P,
 4. **C4, X6:** the 30.25 text and the six named library files.
 5. **X2:** Pi Network's place in the target architecture — a separate decision.
 6. **X4:** the Verification Taxonomy Reconciliation, to be held in S.
+
+---
+
+## 7. Resolution — owner decision R304
+
+| Item | Status |
+|---|---|
+| **C2** — Phase 29 | **RESOLVED.** Phase 29 = Live Intelligence. The verbatim specification is retained and authoritative. Companies & Facilities is a Domain Pack, not a replacement. |
+| **C3** — Phase 30 | **RESOLVED.** Phase 30 = Contract Hardening / Closure (30.25 → 30.26 → 30.27 → S). Supply Chain is domain coverage, not Phase 30. |
+| **X5** — CLAUDE.md timing | **RESOLVED.** The Reconciliation Record `RECORD_PHASE_SEQUENCE_R304.md` was written first; CLAUDE.md §7 was updated after it. |
+
+All other items in this list are unchanged. Nothing was marked IMPLEMENTED.
