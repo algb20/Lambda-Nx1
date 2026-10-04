@@ -145,13 +145,20 @@ describe('how much of the paid tier is actually enforced', () => {
  * domain breakdown" while `scoreboard()` computes a weighted accuracy, by
  * author and by confidence band, and nothing else. Brier and log scores need a
  * stated probability, and our claims carry a categorical confidence grade —
- * they cannot be computed from what is stored, so the text was not merely
- * ahead of the code but unreachable by it. The pricing table called the same
- * claims "our forecasts"; the platform has no forecasting engine, and the
- * Master keeps Forecast distinct from an assessment.
+ * they cannot be computed from what is stored.
+ *
+ * Owner decision D-03 (2026-10-04, ledger R302): the ledger is a **calibration
+ * / evaluation record** of earlier forecasts and claims — ours and others' —
+ * scored against what happened. It may reference a forecast; it does not issue
+ * one. Batch 01 had worded the price list as "our assessments", which hid the
+ * forecasts it actually scores; batch 02 restores them, as an evaluation.
  */
 describe('the calibration ledger claims only what it computes', () => {
   const calibration = CAPABILITIES.find((c) => c.id === 'calibration')!
+  const pricingLine = () =>
+    readFileSync(join(APP, 'pricing/page.tsx'), 'utf8')
+      .split('\n')
+      .find((l) => l.trim().startsWith('calibration:'))
 
   it('promises no metric the scoreboard does not produce', () => {
     expect(calibration.description).not.toMatch(/brier|log[- ]?score|domain breakdown|topic breakdown/i)
@@ -163,10 +170,16 @@ describe('the calibration ledger claims only what it computes', () => {
     expect(calibration.description).toMatch(/confidence/i)
   })
 
-  it('does not sell assessments as forecasts on the price list', () => {
-    const pricing = readFileSync(join(APP, 'pricing/page.tsx'), 'utf8')
-    const line = pricing.split('\n').find((l) => l.trim().startsWith('calibration:'))
-    expect(line, 'pricing label for calibration').toBeTruthy()
-    expect(line).not.toMatch(/forecast/i)
+  it('describes an evaluation of forecasts and claims, per D-03', () => {
+    for (const text of [calibration.description, pricingLine() ?? '']) {
+      expect(text, 'what is evaluated').toMatch(/forecasts? and claims?/i)
+      expect(text, 'that it is an evaluation').toMatch(/scored against/i)
+    }
+  })
+
+  it('never presents the ledger as issuing forecasts', () => {
+    for (const text of [calibration.description, pricingLine() ?? '']) {
+      expect(text).not.toMatch(/\b(our forecasts|we forecast|predicts?)\b/i)
+    }
   })
 })

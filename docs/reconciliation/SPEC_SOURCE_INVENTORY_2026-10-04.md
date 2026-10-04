@@ -230,3 +230,16 @@ The repository's 2,770 passing tests prove **repository behaviour**. None of the
 - CONFLICTING: 6 (was 7).
 - FOUND complete: 2.
 - IMPLEMENTED: 0.
+
+---
+
+## 8. Search for the missing files — R307 ("اعمل المطلوب بنفسك")
+
+| Source tried | Result |
+|---|---|
+| GitHub repository `algb20/Lambda-NX`, the older public project (pushed 2026-03-26) | Cloned read-only. It holds **5 files only**: `index.html`, `netlify/functions/pi-approve.js`, `pi-cancel.js`, `pi-complete.js` and `validation-key.txt`. **No specification text.** The clone was deleted afterwards. |
+| The owner's other GitHub repositories | Not searched. They belong to other projects, and `World-Pi` is out of bounds (R293 / owner instruction). |
+| Gmail connector | **Unavailable.** The connector reports that the owner must sign in again ("needs you to sign in again"). The connection has to be re-authorised in claude.ai connector settings before the search can run. |
+| Owner's project library (ChatGPT / claude.ai project files) | Not reachable from this session |
+
+**Result:** none of the missing items in §5.3 of `CANONICAL_RECONCILIATION.md` could be recovered by Claude. They stay **NOT SUPPLIED TO CLAUDE**, or MISSING — must not invent.

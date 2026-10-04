@@ -49,7 +49,7 @@ const FEATURE_LABEL: Record<Feature, string> = {
   procurement: 'Public contracts & tenders',
   ai_analyst: 'AI analyst — triage and written summaries',
   monitoring: 'Monitors & alerting with signed webhooks',
-  calibration: 'Calibration ledger — our assessments scored against outcomes',
+  calibration: 'Calibration ledger — forecasts and claims scored against outcomes',
   export: 'Export — PDF, CSV, JSON, citations, shareable permalinks',
 }
 

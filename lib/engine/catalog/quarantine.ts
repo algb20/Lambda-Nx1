@@ -98,6 +98,8 @@ export interface QuarantinedSource {
  */
 const PROBED = '2026-08-14'
 const REPROBED = '2026-08-22'
+/** Production's `/api/diagnose`, confirmed from a second network the same day. */
+const OBSERVED_2026_10_04 = '2026-10-04'
 
 const q = (
   key: string,
@@ -124,6 +126,8 @@ export const QUARANTINE: QuarantinedSource[] = [
   q('nation_kenya', 'bot-blocked', 403),
   q('map_morocco', 'bot-blocked', 403),
   q('ethiopia_addisstandard', 'bot-blocked', 403),
+  { key: 'bse_india', reason: 'bot-blocked', status: 403, observedOn: OBSERVED_2026_10_04,
+    note: 'Akamai "Access Denied" — the same refusal as BLS. Seen by Production and re-requested from a second network.' },
 
   // ── Answering perfectly, publishing nothing. ─────────────────────────────
   {
@@ -182,6 +186,8 @@ export const QUARANTINE: QuarantinedSource[] = [
   { key: 'afp_via_gdelt', reason: 'unreachable', status: 429, observedOn: REPROBED,
     note: 'GDELT rate-limits the probe. Re-checked 2026-08-22 and still 429, so this is their standing limit for us rather than one bad sweep.' },
   q('smn_mexico', 'unreachable', 500),
+  { key: 'nasa_donki', reason: 'unreachable', status: 429, observedOn: OBSERVED_2026_10_04,
+    note: 'NASA answers 429 OVER_RATE_LIMIT on the shared DEMO_KEY (Production received HTML instead of JSON). A shared anonymous key on shared serverless addresses is a standing limit, as with afp_via_gdelt. The lasting fix is a registered api.nasa.gov key — an owner decision, not a workaround.' },
   { key: 'ted_europa', reason: 'moved', status: 404, observedOn: REPROBED,
     note: 'Was 202 Accepted with no body; now 404. The async endpoint we were calling is gone, so this is a moved record needing a new URL, not an unreachable one waiting to recover.' },
 ]
