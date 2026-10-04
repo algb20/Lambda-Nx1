@@ -1,5 +1,5 @@
 import type { Licence } from '../catalog/types'
-import { PUBLIC_DOMAIN, WHO_TERMS, needsAgreement, nonCommercial } from '../catalog/licence'
+import { CC0, PUBLIC_DOMAIN, WHO_TERMS, ccBy, ccBySa, needsAgreement, nonCommercial } from '../catalog/licence'
 
 /**
  * The licence position of every **coded** source.
@@ -62,6 +62,14 @@ const COINGECKO: CodedLicence = {
   evidence:
     'Licence allows applications that "charge for your services and products that incorporate or integrates our CoinGecko API", provided they display "Powered by CoinGecko" (font size ≥ 10). Access may not be resold or syndicated.',
   condition: 'Show "Powered by CoinGecko" wherever the data appears — components/powered-by-coingecko.tsx.',
+}
+
+const US_GOV: CodedLicence = {
+  state: 'verified',
+  licence: PUBLIC_DOMAIN,
+  checked: CHECKED,
+  evidence:
+    'Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105). Agencies: FAA, Federal Register (NARA/GPO), NOAA, U.S. Treasury USAspending, USGS.',
 }
 
 const FRED_CITED: CodedLicence = {
@@ -147,6 +155,144 @@ export const CODED_SOURCE_LICENCES: Record<string, CodedLicence> = {
   sec_full_text: US_FEDERAL,
   edgar: US_FEDERAL,
 
+  crossref: {
+    state: 'verified',
+    licence: { id: 'crossref-metadata', name: 'Crossref metadata', commercialUse: true, storage: true, redistribute: true, termsUrl: 'https://www.crossref.org/documentation/retrieve-metadata/rest-api/' },
+    checked: CHECKED,
+    evidence: '"almost none of the metadata is subject to copyright, and you may use it for any purpose"; abstracts may be publishers\' copyright. No sign-up required.',
+    condition: 'Titles and identifiers only; abstracts are not republished.',
+  },
+  gleif: {
+    state: 'verified',
+    licence: { ...CC0, termsUrl: 'https://www.gleif.org/en/meta/lei-data-terms-of-use/' },
+    checked: CHECKED,
+    evidence: 'LEI data terms: "The data available through the Access Service are provided under the CC0 licence."',
+  },
+  gleif_ownership: {
+    state: 'verified',
+    licence: { ...CC0, termsUrl: 'https://www.gleif.org/en/meta/lei-data-terms-of-use/' },
+    checked: CHECKED,
+    evidence: 'LEI data terms: "The data available through the Access Service are provided under the CC0 licence."',
+  },
+  arxiv: {
+    state: 'verified',
+    licence: { ...CC0, name: 'arXiv descriptive metadata (CC0)', termsUrl: 'https://info.arxiv.org/help/api/tou.html' },
+    checked: CHECKED,
+    evidence: 'arXiv API ToU: "You are free to use descriptive metadata about arXiv e-prints under the terms of the Creative Commons Universal (CC0 1.0) Public Domain Declaration"; tools that help users discover e-prints are permitted.',
+    condition: 'Never represent the product as endorsed by arXiv; ≤ 1 request / 3 s, one connection.',
+  },
+  arxiv_watch: {
+    state: 'verified',
+    licence: { ...CC0, name: 'arXiv descriptive metadata (CC0)', termsUrl: 'https://info.arxiv.org/help/api/tou.html' },
+    checked: CHECKED,
+    evidence: 'Same arXiv API ToU as `arxiv`: descriptive metadata under CC0 1.0; discovery and notification tools are permitted.',
+    condition: 'Never represent the product as endorsed by arXiv; ≤ 1 request / 3 s, one connection.',
+  },
+  gdelt: {
+    state: 'verified',
+    licence: { id: 'gdelt-terms', name: 'GDELT Project (citation and link required)', commercialUse: true, storage: true, redistribute: true, attribution: 'The GDELT Project — https://www.gdeltproject.org/', termsUrl: 'https://www.gdeltproject.org/about.html' },
+    checked: CHECKED,
+    evidence: '"available for unlimited and unrestricted use for any academic, commercial, or governmental use of any kind without fee"; "any use or redistribution of the data must include a citation to the GDELT Project and a link to this website".',
+    condition: 'Citation and link shown under the news results.',
+  },
+  ecb_policy_rate: {
+    state: 'verified',
+    licence: { id: 'ecb-reuse', name: 'ECB statistics (source cited)', commercialUse: true, storage: true, redistribute: true, attribution: 'European Central Bank', termsUrl: 'https://www.ecb.europa.eu/services/disclaimer/html/index.en.html' },
+    checked: CHECKED,
+    evidence: 'ECB disclaimer & copyright: information may be reproduced if "the ECB must be cited as the source"; modifications such as calculated growth rates "must be stated explicitly"; if sold, buyers are told it is free from the ECB.',
+    condition: 'ECB named as source; computed changes declared as computed.',
+  },
+  ecb_yield_curve: {
+    state: 'verified',
+    licence: { id: 'ecb-reuse', name: 'ECB statistics (source cited)', commercialUse: true, storage: true, redistribute: true, attribution: 'European Central Bank', termsUrl: 'https://www.ecb.europa.eu/services/disclaimer/html/index.en.html' },
+    checked: CHECKED,
+    evidence: 'Same ECB disclaimer & copyright terms as `ecb_policy_rate`: reproduction allowed with the ECB cited as source; computed modifications stated explicitly.',
+    condition: 'ECB named as source; computed changes declared as computed.',
+  },
+  worldbank_economy: {
+    state: 'verified',
+    licence: { ...ccBy('World Bank', 'https://datacatalog.worldbank.org/public-licenses') },
+    checked: CHECKED,
+    evidence: 'World Bank data catalog default licence: CC BY 4.0 — "copy, modify and distribute data in any format for any purpose, including commercial use", with attribution.',
+  },
+  worldbank_projects: {
+    state: 'verified',
+    licence: { ...ccBy('World Bank', 'https://datacatalog.worldbank.org/public-licenses') },
+    checked: CHECKED,
+    evidence: 'Default licence of the World Bank data catalog (CC BY 4.0), which lists Projects & Operations; no dataset-specific exception was found.',
+  },
+  eurostat_hpi: {
+    state: 'verified',
+    licence: { id: 'eurostat-reuse', name: 'Eurostat (source acknowledged)', commercialUse: true, storage: true, redistribute: true, attribution: 'Eurostat', termsUrl: 'https://ec.europa.eu/eurostat/web/main/help/copyright-notice' },
+    checked: CHECKED,
+    evidence: '"Reuse of statistical data … for commercial or non-commercial purposes is authorised provided the source is acknowledged" — except data from non-EU countries and some trade data.',
+    condition: 'Eurostat acknowledged on the property board; EU house-price series only.',
+  },
+  elexon_grid: {
+    state: 'verified',
+    licence: { id: 'elexon-bmrs', name: 'Elexon BMRS data licence', commercialUse: true, storage: true, redistribute: true, attribution: 'Contains BMRS data © Elexon Limited copyright and database right', termsUrl: 'https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/' },
+    checked: CHECKED,
+    evidence: 'Free to "exploit the BMRS Data, including commercially, or by including it in your own product or application", with the statement "Contains BMRS data © Elexon Limited copyright and database right [year]".',
+    condition: 'Exact attribution in the power-grid board note.',
+  },
+  github: {
+    state: 'verified',
+    licence: { id: 'github-api-terms', name: 'GitHub API terms', commercialUse: true, storage: false, redistribute: false, termsUrl: 'https://docs.github.com/en/site-policy/github-terms/github-terms-of-service' },
+    checked: CHECKED,
+    evidence: 'Terms §H: no prohibition on commercial products; forbids excessive requests, token sharing to exceed limits, and selling users\' personal information.',
+    condition: 'Public repository metadata only; within the unauthenticated rate limit.',
+  },
+
+  faa_nasstatus: US_GOV,
+  federal_register: US_GOV,
+  noaa_ndbc: US_GOV,
+  noaa_swpc: US_GOV,
+  usaspending: US_GOV,
+  usgs_quakes: US_GOV,
+  usgs_recent: US_GOV,
+  fred_housing: {
+    ...FRED_CITED,
+    evidence:
+      'FRED copyright class checked per series 2026-10-04: MSPUS, HOUST, RRVRUSQ156N, MSACSR "Public Domain: Citation requested"; MORTGAGE30US "Copyrighted: Citation required"; CSUSHPINSA "Pre-Approval Required" — removed.',
+  } as CodedLicence,
+  imf_commodities: {
+    ...FRED_CITED,
+    evidence:
+      'All 18 IMF primary-commodity series on FRED checked 2026-10-04: "Copyrighted: Citation required" — commercial use allowed with attribution to FRED and the IMF.',
+  } as CodedLicence,
+  ukhpi_landregistry: {
+    state: 'verified',
+    licence: { id: 'OGL-UK-3.0', name: 'Open Government Licence v3.0', commercialUse: true, storage: true, redistribute: true, attribution: 'Contains HM Land Registry data © Crown copyright and database right', termsUrl: 'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/' },
+    checked: CHECKED,
+    evidence: 'GOV.UK "About the UK House Price Index": published under the Open Government Licence v3.0, which permits commercial reuse with the statement "Contains HM Land Registry data © Crown copyright and database right [year]. This data is licensed under the Open Government Licence v3.0."',
+    condition: 'Exact statement shown on the property board.',
+  },
+  pubmed: {
+    state: 'verified',
+    licence: { id: 'ncbi-eutils', name: 'NCBI E-utilities (PubMed metadata)', commercialUse: true, storage: true, redistribute: true, termsUrl: 'https://www.ncbi.nlm.nih.gov/home/about/policies/' },
+    checked: CHECKED,
+    evidence: 'NCBI policies: "NLM does not claim the copyright on the abstracts in PubMed; however, journal publishers or authors may"; E-utilities: "no more than 3 requests every 1 second"; the NCBI disclaimer must be evident to users of services built on the APIs.',
+    condition: 'esummary metadata only (no abstracts); 400 ms spacing; NCBI disclaimer linked under research results.',
+  },
+  wikipedia_itn: {
+    state: 'verified',
+    licence: ccBySa('Wikipedia contributors', 'https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use'),
+    checked: CHECKED,
+    evidence: 'Wikimedia Terms of Use: text under CC BY-SA 4.0 and GFDL; attribution may be "a hyperlink … to the article"; automated use must follow the User-Agent policy and API etiquette and not unduly burden servers.',
+    condition: 'Each item links to its article; CC BY-SA 4.0 notice under news results; engine User-Agent carries a contact address.',
+  },
+  wikipedia_trending: {
+    state: 'verified',
+    licence: ccBySa('Wikipedia contributors', 'https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use'),
+    checked: CHECKED,
+    evidence: 'Same Wikimedia Terms of Use as wikipedia_itn; this source shows article titles linked to their articles, within the User-Agent policy.',
+  },
+  hf_papers: {
+    state: 'unverified',
+    reason:
+      'Hugging Face terms read 2026-10-04: users must not "reproduce, republish, license any of our proprietary materials" without written permission, and say nothing specific about the Daily Papers listing. Whether that curated listing is their proprietary material is a DECISION REQUIRED.',
+  },
+
   // ── Read, and ambiguous: an owner decision, not a guess ───────────────────
   xposedornot: {
     state: 'unverified',
@@ -160,59 +306,32 @@ export const CODED_SOURCE_LICENCES: Record<string, CodedLicence> = {
   },
 
   // ── Not yet read ──────────────────────────────────────────────────────────
-  arxiv: UNREAD,
-  arxiv_watch: UNREAD,
   bis_speeches: UNREAD,
   celestrak: UNREAD,
   ckan_federation: UNREAD,
   courtlistener: UNREAD,
-  crossref: UNREAD,
   crtsh: UNREAD,
   crypto_news: UNREAD,
   'dns.cloudflare': UNREAD,
   'dns.google': UNREAD,
-  ecb_policy_rate: UNREAD,
   ecb_reference_rates: UNREAD,
-  ecb_yield_curve: UNREAD,
-  elexon_grid: UNREAD,
   ethereum_rpc: UNREAD,
-  eurostat_hpi: UNREAD,
-  faa_nasstatus: UNREAD,
   factcheck: UNREAD,
-  federal_register: UNREAD,
   frankfurter: UNREAD,
   frankfurter_board: UNREAD,
-  fred_housing: UNREAD,
   gdacs: UNREAD,
-  gdelt: UNREAD,
-  github: UNREAD,
-  gleif: UNREAD,
-  gleif_ownership: UNREAD,
   hackernews: UNREAD,
-  hf_papers: UNREAD,
-  imf_commodities: UNREAD,
   iso_mic_registry: UNREAD,
   iss_position: UNREAD,
   mempool: UNREAD,
   mempool_network: UNREAD,
-  noaa_ndbc: UNREAD,
-  noaa_swpc: UNREAD,
   official_statements: UNREAD,
   openalex: UNREAD,
   pi_network: UNREAD,
-  pubmed: UNREAD,
   radio_browser: UNREAD,
   rdap: UNREAD,
-  ukhpi_landregistry: UNREAD,
-  usaspending: UNREAD,
   'username.web': UNREAD,
-  usgs_quakes: UNREAD,
-  usgs_recent: UNREAD,
   wayback: UNREAD,
   wikidata: UNREAD,
   wikimedia_pageviews: UNREAD,
-  wikipedia_itn: UNREAD,
-  wikipedia_trending: UNREAD,
-  worldbank_economy: UNREAD,
-  worldbank_projects: UNREAD,
 }

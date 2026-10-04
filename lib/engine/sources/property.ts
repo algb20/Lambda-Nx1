@@ -15,8 +15,10 @@
  * own territory** — not an aggregator reselling them:
  *
  *  - **FRED** (Federal Reserve Bank of St. Louis) for the United States:
- *    Case-Shiller, median sale price, housing starts, the 30-year mortgage,
- *    rental vacancy and months' supply. The Fed publishing series it curates
+ *    median sale price, housing starts, the 30-year mortgage, rental vacancy
+ *    and months' supply. (Case-Shiller was removed in batch 08: FRED labels it
+ *    "Copyrighted: Pre-Approval Required" — S&P CoreLogic's permission, which
+ *    we do not hold.) The Fed publishing series it curates
  *    itself is A/1.
  *  - **Eurostat** for the European Union: the official quarterly house price
  *    index, the number every EU housing policy argument is conducted in.
@@ -95,15 +97,22 @@ interface FredHousingSeries {
   name: string
   cls: PropertyClass
   unit: string
+  /**
+   * The original publisher. FRED's terms allow commercial use of citation-class
+   * series "provided that appropriate attribution is given to FRED as well as
+   * the original source" (fred.stlouisfed.org/legal).
+   */
+  origin: string
 }
 
 const US_SERIES: FredHousingSeries[] = [
-  { id: 'CSUSHPINSA', name: 'Case-Shiller national home price index', cls: 'price', unit: 'index' },
-  { id: 'MSPUS', name: 'Median sale price, houses sold', cls: 'price', unit: 'USD' },
-  { id: 'HOUST', name: 'Housing starts', cls: 'activity', unit: 'thousands of units' },
-  { id: 'MORTGAGE30US', name: '30-year fixed mortgage rate', cls: 'finance', unit: '%' },
-  { id: 'RRVRUSQ156N', name: 'Rental vacancy rate', cls: 'supply', unit: '%' },
-  { id: 'MSACSR', name: "Months' supply of new houses", cls: 'supply', unit: 'months' },
+  // FRED copyright class, checked 2026-10-04: all "Public Domain: Citation
+  // requested" except MORTGAGE30US, "Copyrighted: Citation required".
+  { id: 'MSPUS', name: 'Median sale price, houses sold', cls: 'price', unit: 'USD', origin: 'U.S. Census Bureau / HUD' },
+  { id: 'HOUST', name: 'Housing starts', cls: 'activity', unit: 'thousands of units', origin: 'U.S. Census Bureau / HUD' },
+  { id: 'MORTGAGE30US', name: '30-year fixed mortgage rate', cls: 'finance', unit: '%', origin: 'Freddie Mac' },
+  { id: 'RRVRUSQ156N', name: 'Rental vacancy rate', cls: 'supply', unit: '%', origin: 'U.S. Census Bureau' },
+  { id: 'MSACSR', name: "Months' supply of new houses", cls: 'supply', unit: 'months', origin: 'U.S. Census Bureau / HUD' },
 ]
 
 /**
@@ -157,7 +166,7 @@ export const usHousing: Source = {
         propertyEvidence({
           cls: s.cls,
           region: 'United States',
-          name: s.name,
+          name: `${s.name} — ${s.origin} via FRED`,
           value: latest.value,
           change:
             previous && previous.value !== 0

@@ -132,7 +132,10 @@ export const BOARDS: BoardDefinition[] = [
     key: 'grid',
     capability: 'power_grid',
     title: 'Power grid',
-    note: 'Britain’s electricity, metered half-hourly by the body that settles the market — not an estimate of what the grid is doing, the figure it is paid on.',
+    // Elexon's BMRS licence allows commercial use on condition of this exact
+    // attribution: "Contains BMRS data © Elexon Limited copyright and database
+    // right [year]."
+    note: `Britain’s electricity, metered half-hourly by the body that settles the market — not an estimate of what the grid is doing, the figure it is paid on. Contains BMRS data © Elexon Limited copyright and database right ${new Date().getUTCFullYear()}.`,
     searchable: false,
   },
   {
