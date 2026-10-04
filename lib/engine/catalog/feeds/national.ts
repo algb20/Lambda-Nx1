@@ -1,5 +1,5 @@
 import type { CatalogSource } from '../types'
-import { PUBLIC_DOMAIN, ccBy, publicFeed } from '../licence'
+import { PUBLIC_DOMAIN, WHO_TERMS, ccBy, publicFeed } from '../licence'
 
 /**
  * National agencies — the layer that turns "global coverage" from a claim into
@@ -342,7 +342,7 @@ export const NATIONAL_SOURCES: CatalogSource[] = [
     // Same organisation as `who_don`, so the same group: a regional office
     // repeating headquarters is not a second confirmation.
     independence: 'who',
-    licence: publicFeed('WHO Africa', 'https://www.who.int/about/policies/terms-of-use'),
+    licence: WHO_TERMS,
     minIntervalSec: 7200,
     keyless: true,
   },
@@ -357,7 +357,7 @@ export const NATIONAL_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'A',
     independence: 'who',
-    licence: publicFeed('WHO EMRO', 'https://www.who.int/about/policies/terms-of-use'),
+    licence: WHO_TERMS,
     minIntervalSec: 7200,
     keyless: true,
     enabled: false,

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { classifyIndicator, investigateThreat } from './threat'
+import { classifyIndicator, investigateThreat, THREAT_WITHHELD } from './threat'
 
 function res(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
@@ -18,38 +18,20 @@ describe('classifyIndicator', () => {
 })
 
 describe('investigateThreat', () => {
-  it('flags an IP found on the Feodo botnet list', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn((u: string) => {
-        const host = new URL(u).hostname
-        if (host === 'feodotracker.abuse.ch')
-          return Promise.resolve(res([{ ip_address: '1.2.3.4', malware: 'Emotet' }]))
-        if (host === 'urlhaus-api.abuse.ch')
-          return Promise.resolve(res({ query_status: 'ok', url_count: 2, urls: [] }))
-        if (host === 'threatfox-api.abuse.ch')
-          return Promise.resolve(res({ query_status: 'ok', data: [{ malware: 'Emotet' }] }))
-        return Promise.resolve(res({}, 404))
-      }),
-    )
-    const report = await investigateThreat('1.2.3.4')
-    expect(report.type).toBe('ip')
-    expect(report.flagged).toBe(true)
-    expect(report.findings.some((f) => /Feodo/.test(f.claim))).toBe(true)
-  })
-
-  it('reports no known threat cleanly (and never throws) when feeds are empty', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn((u: string) => {
-        const host = new URL(u).hostname
-        if (host === 'feodotracker.abuse.ch') return Promise.resolve(res([]))
-        return Promise.resolve(res({ query_status: 'no_result' }))
-      }),
-    )
-    const report = await investigateThreat('clean.test')
-    expect(report.flagged).toBe(false)
-    expect(report.summary.hits).toBe(0)
+  /**
+   * Batch 07: abuse.ch admits only authenticated users and may require a
+   * commercial subscription; ThreatFox and URLhaus already answered 401. With
+   * no permitted source the gateway refuses with the reason, sends nothing,
+   * and above all does not return "not flagged" — an unchecked indicator is
+   * not a clean one (S invariant 15). The adapters' own tests still cover
+   * how a real abuse.ch answer is read, for the day access is arranged.
+   */
+  it('refuses with the reason, and never reports an unchecked indicator as clean', async () => {
+    const fetchSpy = vi.fn(() => Promise.resolve(res([])))
+    vi.stubGlobal('fetch', fetchSpy)
+    await expect(investigateThreat('1.2.3.4')).rejects.toThrow(THREAT_WITHHELD)
+    await expect(investigateThreat('clean.test')).rejects.toThrow(/not the same as clean/)
+    expect(fetchSpy).not.toHaveBeenCalled()
   })
 
   it('rejects an unrecognizable indicator', async () => {

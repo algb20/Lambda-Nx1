@@ -213,3 +213,13 @@ export function needsAgreement(name: string, termsUrl: string): Licence {
     termsUrl,
   }
 }
+
+/**
+ * WHO's website terms (read 2026-10-04, www.who.int/about/policies/terms-of-use):
+ * extracts "may be reviewed, reproduced or translated for research or private
+ * study but not for sale or for use in conjunction with commercial purposes",
+ * and "any use other than for educational or other non-commercial purposes,
+ * require[s] explicit, prior authorization in writing". This product has paid
+ * tiers, so WHO content needs that authorization first (batch 07).
+ */
+export const WHO_TERMS = needsAgreement('World Health Organization (written authorization for commercial use)', 'https://www.who.int/about/policies/terms-of-use')

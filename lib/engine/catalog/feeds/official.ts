@@ -1,5 +1,5 @@
 import type { CatalogSource } from '../types'
-import { PUBLIC_DOMAIN, ccBy, nonCommercial, publicFeed } from '../licence'
+import { PUBLIC_DOMAIN, WHO_TERMS, ccBy, nonCommercial, publicFeed } from '../licence'
 
 /**
  * Institutional and official publication.
@@ -42,7 +42,7 @@ export const OFFICIAL_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'A',
     independence: 'who',
-    licence: publicFeed('World Health Organization', 'https://www.who.int/about/policies/terms-of-use'),
+    licence: WHO_TERMS,
     minIntervalSec: 3600,
     keyless: true,
     note: 'The authoritative record of verified outbreaks.',

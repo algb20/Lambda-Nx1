@@ -114,8 +114,9 @@ export const FIRST_LIGHT: ReadonlySet<string> = new Set([
   'tsunami_gov',
   // Volcanic activity, worldwide weekly report.
   'si_volcano_weekly',
-  // Disease outbreaks, worldwide.
-  'who_outbreaks',
+  // Disease outbreaks: `who_outbreaks` was here. WHO's terms require written
+  // authorization for commercial use (batch 07), so it is withheld; no other
+  // geolocated outbreak feed replaces it yet — a real gap, left visible.
   // The one national feed in the list, and it earns its place on volume: NWS
   // issues county-level warnings continuously, so it is usually the difference
   // between a first-light map with marks on it and one without.

@@ -916,6 +916,15 @@ function GeoView({ r }: { r: GeoReport }) {
       ) : null}
       <Card className="p-4">
         <h4 className="mb-1 text-sm font-semibold">Geospatial results</h4>
+        {/* Nominatim's usage policy (osmfoundation.org): results carry the ODbL
+            attribution "as suitable for your medium". */}
+        <p className="mb-1 text-[11px] text-muted-foreground">
+          Places ©{' '}
+          <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" className="hover:underline">
+            OpenStreetMap contributors
+          </a>{' '}
+          (ODbL), via Nominatim
+        </p>
         {r.findings.length === 0 ? (
           <p className="py-2 text-sm text-muted-foreground">
             No public geospatial match. Try a place or a &quot;lat,lon&quot; pair.

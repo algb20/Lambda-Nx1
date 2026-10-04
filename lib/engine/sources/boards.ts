@@ -776,7 +776,8 @@ const STATEMENT_FEEDS: StatementFeed[] = [
   { key: 'fed_press', label: 'US Federal Reserve', url: 'https://www.federalreserve.gov/feeds/press_all.xml', host: 'www.federalreserve.gov' },
   { key: 'ukgov', label: 'UK government', url: 'https://www.gov.uk/search/news-and-communications.atom', host: 'www.gov.uk' },
   { key: 'iaea', label: 'IAEA', url: 'https://www.iaea.org/feeds/topnews', host: 'www.iaea.org' },
-  { key: 'who_news', label: 'World Health Organization', url: 'https://www.who.int/rss-feeds/news-english.xml', host: 'www.who.int' },
+  // WHO news withheld: WHO's terms require written authorization for
+  // commercial use (WHO_TERMS, batch 07).
 ]
 
 /**

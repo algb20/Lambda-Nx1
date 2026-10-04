@@ -1,5 +1,5 @@
 import type { Licence } from '../catalog/types'
-import { PUBLIC_DOMAIN, needsAgreement, nonCommercial } from '../catalog/licence'
+import { PUBLIC_DOMAIN, WHO_TERMS, needsAgreement, nonCommercial } from '../catalog/licence'
 
 /**
  * The licence position of every **coded** source.
@@ -35,6 +35,14 @@ export type CodedLicence =
   | { state: 'unverified'; reason: string }
 
 const CHECKED = '2026-10-04'
+
+const ABUSE_CH_REFUSED: CodedLicence = {
+  state: 'refused',
+  licence: { id: 'abuse-ch', name: 'abuse.ch (authenticated users only)', commercialUse: false, storage: true, redistribute: false, termsUrl: 'https://abuse.ch/terms-of-use/' },
+  checked: '2026-10-04',
+  evidence:
+    '"Access to the abuse.ch Platforms is provided only to: Authenticated Users"; commercial use "may require a paid subscription, which will be managed by Spamhaus". ThreatFox and URLhaus APIs answered 401 without a key.',
+}
 const UNREAD: CodedLicence = { state: 'unverified', reason: 'Provider terms not yet read for commercial use.' }
 
 const COINGECKO: CodedLicence = {
@@ -100,7 +108,32 @@ export const CODED_SOURCE_LICENCES: Record<string, CodedLicence> = {
     evidence: '"free for non-commercial use … If you\'re using the InternetDB API to make money then you need an enterprise license."',
   },
 
+  feodo: ABUSE_CH_REFUSED,
+  urlhaus: ABUSE_CH_REFUSED,
+  threatfox: ABUSE_CH_REFUSED,
+  who_outbreaks: {
+    state: 'refused',
+    licence: WHO_TERMS,
+    checked: CHECKED,
+    evidence:
+      'WHO terms: extracts "not for sale or for use in conjunction with commercial purposes"; other uses "require explicit, prior authorization in writing".',
+  },
+
   // ── Verified ──────────────────────────────────────────────────────────────
+  nominatim: {
+    state: 'verified',
+    licence: { id: 'ODbL-1.0', name: 'OpenStreetMap (ODbL) via Nominatim', commercialUse: true, storage: true, redistribute: true, attribution: '© OpenStreetMap contributors', termsUrl: 'https://operations.osmfoundation.org/policies/nominatim/' },
+    checked: CHECKED,
+    evidence:
+      'Nominatim usage policy: "an absolute maximum of 1 request per second"; identify with a real User-Agent; "clearly display attribution"; no reselling of geocoding results, no auto-complete, no bulk grids. Commercial apps are not excluded.',
+    condition: 'minIntervalMs 1100; engine User-Agent; ODbL attribution shown with Geo results; per-query use only.',
+  },
+  gravatar: {
+    state: 'verified',
+    licence: { id: 'gravatar-api', name: 'Gravatar API', commercialUse: true, storage: false, redistribute: false, termsUrl: 'https://docs.gravatar.com/rest/getting-started/' },
+    checked: CHECKED,
+    evidence: '"The Gravatar API is completely open and free to use" for "developers and organizations of all sizes", under the WordPress.com Guidelines for Responsible Use.',
+  },
   coingecko: COINGECKO,
   coingecko_asset: COINGECKO,
   coingecko_board: COINGECKO,
@@ -147,7 +180,6 @@ export const CODED_SOURCE_LICENCES: Record<string, CodedLicence> = {
   faa_nasstatus: UNREAD,
   factcheck: UNREAD,
   federal_register: UNREAD,
-  feodo: UNREAD,
   frankfurter: UNREAD,
   frankfurter_board: UNREAD,
   fred_housing: UNREAD,
@@ -156,7 +188,6 @@ export const CODED_SOURCE_LICENCES: Record<string, CodedLicence> = {
   github: UNREAD,
   gleif: UNREAD,
   gleif_ownership: UNREAD,
-  gravatar: UNREAD,
   hackernews: UNREAD,
   hf_papers: UNREAD,
   imf_commodities: UNREAD,
@@ -166,22 +197,18 @@ export const CODED_SOURCE_LICENCES: Record<string, CodedLicence> = {
   mempool_network: UNREAD,
   noaa_ndbc: UNREAD,
   noaa_swpc: UNREAD,
-  nominatim: UNREAD,
   official_statements: UNREAD,
   openalex: UNREAD,
   pi_network: UNREAD,
   pubmed: UNREAD,
   radio_browser: UNREAD,
   rdap: UNREAD,
-  threatfox: UNREAD,
   ukhpi_landregistry: UNREAD,
-  urlhaus: UNREAD,
   usaspending: UNREAD,
   'username.web': UNREAD,
   usgs_quakes: UNREAD,
   usgs_recent: UNREAD,
   wayback: UNREAD,
-  who_outbreaks: UNREAD,
   wikidata: UNREAD,
   wikimedia_pageviews: UNREAD,
   wikipedia_itn: UNREAD,

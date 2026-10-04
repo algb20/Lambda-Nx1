@@ -1,5 +1,5 @@
 import type { Licence } from '../../catalog/types'
-import { PUBLIC_DOMAIN, ccBy, ccBySa, publicFeed } from '../../catalog/licence'
+import { PUBLIC_DOMAIN, WHO_TERMS, ccBy, ccBySa, publicFeed } from '../../catalog/licence'
 
 /**
  * The open-data portals we federate over.
@@ -350,7 +350,7 @@ export const PORTALS: DataPortal[] = [
     operator: 'World Health Organization',
     base: 'https://apps.who.int/gho',
     country: 'global',
-    metadataLicence: ccBy('World Health Organization', 'https://www.who.int/about/policies/terms-of-use'),
+    metadataLicence: WHO_TERMS,
     enabled: false,
     note: 'OData/Athena API, not CKAN.',
   },

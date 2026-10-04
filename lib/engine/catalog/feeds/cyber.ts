@@ -19,14 +19,23 @@ import { PUBLIC_DOMAIN, ccBy, publicFeed } from '../licence'
  * licence, because it is genuinely its own terms and pretending otherwise is
  * how a licence gets mis-stated in the permissive direction.
  */
+/**
+ * abuse.ch terms of use (read 2026-10-04, abuse.ch/terms-of-use): "Access to the
+ * abuse.ch Platforms is provided only to: Authenticated Users", and "use … by
+ * companies, networks, or individuals with commercial or for-profit needs may
+ * require a paid subscription, which will be managed by Spamhaus". Measured the
+ * same day: the ThreatFox and URLhaus APIs answer 401 without a key. Recorded
+ * as needing an agreement until an account (and, if required, a subscription)
+ * exists — batch 07. It was recorded as open data with commercial use allowed.
+ */
 const ABUSE_CH: Licence = {
   id: 'abuse-ch',
-  name: 'abuse.ch open data',
-  commercialUse: true,
+  name: 'abuse.ch (authenticated users; commercial use may require a Spamhaus subscription)',
+  commercialUse: false,
   storage: true,
-  redistribute: true,
+  redistribute: false,
   attribution: 'abuse.ch',
-  termsUrl: 'https://abuse.ch/',
+  termsUrl: 'https://abuse.ch/terms-of-use/',
 }
 
 export const CYBER_SOURCES: CatalogSource[] = [

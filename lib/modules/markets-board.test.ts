@@ -146,5 +146,13 @@ describe('marketsBoard', () => {
      */
     expect(second.summary.instruments).toBeGreaterThan(0)
     expect(second.summary.instruments).toBeLessThanOrEqual(first.summary.instruments)
-  })
+  },
+  /**
+   * Two boards back to back pay the engine's real per-provider spacing (the
+   * second call waits out each source's minimum interval). Measured at 4.76 s
+   * before batch 06 and ~5.0 s after — on the edge of Vitest's 5 s default, so
+   * it failed intermittently under a loaded full run. The wait is the
+   * behaviour under test, so the limit is raised rather than the spacing faked.
+   */
+  15_000)
 })

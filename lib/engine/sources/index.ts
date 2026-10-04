@@ -81,7 +81,14 @@ export const moduleOneSources: Source[] = [cloudflareDns, googleDns, rdap, crtsh
 
 export const moduleTwoSources: Source[] = [usernameWeb, xposedornot, gravatar]
 
-export const threatGatewaySources: Source[] = [feodo, urlhaus, threatfox]
+/**
+ * Empty until abuse.ch access is arranged (batch 07): its terms admit only
+ * authenticated users and say commercial use may need a Spamhaus subscription;
+ * ThreatFox and URLhaus already answered 401 to every keyless call. The
+ * threat gateway says so plainly rather than reporting "not flagged" — an
+ * empty check is not a clean bill (S invariant 15).
+ */
+export const threatGatewaySources: Source[] = []
 
 /**
  * OpenSanctions is out of the gateway (batch 06). Two facts, both measured on
@@ -186,9 +193,10 @@ export const moduleTwoSourceCatalog: CatalogRow[] = [
 ]
 
 export const threatGatewayCatalog: CatalogRow[] = [
-  { key: 'feodo', name: 'Feodo Tracker (abuse.ch)', capability: 'threat', passive: true, enabled: true },
-  { key: 'urlhaus', name: 'URLhaus (abuse.ch)', capability: 'threat', passive: true, enabled: true },
-  { key: 'threatfox', name: 'ThreatFox (abuse.ch)', capability: 'threat', passive: true, enabled: true },
+  // Withheld until abuse.ch access is arranged — see threatGatewaySources.
+  { key: 'feodo', name: 'Feodo Tracker (abuse.ch)', capability: 'threat', passive: true, enabled: false },
+  { key: 'urlhaus', name: 'URLhaus (abuse.ch)', capability: 'threat', passive: true, enabled: false },
+  { key: 'threatfox', name: 'ThreatFox (abuse.ch)', capability: 'threat', passive: true, enabled: false },
 ]
 
 export const financeGatewayCatalog: CatalogRow[] = [
@@ -290,7 +298,8 @@ export const worldEventsGatewayCatalog: CatalogRow[] = [
   { key: 'usgs_recent', name: 'USGS seismic (M2.5+ past day)', capability: 'world_events', passive: true, enabled: true },
   { key: 'gdacs', name: 'GDACS (UN/EC disaster alerts)', capability: 'world_events', passive: true, enabled: true },
   { key: 'nws_alerts', name: 'NOAA/NWS active alerts (US)', capability: 'world_events', passive: true, enabled: true },
-  { key: 'who_outbreaks', name: 'WHO Disease Outbreak News', capability: 'world_events', passive: true, enabled: true },
+  // Withheld: WHO's terms require written authorization for commercial use.
+  { key: 'who_outbreaks', name: 'WHO Disease Outbreak News', capability: 'world_events', passive: true, enabled: false },
   { key: 'iss_position', name: 'ISS live position', capability: 'world_events', passive: true, enabled: true },
 ]
 
