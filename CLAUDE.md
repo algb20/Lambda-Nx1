@@ -286,12 +286,19 @@ When two files or two decisions conflict:
 Records live in `docs/reconciliation/`: the Contradiction Register in the baseline, and
 `CONTINUITY_M_S.md`.
 
-**Phase state (2026-10-04, R301):**
-- **Working point:** the pipeline `CANONICAL RECONCILIATION → CURRENT-SYSTEM AUDIT →
-  MISSING-SPEC RECOVERY → CONTRACT CONSOLIDATION → RESUME`. The next stage is fixed
-  formally only after RESUME. **No code changes until then (R299).**
-- Latest *specification* stage recorded in the Master: **30.27.8.S** — BLOCKED by the
-  Build Package's own terms (§29.4).
+**Phase state (2026-10-04, R302):**
+- **Operational resumption point: 30.27.8.S — Cross-Contract Consistency / Closure Gate**
+  (owner, R302). Step 1 of the R301 pipeline (Canonical Reconciliation) is closed for
+  W1, W2, W4 and W5. Audit, recovery and consolidation continue as preparation for S.
+  **No code changes (R299).**
+- 30.27.8 letter sequence (owner, R302): A → B → C → D → E → F → G → H → I → J → K → L →
+  M → N → O → P → Q → R → S. M–R are preserved history, not a return point.
+- Verification ladders are preserved as independent frameworks until S defines a
+  Verification-Level Crosswalk (R302). No numeric conversion between ladders.
+- Forecast is an independent intelligence layer and never becomes World State or
+  canonical truth. The Calibration Ledger is an evaluation record, not a forecast (R302).
+- Text classes: SOURCE-PRESERVED / CONSOLIDATED / RECONSTRUCTED. Never write ORIGINAL
+  without the original text (R302).
 - Phase 28 = Technology Intelligence. Phase 29 = Live Intelligence (R300).
   Companies & Facilities Intelligence is a **Domain Pack**, not a phase (R301-1).
 - 30.27.8.M is history only.

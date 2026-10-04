@@ -193,3 +193,98 @@ Stored D3, D4 and D5 values are never rewritten (baseline §7.3).
 | Linked domains (R301-1) | Technology Intelligence (Phase 28) · Supply Chain · Financial / Market · Geospatial / EO · Infrastructure · Resources / Materials · Events / Evidence · Web / News / Filings · Geopolitical Intelligence (Master section §28) |
 | Status | SPECIFIED (content), **NOT IMPLEMENTED**. Repository precursors: companies, ownership, filings and procurement gateways (G33). There is no facility object. |
 | Open | Its Build §50 domain-pack fields (`identity()`, `ontology()`, …, `version()`) are not yet written — RESEARCH / SPECIFICATION. |
+
+---
+
+## 5. Step 1 decisions — 2026-10-04 (ledger R302)
+
+| Workstream | Owner decision | Status |
+|---|---|---|
+| **W1** | Unified 30.27.8 letter sequence **A → B → C → D → E → F → G → H → I → J → K → L → M → N → O → P → Q → R → S**: B, C, I and J are added, and F is split from G. M–R are preserved specification history, **not** a return point. **The operational resumption point is 30.27.8.S — Cross-Contract Consistency / Closure Gate.** | **ACCEPTED** |
+| **W2** | **Preserve first, reconcile in S.** The ladders stay as independent verification frameworks until S unifies them formally. The decision does **not** state L0–L7 = 0–6, does **not** state that either ladder cancels the other, and does **not** use a level from one ladder as a truth probability in another. S gains a **Verification-Level Crosswalk** contract (§5.2). | **ACCEPTED** |
+| **W4** | Forecast is an independent intelligence layer, in the chain EVENT → CHANGE → SIGNAL → SITUATION → HYPOTHESIS → RESEARCH → INFERENCE → ASSESSMENT → **FORECAST** → SCENARIO → DECISION. **Forecast never becomes World State or canonical truth.** D-03 is resolved: the Calibration Ledger is a **Calibration / Evaluation Record**, not a Forecast. It may *reference* earlier forecasts; it does not become one. | **ACCEPTED** |
+| **W5** | Text classes, from now on: **SOURCE-PRESERVED** (the original text was found) · **CONSOLIDATED** (found in several sources and unified without changing meaning) · **RECONSTRUCTED** (re-assembled from available evidence). **ORIGINAL** is never written unless the original text is actually in hand. | **ACCEPTED** |
+| W3 / W6 | Belong to the current-system audit. | Continue as preparation |
+| Code | — | **Forbidden** (R299) |
+| Research / preparation | — | **Continues** |
+| Phase 31 | — | **BLOCKED** until Phase 30 closes |
+
+### 5.1 Precision notes recorded with the decisions
+
+- **W1 — source of the sequence.**
+  - The Build Package states the sequence as **A → D → E → F/G → H → K → L → M → N → O → P → Q → R → S** (§0.0, §6), without B, C, I or J and with F/G merged.
+  - The unified sequence above is therefore an **owner decision that explicitly supersedes** that line, per the Build Package's own change rule §54. It is not a quotation from it.
+  - What the Build Package *does* establish, and what this decision relies on: S is the current resumption point, and M–R are preserved history (Build §0.0, lines 15–39).
+- **W1 — content of B, C, I and J.** They now hold places in the sequence. Their text class is unchanged:
+  - **B, C — RECONSTRUCTED (concepts):** Supplement §10, with C's invocation gate.
+  - **I — MISSING:** "RECOVERY REQUIRED for exact historical text".
+  - **J — RECONSTRUCTED (concepts):** "not fully present".
+  - None is invented.
+- **W1 — F and G.** Split as two stages. The only detailed text so far is the merged F/G (Build §19; §70.8). Separating that text into F and G is CONSOLIDATION work for S. It is not done by assumption.
+- **W4 — forecasting requirements cited by the owner** (attributed to `Lambda_NX_Master_Living_Blueprint_v13_Phase_29_Live_Intelligence.md`):
+
+  | Requirement | Found in the files supplied to Claude? |
+  |---|---|
+  | Point-in-time cutoff | ✔ Build §41 ("point-in-time cutoff"); Master §19 ("no future information in historical backtests") |
+  | Prediction intervals | ✔ Build §41 |
+  | Calibrated probabilities / calibration | ✔ Build §41 ("calibration"); Master §19 (Brier, log loss, CRPS, calibration, sharpness) |
+  | Model / version | ✔ Build §41 ("model/version") |
+  | Outcome tracking | ✔ Master §19 pipeline ("… Forecast → Monitoring → Outcome → Evaluation") |
+  | Causal vs predictive distinction | ✔ Master §19 ("Prediction asks what is expected. Causal inference asks what happens under intervention.") |
+  | Forecast Registry; Model/Version **Registry**; Model Disagreement; Uncertainty Decomposition; Forecast Resolution | **Not found as named.** The Build Package's verbatim Phase 29 extract (§58.3, 29.0–29.109) does not contain these terms, and the v13 file itself was not supplied. Status: **cited by owner — NOT SUPPLIED TO CLAUDE.** Recorded, not invented. |
+
+- **W4 — chain vs L pipeline.** The owner's chain places Forecast. It is recorded beside the L pipeline (Build §22: EVENT → CHANGE → **PATTERN** → SIGNAL → SITUATION → HYPOTHESIS → RESEARCH → **CORROBORATION** → INFERENCE → ASSESSMENT → FORECAST / SCENARIO / **ALERT**), not as a replacement for it. The chains differ in PATTERN, CORROBORATION, ALERT and DECISION. Reconciling the two chains is an S consistency item (§5.2). Neither is dropped.
+- **W2 — Claude's earlier ladder-A mapping proposal** (§3, W2 table) is **not adopted**. It is kept above as history and as input for S. It must not be used as a conversion.
+
+### 5.2 Items added to the S agenda (closure/consistency)
+
+1. **Verification-Level Crosswalk contract.** For each ladder or framework — ladder A (0–6), L0–L7 gates, TruthStatus, Admiralty A–F / 1–6, and the repository confidence grade — record:
+   - **name**;
+   - **purpose**;
+   - **scope of use**;
+   - **transition conditions**;
+   - **relation to the other ladders**;
+   - **conversion class: LOSSLESS / APPROXIMATE / NOT ALLOWED**.
+
+   Rule: verification level ≠ truth probability.
+2. **F / G separation** of the merged F/G text (CONSOLIDATION).
+3. **Placement of B, C, I and J** in the closure matrix, with their text classes.
+4. **Forecast chain vs L pipeline** consistency (§5.1).
+5. **The owner-cited forecasting requirements** not yet supplied (§5.1) — supply them, or record them as REQUIRED.
+
+### 5.3 W5 register re-labelled with the new classes
+
+| Item | Class | Basis |
+|---|---|---|
+| Phase 28 Technology Intelligence | **SOURCE-PRESERVED** | Build §58.2, verbatim from v12 |
+| Phase 29 Live Intelligence | **SOURCE-PRESERVED** | Build §58.3, verbatim from v13 |
+| Q, R, S (+ §70.18) | **SOURCE-PRESERVED** | Build §58.5, from the 2026-09-26 consolidation |
+| A, D, E, F/G, H, K, L, M, N, O, P — §70.8 summaries | **SOURCE-PRESERVED** (summary level) | Original Master lines 4218–4515; Build §58.5 |
+| A, D, E, F/G, H, K, L, M, N, O, P — detailed contracts | **RECONSTRUCTED / CONSOLIDATED**, as labelled by the Build Package | Build §16–§26 |
+| 30.26, 30.27.2–5 | **RECONSTRUCTED / CONSOLIDATED**, as labelled by the Build Package ("not a claim of byte-for-byte recovery") | Build §9, §11–§14; v9 source §213–§273 (SOURCE-PRESERVED extract); Supplement §4–§9 |
+| B, C, J | **RECONSTRUCTED** (concepts only) | Supplement §10 |
+| I | **MISSING — must not invent** | Supplement §10 |
+| Companies & Facilities domain pack | **CONSOLIDATED** | Build §37 + owner R298 description + Build §50 |
+| `…Blueprint_2026-09-25_R_FINAL.md` (owner: contains the 30.27.8 extensions up to R) | **NOT SUPPLIED TO CLAUDE** | Named by the owner; not uploaded |
+
+No item is labelled ORIGINAL.
+
+### 5.4 Follow-up created by D-03 (recorded, no code)
+
+- **Maintenance item M-04 (batch 01)** changed the pricing label from "our forecasts scored against outcomes" to "our assessments scored against outcomes".
+- Under D-03, the ledger is a Calibration / Evaluation Record of earlier forecasts and claims. The original wording may therefore have been closer to the owner's definition.
+- The UI strings in `components/calibration-scoreboard.tsx:111` and `components/x-like-feed.tsx:112` ("published forecasts") are consistent with D-03.
+- **Recommendation:** in a future authorised maintenance batch, re-word the pricing label to the D-03 definition, e.g. "Calibration ledger — forecasts and claims scored against outcomes".
+- **Not changed now** (R299: NO CODE CHANGES).
+
+### 5.5 Pipeline status after step 1
+
+| Step | Status |
+|---|---|
+| 1. CANONICAL RECONCILIATION | **CLOSED** for W1, W2, W4 and W5 (owner, R302) |
+| 2. CURRENT-SYSTEM AUDIT (W3, W6) | Preparation — continues |
+| 3. MISSING-SPEC RECOVERY | Continues — items in §5.3 marked NOT SUPPLIED or MISSING |
+| 4. CONTRACT CONSOLIDATION | Feeds S — §5.2 agenda |
+| **Resumption point** | **30.27.8.S** (owner, R302) |
+| Code | **Forbidden** |
+| Phase 31 | **BLOCKED** |
