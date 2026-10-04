@@ -124,8 +124,9 @@ families **extend, never replace** this method. Family roadmap: `docs/GATEWAYS.m
      reach the code only through the Master and an approved specification (§0, rule 2).
    - **Source target:** the "one million" figure is reported only as **labelled reach, by
      unit**, never summed across units (`lib/engine/catalog/families.ts`, `ReachUnit`).
-     Whether to keep, relabel or retire this target is an open owner decision
-     (CONF-G06).
+     The owner decided to **keep** the target (2026-10-03, R294; CONF-G06). The plan and
+     the proposed honest acceptance bar — at least 1 M live publishers *excluding the
+     single largest family* — are in `docs/reconciliation/SOURCE_POPULATION_PLAN.md`.
 
    The original instruction, kept for the record:
    - **Source population is a headline target: one million and rising.** Counted
