@@ -44,6 +44,23 @@ behaviour. They are not Master acceptance.
 
 The current reconciled state is in `docs/reconciliation/`.
 
+**Owner handoff of 2026-10-04** (`docs/reconciliation/PACKAGE_INTAKE_2026-10-04.md`).
+The owner holds both documents. The repository is public, so it stores their
+fingerprints only:
+- **Build Package** — `Lambda_NX_MASTER_RECONCILED_CLAUDE_BUILD_PACKAGE_2026-10-04.md`. The
+  reconciled Master target, sha256 `6a056334…`.
+- **Execution Package** — `Lambda_NX_CLAUDE_EXECUTION_PACKAGE_2026-10-04.md`, sha256
+  `4569844a…`.
+
+The Execution Package is the owner's execution contract. This file adds the repository
+specifics: branch, ledger, lanes and live-system rules. Where the two differ, the
+Execution Package governs. In particular, follow its:
+- pre-coding checklist (§6);
+- stop conditions (§32);
+- implementation report format (§31).
+
+A Master subsystem is coded only from a task sheet in the Build Package §53 format.
+
 ## 1. What this project is
 
 > This section describes the **current implementation surface** (the Existing
@@ -240,7 +257,8 @@ Records live in `docs/reconciliation/`: the Contradiction Register in the baseli
 `CONTINUITY_M_S.md`.
 
 **Phase state (2026-10-03):**
-- Operational resumption point: **30.27.8.S**.
+- Operational resumption point: **30.27.8.S** — BLOCKED by the Build Package's own terms
+  (§29.4) until its source contracts are consolidated and its open conflicts decided.
 - 30.27.8.M is history only.
 - Phase 30 is NOT COMPLETE. Phase 31 is BLOCKED until Phase 30 closes.
 - This reconciliation stage is **30.27.8.RB**. R remains Artifact / Export /

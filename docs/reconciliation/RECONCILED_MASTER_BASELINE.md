@@ -1078,3 +1078,21 @@ The migration (`db/ops/orphan-L-quarantine.sql`) moves it to the non-exposed sch
 - The "52 posts" figure in §1.4 was wrong, most likely read from a planner estimate rather than a count, and is superseded by this count.
 
 **Production deployment lock** (§14.4) remains an **owner action** on Netlify. The schedule change above sits on this branch only: it reaches Production only through a merge to `main` and a deploy, both of which are paused.
+
+---
+
+## 16. Intake of the 2026-10-04 owner handoff (ledger R295) — append
+
+See `PACKAGE_INTAKE_2026-10-04.md`.
+
+| Entry | Status after intake |
+|---|---|
+| MR-01, MR-02, MR-03 — envelope, temporal, errors | **Contract text supplied:** Build §9, §14.4, §10.6 and §15. Status stays **BLOCKED**: S is blocked (Build §29.4) and no task sheet has been issued. |
+| MR-04, MR-05, MR-06 — health, connector, licence | Contract text supplied (Build §31, §43, §46). BLOCKED for the same reason. |
+| CONF-V01 — ladders | **OPEN** — sharpened by PI-01: three scales, and ladder A neither superseded nor mapped. |
+| CONF-V02 — Admiralty | **RESOLVED** — Build §32 keeps Admiralty separate from the ladder. |
+| CONF-F01 — forecast wording | **RESOLVED** — Build §41 confirms it. |
+| CONF-A03 — MCP version | Research anchor supplied (Build §10.1, §56). It is beyond Claude's verification; the upgrade waits for a task sheet. |
+| CONF-S03 — health taxonomy | **OPEN** — Build §31 restates the Master taxonomy. The mapping of `cached` and `empty` is still undecided. |
+| New: D-01, Next.js 15.5.27 | DISCOVERED — needs a dedicated maintenance unit, awaiting authorisation. |
+| New: D-03, calibration "forecast" terminology | DISCOVERED — research owner. |

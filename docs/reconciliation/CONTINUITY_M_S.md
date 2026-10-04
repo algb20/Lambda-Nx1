@@ -208,3 +208,18 @@ Legend:
   7. Identify what Claude still lacks, then issue the final Claude package.
 
   No programming against these contracts until then.
+
+---
+
+## 8. Intake of the 2026-10-04 owner handoff (ledger R295)
+
+The Build Package supplies, as reconciled text, what §7 recorded as NOT SUPPLIED TO CLAUDE:
+- **30.26 and 30.27.2–5:** SPECIFIED — RECONSTRUCTED/CONSOLIDATED.
+- **Phase 28 and 29:** reconciled sections plus verbatim extracts.
+- **M and A–P:** fuller texts, status RESEARCHED → SPECIFICATION IN PROGRESS.
+
+CR-02, CR-03 and CR-04 are therefore **SUPPLIED**. The package confirms:
+- S is the operational resumption point (CR-01);
+- S is **BLOCKED** until its conflicts are decided (Build §29.4).
+
+The only new conflict found in the package is PI-01: ladder A is neither superseded nor mapped. Details are in `PACKAGE_INTAKE_2026-10-04.md`.
