@@ -1,5 +1,8 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { catalogAttributions } from '@/lib/engine/catalog'
+import { SOURCE_LICENSE_REGISTRY, usagePolicy } from '@/lib/engine/licensing/registry'
+import { activePortals } from '@/lib/engine/registries/ckan/portals'
 
 /**
  * Terms of use.
@@ -22,6 +25,27 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     </section>
   )
 }
+
+/**
+ * Credits owed under the sources' own terms (CC BY, OGL, ODbL, ECB, FRED, …),
+ * from the licence & usage registry and the catalogue. `catalogAttributions`
+ * was written for exactly this and never displayed anywhere (R317 audit).
+ * Withheld sources owe nothing because nothing of theirs is shown.
+ */
+const ACTIVE_PORTALS = new Set(activePortals().map((p) => 'ckan:' + p.key))
+
+const SOURCE_ATTRIBUTIONS = [
+  ...new Set([
+    ...catalogAttributions(),
+    ...SOURCE_LICENSE_REGISTRY.filter(
+      (r) =>
+        r.attribution &&
+        usagePolicy(r.license_status) !== 'WITHHOLD' &&
+        // A portal that is switched off shows nothing, so owes nothing.
+        (r.kind !== 'ckan-portal' || ACTIVE_PORTALS.has(r.source_id)),
+    ).map((r) => r.attribution as string),
+  ]),
+].sort((a, b) => a.localeCompare(b))
 
 export default function TermsPage() {
   return (
@@ -120,6 +144,33 @@ export default function TermsPage() {
           You are responsible for keeping your password. Because we store only a hash of it, we
           cannot recover it — we can only help you start again. You may erase your account at any
           time from Preferences → Account, and it is erased immediately.
+        </p>
+      </Section>
+
+      <Section title="Data sources and attributions">
+        <p>
+          Lambda reads public sources under each provider&rsquo;s own terms, recorded with the quoted
+          text and the date it was read. Several of those terms ask to be credited wherever their data
+          appears; each finding also links to its source. The credits owed are:
+        </p>
+        <ul className="list-disc space-y-1 pl-5">
+          {SOURCE_ATTRIBUTIONS.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+        <p>
+          Licence texts:{' '}
+          <a href="https://creativecommons.org/licenses/by/4.0/" className="text-primary hover:underline">CC BY 4.0</a>
+          {' · '}
+          <a href="https://creativecommons.org/licenses/by-sa/4.0/" className="text-primary hover:underline">CC BY-SA 4.0</a>
+          {' · '}
+          <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" className="text-primary hover:underline">Open Government Licence v3.0</a>
+          {' · '}
+          <a href="https://open.canada.ca/en/open-government-licence-canada" className="text-primary hover:underline">Open Government Licence – Canada</a>
+          {' · '}
+          <a href="https://opendatacommons.org/licenses/odbl/1-0/" className="text-primary hover:underline">ODbL 1.0</a>.
+          Where Lambda computes a change or a count from published values, the values themselves are
+          not modified and the computation is labelled as ours.
         </p>
       </Section>
 

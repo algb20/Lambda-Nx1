@@ -175,3 +175,16 @@ Each follows CONFLICT → EVIDENCE → IMPACT → PROPOSED RESOLUTION → APPROV
 **Phase identities now settled:**
 - Phase 28 = Technology Intelligence (SC-01, R298).
 - Phase 29 = Live Intelligence (SC-08, R300).
+
+## 6. Source licensing (R317, 2026-10-05)
+
+Full audit: `SOURCE_LICENSING_GAP_AUDIT_2026-10-05.md`. Registry: `lib/engine/licensing/source-licence-registry.json`.
+
+| ID | Existing System | Target (Master) | Status | Decision path |
+|---|---|---|---|---|
+| GL-01 | 188 catalogue licences without stored evidence | Every source licence evidenced (§31) | GAP | Research |
+| GL-05 | Registry enforced by conformance test | Runtime policy (§31, §46, E) | GAP | BC-2, BC-3 |
+| GL-06 | No terms-change detection | Recheck incl. terms (§31) | GAP | BC-5 |
+| GL-08 | AI/ML use NOT_STATED for all sources | Context Firewall (E) | GAP — DECISION REQUIRED | BC-4 |
+| GL-09 | Several capabilities without verified fallback | Resilience (§45), independence (J) | GAP | BC-7 |
+| GL-10 | Username-presence check (HIGH personal-data risk) | Charter §3 | DECISION REQUIRED | Owner |

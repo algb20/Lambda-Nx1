@@ -6,7 +6,9 @@ import { licenceProblem } from '@/lib/engine/catalog/licence'
 import { Registry, registry } from '@/lib/engine/registry'
 import * as sources from '@/lib/engine/sources'
 import { opensky } from '@/lib/engine/sources/geo'
-import { CODED_SOURCE_LICENCES } from '@/lib/engine/sources/licences'
+import { SOURCE_LICENSE_REGISTRY, licenseRecord, recordProblems, usagePolicy } from '@/lib/engine/licensing/registry'
+import { activeSources } from '@/lib/engine/catalog'
+import { PORTALS, activePortals } from '@/lib/engine/registries/ckan/portals'
 import type { Source } from '@/lib/engine/types'
 
 /**
@@ -137,7 +139,7 @@ describe('S invariant 4 — no source runs around the licence gate', () => {
   })
 })
 
-describe('S invariant 4 — every coded source declares what its terms allow (NEW-03)', () => {
+describe('S invariant 4 — every source is in the licence & usage registry (R317)', () => {
   const registered = () => {
     for (const [name, fn] of Object.entries(sources)) {
       if (/^register[A-Z]/.test(name) && typeof fn === 'function') (fn as () => void)()
@@ -147,31 +149,39 @@ describe('S invariant 4 — every coded source declares what its terms allow (NE
       (k) => !catalogue.has(k),
     )
   }
+  const policyOf = (id: string) => {
+    const r = licenseRecord(id)
+    return r ? usagePolicy(r.license_status) : 'MISSING'
+  }
 
-  it('has a licence entry for every registered coded source', () => {
-    const keys = registered()
-    expect(keys.length).toBeGreaterThan(50)
-    expect(keys.filter((k) => !(k in CODED_SOURCE_LICENCES))).toEqual([])
+  it('holds a valid record for every coded source, catalogue record and CKAN portal', () => {
+    const coded = registered()
+    expect(coded.length).toBeGreaterThan(50)
+    const missing = [
+      ...coded.filter((k) => !licenseRecord(k)),
+      ...CATALOG.map((c) => c.key).filter((k) => !licenseRecord(k)),
+      ...PORTALS.map((p) => 'ckan:' + p.key).filter((k) => !licenseRecord(k)),
+    ]
+    expect(missing).toEqual([])
+    const invalid = SOURCE_LICENSE_REGISTRY.flatMap((r) => recordProblems(r).map((p) => `${r.source_id}: ${p}`))
+    expect(invalid).toEqual([])
   })
 
-  it('registers no source whose terms refuse this product', () => {
-    const refused = Object.entries(CODED_SOURCE_LICENCES)
-      .filter(([, l]) => l.state === 'refused')
-      .map(([k]) => k)
-    expect(refused).toEqual(expect.arrayContaining(['opensky', 'opensanctions', 'urlscan', 'shodan.internetdb']))
-    expect(registered().filter((k) => refused.includes(k))).toEqual([])
+  it('never lets "no restriction mentioned" stand as a licence', () => {
+    for (const r of SOURCE_LICENSE_REGISTRY) {
+      if (r.basis === 'ABSENCE_OF_RESTRICTION') expect(r.license_status, r.source_id).toBe('UNCLEAR')
+    }
   })
 
-  it('marks verified only what was read, with the evidence and a commercial-use licence', () => {
-    for (const [key, l] of Object.entries(CODED_SOURCE_LICENCES)) {
-      if (l.state === 'unverified') {
-        expect(l.reason.length, key).toBeGreaterThan(10)
-        continue
-      }
-      expect(l.checked, key).toMatch(/^\d{4}-\d{2}-\d{2}$/)
-      expect(l.evidence.length, key).toBeGreaterThan(20)
-      if (l.state === 'verified') expect(l.licence.commercialUse, key).toBe(true)
-      else expect(l.licence.commercialUse, key).toBe(false)
+  it('runs nothing whose policy is WITHHOLD — coded, catalogue or portal', () => {
+    expect(registered().filter((k) => policyOf(k) === 'WITHHOLD')).toEqual([])
+    expect(activeSources().map((s) => s.key).filter((k) => policyOf(k) === 'WITHHOLD')).toEqual([])
+    expect(activePortals().map((p) => 'ckan:' + p.key).filter((k) => policyOf(k) === 'WITHHOLD')).toEqual([])
+  })
+
+  it('keeps the withheld providers withheld', () => {
+    for (const k of ['opensky', 'opensanctions', 'urlscan', 'shodan.internetdb', 'feodo', 'urlhaus', 'threatfox', 'who_outbreaks', 'bis_speeches']) {
+      expect(policyOf(k), k).toBe('WITHHOLD')
     }
   })
 })
