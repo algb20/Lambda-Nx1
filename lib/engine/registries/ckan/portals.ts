@@ -68,6 +68,8 @@ export interface DataPortal {
   harvests?: string[]
   enabled?: boolean
   note?: string
+  /** Why a portal is off, with the date and what it answered — an observation, not a decision. */
+  disabledNote?: string
 }
 
 const OGL_UK = ccBy(
@@ -99,6 +101,8 @@ export const PORTALS: DataPortal[] = [
     country: 'US',
     metadataLicence: PUBLIC_DOMAIN,
     note: 'The reference CKAN deployment. Harvests most US federal agency catalogues.',
+    enabled: false,
+    disabledNote: 'Observed 2026-10-05 (moved): 404 on /api/3/action/package_search — the catalogue API path has changed. Disabled until a recheck shows the API answering; a refusal is the operator\'s terms (charter §3) and is not worked around. Batch 10.',
   },
   {
     key: 'uk_data_gov',
@@ -131,6 +135,8 @@ export const PORTALS: DataPortal[] = [
     base: 'https://catalogue.data.govt.nz',
     country: 'NZ',
     metadataLicence: ccBy('New Zealand Government', 'https://data.govt.nz/'),
+    enabled: false,
+    disabledNote: 'Observed 2026-10-05 (bot-blocked): Imperva bot challenge (\"Pardon Our Interruption\") instead of the API. Disabled until a recheck shows the API answering; a refusal is the operator\'s terms (charter §3) and is not worked around. Batch 10.',
   },
   {
     key: 'ie_data_gov',
@@ -180,6 +186,8 @@ export const PORTALS: DataPortal[] = [
     base: 'https://www.data.gv.at',
     country: 'AT',
     metadataLicence: ccBy('data.gv.at', 'https://www.data.gv.at/infos/nutzungsbedingungen/'),
+    enabled: false,
+    disabledNote: 'Observed 2026-10-05 (moved): 404 HTML on the CKAN API path. Disabled until a recheck shows the API answering; a refusal is the operator\'s terms (charter §3) and is not worked around. Batch 10.',
   },
   {
     key: 'nl_overheid',
@@ -206,6 +214,8 @@ export const PORTALS: DataPortal[] = [
     base: 'https://www.avoindata.fi/data',
     country: 'FI',
     metadataLicence: ccBy('Avoindata.fi', 'https://www.avoindata.fi/en/info'),
+    enabled: false,
+    disabledNote: 'Observed 2026-10-05 (bot-blocked): 403 Forbidden to the engine\'s User-Agent. Disabled until a recheck shows the API answering; a refusal is the operator\'s terms (charter §3) and is not worked around. Batch 10.',
   },
   {
     key: 'se_dataportal',
@@ -234,6 +244,8 @@ export const PORTALS: DataPortal[] = [
     base: 'https://www.dati.gov.it/opendata',
     country: 'IT',
     metadataLicence: ccBy('dati.gov.it', 'https://www.dati.gov.it/content/note-legali'),
+    enabled: false,
+    disabledNote: 'Observed 2026-10-05 (bot-blocked): 403 Forbidden to the engine\'s User-Agent. Disabled until a recheck shows the API answering; a refusal is the operator\'s terms (charter §3) and is not worked around. Batch 10.',
   },
   {
     key: 'pt_dados',
@@ -242,6 +254,8 @@ export const PORTALS: DataPortal[] = [
     base: 'https://dados.gov.pt',
     country: 'PT',
     metadataLicence: ccBy('dados.gov.pt', 'https://dados.gov.pt/'),
+    enabled: false,
+    disabledNote: 'Observed 2026-10-05 (moved): 404 JSON on the CKAN API path. Disabled until a recheck shows the API answering; a refusal is the operator\'s terms (charter §3) and is not worked around. Batch 10.',
   },
   {
     key: 'ro_data_gov',
@@ -250,6 +264,8 @@ export const PORTALS: DataPortal[] = [
     base: 'https://data.gov.ro',
     country: 'RO',
     metadataLicence: ccBy('data.gov.ro', 'https://data.gov.ro/'),
+    enabled: false,
+    disabledNote: 'Observed 2026-10-05 (moved): connection reset / 404 on the CKAN API path. Disabled until a recheck shows the API answering; a refusal is the operator\'s terms (charter §3) and is not worked around. Batch 10.',
   },
 
   // ── Latin America, Africa, Asia ──────────────────────────────────────────
@@ -260,6 +276,8 @@ export const PORTALS: DataPortal[] = [
     base: 'https://dados.gov.br/dados',
     country: 'BR',
     metadataLicence: ccBy('dados.gov.br', 'https://dados.gov.br/'),
+    enabled: false,
+    disabledNote: 'Observed 2026-10-05 (credential): 401 — the API now requires authentication. Disabled until a recheck shows the API answering; a refusal is the operator\'s terms (charter §3) and is not worked around. Batch 10.',
   },
   {
     key: 'mx_datos',
@@ -268,6 +286,8 @@ export const PORTALS: DataPortal[] = [
     base: 'https://datos.gob.mx/busca',
     country: 'MX',
     metadataLicence: ccBy('datos.gob.mx', 'https://datos.gob.mx/libreusomx'),
+    enabled: false,
+    disabledNote: 'Observed 2026-10-05 (bot-blocked): Akamai \"Access Denied\" (403). Disabled until a recheck shows the API answering; a refusal is the operator\'s terms (charter §3) and is not worked around. Batch 10.',
   },
   {
     key: 'cl_datos',
@@ -293,6 +313,8 @@ export const PORTALS: DataPortal[] = [
     country: 'global',
     metadataLicence: ccBySa('Code for Africa', 'https://africaopendata.org/about'),
     note: 'Pan-African aggregation — the widest single reach into a region every comparable platform reads thinly.',
+    enabled: false,
+    disabledNote: 'Observed 2026-10-05 (bot-blocked): Cloudflare challenge (\"Just a moment...\") instead of the API. Disabled until a recheck shows the API answering; a refusal is the operator\'s terms (charter §3) and is not worked around. Batch 10.',
   },
   {
     key: 'ke_open_data',

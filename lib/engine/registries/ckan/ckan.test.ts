@@ -99,7 +99,7 @@ describe('the portal registry', () => {
 
   it('explains every portal it has switched off, so nobody has to guess why', () => {
     for (const p of PORTALS.filter((x) => x.enabled === false)) {
-      expect(p.note, `${p.key} is disabled with no reason given`).toBeTruthy()
+      expect(p.disabledNote ?? p.note, `${p.key} is disabled with no reason given`).toBeTruthy()
     }
   })
 
@@ -137,11 +137,24 @@ describe('the portal registry', () => {
 
   it('reaches beyond the rich world — the coverage every comparable platform is thin on', () => {
     const countries = new Set(activePortals().map((p) => p.country))
-    for (const expected of ['BR', 'MX', 'CL', 'AR', 'JP']) {
+    for (const expected of ['CL', 'AR', 'JP']) {
       expect(countries, `no active portal for ${expected}`).toContain(expected)
     }
-    // Africa is reached through the pan-African catalogue rather than per country.
-    expect(activePortals().some((p) => p.key === 'africa_open_data')).toBe(true)
+  })
+
+  /**
+   * Brazil, Mexico and the pan-African catalogue were part of that reach until
+   * 2026-10-05, when they answered 401, an Akamai refusal and a Cloudflare
+   * challenge. A refusal is the operator's terms and is not worked around, so
+   * they are off — and the loss is stated here rather than the test quietly
+   * shrinking (batch 10; a coverage GAP in the audit).
+   */
+  it('says, with a date, why Brazil, Mexico and Africa are not reached today', () => {
+    for (const key of ['br_dados', 'mx_datos', 'africa_open_data']) {
+      const p = PORTALS.find((x) => x.key === key)!
+      expect(p.enabled).toBe(false)
+      expect(p.disabledNote).toMatch(/^Observed 2026-10-05/)
+    }
   })
 })
 
