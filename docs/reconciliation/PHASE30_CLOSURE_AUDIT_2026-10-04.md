@@ -332,7 +332,7 @@ SP = SOURCE-PRESERVED summary (M0 §70.8 / BP §58.5). RC = RECONSTRUCTED / CONS
 | **NEW-09** | TED v3 is POST-only; the catalogue adapter is GET-only | Batch 04 NI-04-3 | One source | **DECISION REQUIRED** |
 | **NEW-10** | ReliefWeb appname approval; NASA key | Batches 04 and 05 | Two sources | **OWNER ACTION** (deployment environment, not Git) |
 | **NEW-11** | Batch-04 releases of `who_don` and `bis_press` used a feed-syndication licence that WHO's and BIS's own terms do not grant for commercial use | Batches 07 and 08 | Licence | **FIXED** — both withheld (WHO_TERMS, needsAgreement); recorded as reversals, not erased |
-| **NEW-12** | The CKAN federation records each portal's metadata licence but does not gate on it | Batch 08 | Licence | **GAP** — needs a per-portal review |
+| **NEW-12** | The CKAN federation records each portal's metadata licence but does not gate on it | Batch 08 | Licence | **FIXED (batch 09):** `activePortals()` now admits only licence-accepted portals. Re-reading the 22 active portals' records is still open. |
 | **NEW-13** | `npm run test:ui` left `next-server` running, so later runs tested an old build | Batch 08 | Test evidence | **FIXED** (process-group stop); earlier browser results that ran after a leftover server are void |
 | C2-R308 | Phase 29 label in R308 | R309 | — | **RESOLVED** |
 

@@ -343,12 +343,34 @@ export const CODED_SOURCE_LICENCES: Record<string, CodedLicence> = {
     reason:
       'Several publishers, read 2026-10-04: White House — "government-produced materials … are not copyright protected" (third-party content CC BY 3.0). United Nations — "News-related material can be used as long as the appropriate credit is given and the United Nations is advised"; other material needs written permission. Notifying the UN is an owner action — DECISION REQUIRED. EC, ECB, Fed, GOV.UK and IAEA feeds not yet read individually.',
   },
-  'dns.google': { state: 'unverified', reason: 'Google Public DNS is governed by the Google APIs Terms of Service, which were not read in full on 2026-10-04.' },
-  'dns.cloudflare': { state: 'unverified', reason: 'Cloudflare\'s 1.1.1.1 pages read on 2026-10-04 cover privacy only, not permitted use.' },
-  wayback: { state: 'unverified', reason: 'The Internet Archive terms page could not be read on 2026-10-04 (help site did not resolve).' },
-  wikimedia_pageviews: { state: 'unverified', reason: 'The Analytics API page read on 2026-10-04 does not state the licence of pageview data.' },
-  courtlistener: { state: 'unverified', reason: 'courtlistener.com/terms answered 403 to the reader on 2026-10-04.' },
-  gdacs: { state: 'unverified', reason: 'GDACS terms page answered 404 on 2026-10-04.' },
+  'dns.google': {
+    state: 'verified',
+    licence: { id: 'google-apis-tos', name: 'Google APIs Terms of Service', commercialUse: true, storage: false, redistribute: false, termsUrl: 'https://developers.google.com/terms' },
+    checked: '2026-10-05',
+    evidence: 'Google Public DNS: "By using the Google Public DNS service and its APIs, you consent to be bound by the Google APIs Terms of Service", which require access only "by the means described in the documentation" and state no bar on commercial use.',
+    condition: 'Only the documented DoH JSON endpoint is used.',
+  },
+  'dns.cloudflare': {
+    state: 'verified',
+    licence: { id: 'cloudflare-1111-terms', name: 'Cloudflare 1.1.1.1 terms of use', commercialUse: true, storage: false, redistribute: false, termsUrl: 'https://developers.cloudflare.com/1.1.1.1/terms-of-use/' },
+    checked: '2026-10-05',
+    evidence: '1.1.1.1 terms of use: use is under the Cloudflare Website and Online Services Terms; attribution is required only of ISPs and equipment makers integrating the resolver. No restriction on DNS-over-HTTPS queries is stated — verified by absence of restriction, not by an express grant.',
+  },
+  wayback: { state: 'unverified', reason: 'archive.org terms pages render no extractable text (2026-10-04, 2026-10-05); not yet read.' },
+  wikimedia_pageviews: {
+    state: 'verified',
+    licence: { ...CC0, termsUrl: 'https://dumps.wikimedia.org/other/pageviews/readme.html' },
+    checked: '2026-10-05',
+    evidence: 'Wikimedia analytics datasets readme: "All Analytics datasets are available under the Creative Commons CC0 dedication." Pageview counts are one of them; requests follow the User-Agent policy.',
+  },
+  courtlistener: { state: 'unverified', reason: 'courtlistener.com/terms answers 403 to both readers (2026-10-04, 2026-10-05).' },
+  gdacs: {
+    state: 'verified',
+    licence: ccBy('GDACS — European Commission JRC', 'https://commission.europa.eu/legal-notice_en'),
+    checked: '2026-10-05',
+    evidence: 'GDACS (EC JRC with UN OCHA) links the European Commission copyright notice from its site: reuse under CC BY 4.0, "provided appropriate credit is given and changes are indicated". Its own terms page is a disclaimer ("purely indicative").',
+    condition: 'Each alert links to its GDACS report; severity is shown as GDACS assigned it.',
+  },
   crtsh: { state: 'unverified', reason: 'crt.sh publishes no terms of use; Certificate Transparency logs are public by design, but no provider statement was found.' },
 
   // ── Read, and ambiguous: an owner decision, not a guess ───────────────────
@@ -364,15 +386,35 @@ export const CODED_SOURCE_LICENCES: Record<string, CodedLicence> = {
   },
 
   // ── Not yet read ──────────────────────────────────────────────────────────
-  celestrak: { state: 'unverified', reason: 'CelesTrak\'s site (webmaster page read 2026-10-04) states no terms of use; not yet found elsewhere.' },
-  ckan_federation: { state: 'unverified', reason: 'Each portal\'s metadata licence is recorded in lib/engine/registries/ckan/portals.ts (earlier work, not re-read on 2026-10-04), but the federation does not gate on those licences — a GAP recorded in batch 08.' },
+  celestrak: { state: 'unverified', reason: 'CelesTrak states no terms on its site; its homepage reset the connection on 2026-10-05.' },
+  ckan_federation: { state: 'unverified', reason: 'Each portal\'s catalogue licence is recorded in lib/engine/registries/ckan/portals.ts and, since batch 09, enforced: activePortals() admits only portals the licence gate accepts. The 22 active portals\' records come from earlier work and were not re-read on 2026-10-05; re-reading them one by one is the remaining task.' },
   crypto_news: { state: 'unverified', reason: 'Several publishers\' RSS feeds (minepi.com, blog.ethereum.org, solana.com, …); their terms not yet read individually.' },
-  ethereum_rpc: { state: 'unverified', reason: 'PublicNode terms for its public Ethereum RPC not yet read.' },
+  ethereum_rpc: {
+    state: 'unverified',
+    reason: 'PublicNode terms read 2026-10-05: users "agree not to modify, copy, frame, scrape … display, distribute, transmit, publish … the Service or the Service Content commercially and non-commercially". Whether public Ethereum chain data returned by its RPC is "Service Content" is a DECISION REQUIRED; an RPC with permissive terms, or our own node, would remove the question.',
+  },
   factcheck: { state: 'unverified', reason: 'Several fact-checkers\' RSS feeds (Snopes, Full Fact, PolitiFact, …); their terms not yet read individually.' },
   hackernews: { state: 'unverified', reason: 'The HN Search (Algolia) API page read on 2026-10-04 states no terms or limits.' },
-  iss_position: { state: 'unverified', reason: 'wheretheiss.at terms not yet read.' },
-  openalex: { state: 'unverified', reason: 'OpenAlex help pages did not render their licence text on 2026-10-04.' },
+  iss_position: {
+    state: 'verified',
+    licence: { id: 'wheretheiss', name: 'Where the ISS at? public API', commercialUse: true, storage: true, redistribute: true, termsUrl: 'https://wheretheiss.at/w/developer' },
+    checked: '2026-10-05',
+    evidence: 'Developer page offers the API publicly: "requests are limited to roughly 1 per second", with X-Rate-Limit headers; no use restriction is stated. Verified by absence of restriction.',
+    condition: 'minIntervalMs 3000.',
+  },
+  openalex: {
+    state: 'verified',
+    licence: { ...CC0, termsUrl: 'https://github.com/ourresearch/openalex-docs' },
+    checked: '2026-10-05',
+    evidence: 'OpenAlex documentation (official docs repository): "Our complete dataset is free under the CC0 license"; "The API has a limit of 100,000 calls per day".',
+  },
   pi_network: { state: 'unverified', reason: 'Pi Network is Lambda NX\'s own identity and payment platform (CLAUDE.md §10); the Pi developer terms for its public mainnet API were not read on 2026-10-04.' },
-  rdap: { state: 'unverified', reason: 'rdap.org redirects to each registry\'s RDAP service; registry terms vary and were not read.' },
+  rdap: {
+    state: 'verified',
+    licence: { id: 'rdap-org', name: 'rdap.org bootstrap service', commercialUse: true, storage: true, redistribute: true, termsUrl: 'https://rdap.org/' },
+    checked: '2026-10-05',
+    evidence: 'rdap.org states only a rate limit — "a maximum of 10 requests in 10 seconds", per IP — and no use restriction; registration data comes from the registries\' public RDAP services. Verified by absence of restriction.',
+    condition: 'minIntervalMs raised from 500 to 1000 to stay within 10 / 10 s.',
+  },
   'username.web': { state: 'unverified', reason: 'Checks public profile URLs on several sites (GitHub, GitLab, dev.to, …); each site\'s terms on automated access not yet read.' },
 }

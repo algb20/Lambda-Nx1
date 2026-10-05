@@ -1,5 +1,5 @@
 import type { Licence } from '../../catalog/types'
-import { PUBLIC_DOMAIN, WHO_TERMS, ccBy, ccBySa, publicFeed } from '../../catalog/licence'
+import { ccBy, ccBySa, licenceProblem, PUBLIC_DOMAIN, publicFeed, WHO_TERMS } from '../../catalog/licence'
 
 /**
  * The open-data portals we federate over.
@@ -364,9 +364,17 @@ export const PORTALS: DataPortal[] = [
   },
 ]
 
-/** Portals the federation will actually query. */
+/**
+ * Portals the federation will actually query: enabled, **and** whose catalogue
+ * terms the licence gate accepts for this product.
+ *
+ * The metadata licence was recorded on every portal but never consulted, so a
+ * portal whose terms refuse commercial use would have been queried as soon as
+ * someone enabled it — the same gap batch 05 found in the coded sources
+ * (batch 09). The only refused portal today, `who_gho`, is also disabled.
+ */
 export function activePortals(portals = PORTALS): DataPortal[] {
-  return portals.filter((p) => p.enabled !== false)
+  return portals.filter((p) => p.enabled !== false && licenceProblem(p.metadataLicence) === null)
 }
 
 /** Hostnames the federation contacts — what the passive guardrail allow-lists. */
