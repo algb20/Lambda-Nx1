@@ -1,5 +1,5 @@
 import type { CatalogSource } from '../types'
-import { publicFeed } from '../licence'
+import { ccBy, needsAgreement, nonCommercial, publicFeed } from '../licence'
 
 /**
  * Crypto and blockchain publishers.
@@ -87,7 +87,10 @@ export const CRYPTO_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'A',
     independence: 'ethereum-foundation',
-    licence: publicFeed('Ethereum Foundation', 'https://ethereum.org/en/terms-of-use/'),
+    // Non-code content "licensed under the Creative Commons Attribution 4.0
+    // International License"; the same terms also ask users to warrant
+    // "personal use" of the websites — LEGAL_REVIEW_REQUIRED, kept running (R317).
+    licence: ccBy('Ethereum Foundation', 'https://ethereum.org/en/terms-of-use/'),
     minIntervalSec: 1800,
     keyless: true,
     enabled: false,
@@ -104,7 +107,10 @@ export const CRYPTO_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'A',
     independence: 'solana-foundation',
-    licence: publicFeed('Solana Foundation', 'https://solana.com/tos'),
+    // Solana Foundation EULA (read 2026-10-05): a "personal … license … solely
+    // for your own use"; "The Service may not be used in connection with any
+    // commercial endeavors except those … approved by us". RESTRICTED.
+    licence: needsAgreement('Solana Foundation', 'https://solana.com/tos'),
     minIntervalSec: 1800,
     keyless: true,
     enabled: false,
@@ -159,7 +165,9 @@ export const CRYPTO_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'C',
     independence: 'cointelegraph',
-    licence: publicFeed('Cointelegraph', 'https://cointelegraph.com/terms-and-privacy'),
+    // "Users may access the Content for personal and informational purposes
+    // only" (read 2026-10-05). RESTRICTED (batch 10).
+    licence: nonCommercial('Cointelegraph — personal and informational use only', 'https://cointelegraph.com/terms-and-privacy'),
     minIntervalSec: 900,
     keyless: true,
     enabled: false,
@@ -178,7 +186,9 @@ export const CRYPTO_SOURCES: CatalogSource[] = [
     // about who is counting applies to who is reporting too.
     admiralty: 'C',
     independence: 'bitcoin-magazine',
-    licence: publicFeed('Bitcoin Magazine', 'https://bitcoinmagazine.com/terms-of-use'),
+    // "Unauthorized reproduction, distribution, or modification is prohibited
+    // without our prior written consent" (read 2026-10-05). RESTRICTED.
+    licence: needsAgreement('Bitcoin Magazine', 'https://bitcoinmagazine.com/terms-of-use'),
     minIntervalSec: 1800,
     keyless: true,
     enabled: false,

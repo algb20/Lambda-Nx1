@@ -21,8 +21,12 @@ describe('investigateUsername', () => {
     )
     const report = await investigateUsername('octocat')
     const platforms = report.found.map((e) => e.data as { platform: string }).map((d) => d.platform).sort()
-    expect(platforms).toEqual(['GitHub', 'GitLab'])
-    expect(report.summary.platformsFound).toBe(2)
+    // GitHub, Dev.to, Replit and Reddit are no longer checked: their terms do
+    // not allow this use (batch 10).
+    expect(platforms).toEqual(['GitLab'])
+    expect(report.summary.platformsFound).toBe(1)
+    const asked = vi.mocked(fetch).mock.calls.map((c) => new URL(String(c[0])).hostname)
+    for (const host of ['github.com', 'dev.to', 'replit.com', 'www.reddit.com']) expect(asked).not.toContain(host)
   })
 
   it('rejects an invalid username', async () => {

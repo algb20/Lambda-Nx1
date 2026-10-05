@@ -109,10 +109,12 @@ describe('refusing to invent a verdict', () => {
 describe('counting checkers, not headlines', () => {
   it('reads its publishers from the catalogue rather than a second list', () => {
     const keys = factcheckFeeds().map((f) => f.key)
-    expect(keys).toContain('snopes')
     expect(keys).toContain('fullfact')
-    expect(keys).toContain('politifact')
-    expect(keys).toHaveLength(5)
+    expect(keys).toContain('factcheck_org')
+    // Withheld by their own terms (batch 10): personal, non-commercial use only.
+    expect(keys).not.toContain('snopes')
+    expect(keys).not.toContain('politifact')
+    expect(keys).toHaveLength(3)
     for (const feed of factcheckFeeds()) {
       expect(factChecks.hosts).toContain(new URL(feed.url).hostname.toLowerCase())
     }
@@ -121,8 +123,8 @@ describe('counting checkers, not headlines', () => {
   it('reports how many INDEPENDENT checkers addressed the subject', async () => {
     const out = await factChecks.run(ask('flood'), allAnswering())
     const summary = out.find((e) => e.claim.includes('independent fact-checker'))
-    expect(summary?.claim).toContain('5 independent fact-checkers have addressed this')
-    expect((summary?.data as { value: number }).value).toBe(5)
+    expect(summary?.claim).toContain('3 independent fact-checkers have addressed this')
+    expect((summary?.data as { value: number }).value).toBe(3)
   })
 
   it('says in the row itself that the count is not a verdict', async () => {
@@ -136,7 +138,7 @@ describe('counting checkers, not headlines', () => {
 
   it('counts one checker as one, in the singular', async () => {
     const ctx = ctxOf((url) => ({
-      text: url.includes('snopes')
+      text: url.includes('factcheck.org')
         ? feedOf([{ title: 'A claim about widgets' }])
         : feedOf([{ title: 'Something else entirely' }]),
     }))
@@ -205,16 +207,16 @@ describe('the gateway', () => {
   it('fetches every publisher in one run without refusing itself', async () => {
     const ctx = ctxOf(() => ({ text: feedOf([{ title: 'x' }]) }))
     await factChecks.run(ask(''), ctx)
-    expect((ctx.fetch as unknown as { mock: { calls: unknown[] } }).mock.calls.length).toBe(5)
+    expect((ctx.fetch as unknown as { mock: { calls: unknown[] } }).mock.calls.length).toBe(factcheckFeeds().length)
   })
 
   it('keeps going when one checker fails', async () => {
     const ctx = ctxOf((url) =>
-      url.includes('snopes') ? { ok: false, status: 503 } : { text: feedOf([{ title: 'x' }]) },
+      url.includes('fullfact') ? { ok: false, status: 503 } : { text: feedOf([{ title: 'x' }]) },
     )
     const out = await factChecks.run(ask(''), ctx)
     expect(out.length).toBeGreaterThan(0)
-    expect(out.every((e) => e.sourceKey !== 'snopes')).toBe(true)
+    expect(out.every((e) => e.sourceKey !== 'fullfact')).toBe(true)
   })
 
   it('fails loudly when every checker is unreachable', async () => {
@@ -279,7 +281,19 @@ describe('a catalogued gap is not a checker', () => {
    */
   it('still reads the publishers the sweep deliberately skips', () => {
     const keys = factcheckFeeds().map((f) => f.key)
-    expect(keys).toContain('snopes')
-    expect(keys.length, 'enabled:false means gateway-driven, not unusable').toBeGreaterThanOrEqual(5)
+    expect(keys).toContain('fullfact')
+    expect(keys.length, 'enabled:false means gateway-driven, not unusable').toBeGreaterThanOrEqual(3)
+  })
+
+  /**
+   * The licence gate and the quarantine apply here too (batch 10): the gateway
+   * reads these records directly, so skipping the gate let a feed whose terms
+   * forbid commercial use run anyway.
+   */
+  it('never fetches a checker whose terms forbid this product', async () => {
+    const ctx = ctxOf(() => ({ text: feedOf([{ title: 'x' }]) }))
+    await factChecks.run(ask(''), ctx)
+    const urls = (ctx.fetch as unknown as { mock: { calls: unknown[][] } }).mock.calls.map((c) => String(c[0]))
+    expect(urls.some((u) => /snopes\.com|politifact\.com/.test(u))).toBe(false)
   })
 })

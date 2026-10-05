@@ -44,6 +44,8 @@
 import type { Evidence, Source, SourceContext, SourceInput } from '../types'
 import { parseFeed } from '../feedxml'
 import { byTopic } from '../catalog'
+import { licenceProblem } from '../catalog/licence'
+import { isQuarantined } from '../catalog/quarantine'
 import { independenceGroup } from '../catalog/types'
 import type { CatalogSource } from '../catalog/types'
 import { SourceUnavailableError } from '../fetch-guard'
@@ -161,9 +163,19 @@ export function looksLikeReference(categories: string[], title = ''): boolean {
  * Two different facts share one catalogue, and only one of them is about
  * whether we can read the source.
  */
+/**
+ * The fact-check feeds this source reads: keyless (or keyed and configured),
+ * not quarantined, and accepted by the licence gate. The gate and the
+ * quarantine used to be skipped here — the records are `enabled: false` in the
+ * catalogue so the sweep leaves them to this source, which read them directly
+ * (batch 10). Snopes and PolitiFact are now withheld by their own terms.
+ */
 export function factcheckFeeds(): CatalogSource[] {
   return byTopic('factcheck').filter(
-    (f) => f.keyless || (f.keyEnv ? Boolean(process.env[f.keyEnv]) : false),
+    (f) =>
+      (f.keyless || (f.keyEnv ? Boolean(process.env[f.keyEnv]) : false)) &&
+      !isQuarantined(f.key) &&
+      licenceProblem(f.licence) === null,
   )
 }
 

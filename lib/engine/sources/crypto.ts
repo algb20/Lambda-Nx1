@@ -45,6 +45,8 @@
 import type { Evidence, Source, SourceContext, SourceInput } from '../types'
 import { parseFeed } from '../feedxml'
 import { byTopic } from '../catalog'
+import { licenceProblem } from '../catalog/licence'
+import { isQuarantined } from '../catalog/quarantine'
 import type { CatalogSource } from '../catalog/types'
 import { expectJson, SourceUnavailableError } from '../fetch-guard'
 import { publicationTime } from '../observed'
@@ -722,8 +724,9 @@ export function publisherTier(entry: CatalogSource): string {
  * first time one of them is edited, which is how a source ends up quietly
  * disabled in one place and live in the other.
  */
+/** Crypto feeds this source may read — same gate as `factcheckFeeds` (batch 10). */
 export function cryptoFeeds(): CatalogSource[] {
-  return byTopic('crypto')
+  return byTopic('crypto').filter((f) => !isQuarantined(f.key) && licenceProblem(f.licence) === null)
 }
 
 const HOSTS = [...new Set(cryptoFeeds().map((f) => new URL(f.url).hostname.toLowerCase()))]
