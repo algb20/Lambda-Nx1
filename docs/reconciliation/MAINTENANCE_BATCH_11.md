@@ -125,13 +125,22 @@ The notes are recorded in `portals.ts`. All four stay disabled.
 
 ## 6. Coverage now withheld with no verified fallback (GAP, stated rather than hidden)
 
-- Australian weather warnings (BoM).
-- Broad English-language world news from public broadcasters (BBC, NPR, ABC unreadable, CBC unreadable). GDELT remains, under review for publisher rights.
-- Humanitarian situation reports (ReliefWeb). GDACS and IFRC GO remain, the latter unreadable.
-- Internet routing (RIPEstat) and measurement (RIPE Atlas). OONI remains under review.
-- **DISCOVERED replacements, not adopted:**
-  - Red Hat's RHSA feed is CC BY 4.0 (`access.redhat.com/security/data`);
-  - Météo-France open data under Licence Ouverte (`meteo.data.gouv.fr`, unreachable on the day).
+> **Corrected in R319.** The first version of this section listed Australian weather warnings, ReliefWeb and RIPE (Atlas, RIPEstat) as coverage newly lost. That overstated it. `bom_warnings`, `ripe_atlas_anchors`, `ripe_stat_announced` and `reliefweb_disasters` were already `enabled: false`, and `reliefweb_reports` was already quarantined. Withholding them removed nothing that was running. Their licences still stand as read, and they cannot be switched on without a licence.
+
+What batch 11 actually took out of the running set (164 → 139):
+
+- **International and regional news:** BBC, Guardian, NPR, Al Jazeera, SCMP, SPIEGEL, Infobae, The Hindu, Middle East Eye, An-Nahar, Folha.
+  - Replacement candidates checked in R319 and not usable:
+    - **Voice of America** — public domain, but every feed stops at March 2025;
+    - no other public-domain or openly licensed broadcaster feed found.
+  - GDELT remains, under review for publisher rights.
+- **Security news and data:** BleepingComputer, MSRC, SANS ISC. CISA KEV and OSV.dev remain.
+- **Other:** ESA, Bank of England, Bank of Japan, World Bank news, FCA, FINRA, FAO GIEWS, Météo-France vigilance, NRCan, Nature, AP via feedx.
+
+**DISCOVERED replacements, not adopted:**
+- Red Hat's RHSA feed is CC BY 4.0 (`access.redhat.com/security/data`);
+- Météo-France open data under Licence Ouverte (`meteo.data.gouv.fr`, unreachable on the day);
+- RouteViews `/guest/asn/{asn}` is CC BY 4.0 with commercial use allowed (R319). It would replace RIPEstat if the query-driven routing capability is ever switched on.
 
 ## 7. Tests
 

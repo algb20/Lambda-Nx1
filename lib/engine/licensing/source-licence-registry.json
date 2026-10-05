@@ -6208,8 +6208,7 @@
   ],
   "checked_at": "2026-10-05",
   "fallback_sources": [
-   "gdacs_alerts (terms not found)",
-   "ifrc_appeals (terms not found)"
+   "gdacs_alerts (CC BY 4.0, verified)"
   ]
  },
  {
@@ -9742,7 +9741,10 @@
    }
   ],
   "checked_at": "2026-10-05",
-  "fallback_sources": []
+  "fallback_sources": [
+   "M-Lab measurement data (CC0 — verified 2026-10-05; served through BigQuery, not a keyless HTTP API)",
+   "ooni_measurements (under review)"
+  ]
  },
  {
   "source_id": "ripe_stat_announced",
@@ -9784,7 +9786,9 @@
    }
   ],
   "checked_at": "2026-10-05",
-  "fallback_sources": []
+  "fallback_sources": [
+   "RouteViews API /guest/asn/{asn} (CC BY 4.0; commercial use with attribution, logo and boilerplate — verified 2026-10-05, R319)"
+  ]
  },
  {
   "source_id": "ooni_measurements",
@@ -10697,8 +10701,7 @@
   ],
   "checked_at": "2026-10-05",
   "fallback_sources": [
-   "gdacs_alerts (terms not found)",
-   "ifrc_appeals (terms not found)"
+   "gdacs_alerts (CC BY 4.0, verified)"
   ]
  },
  {
