@@ -1,5 +1,5 @@
 import type { CatalogSource } from '../types'
-import { PUBLIC_DOMAIN, ccBy, publicFeed } from '../licence'
+import { PUBLIC_DOMAIN, ccBy, nonCommercial, publicFeed } from '../licence'
 
 /**
  * Hazard and Earth-observation sources: what instruments and official agencies
@@ -167,7 +167,7 @@ export const HAZARD_SOURCES: CatalogSource[] = [
     // Deliberately its own group: EMSC solves independently of the USGS, which
     // is exactly what makes agreement between them worth something.
     independence: 'emsc',
-    licence: ccBy('European-Mediterranean Seismological Centre', 'https://www.seismicportal.eu/'),
+    licence: ccBy('EMSC — European-Mediterranean Seismological Centre (CC BY 4.0)', 'https://www.seismicportal.eu/fdsn-wsevent.html'),
     minIntervalSec: 300,
     keyless: true,
     map: {
@@ -266,7 +266,7 @@ export const HAZARD_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'A',
     independence: 'un-ocha',
-    licence: ccBy('UN OCHA ReliefWeb', 'https://reliefweb.int/terms-conditions'),
+    licence: nonCommercial('UN OCHA ReliefWeb (personal, non-commercial use, R318)', 'https://reliefweb.int/terms-conditions'),
     minIntervalSec: 1800,
     /**
      * Not keyless any more, and off until that is resolved.

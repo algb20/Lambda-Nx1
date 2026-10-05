@@ -1,5 +1,5 @@
 import type { CatalogSource } from '../types'
-import { PUBLIC_DOMAIN, WHO_TERMS, ccBy, publicFeed } from '../licence'
+import { PUBLIC_DOMAIN, WHO_TERMS, ccBy, needsAgreement, nonCommercial, publicFeed } from '../licence'
 
 /**
  * National agencies — the layer that turns "global coverage" from a claim into
@@ -100,7 +100,7 @@ export const NATIONAL_SOURCES: CatalogSource[] = [
     coverage: ['CA'],
     admiralty: 'A',
     independence: 'nrcan',
-    licence: ccBy('Natural Resources Canada, Open Government Licence', 'https://open.canada.ca/en/open-government-licence-canada'),
+    licence: needsAgreement('Natural Resources Canada (commercial redistribution needs written permission, R318)', 'https://natural-resources.canada.ca/corporate/terms-conditions'),
     minIntervalSec: 600,
     keyless: true,
   },
@@ -149,7 +149,7 @@ export const NATIONAL_SOURCES: CatalogSource[] = [
     coverage: ['FR'],
     admiralty: 'A',
     independence: 'meteofrance',
-    licence: publicFeed('Météo-France', 'https://donneespubliques.meteofrance.fr/'),
+    licence: nonCommercial('Météo-France websites (private or educational use only, R318)', 'https://meteofrance.com/droits-de-reproduction'),
     minIntervalSec: 900,
     keyless: true,
   },
@@ -164,7 +164,7 @@ export const NATIONAL_SOURCES: CatalogSource[] = [
     coverage: ['AU'],
     admiralty: 'A',
     independence: 'bom-au',
-    licence: ccBy('Australian Bureau of Meteorology', 'http://www.bom.gov.au/other/copyright.shtml'),
+    licence: nonCommercial('Bureau of Meteorology data feeds ("not for commercial use", R318)', 'https://www.bom.gov.au/catalogue/data-feeds.shtml'),
     minIntervalSec: 900,
     keyless: true,
     enabled: false,
@@ -421,7 +421,7 @@ export const NATIONAL_SOURCES: CatalogSource[] = [
     coverage: ['JP'],
     admiralty: 'A',
     independence: 'boj',
-    licence: publicFeed('Bank of Japan', 'https://www.boj.or.jp/en/'),
+    licence: needsAgreement('Bank of Japan (commercial reproduction needs permission, R318)', 'https://www.boj.or.jp/en/about/copyright.htm'),
     minIntervalSec: 7200,
     keyless: true,
   },
@@ -436,7 +436,7 @@ export const NATIONAL_SOURCES: CatalogSource[] = [
     coverage: ['GB'],
     admiralty: 'A',
     independence: 'boe',
-    licence: publicFeed('Bank of England', 'https://www.bankofengland.co.uk/legal'),
+    licence: nonCommercial('Bank of England website resources (personal or internal non-commercial use, R318)', 'https://www.bankofengland.co.uk/legal'),
     minIntervalSec: 7200,
     keyless: true,
   },

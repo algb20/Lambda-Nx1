@@ -173,6 +173,16 @@ describe('S invariant 4 — every source is in the licence & usage registry (R31
     }
   })
 
+  it('never words an absence of restriction as a grant (R318)', () => {
+    // Four records said "no restriction on commercial use is stated" under
+    // basis EXPRESS_GRANT; the basis check alone could not see it.
+    const absence = /no (restriction|prohibition)|not stated|no stated|state[sd]? no bar|does not (forbid|prohibit)/i
+    const verifiedOnSilence = SOURCE_LICENSE_REGISTRY.filter(
+      (r) => r.license_status.startsWith('VERIFIED') && r.evidence_reference.every((e) => absence.test(e.quote)),
+    )
+    expect(verifiedOnSilence.map((r) => r.source_id)).toEqual([])
+  })
+
   it('runs nothing whose policy is WITHHOLD — coded, catalogue or portal', () => {
     expect(registered().filter((k) => policyOf(k) === 'WITHHOLD')).toEqual([])
     expect(activeSources().map((s) => s.key).filter((k) => policyOf(k) === 'WITHHOLD')).toEqual([])
@@ -183,6 +193,21 @@ describe('S invariant 4 — every source is in the licence & usage registry (R31
     for (const k of ['opensky', 'opensanctions', 'urlscan', 'shodan.internetdb', 'feodo', 'urlhaus', 'threatfox', 'who_outbreaks', 'bis_speeches']) {
       expect(policyOf(k), k).toBe('WITHHOLD')
     }
+  })
+
+  it('keeps the publishers whose terms were read in R318 withheld', () => {
+    // Personal/non-commercial terms, business-use licences, or an outright ban
+    // on automated access — each quoted in its registry record.
+    for (const k of ['bbc_world', 'guardian_world', 'npr_world', 'aljazeera', 'scmp_news', 'spiegel_international', 'reliefweb_reports', 'ripe_stat_announced', 'sans_isc', 'bom_warnings']) {
+      expect(policyOf(k), k).toBe('WITHHOLD')
+      expect(activeSources().some((s) => s.key === k), k).toBe(false)
+    }
+  })
+
+  it('has no record left standing on an unevidenced earlier licence', () => {
+    // R318 read the terms behind every catalogue licence recorded before
+    // 2026-10-04. A record may be UNCLEAR, but never silently inherited.
+    expect(SOURCE_LICENSE_REGISTRY.filter((r) => r.basis === 'PRIOR_RECORD_NO_EVIDENCE').map((r) => r.source_id)).toEqual([])
   })
 })
 

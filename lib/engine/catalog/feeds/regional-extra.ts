@@ -1,5 +1,5 @@
 import type { CatalogSource } from '../types'
-import { publicFeed } from '../licence'
+import { needsAgreement, nonCommercial, publicFeed } from '../licence'
 
 /**
  * The long tail of regional reporting.
@@ -117,7 +117,7 @@ export const REGIONAL_EXTRA_SOURCES: CatalogSource[] = [
     coverage: ['LB'],
     admiralty: 'C',
     independence: 'annahar',
-    licence: publicFeed('An-Nahar', 'https://www.annahar.com/'),
+    licence: nonCommercial('An-Nahar (personal, non-commercial use, R318)', 'https://www.annahar.com/terms'),
     minIntervalSec: 1800,
     keyless: true,
   },
@@ -164,7 +164,7 @@ export const REGIONAL_EXTRA_SOURCES: CatalogSource[] = [
     coverage: ['BD'],
     admiralty: 'B',
     independence: 'dailystar-bd',
-    licence: publicFeed('The Daily Star', 'https://www.thedailystar.net/'),
+    licence: needsAgreement('The Daily Star (commercial use needs authorization, R318)', 'https://www.thedailystar.net/'),
     minIntervalSec: 1800,
     keyless: true,
   },
@@ -275,7 +275,7 @@ export const REGIONAL_EXTRA_SOURCES: CatalogSource[] = [
     coverage: ['BR'],
     admiralty: 'B',
     independence: 'folha',
-    licence: publicFeed('Folha de S.Paulo', 'https://www.folha.uol.com.br/'),
+    licence: needsAgreement('Folha de S.Paulo (reproduction needs written Folhapress authorization, R318)', 'https://www.folha.uol.com.br/'),
     minIntervalSec: 1800,
     keyless: true,
   },

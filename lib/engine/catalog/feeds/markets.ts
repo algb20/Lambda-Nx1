@@ -1,5 +1,5 @@
 import type { CatalogSource } from '../types'
-import { PUBLIC_DOMAIN, ccBy, publicFeed } from '../licence'
+import { PUBLIC_DOMAIN, ccBy, needsAgreement, nonCommercial, publicFeed } from '../licence'
 import { USER_AGENT } from '../../guardrail'
 
 /**
@@ -288,7 +288,7 @@ export const MARKET_SOURCES: CatalogSource[] = [
     coverage: ['GB'],
     admiralty: 'A',
     independence: 'fca',
-    licence: ccBy('FCA, Open Government Licence v3.0', 'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/'),
+    licence: needsAgreement('FCA website (storage in another site or retrieval system needs permission, R318)', 'https://www.fca.org.uk/legal'),
     minIntervalSec: 3600,
     keyless: true,
     note: 'Includes the warning list — unauthorised firms, named by the regulator.',
@@ -319,7 +319,7 @@ export const MARKET_SOURCES: CatalogSource[] = [
     coverage: ['US'],
     admiralty: 'A',
     independence: 'finra',
-    licence: publicFeed('FINRA', 'https://www.finra.org/about/terms-and-conditions'),
+    licence: nonCommercial('FINRA website (non-commercial personal or professional use, R318)', 'https://www.finra.org/terms-of-use'),
     minIntervalSec: 7200,
     keyless: true,
   },

@@ -102,7 +102,7 @@ export const PORTALS: DataPortal[] = [
     metadataLicence: PUBLIC_DOMAIN,
     note: 'The reference CKAN deployment. Harvests most US federal agency catalogues.',
     enabled: false,
-    disabledNote: 'Observed 2026-10-05 (moved): 404 on /api/3/action/package_search — the catalogue API path has changed. Disabled until a recheck shows the API answering; a refusal is the operator\'s terms (charter §3) and is not worked around. Batch 10.',
+    disabledNote: 'Observed 2026-10-05 (moved): 404 on /api/3/action/package_search — the catalogue API path has changed. Disabled until a recheck shows the API answering; a refusal is the operator\'s terms (charter §3) and is not worked around. Batch 10. Batch 11 (R318): the CKAN API now answers at api.gsa.gov/technology/datagov/v3/action/package_search and requires an api.data.gov key (403 API_KEY_MISSING without one) — an owner action (key in the environment only), not a path repair.',
   },
   {
     key: 'uk_data_gov',
@@ -187,7 +187,7 @@ export const PORTALS: DataPortal[] = [
     country: 'AT',
     metadataLicence: ccBy('data.gv.at', 'https://www.data.gv.at/infos/nutzungsbedingungen/'),
     enabled: false,
-    disabledNote: 'Observed 2026-10-05 (moved): 404 HTML on the CKAN API path. Disabled until a recheck shows the API answering; a refusal is the operator\'s terms (charter §3) and is not worked around. Batch 10.',
+    disabledNote: 'Observed 2026-10-05 (moved): 404 HTML on the CKAN API path. Disabled until a recheck shows the API answering; a refusal is the operator\'s terms (charter §3) and is not worked around. Batch 10. Batch 11 (R318): /api/3/action, /katalog/api/3/action and /katalog/api/action all answer 404; no successor API found yet.',
   },
   {
     key: 'nl_overheid',
@@ -255,7 +255,7 @@ export const PORTALS: DataPortal[] = [
     country: 'PT',
     metadataLicence: ccBy('dados.gov.pt', 'https://dados.gov.pt/'),
     enabled: false,
-    disabledNote: 'Observed 2026-10-05 (moved): 404 JSON on the CKAN API path. Disabled until a recheck shows the API answering; a refusal is the operator\'s terms (charter §3) and is not worked around. Batch 10.',
+    disabledNote: 'Observed 2026-10-05 (moved): 404 JSON on the CKAN API path. Disabled until a recheck shows the API answering; a refusal is the operator\'s terms (charter §3) and is not worked around. Batch 10. Batch 11 (R318): the portal now runs udata, not CKAN — /api/1/datasets/ answers 200. Reaching it needs a udata adapter (DISCOVERED; an engine addition, not a path repair).',
   },
   {
     key: 'ro_data_gov',
@@ -265,7 +265,7 @@ export const PORTALS: DataPortal[] = [
     country: 'RO',
     metadataLicence: ccBy('data.gov.ro', 'https://data.gov.ro/'),
     enabled: false,
-    disabledNote: 'Observed 2026-10-05 (moved): connection reset / 404 on the CKAN API path. Disabled until a recheck shows the API answering; a refusal is the operator\'s terms (charter §3) and is not worked around. Batch 10.',
+    disabledNote: 'Observed 2026-10-05 (moved): connection reset / 404 on the CKAN API path. Disabled until a recheck shows the API answering; a refusal is the operator\'s terms (charter §3) and is not worked around. Batch 10. Batch 11 (R318): /api/3/action and /api/action still reset the connection.',
   },
 
   // ── Latin America, Africa, Asia ──────────────────────────────────────────

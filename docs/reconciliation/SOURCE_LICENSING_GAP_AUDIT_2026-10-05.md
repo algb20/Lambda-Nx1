@@ -132,7 +132,7 @@ Measured live (licence facet), so no portal is treated as one licence:
 
 | ID | Gap | Evidence | Ladder status | Next step |
 |---|---|---|---|---|
-| GL-01 | **188 catalogue licences have no evidence on file** | Registry baselines | DISCOVERED | RESEARCH: read each provider's terms (largest open task) |
+| GL-01 | **188 catalogue licences have no evidence on file** | Registry baselines | **Closed in repository (R318, batch 11):** all 184 remaining read — 65 verified, 34 withheld, 12 legal review, 73 unreadable (reason dated). A test now fails on any unevidenced record | RESEARCH: the 73 unreadable terms (mostly 403 / JavaScript-only) by another route |
 | GL-02 | Coded sources had no licence gate | Batches 05–06 | **Closed in repository** (registry + conformance test) | — |
 | GL-03 | Gateway readers bypassed the catalogue licence gate and quarantine (fact-check, crypto) | Batch 10 | **Closed in repository** | — |
 | GL-04 | Required attributions were never displayed (`catalogAttributions()` unused) | Batch 10 | **Partly closed:** central list on `/terms`, plus per-surface lines for CoinGecko, GDELT, ECB, Elexon, Land Registry, Eurostat, NCBI, OSM, FRED | REQUIRED: per-finding attribution where CC BY requires it near the data (e.g. ECDC items on the map) |
@@ -140,9 +140,12 @@ Measured live (licence facet), so no portal is treated as one licence:
 | GL-06 | No detection of **terms changes** (EXPIRED_OR_CHANGED is manual) | — | DISCOVERED | REQUIRED: terms fingerprint + scheduled re-read, beside the availability recheck |
 | GL-07 | Retention / caching / derived-data rules are mostly NOT_STATED; Lambda has no per-source retention policy | Registry fields | DISCOVERED | REQUIRED: per-source retention and derivation policy |
 | GL-08 | **AI/ML and training use are NOT_STATED for every source**, yet the AI analyst summarises source content | Registry fields | DISCOVERED | DECISION REQUIRED: default for NOT_STATED under the Context Firewall (E) |
-| GL-09 | Capabilities with **no verified independent fallback** | §1.2 | RESEARCHED | RESEARCH: threat reputation, stock indices, IP exposure, scan history, PEP screening, maritime vessels, live flights, Ethereum/Solana chain state, Global-South open data |
+| GL-09 | Capabilities with **no verified independent fallback** | §1.2; batch 11 §6 | RESEARCHED | RESEARCH: threat reputation, stock indices, IP exposure, scan history, PEP screening, maritime vessels, live flights, Ethereum/Solana chain state, Global-South open data; **added in R318:** Australian weather warnings, public-broadcaster world news, humanitarian situation reports (ReliefWeb), internet routing and measurement (RIPEstat, Atlas) |
 | GL-10 | Username-presence checks carry HIGH personal-data risk (charter §3) | Registry | RESEARCHED | DECISION REQUIRED (owner) on the capability itself |
-| GL-11 | Ten CKAN portals off; four need path repair (US, AT, PT, RO) | Batch 10 | RESEARCHED | Maintenance (repair) / owner (Brazil token; Mexico and Africa allow-listing) |
+| GL-11 | Ten CKAN portals off; four need path repair (US, AT, PT, RO) | Batch 10; batch 11 | RESEARCHED — none repairable by path: US needs an api.data.gov key, PT runs udata, AT has no successor API, RO resets | Owner (api.data.gov key in the environment; Brazil token; Mexico and Africa allow-listing); DECISION (udata adapter for PT, and France) |
+| GL-13 | OGL and similar licences **exclude personal data**, yet two sources carry it (The Gazette notices, Companies House officers) | Batch 11 | RESEARCHED | REQUIRED: personal-data filter or owner decision (charter §3) |
+| GL-14 | **Provenance:** a catalogue feed was an unofficial third-party re-feed of a wire service (`ap_topnews` via feedx.net) | Batch 11 | **Withheld** | REQUIRED: a catalogue rule that a feed's host must belong to its publisher, or the record says whose licence covers it |
+| GL-15 | Four coded records were VERIFIED on absence of restriction under basis EXPRESS_GRANT | Batch 11 | **Closed in repository** (reclassified; wording test added) | — |
 | GL-12 | Owner actions pending | Earlier batches | AGREED to be owner actions | abuse.ch account; ReliefWeb appname; NASA key; written permissions (WHO, BIS, UN notice); OpenSky / OpenSanctions / Shodan / urlscan licences |
 
 ## 3. Architecture Impact

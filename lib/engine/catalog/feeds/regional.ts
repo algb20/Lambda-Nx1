@@ -1,5 +1,5 @@
 import type { CatalogSource } from '../types'
-import { publicFeed } from '../licence'
+import { needsAgreement, nonCommercial, publicFeed } from '../licence'
 
 /**
  * Regional and multilingual reporting.
@@ -37,7 +37,7 @@ export const REGIONAL_SOURCES: CatalogSource[] = [
     admiralty: 'B',
     // Same newsroom as the English service: one group, not two.
     independence: 'aljazeera',
-    licence: publicFeed('Al Jazeera', 'https://www.aljazeera.com/terms-and-conditions/'),
+    licence: nonCommercial('Al Jazeera (personal, non-commercial use; no bots, R318)', 'https://www.aljazeera.com/terms-and-conditions/'),
     minIntervalSec: 1800,
     keyless: true,
   },
@@ -52,7 +52,7 @@ export const REGIONAL_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'B',
     independence: 'bbc',
-    licence: publicFeed('BBC News', 'https://www.bbc.co.uk/usingthebbc/terms/'),
+    licence: needsAgreement('BBC News (business use of RSS feeds needs a BBC licence, R318)', 'https://www.bbc.co.uk/usingthebbc/terms/can-i-use-bbc-content/'),
     minIntervalSec: 1800,
     keyless: true,
   },
@@ -82,7 +82,7 @@ export const REGIONAL_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'C',
     independence: 'middleeasteye',
-    licence: publicFeed('Middle East Eye', 'https://www.middleeasteye.net/'),
+    licence: needsAgreement('Middle East Eye (commercial use and republication need a licence, R318)', 'https://www.middleeasteye.net/terms-and-conditions'),
     minIntervalSec: 3600,
     keyless: true,
   },
@@ -133,7 +133,7 @@ export const REGIONAL_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'B',
     independence: 'nhk',
-    licence: publicFeed('NHK World', 'https://www3.nhk.or.jp/nhkworld/en/terms/'),
+    licence: nonCommercial('NHK World (content use beyond the terms prohibited, R318)', 'https://www3.nhk.or.jp/nhkworld/en/terms/'),
     minIntervalSec: 1800,
     keyless: true,
   },
@@ -148,7 +148,7 @@ export const REGIONAL_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'B',
     independence: 'thehindu',
-    licence: publicFeed('The Hindu', 'https://www.thehindu.com/terms-of-use/'),
+    licence: nonCommercial('The Hindu (personal, non-commercial use; no robots, R318)', 'https://www.thehindu.com/termsofuse/'),
     minIntervalSec: 1800,
     keyless: true,
   },
@@ -178,7 +178,7 @@ export const REGIONAL_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'B',
     independence: 'scmp',
-    licence: publicFeed('SCMP', 'https://www.scmp.com/terms-conditions'),
+    licence: nonCommercial('SCMP (automated access prohibited for any purpose, R318)', 'https://www.scmp.com/terms-conditions'),
     minIntervalSec: 1800,
     keyless: true,
   },
@@ -217,7 +217,7 @@ export const REGIONAL_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'C',
     independence: 'infobae',
-    licence: publicFeed('Infobae', 'https://www.infobae.com/terminos-y-condiciones/'),
+    licence: needsAgreement('Infobae (any reuse needs written authorization, R318)', 'https://www.infobae.com/terminos-y-condiciones/'),
     minIntervalSec: 1800,
     keyless: true,
   },
@@ -264,7 +264,7 @@ export const REGIONAL_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'B',
     independence: 'spiegel',
-    licence: publicFeed('DER SPIEGEL', 'https://www.spiegel.de/dienste/impressum-1000000.html'),
+    licence: nonCommercial('DER SPIEGEL (automated reading and use for RSS feeds not permitted, R318)', 'https://www.spiegel.de/nutzungsbedingungen'),
     minIntervalSec: 1800,
     keyless: true,
   },

@@ -1,5 +1,5 @@
 import type { CatalogSource, Licence } from '../types'
-import { PUBLIC_DOMAIN, ccBy, publicFeed } from '../licence'
+import { PUBLIC_DOMAIN, ccBy, nonCommercial, publicFeed } from '../licence'
 
 /**
  * Cyber threat and vulnerability sources.
@@ -286,7 +286,7 @@ export const CYBER_SOURCES: CatalogSource[] = [
     coverage: 'global',
     // A about Microsoft products — nobody is better placed. Not a general A.
     admiralty: 'A',
-    licence: publicFeed('Microsoft MSRC', 'https://www.microsoft.com/legal'),
+    licence: nonCommercial('Microsoft (personal, non-commercial use unless otherwise specified, R318)', 'https://www.microsoft.com/en-us/legal/terms-of-use'),
     minIntervalSec: 3600,
     keyless: true,
   },
@@ -346,7 +346,7 @@ export const CYBER_SOURCES: CatalogSource[] = [
     topics: ['cyber-advisory', 'news'],
     coverage: 'global',
     admiralty: 'C',
-    licence: publicFeed('BleepingComputer', 'https://www.bleepingcomputer.com/'),
+    licence: nonCommercial('BleepingComputer (storage for personal, non-commercial use only, R318)', 'https://www.bleepingcomputer.com/terms-of-use/'),
     minIntervalSec: 3600,
     keyless: true,
   },
@@ -374,7 +374,7 @@ export const CYBER_SOURCES: CatalogSource[] = [
     topics: ['cyber-advisory', 'malware'],
     coverage: 'global',
     admiralty: 'B',
-    licence: publicFeed('SANS Internet Storm Center', 'https://isc.sans.edu/'),
+    licence: nonCommercial('SANS Internet Storm Center (CC BY-NC-SA 4.0, R318)', 'https://isc.sans.edu/api/'),
     minIntervalSec: 3600,
     keyless: true,
   },

@@ -1,5 +1,5 @@
 import type { CatalogSource } from '../types'
-import { PUBLIC_DOMAIN, ccBy, publicFeed } from '../licence'
+import { PUBLIC_DOMAIN, ccBy, nonCommercial, publicFeed } from '../licence'
 
 /**
  * Earth systems and space — the instruments, not the reporting.
@@ -131,7 +131,7 @@ export const SCIENCE_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'A',
     independence: 'esa',
-    licence: ccBy('European Space Agency', 'https://www.esa.int/Services/Terms_and_conditions'),
+    licence: nonCommercial('European Space Agency website (personal, non-commercial use, R318)', 'https://www.esa.int/Services/Terms_and_conditions'),
     minIntervalSec: 21600,
     keyless: true,
   },

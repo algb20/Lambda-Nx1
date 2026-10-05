@@ -182,9 +182,11 @@ Full audit: `SOURCE_LICENSING_GAP_AUDIT_2026-10-05.md`. Registry: `lib/engine/li
 
 | ID | Existing System | Target (Master) | Status | Decision path |
 |---|---|---|---|---|
-| GL-01 | 188 catalogue licences without stored evidence | Every source licence evidenced (§31) | GAP | Research |
+| GL-01 | 188 catalogue licences without stored evidence → **all read in R318** (batch 11); 73 terms pages unreadable, reason dated | Every source licence evidenced (§31) | GAP narrowed (REPO-TESTED: no unevidenced record) | Research the 73 |
 | GL-05 | Registry enforced by conformance test | Runtime policy (§31, §46, E) | GAP | BC-2, BC-3 |
 | GL-06 | No terms-change detection | Recheck incl. terms (§31) | GAP | BC-5 |
 | GL-08 | AI/ML use NOT_STATED for all sources | Context Firewall (E) | GAP — DECISION REQUIRED | BC-4 |
 | GL-09 | Several capabilities without verified fallback | Resilience (§45), independence (J) | GAP | BC-7 |
 | GL-10 | Username-presence check (HIGH personal-data risk) | Charter §3 | DECISION REQUIRED | Owner |
+| GL-13 | OGL-licensed sources carrying personal data (Gazette, Companies House) | Charter §3; data minimisation | GAP | Personal-data filter or owner decision |
+| GL-14 | A catalogue feed hosted by an unofficial re-publisher (withheld) | Provenance (§31) | GAP | Catalogue rule: host belongs to publisher |
