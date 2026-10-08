@@ -25,4 +25,10 @@ describe('the generated credit index (GL-04, R323)', () => {
     expect(creditOf('bgs_quakes')?.licence).toBeUndefined()
     expect(creditOf('emsc_quakes')?.licence).toBe('CC BY 4.0')
   })
+
+  it('credits coded sources from their verified registry attribution (R324)', () => {
+    expect(creditOf('coingecko')?.credit).toBe('Powered by CoinGecko')
+    expect(creditOf('nominatim')).toEqual({ credit: '© OpenStreetMap contributors', licence: 'ODbL 1.0' })
+    expect(creditOf('ukhpi_landregistry')?.licence).toBe('Open Government Licence v3.0')
+  })
 })

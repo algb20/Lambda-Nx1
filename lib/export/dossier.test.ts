@@ -187,7 +187,7 @@ describe('toCsv', () => {
 
   it('leads with a header row and uses CRLF', () => {
     expect(csv.split('\r\n')[0]).toBe(
-      'claim,entity,source,reference,source_url,retrieved_at,admiralty,confidence',
+      'claim,entity,source,reference,source_url,retrieved_at,admiralty,confidence,credit,licence',
     )
     expect(csv.endsWith('\r\n')).toBe(true)
   })
@@ -355,5 +355,33 @@ describe('renderDossier', () => {
     for (const f of ['json', 'csv', 'markdown', 'citations', 'bibtex', 'html'] as const) {
       expect(renderDossier(d, f).body.length, f).toBeGreaterThan(20)
     }
+  })
+})
+
+describe('credits travel with the data (BC-8, R324)', () => {
+  // An export redistributes third-party material; CC BY and OGL require the
+  // credit in every copy. EMSC is CC BY 4.0 with a credit; dns.google owes none.
+  const d = buildDossier({
+    subject: 'example.com',
+    kind: 'domain',
+    evidence: [
+      ev({ sourceKey: 'emsc_quakes', sourceUrl: 'https://www.seismicportal.eu/x', claim: 'M5.1 quake' }),
+      ev(),
+    ],
+  })
+  const emsc = d.references.find((r) => r.sourceKey === 'emsc_quakes')!
+
+  it('puts the credit and the verified licence on the reference', () => {
+    expect(emsc.credit).toContain('EMSC')
+    expect(emsc.licence).toEqual({ label: 'CC BY 4.0', url: 'https://creativecommons.org/licenses/by/4.0/' })
+    expect(d.references.find((r) => r.sourceKey !== 'emsc_quakes')!.credit).toBeNull()
+  })
+
+  it('carries them into every format', () => {
+    expect(toMarkdown(d)).toContain('licence: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)')
+    expect(toMarkdown(d)).toContain('EMSC')
+    expect(toPrintableHtml(d)).toContain('<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>')
+    expect(toCsv(d)).toMatch(/M5\.1 quake.*EMSC.*CC BY 4\.0/)
+    expect(JSON.parse(toJson(d)).references[0].credit).toContain('EMSC')
   })
 })

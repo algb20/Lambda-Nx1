@@ -9,7 +9,8 @@
  *
  * The credit comes from the licence & usage registry when the record is
  * verified (its attribution was read from the provider's own terms), otherwise
- * from the catalogue licence. Withheld sources get no entry: nothing of theirs
+ * from the catalogue licence; coded sources use the registry's verified
+ * attribution. Withheld sources get no entry: nothing of theirs
  * is shown.
  *
  * Usage:  npx tsx scripts/build-credit-index.ts

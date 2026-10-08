@@ -72,6 +72,7 @@ import { PREDICATE_LABEL } from '@/lib/engine/ontology'
 import { proposePivots } from '@/lib/modules/copilot'
 import type { Evidence } from '@/lib/engine/types'
 import type { AnalystVerdict, Severity } from '@/lib/ai/types'
+import { SourceCredit } from '@/components/source-credit'
 
 type Result =
   | { kind: 'nexus'; data: NexusReport }
@@ -184,7 +185,7 @@ function SourceTag({ e }: { e: EvidenceItem }) {
         </Badge>
       ) : null}
       <Badge variant="secondary" className="text-[10px]">
-        {e.sourceKey}
+        <SourceCredit sourceKey={e.sourceKey} sourceUrl={e.sourceUrl} />
       </Badge>
     </div>
   )
