@@ -22,7 +22,9 @@
     "check:deploys": "tsx scripts/check-deploys.ts",
     "verify:live": "tsx scripts/verify-live.ts",
     "audit:responsive": "node scripts/responsive-audit.mjs",
-    "package:studio": "node scripts/package.mjs --profile studio"
+    "package:studio": "node scripts/package.mjs --profile studio",
+    "check:terms": "tsx scripts/check-terms.ts",
+    "build:credits": "tsx scripts/build-credit-index.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

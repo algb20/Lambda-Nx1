@@ -1,0 +1,28 @@
+import { CATALOG } from './index'
+import { licenceProblem } from './licence'
+import { licenseRecord, usagePolicy } from '../licensing/registry'
+import { licenceTextsFor } from '../licensing/licence-texts'
+import type { SourceCredit } from './credits'
+
+/**
+ * Server-side derivation of `credits.ts` (see scripts/build-credit-index.ts).
+ * Kept apart from the generated file so the browser bundle never imports the
+ * catalogue or the registry.
+ */
+export function creditEntries(): [string, SourceCredit][] {
+  const out: [string, SourceCredit][] = []
+  for (const source of CATALOG) {
+    if (licenceProblem(source.licence) !== null) continue
+    const record = licenseRecord(source.key)
+    if (record && usagePolicy(record.license_status) === 'WITHHOLD') continue
+    const verified = record?.license_status.startsWith('VERIFIED') ?? false
+    const credit = (verified && record?.attribution) || source.licence.attribution
+    if (!credit) continue
+    // A licence is named only when the registry verified it from the provider's
+    // own terms; an UNCLEAR record must not be shown as "CC BY" on the strength
+    // of a catalogue entry nobody re-read.
+    const licence = verified && record ? licenceTextsFor(record.license)[0]?.label : undefined
+    out.push([source.key, licence ? { credit, licence } : { credit }])
+  }
+  return out.sort(([a], [b]) => a.localeCompare(b))
+}

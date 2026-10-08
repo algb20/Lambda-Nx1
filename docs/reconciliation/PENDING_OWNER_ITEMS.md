@@ -5,7 +5,7 @@
 | **Purpose** | One living list of everything that cannot be finished in the repository: keys, environment variables, decisions, permissions, writes to live systems. Owner R322: «احفظ في قائمة غير المكتمل مثل المفاتيح أو المتغيرات وغيرها». |
 | **Rule** | No secret value is ever written here, in Git, or in any file (owner S2). A key is named; its value goes only into the hosting environment, by the owner. |
 | **Production** | Locked on `9c19303`. No Production environment variable or deploy is changed without a new owner decision (R306). |
-| **Updated** | 2026-10-08 (R322). Each item says where it came from. Close an item by striking it through, with the date and the commit or decision. |
+| **Updated** | 2026-10-08 (R323). Each item says where it came from. Close an item by striking it through, with the date and the commit or decision. |
 
 ## A. Source keys and tokens (environment only)
 
@@ -55,7 +55,7 @@ Listed so none is forgotten. Whether each is set in a given environment is **UNV
 | C5 | Companies House: may officer and PSC data appear at all, and in what form? | GL-13; batch 14 |
 | C6 | Dedicated RPC provider or own node (Ethereum, Solana) | R317 |
 | C7 | XposedOrNot: does Lambda's use count as "personal and low-volume"? | R317 |
-| C8 | Approve Blueprint changes BC-1 to BC-8 (licence registry into the Policy Engine, terms-change detection, and the rest) in the Master unification session | Gap audit §4 |
+| C8 | Approve Blueprint changes BC-1 to BC-8 (licence registry into the Policy Engine, terms-change detection, and the rest) in the Master unification session. Already built as repository tools, awaiting runtime wiring: `npm run check:terms` (BC-5) and per-finding credits (BC-8) | Gap audit §4; batch 15 |
 | C9 | Lift the Production pause, when 30.27.8.R is closed | R294, R306 |
 
 ## D. Permissions and agreements to request (owner action)

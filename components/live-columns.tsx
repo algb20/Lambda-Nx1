@@ -14,6 +14,7 @@ import {
 import { diversify } from '@/lib/analysis/significance'
 import { originOf } from '@/lib/engine/catalog/origins'
 import { isNaturalHazard, splitHazards } from '@/lib/analysis/hazards'
+import { SourceCredit } from '@/components/source-credit'
 
 /**
  * The world as a wall of small boxes, one per subject, each with its own stream.
@@ -156,18 +157,8 @@ function Row({ event, color }: { event: WorldEvent; color: string }) {
       </p>
       <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[10px] text-muted-foreground ltr:pl-3 rtl:pr-3">
         {/* The publisher, named. A headline with no source is a rumour. */}
-        {event.sourceUrl ? (
-          <a
-            href={event.sourceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="truncate hover:text-foreground hover:underline"
-          >
-            {event.sourceKey}
-          </a>
-        ) : (
-          <span className="truncate">{event.sourceKey}</span>
-        )}
+        {/* Credited the way its licence asks (GL-04). */}
+        <SourceCredit sourceKey={event.sourceKey} sourceUrl={event.sourceUrl} />
         <span aria-hidden>·</span>
         <TimeStamp iso={event.observedAt ?? event.at} fallback="time not stated" />
         {event.country ? (

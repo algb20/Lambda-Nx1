@@ -57,6 +57,15 @@ export interface EvidenceReference {
   quote: string
   url: string
   read_at: string
+  /**
+   * What `quote` is (R323, for the terms-change check):
+   * - `quote`       the provider's words, verbatim (elisions marked …, editorial
+   *                 brackets […])
+   * - `paraphrase`  our summary; only the parts inside double quotes are verbatim
+   * - `observation` something we saw (a status code, a measurement, a citation),
+   *                 not the provider's words
+   */
+  kind: 'quote' | 'paraphrase' | 'observation'
 }
 
 export interface SourceLicenseRecord {
@@ -134,6 +143,9 @@ export function recordProblems(r: SourceLicenseRecord): string[] {
     p.push('no quoted evidence with URL and date')
   }
   if (r.license_status === 'VERIFIED_CONDITIONAL' && !r.conditions && !r.attribution) p.push('conditional without a condition')
+  for (const e of r.evidence_reference) {
+    if (!['quote', 'paraphrase', 'observation'].includes(e.kind)) p.push(`evidence without a kind: ${e.quote.slice(0, 40)}`)
+  }
   return p
 }
 

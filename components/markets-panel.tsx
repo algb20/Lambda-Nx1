@@ -24,6 +24,7 @@ import {
   usd,
   type Direction,
 } from '@/lib/analysis/market-format'
+import { SourceCredit } from '@/components/source-credit'
 
 /**
  * Markets and chains, on one page.
@@ -549,13 +550,7 @@ function Provenance({
   const age = ageLabel(at)
   return (
     <p className="mt-2 flex flex-wrap items-center gap-x-1.5 border-t border-border/60 pt-2 text-[10px] text-muted-foreground">
-      {sourceUrl ? (
-        <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="truncate hover:underline">
-          {sourceKey}
-        </a>
-      ) : (
-        <span className="truncate">{sourceKey}</span>
-      )}
+      <SourceCredit sourceKey={sourceKey} sourceUrl={sourceUrl} />
       {age ? (
         <>
           <span aria-hidden>·</span>

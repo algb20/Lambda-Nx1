@@ -12,6 +12,7 @@ import {
   type WorldEvent,
   type WorldEventsReport,
 } from '@/lib/modules/world-events-shared'
+import { SourceCredit } from '@/components/source-credit'
 
 /**
  * A panel per category, under the globe.
@@ -370,7 +371,7 @@ function CategoryPanel({
 
             {size !== 'compact' ? (
               <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-muted-foreground">
-                <span className="font-mono">{e.sourceKey}</span>
+                <SourceCredit sourceKey={e.sourceKey} />
                 {e.country ? <span>{e.country}</span> : null}
                 {e.magnitude !== null ? (
                   <span className="tabular-nums">

@@ -33,7 +33,8 @@
    {
     "quote": "Commercial REST use requires a prior agreement (catalogue record opensky_states; batch 05).",
     "url": "https://opensky-network.org/about/terms-of-use",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-04",
@@ -73,7 +74,8 @@
    {
     "quote": "\"Creative Commons 4.0 Attribution NonCommercial\"; commercial use requires a paid licence. The API also answers 401 without a key.",
     "url": "https://www.opensanctions.org/licensing/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -115,7 +117,8 @@
    {
     "quote": "\"Commercial use of any part of our service requires express written permission.\"",
     "url": "https://urlscan.io/terms/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-04",
@@ -155,7 +158,8 @@
    {
     "quote": "\"free for non-commercial use … If you're using the InternetDB API to make money then you need an enterprise license.\"",
     "url": "https://internetdb.shodan.io/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-04",
@@ -195,7 +199,8 @@
    {
     "quote": "\"Access to the abuse.ch Platforms is provided only to: Authenticated Users\"; commercial use \"may require a paid subscription, which will be managed by Spamhaus\". ThreatFox and URLhaus APIs answered 401 without a key.",
     "url": "https://abuse.ch/terms-of-use/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -237,7 +242,8 @@
    {
     "quote": "\"Access to the abuse.ch Platforms is provided only to: Authenticated Users\"; commercial use \"may require a paid subscription, which will be managed by Spamhaus\". ThreatFox and URLhaus APIs answered 401 without a key.",
     "url": "https://abuse.ch/terms-of-use/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -279,7 +285,8 @@
    {
     "quote": "\"Access to the abuse.ch Platforms is provided only to: Authenticated Users\"; commercial use \"may require a paid subscription, which will be managed by Spamhaus\". ThreatFox and URLhaus APIs answered 401 without a key.",
     "url": "https://abuse.ch/terms-of-use/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -321,7 +328,8 @@
    {
     "quote": "WHO terms: extracts \"not for sale or for use in conjunction with commercial purposes\"; other uses \"require explicit, prior authorization in writing\".",
     "url": "https://www.who.int/about/policies/terms-of-use",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -364,7 +372,8 @@
    {
     "quote": "Nominatim usage policy: \"an absolute maximum of 1 request per second\"; identify with a real User-Agent; \"clearly display attribution\"; no reselling of geocoding results, no auto-complete, no bulk grids. Commercial apps are not excluded.",
     "url": "https://operations.osmfoundation.org/policies/nominatim/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -404,7 +413,8 @@
    {
     "quote": "\"The Gravatar API is completely open and free to use\" for \"developers and organizations of all sizes\", under the WordPress.com Guidelines for Responsible Use.",
     "url": "https://docs.gravatar.com/rest/getting-started/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -444,7 +454,8 @@
    {
     "quote": "Licence allows applications that \"charge for your services and products that incorporate or integrates our CoinGecko API\", provided they display \"Powered by CoinGecko\" (font size ≥ 10). Access may not be resold or syndicated.",
     "url": "https://www.coingecko.com/en/api_terms",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -484,7 +495,8 @@
    {
     "quote": "Licence allows applications that \"charge for your services and products that incorporate or integrates our CoinGecko API\", provided they display \"Powered by CoinGecko\" (font size ≥ 10). Access may not be resold or syndicated.",
     "url": "https://www.coingecko.com/en/api_terms",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -524,7 +536,8 @@
    {
     "quote": "Licence allows applications that \"charge for your services and products that incorporate or integrates our CoinGecko API\", provided they display \"Powered by CoinGecko\" (font size ≥ 10). Access may not be resold or syndicated.",
     "url": "https://www.coingecko.com/en/api_terms",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -564,7 +577,8 @@
    {
     "quote": "Licence allows applications that \"charge for your services and products that incorporate or integrates our CoinGecko API\", provided they display \"Powered by CoinGecko\" (font size ≥ 10). Access may not be resold or syndicated.",
     "url": "https://www.coingecko.com/en/api_terms",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -604,7 +618,8 @@
    {
     "quote": "Licence allows applications that \"charge for your services and products that incorporate or integrates our CoinGecko API\", provided they display \"Powered by CoinGecko\" (font size ≥ 10). Access may not be resold or syndicated.",
     "url": "https://www.coingecko.com/en/api_terms",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -644,7 +659,8 @@
    {
     "quote": "Licence allows applications that \"charge for your services and products that incorporate or integrates our CoinGecko API\", provided they display \"Powered by CoinGecko\" (font size ≥ 10). Access may not be resold or syndicated.",
     "url": "https://www.coingecko.com/en/api_terms",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -684,7 +700,8 @@
    {
     "quote": "FRED legal: \"Public Domain: Citation requested\" and \"Copyrighted: Citation required\" series \"may be used for internal commercial uses … provided that appropriate attribution is given to FRED as well as the original source\". \"Copyrighted: Pre-approval required\" series are excluded from the board (FRED_PRE_APPROVAL_REQUIRED).",
     "url": "https://fred.stlouisfed.org/legal/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -724,7 +741,8 @@
    {
     "quote": "FRED legal: \"Public Domain: Citation requested\" and \"Copyrighted: Citation required\" series \"may be used for internal commercial uses … provided that appropriate attribution is given to FRED as well as the original source\". \"Copyrighted: Pre-approval required\" series are excluded from the board (FRED_PRE_APPROVAL_REQUIRED).",
     "url": "https://fred.stlouisfed.org/legal/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -764,7 +782,8 @@
    {
     "quote": "Work of the US federal government (17 U.S.C. §105). SEC fair-access policy read 2026-10-04: \"Current max request rate: 10 requests/second\", with a declared User-Agent carrying contact details.",
     "url": "https://www.sec.gov/search-filings/edgar-search-assistance/accessing-edgar-data",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -804,7 +823,8 @@
    {
     "quote": "Work of the US federal government (17 U.S.C. §105). SEC fair-access policy read 2026-10-04: \"Current max request rate: 10 requests/second\", with a declared User-Agent carrying contact details.",
     "url": "https://www.sec.gov/search-filings/edgar-search-assistance/accessing-edgar-data",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -844,7 +864,8 @@
    {
     "quote": "Work of the US federal government (17 U.S.C. §105). SEC fair-access policy read 2026-10-04: \"Current max request rate: 10 requests/second\", with a declared User-Agent carrying contact details.",
     "url": "https://www.sec.gov/search-filings/edgar-search-assistance/accessing-edgar-data",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -884,7 +905,8 @@
    {
     "quote": "Work of the US federal government (17 U.S.C. §105). SEC fair-access policy read 2026-10-04: \"Current max request rate: 10 requests/second\", with a declared User-Agent carrying contact details.",
     "url": "https://www.sec.gov/search-filings/edgar-search-assistance/accessing-edgar-data",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -924,7 +946,8 @@
    {
     "quote": "\"almost none of the metadata is subject to copyright, and you may use it for any purpose\"; abstracts may be publishers' copyright. No sign-up required.",
     "url": "https://www.crossref.org/documentation/retrieve-metadata/rest-api/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -964,7 +987,8 @@
    {
     "quote": "LEI data terms: \"The data available through the Access Service are provided under the CC0 licence.\"",
     "url": "https://www.gleif.org/en/meta/lei-data-terms-of-use/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1004,7 +1028,8 @@
    {
     "quote": "LEI data terms: \"The data available through the Access Service are provided under the CC0 licence.\"",
     "url": "https://www.gleif.org/en/meta/lei-data-terms-of-use/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1042,9 +1067,10 @@
   "conditions": "Never represent the product as endorsed by arXiv; ≤ 1 request / 3 s, one connection.",
   "evidence_reference": [
    {
-    "quote": "arXiv API ToU: \"You are free to use descriptive metadata about arXiv e-prints under the terms of the Creative Commons Universal (CC0 1.0) Public Domain Declaration\"; tools that help users discover e-prints are permitted.",
+    "quote": "arXiv API ToU: \"You are free to use descriptive metadata … about arXiv e-prints under the terms of the Creative Commons Universal (CC0 1.0) Public Domain Declaration\"; tools that help users discover e-prints are permitted.",
     "url": "https://info.arxiv.org/help/api/tou.html",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1084,7 +1110,8 @@
    {
     "quote": "Same arXiv API ToU as `arxiv`: descriptive metadata under CC0 1.0; discovery and notification tools are permitted.",
     "url": "https://info.arxiv.org/help/api/tou.html",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1124,7 +1151,8 @@
    {
     "quote": "\"available for unlimited and unrestricted use for any academic, commercial, or governmental use of any kind without fee\"; \"any use or redistribution of the data must include a citation to the GDELT Project and a link to this website\".",
     "url": "https://www.gdeltproject.org/about.html",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1164,7 +1192,8 @@
    {
     "quote": "ECB disclaimer & copyright: information may be reproduced if \"the ECB must be cited as the source\"; modifications such as calculated growth rates \"must be stated explicitly\"; if sold, buyers are told it is free from the ECB.",
     "url": "https://www.ecb.europa.eu/services/disclaimer/html/index.en.html",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1204,7 +1233,8 @@
    {
     "quote": "Same ECB disclaimer & copyright terms as `ecb_policy_rate`: reproduction allowed with the ECB cited as source; computed modifications stated explicitly.",
     "url": "https://www.ecb.europa.eu/services/disclaimer/html/index.en.html",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1244,7 +1274,8 @@
    {
     "quote": "World Bank data catalog default licence: CC BY 4.0 — \"copy, modify and distribute data in any format for any purpose, including commercial use\", with attribution.",
     "url": "https://datacatalog.worldbank.org/public-licenses",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1284,7 +1315,8 @@
    {
     "quote": "Default licence of the World Bank data catalog (CC BY 4.0), which lists Projects & Operations; no dataset-specific exception was found.",
     "url": "https://datacatalog.worldbank.org/public-licenses",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1324,7 +1356,8 @@
    {
     "quote": "\"Reuse of statistical data … for commercial or non-commercial purposes is authorised provided the source is acknowledged\" — except data from non-EU countries and some trade data.",
     "url": "https://ec.europa.eu/eurostat/web/main/help/copyright-notice",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1364,7 +1397,8 @@
    {
     "quote": "Free to \"exploit the BMRS Data, including commercially, or by including it in your own product or application\", with the statement \"Contains BMRS data © Elexon Limited copyright and database right [year]\".",
     "url": "https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1404,12 +1438,14 @@
    {
     "quote": "Terms §H: no prohibition on commercial products; forbids excessive requests, token sharing to exceed limits, and selling users' personal information.",
     "url": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    },
    {
     "quote": "You may use information from our Service for the following reasons, regardless of whether the information was scraped, collected through our API, or obtained otherwise: Researchers … for research purposes, only if any publications resulting from that research are open access. Archivists … for archival purposes.",
     "url": "https://docs.github.com/en/site-policy/acceptable-use-policies/github-acceptable-use-policies",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -1449,7 +1485,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105). Agencies: FAA, Federal Register (NARA/GPO), NOAA, U.S. Treasury USAspending, USGS.",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1489,7 +1526,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105). Agencies: FAA, Federal Register (NARA/GPO), NOAA, U.S. Treasury USAspending, USGS.",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1529,7 +1567,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105). Agencies: FAA, Federal Register (NARA/GPO), NOAA, U.S. Treasury USAspending, USGS.",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1569,7 +1608,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105). Agencies: FAA, Federal Register (NARA/GPO), NOAA, U.S. Treasury USAspending, USGS.",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1609,7 +1649,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105). Agencies: FAA, Federal Register (NARA/GPO), NOAA, U.S. Treasury USAspending, USGS.",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1649,7 +1690,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105). Agencies: FAA, Federal Register (NARA/GPO), NOAA, U.S. Treasury USAspending, USGS.",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1689,7 +1731,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105). Agencies: FAA, Federal Register (NARA/GPO), NOAA, U.S. Treasury USAspending, USGS.",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1729,7 +1772,8 @@
    {
     "quote": "FRED copyright class checked per series 2026-10-04: MSPUS, HOUST, RRVRUSQ156N, MSACSR \"Public Domain: Citation requested\"; MORTGAGE30US \"Copyrighted: Citation required\"; CSUSHPINSA \"Pre-Approval Required\" — removed.",
     "url": "https://fred.stlouisfed.org/legal/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1769,7 +1813,8 @@
    {
     "quote": "All 18 IMF primary-commodity series on FRED checked 2026-10-04: \"Copyrighted: Citation required\" — commercial use allowed with attribution to FRED and the IMF.",
     "url": "https://fred.stlouisfed.org/legal/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1808,8 +1853,9 @@
   "evidence_reference": [
    {
     "quote": "GOV.UK \"About the UK House Price Index\": published under the Open Government Licence v3.0, which permits commercial reuse with the statement \"Contains HM Land Registry data © Crown copyright and database right [year]. This data is licensed under the Open Government Licence v3.0.\"",
-    "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
-    "read_at": "2026-10-04"
+    "url": "https://www.gov.uk/government/publications/about-the-uk-house-price-index/about-the-uk-house-price-index",
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1849,7 +1895,8 @@
    {
     "quote": "NCBI policies: \"NLM does not claim the copyright on the abstracts in PubMed; however, journal publishers or authors may\"; E-utilities: \"no more than 3 requests every 1 second\"; the NCBI disclaimer must be evident to users of services built on the APIs.",
     "url": "https://www.ncbi.nlm.nih.gov/home/about/policies/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1889,7 +1936,8 @@
    {
     "quote": "Wikimedia Terms of Use: text under CC BY-SA 4.0 and GFDL; attribution may be \"a hyperlink … to the article\"; automated use must follow the User-Agent policy and API etiquette and not unduly burden servers.",
     "url": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1929,7 +1977,8 @@
    {
     "quote": "Same Wikimedia Terms of Use as wikipedia_itn; this source shows article titles linked to their articles, within the User-Agent policy.",
     "url": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1969,7 +2018,8 @@
    {
     "quote": "Hugging Face terms read 2026-10-04: users must not \"reproduce, republish, license any of our proprietary materials\" without written permission, and say nothing specific about the Daily Papers listing. Whether that curated listing is their proprietary material is a DECISION REQUIRED.",
     "url": "",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-05",
@@ -2011,7 +2061,8 @@
    {
     "quote": "BIS terms: users may \"download, display, print out, photocopy or redistribute any BIS Material for non-commercial purposes\"; commercial reproduction needs written permission.",
     "url": "https://www.bis.org/terms_conditions.htm",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -2053,7 +2104,8 @@
    {
     "quote": "Frankfurter: free, open-source, \"no quotas\", rate-limited against abuse; \"the rates themselves fall under each provider's terms\". ECB terms (read the same day) allow reuse with the ECB cited and modifications stated.",
     "url": "https://frankfurter.dev/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -2093,7 +2145,8 @@
    {
     "quote": "Frankfurter: free, open-source, \"no quotas\", rate-limited against abuse; \"the rates themselves fall under each provider's terms\". ECB terms (read the same day) allow reuse with the ECB cited and modifications stated.",
     "url": "https://frankfurter.dev/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -2133,7 +2186,8 @@
    {
     "quote": "Frankfurter: free, open-source, \"no quotas\", rate-limited against abuse; \"the rates themselves fall under each provider's terms\". ECB terms (read the same day) allow reuse with the ECB cited and modifications stated.",
     "url": "https://frankfurter.dev/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -2173,7 +2227,8 @@
    {
     "quote": "Wikidata licensing: \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\"",
     "url": "https://www.wikidata.org/wiki/Wikidata:Licensing",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -2213,7 +2268,8 @@
    {
     "quote": "API docs: \"we enforce rate limits … HTTP 429 … Consider an enterprise sponsorship if you need higher API limits.\" No restriction on commercial use is stated.",
     "url": "https://mempool.space/docs/api/rest",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-05",
@@ -2253,7 +2309,8 @@
    {
     "quote": "API docs: \"we enforce rate limits … HTTP 429 … Consider an enterprise sponsorship if you need higher API limits.\" No restriction on commercial use is stated.",
     "url": "https://mempool.space/docs/api/rest",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-05",
@@ -2291,9 +2348,10 @@
   "conditions": null,
   "evidence_reference": [
    {
-    "quote": "\"This API is completely free and open source\"; it may be used \"in free and non free software\"; clients must \"send a speaking http agent string\".",
+    "quote": "\"This API … is completely free and open source\"; it may be used \"in free and non free software\"; clients must \"send a speaking http agent string\".",
     "url": "https://api.radio-browser.info/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -2333,7 +2391,8 @@
    {
     "quote": "ISO 10383 terms of use: the material \"is intended to be used and reproduced freely\"; a non-exclusive right to use it, \"excluding the right to reproduce all or substantial part of this website for the purpose of making such reproductions available to third parties\".",
     "url": "https://www.iso20022.org/sites/default/files/2020-02/ISO10383_Terms_of_use.pdf",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-04",
@@ -2373,7 +2432,8 @@
    {
     "quote": "Several publishers, read 2026-10-04: White House — \"government-produced materials … are not copyright protected\" (third-party content CC BY 3.0). United Nations — \"News-related material can be used as long as the appropriate credit is given and the United Nations is advised\"; other material needs written permission. Notifying the UN is an owner action — DECISION REQUIRED. EC, ECB, Fed, GOV.UK and IAEA feeds not yet read individually.",
     "url": "",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -2415,7 +2475,8 @@
    {
     "quote": "Google Public DNS: \"By using the Google Public DNS service and its APIs, you consent to be bound by the Google APIs Terms of Service\", which require access only \"by the means described in the documentation\" and state no bar on commercial use.",
     "url": "https://developers.google.com/terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-05",
@@ -2455,7 +2516,8 @@
    {
     "quote": "1.1.1.1 terms of use: use is under the Cloudflare Website and Online Services Terms; attribution is required only of ISPs and equipment makers integrating the resolver. No restriction on DNS-over-HTTPS queries is stated — verified by absence of restriction, not by an express grant.",
     "url": "https://developers.cloudflare.com/1.1.1.1/terms-of-use/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -2495,7 +2557,8 @@
    {
     "quote": "archive.org terms pages render no extractable text (2026-10-04, 2026-10-05); not yet read.",
     "url": "",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -2535,7 +2598,8 @@
    {
     "quote": "Wikimedia analytics datasets readme: \"All Analytics datasets are available under the Creative Commons CC0 dedication.\" Pageview counts are one of them; requests follow the User-Agent policy.",
     "url": "https://dumps.wikimedia.org/other/pageviews/readme.html",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-05",
@@ -2575,7 +2639,8 @@
    {
     "quote": "courtlistener.com/terms answers 403 to both readers (2026-10-04, 2026-10-05).",
     "url": "",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -2615,7 +2680,8 @@
    {
     "quote": "GDACS (EC JRC with UN OCHA) links the European Commission copyright notice from its site: reuse under CC BY 4.0, \"provided appropriate credit is given and changes are indicated\". Its own terms page is a disclaimer (\"purely indicative\").",
     "url": "https://commission.europa.eu/legal-notice_en",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-05",
@@ -2655,7 +2721,8 @@
    {
     "quote": "crt.sh publishes no terms of use; Certificate Transparency logs are public by design, but no provider statement was found.",
     "url": "",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -2695,7 +2762,8 @@
    {
     "quote": "Terms read 2026-10-04: \"The free API is for personal and low-volume use\"; commercial products needing more throughput should use paid plans. Whether this product's use counts as personal is a DECISION REQUIRED.",
     "url": "",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-05",
@@ -2737,7 +2805,8 @@
    {
     "quote": "Solana docs read 2026-10-04: \"The public RPC endpoints are not intended for production applications\" (100 requests / 10 s per IP). A dedicated RPC provider is a DECISION REQUIRED.",
     "url": "",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-05",
@@ -2779,7 +2848,8 @@
    {
     "quote": "CelesTrak states no terms on its site; its homepage reset the connection on 2026-10-05.",
     "url": "",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -2819,7 +2889,8 @@
    {
     "quote": "Each portal's catalogue licence is recorded in lib/engine/registries/ckan/portals.ts and, since batch 09, enforced: activePortals() admits only portals the licence gate accepts. The 22 active portals' records come from earlier work and were not re-read on 2026-10-05; re-reading them one by one is the remaining task.",
     "url": "",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -2859,7 +2930,8 @@
    {
     "quote": "Several publishers' RSS feeds (minepi.com, blog.ethereum.org, solana.com, …); their terms not yet read individually.",
     "url": "",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -2906,22 +2978,26 @@
    {
     "quote": "Subject to these Terms, you are hereby granted a non-exclusive, limited, non-transferable, freely revocable license to access and use the Service.",
     "url": "https://www.publicnode.com/terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "Except as expressly authorized by www.publicnode.com, you agree not to modify, copy, frame, scrape, rent, lease, loan, sell, re-use, display, distribute, transmit, publish, re-publish, distribute or create derivative works based on the Service or the Service Content commercially and non-commercially",
     "url": "https://www.publicnode.com/terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "In connection with your use of the Service, you will not engage in or use any data mining, robots, scraping, or similar data gathering or extraction methods.",
     "url": "https://www.publicnode.com/terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "Use the Service for any commercial solicitation purposes [prohibited]",
     "url": "https://www.publicnode.com/terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -2963,7 +3039,8 @@
    {
     "quote": "Several fact-checkers' RSS feeds (Snopes, Full Fact, PolitiFact, …); their terms not yet read individually.",
     "url": "",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -3003,7 +3080,8 @@
    {
     "quote": "The HN Search (Algolia) API page read on 2026-10-04 states no terms or limits.",
     "url": "",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -3043,7 +3121,8 @@
    {
     "quote": "Developer page offers the API publicly: \"requests are limited to roughly 1 per second\", with X-Rate-Limit headers; no use restriction is stated. Verified by absence of restriction.",
     "url": "https://wheretheiss.at/w/developer",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-05",
@@ -3083,7 +3162,8 @@
    {
     "quote": "OpenAlex documentation (official docs repository): \"Our complete dataset is free under the CC0 license\"; \"The API has a limit of 100,000 calls per day\".",
     "url": "https://github.com/ourresearch/openalex-docs",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-05",
@@ -3123,7 +3203,8 @@
    {
     "quote": "Pi Network is Lambda NX's own identity and payment platform (CLAUDE.md §10); the Pi developer terms for its public mainnet API were not read on 2026-10-04.",
     "url": "",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -3163,7 +3244,8 @@
    {
     "quote": "rdap.org states only a rate limit — \"a maximum of 10 requests in 10 seconds\", per IP — and no use restriction; registration data comes from the registries' public RDAP services. Verified by absence of restriction.",
     "url": "https://rdap.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-05",
@@ -3203,7 +3285,8 @@
    {
     "quote": "Checks public profile URLs on several sites (GitHub, GitLab, dev.to, …); each site's terms on automated access not yet read.",
     "url": "",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -3245,12 +3328,14 @@
    {
     "quote": "Extracts of the information in the web site may be reviewed, reproduced or translated for research or private study but not for sale or for use in conjunction with commercial purposes.",
     "url": "https://www.who.int/about/policies/terms-of-use",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "quote"
    },
    {
     "quote": "Reproduction or translation of substantial portions of the web site, or any use other than for educational or other non-commercial purposes, require explicit, prior authorization in writing.",
     "url": "https://www.who.int/about/policies/terms-of-use",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-04",
@@ -3295,12 +3380,14 @@
    {
     "quote": "Extracts of the information in the web site may be reviewed, reproduced or translated for research or private study but not for sale or for use in conjunction with commercial purposes.",
     "url": "https://www.who.int/about/policies/terms-of-use",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "quote"
    },
    {
     "quote": "Reproduction or translation of substantial portions of the web site, or any use other than for educational or other non-commercial purposes, require explicit, prior authorization in writing.",
     "url": "https://www.who.int/about/policies/terms-of-use",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-04",
@@ -3345,12 +3432,14 @@
    {
     "quote": "Extracts of the information in the web site may be reviewed, reproduced or translated for research or private study but not for sale or for use in conjunction with commercial purposes.",
     "url": "https://www.who.int/about/policies/terms-of-use",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "quote"
    },
    {
     "quote": "Reproduction or translation of substantial portions of the web site, or any use other than for educational or other non-commercial purposes, require explicit, prior authorization in writing.",
     "url": "https://www.who.int/about/policies/terms-of-use",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-04",
@@ -3394,9 +3483,10 @@
   "conditions": null,
   "evidence_reference": [
    {
-    "quote": "users may download, display, print out, photocopy or redistribute any BIS Material for non-commercial purposes; commercial reproduction requires written permission",
+    "quote": "users may download, display, print out, photocopy or redistribute any BIS Material for non-commercial purposes.",
     "url": "https://www.bis.org/terms_conditions.htm",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -3439,9 +3529,10 @@
   "conditions": null,
   "evidence_reference": [
    {
-    "quote": "The data is licensed under the terms of Creative Commons 4.0 Attribution NonCommercial; commercial use requires a paid licence.",
+    "quote": "The data is licensed under the terms of Creative Commons 4.0 Attribution NonCommercial",
     "url": "https://www.opensanctions.org/licensing/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -3485,7 +3576,8 @@
    {
     "quote": "You may only use the free API services for non-commercial purposes",
     "url": "https://open-meteo.com/en/terms",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -3531,7 +3623,8 @@
    {
     "quote": "Repository record (written before 2026-10-04): OpenSky terms require a prior agreement for commercial REST use. The terms page answered 403 on 2026-10-05, so this could not be re-confirmed; the source stays withheld until it is.",
     "url": "https://opensky-network.org/about/terms-of-use",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -3574,7 +3667,8 @@
    {
     "quote": "Global Fishing Watch APIs are only available for non-commercial purposes.",
     "url": "https://globalfishingwatch.org/our-apis/documentation",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -3618,7 +3712,8 @@
    {
     "quote": "OPS: free up to 4 GB of data per week for registered users; paying users above that (EUR 2 800 / year); use governed by a fair use charter and separate terms and conditions, not yet read.",
     "url": "https://www.epo.org/en/searching-for-patents/data/web-services/ops",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -3661,7 +3756,8 @@
    {
     "quote": "The API terms page read on 2026-10-05 showed only the documentation licence; the governing API terms were not read.",
     "url": "https://developers.google.com/fact-check/tools/api/terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -3703,12 +3799,14 @@
    {
     "quote": "Access to the abuse.ch Platforms is provided only to: Authenticated Users",
     "url": "https://abuse.ch/terms-of-use/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "quote"
    },
    {
     "quote": "Use of the Platforms by companies, networks, or individuals with commercial or for-profit needs may require a paid subscription, which will be managed by Spamhaus.",
     "url": "https://abuse.ch/terms-of-use/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-04",
@@ -3752,12 +3850,14 @@
    {
     "quote": "Access to the abuse.ch Platforms is provided only to: Authenticated Users",
     "url": "https://abuse.ch/terms-of-use/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "quote"
    },
    {
     "quote": "Use of the Platforms by companies, networks, or individuals with commercial or for-profit needs may require a paid subscription, which will be managed by Spamhaus.",
     "url": "https://abuse.ch/terms-of-use/",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-04",
@@ -3802,12 +3902,14 @@
    {
     "quote": "You may view and print content for personal, non-commercial use only.",
     "url": "https://www.snopes.com/terms-of-use/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "Use automated systems (bots, scrapers) without written permission. [prohibited]",
     "url": "https://www.snopes.com/terms-of-use/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -3852,7 +3954,8 @@
    {
     "quote": "The site’s content is for your personal, non-commercial use.",
     "url": "https://www.politifact.com/copyright/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -3897,12 +4000,14 @@
    {
     "quote": "FactCheck.org articles may be reprinted or distributed, without charge, online or in newspapers or magazines.",
     "url": "https://www.factcheck.org/copyright-policy/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "FactCheck.org should be prominently displayed at the beginning of the republished work.",
     "url": "https://www.factcheck.org/copyright-policy/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -3943,9 +4048,10 @@
   "conditions": "Kept running (R317): no grant and no ban on the public feed; headline and link only.",
   "evidence_reference": [
    {
-    "quote": "The content of this website is copyright Full Fact unless otherwise stated. For licensing requests, please contact us.",
+    "quote": "The content of this website is copyright Full Fact unless otherwise stated. All rights reserved. For licensing requests, please contact us.",
     "url": "https://fullfact.org/terms-and-conditions/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -3988,7 +4094,8 @@
    {
     "quote": "Terms page (terms-of-service.html) answered 404 and none is linked from the homepage (2026-10-05).",
     "url": "https://leadstories.com/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4031,7 +4138,8 @@
    {
     "quote": "Users may access the Content for personal and informational purposes only.",
     "url": "https://cointelegraph.com/terms-and-privacy",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4076,7 +4184,8 @@
    {
     "quote": "Unauthorized reproduction, distribution, or modification is prohibited without our prior written consent.",
     "url": "https://bitcoinmagazine.com/terms-of-use",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4119,12 +4228,14 @@
    {
     "quote": "The Foundation hereby grants you a personal, limited, revocable, non-transferable license to access and use the Service solely for your own use.",
     "url": "https://solana.com/tos",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "The Service may not be used in connection with any commercial endeavors except those that are specifically endorsed or approved by us.",
     "url": "https://solana.com/tos",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4165,14 +4276,16 @@
   "conditions": "Content licence is CC BY 4.0, but the site terms also require \"personal use\" — the two clauses need a legal reading.",
   "evidence_reference": [
    {
-    "quote": "… (the “Non-Code Content”) are licensed under the Creative Commons Attribution 4.0 International License",
+    "quote": "… (collectively, the \"Non-Code Content\") are licensed under the Creative Commons Attribution 4.0 International License",
     "url": "https://ethereum.org/en/terms-of-use/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "By using the Websites, you represent and warrant that you … (iii) are using the Websites only for your own personal use.",
     "url": "https://ethereum.org/en/terms-of-use/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4215,7 +4328,8 @@
    {
     "quote": "Terms-of-use page returned no readable text on 2026-10-05.",
     "url": "https://www.coindesk.com/terms-of-use",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4258,7 +4372,8 @@
    {
     "quote": "Terms page (terms-of-service) answered 404; the developer terms cover developer accounts, not reuse of the blog feed.",
     "url": "https://minepi.com/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4300,7 +4415,8 @@
    {
     "quote": "No terms of use found on bitcoinops.org (2026-10-05).",
     "url": "https://bitcoinops.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4342,12 +4458,14 @@
    {
     "quote": "information and documents made publicly available on ECDC web pages and for which ECDC owns the copyright are licenced in accordance with the CC BY 4.0 licence",
     "url": "https://www.ecdc.europa.eu/en/copyright",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "They may be reproduced, adapted and/or distributed … for commercial or non-commercial purposes provided that … ECDC is always acknowledged as the creator …; you provide a link to the CC BY 4.0 licence; and you indicate if you modified the licence material.",
     "url": "https://www.ecdc.europa.eu/en/copyright",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4391,7 +4509,8 @@
    {
     "quote": "robots.txt (edition of 2026-09-24): \"User-agent: * Disallow: /\" — only named bots may crawl.",
     "url": "https://www.eluniversal.com.mx/robots.txt",
-    "read_at": "2026-10-04"
+    "read_at": "2026-10-04",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-04",
@@ -4433,7 +4552,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4475,7 +4595,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4518,7 +4639,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4564,7 +4686,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4608,7 +4731,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4650,7 +4774,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4692,7 +4817,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4735,7 +4861,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4778,7 +4905,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4820,7 +4948,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4863,7 +4992,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4905,7 +5035,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4948,7 +5079,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -4990,7 +5122,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5032,7 +5165,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5074,7 +5208,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5117,7 +5252,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5159,7 +5295,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5202,7 +5339,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5245,7 +5383,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5288,7 +5427,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5332,7 +5472,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5375,7 +5516,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5418,7 +5560,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5460,7 +5603,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5504,7 +5648,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5547,7 +5692,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5590,7 +5736,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5632,7 +5779,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5676,7 +5824,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5719,7 +5868,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5762,7 +5912,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5804,7 +5955,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5846,7 +5998,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5890,7 +6043,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5934,7 +6088,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -5978,7 +6133,8 @@
    {
     "quote": "Work of the United States federal government — not subject to copyright in the US (17 U.S.C. §105).",
     "url": "https://www.law.cornell.edu/uscode/text/17/105",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6020,7 +6176,8 @@
    {
     "quote": "The data provided by this service is distributed under the Creative Commons Attribution 4.0 International (CC BY 4.0) license.",
     "url": "https://www.seismicportal.eu/fdsn-wsevent.html",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6062,7 +6219,8 @@
    {
     "quote": "BGS will take active measures to protect against the unauthorised copying and re-use of our materials … Digital licensing can assist you with any queries relating to licences for the re-use of our data products.",
     "url": "https://www.bgs.ac.uk/bgs-intellectual-property-rights/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6107,7 +6265,8 @@
    {
     "quote": "GeoNet content is copyright Earth Sciences New Zealand and is licensed under a Creative Commons Attribution 3.0 New Zealand License",
     "url": "https://www.geonet.org.nz/policy",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6153,12 +6312,14 @@
    {
     "quote": "Unless otherwise indicated (e.g. in individual copyright notices), content owned by the EU on this website is licensed under the C[reative Commons Attribution 4.0 International (CC BY 4.0) licence]",
     "url": "https://commission.europa.eu/legal-notice_en",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "GDACS (EC JRC with UN OCHA) links the European Commission copyright notice from its site: reuse under CC BY 4.0, \"provided appropriate credit is given and changes are indicated\".",
     "url": "https://commission.europa.eu/legal-notice_en",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6203,7 +6364,8 @@
    {
     "quote": "ReliefWeb grants permission to Users to visit the Space and to download and copy the information, documents and materials (collectively, \"Materials\") from the Space for the User's personal, non-commercial use, without any right to resell or redistribute them or to compile or create derivative works therefrom",
     "url": "https://reliefweb.int/terms-conditions",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6249,12 +6411,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6298,12 +6462,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6347,12 +6513,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6396,12 +6564,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6445,12 +6615,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6494,12 +6666,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6543,12 +6717,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6592,12 +6768,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6641,12 +6819,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6690,12 +6870,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6739,12 +6921,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6788,12 +6972,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6837,12 +7023,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6886,12 +7074,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6935,12 +7125,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -6984,12 +7176,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -7033,12 +7227,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -7082,12 +7278,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -7131,12 +7329,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -7180,12 +7380,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -7229,12 +7431,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -7278,12 +7482,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -7327,12 +7533,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -7376,12 +7584,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -7425,12 +7635,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -7474,12 +7686,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -7523,12 +7737,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -7572,12 +7788,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -7621,12 +7839,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -7670,12 +7890,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -7719,12 +7941,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -7768,12 +7992,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -7817,12 +8043,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -7866,12 +8094,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -7915,12 +8145,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -7964,12 +8196,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8013,12 +8247,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8062,12 +8298,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8111,12 +8349,14 @@
    {
     "quote": "Atom Feeds for Re-users Traditional Atom feeds providing weather warnings for individual European countries and all of Europe.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "MeteoAlarm License (CC BY 4.0) … © 2026 MeteoAlarm. Data provided by EUMETNET members.",
     "url": "https://api.meteoalarm.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8158,7 +8398,8 @@
    {
     "quote": "Smithsonian terms pages (si.edu/termsofuse, volcano.si.edu) answered 403 on 2026-10-05.",
     "url": "https://volcano.si.edu/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8200,7 +8441,8 @@
    {
     "quote": "Unless otherwise specified, you may use our photographs and imagery for commercial purposes; however, you may not re-sell them.",
     "url": "https://nsidc.org/about/data-use-and-copyright",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8244,7 +8486,8 @@
    {
     "quote": "The copyright page now covers only the Copernicus trade marks; the site is an archive and its successor (eu-space.europa.eu) did not answer on 2026-10-05.",
     "url": "https://www.copernicus.eu/en/access-data/copyright-and-licences",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8287,7 +8530,8 @@
    {
     "quote": "The contents of the ESA website are intended for the personal and non-commercial use of its users. ESA grants permission to users to visit the site, and to download and copy information, images, documents and materials from the website for users' personal non-commercial use.",
     "url": "https://www.esa.int/Services/Terms_and_conditions",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8330,12 +8574,14 @@
    {
     "quote": "OpenAQ users must therefore review and comply with any terms published by data providers.",
     "url": "https://docs.openaq.org/about/terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "we provide no assurance that the data provided may be used free of any third-party claims.",
     "url": "https://docs.openaq.org/about/terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8378,7 +8624,8 @@
    {
     "quote": "The governing Trust Legal Provisions are a PDF linked from this page and were not read on 2026-10-05.",
     "url": "https://trustee.ietf.org/documents/trust-legal-provisions/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8420,7 +8667,8 @@
    {
     "quote": "Permission to copy, and distribute the contents of this document, or the W3C document from which this statement is linked, in any medium for any purpose and without fee or royalty is hereby granted, provided that you include the following on ALL copies of the document, or portions thereof, that you use: A link or URL to the original W3C document.",
     "url": "https://www.w3.org/copyright/document-license-2023/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8463,12 +8711,14 @@
    {
     "quote": "気象庁ホームページで公開している情報（以下「コンテンツ」といいます。）は、権利表記の記載がない限り「公共データ利用規約（第1.0版）」に準拠した利用条件の下で、利用することができます。",
     "url": "https://www.jma.go.jp/jma/kishou/info/coment.html",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "The Terms of Use are compatible with the Creative Commons Attribution License 4.0 (hereinafter referred to as the CC License).",
     "url": "https://www.jma.go.jp/jma/en/copyright.html",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8511,7 +8761,8 @@
    {
     "quote": "I contenuti pubblicati su queste pagine dall' Istituto Nazionale di Geofisica e Vulcanologia sono distribuiti sotto licenza Creative Commons Attribution 4.0 International License",
     "url": "https://www.ingv.it/note-legali",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8553,7 +8804,8 @@
    {
     "quote": "el uso de los productos y servicios de información geográfica del IGN definidos en el ámbito de la Orden FOM/2807/2015 conlleva la aceptación por el usuario de una licencia CC - BY 4.0",
     "url": "https://www.ign.es/resources/licencia/Condiciones_licenciaUso_IGN.pdf",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8595,7 +8847,8 @@
    {
     "quote": "All material on this website is licensed under the Creative Commons Attribution 4.0 International Licence , with the exception of: the Commonwealth Coat of Arms this entity's logo products or content with specific copyright or other statements content the copyright in which belongs to third parties.",
     "url": "https://www.ga.gov.au/copyright",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8637,7 +8890,8 @@
    {
     "quote": "Unless otherwise specified, you may not reproduce materials on this site, in whole or in part, for the purposes of commercial redistribution without prior written permission from Natural Resources Canada.",
     "url": "https://natural-resources.canada.ca/corporate/terms-conditions",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8683,12 +8937,14 @@
    {
     "quote": "The Website terms of use contain licence provisions under the terms of the UK Open Government Licence for Public Sector Information v3.0 which govern the use of material presented on this website, other than material which we tell you is governed by different licence terms.",
     "url": "https://www.metoffice.gov.uk/policies/legal",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "You are free to: copy, publish, distribute and transmit the Information; adapt the Information; exploit the Information commercially and non-commercially",
     "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8731,7 +8987,8 @@
    {
     "quote": "Alle frei zugänglichen Geodaten und Geodatendienste sowie die als hochwertige Datensätze / high value datasets ( HVD ) festgelegten Leistungen des DWD dürfen unter den Bedingungen der Lizenz Creative Commons BY 4.0 ( CC BY 4.0 ) unter Beigabe eines Quellenvermerks weiterverwendet werden.",
     "url": "https://www.dwd.de/DE/service/rechtliche_hinweise/rechtliche_hinweise_node.html",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8775,12 +9032,14 @@
    {
     "quote": "Au titre de la présente licence, est exclusivement concédé un droit d'usage privé, individuel et personnel ou à caractère pédagogique, informatif et/ou éducatif.",
     "url": "https://meteofrance.com/droits-de-reproduction",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "Sont concernés par les droits de reproduction décrits infra , les sites Internet suivants : … Le site Internet de données publiques, comprenant la Publithèque",
     "url": "https://meteofrance.com/droits-de-reproduction",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8826,7 +9085,8 @@
    {
     "quote": "The Bureau of Meteorology makes a number of real-time forecast, warning and observation products and analysis charts available via the web and Anonymous FTP. These products are free to access and are not for commercial use.",
     "url": "https://www.bom.gov.au/catalogue/data-feeds.shtml",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8870,7 +9130,8 @@
    {
     "quote": "No reuse or copyright terms found on the site on 2026-10-05 (pages read: home, disclaimer/copyright paths, which answered 404, 500 or no connection).",
     "url": "https://mausam.imd.gov.in/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8914,7 +9175,8 @@
    {
     "quote": "No reuse or copyright terms found on the site on 2026-10-05 (pages read: home, disclaimer/copyright paths, which answered 404, 500 or no connection).",
     "url": "https://www.cwa.gov.tw/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -8957,7 +9219,8 @@
    {
     "quote": "No reuse or copyright terms found on the site on 2026-10-05 (pages read: home, disclaimer/copyright paths, which answered 404, 500 or no connection).",
     "url": "https://www.weather.go.kr/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9000,7 +9263,8 @@
    {
     "quote": "No reuse or copyright terms found on the site on 2026-10-05 (pages read: home, disclaimer/copyright paths, which answered 404, 500 or no connection).",
     "url": "https://www.pagasa.dost.gov.ph/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9044,7 +9308,8 @@
    {
     "quote": "No reuse or copyright terms found on the site on 2026-10-05 (pages read: home, disclaimer/copyright paths, which answered 404, 500 or no connection).",
     "url": "https://portal.inmet.gov.br/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9087,7 +9352,8 @@
    {
     "quote": "No reuse or copyright terms found on the site on 2026-10-05 (pages read: home, disclaimer/copyright paths, which answered 404, 500 or no connection).",
     "url": "https://smn.conagua.gob.mx/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9131,7 +9397,8 @@
    {
     "quote": "No reuse or copyright terms found on the site on 2026-10-05 (pages read: home, disclaimer/copyright paths, which answered 404, 500 or no connection).",
     "url": "https://www.weathersa.co.za/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9173,12 +9440,14 @@
    {
     "quote": "Most content on GOV.UK is subject to Crown copyright protection and is published under the Open Government Licence ( OGL ), which also sets out which content is exempt.",
     "url": "https://www.gov.uk/help/terms-conditions",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "You are free to: copy, publish, distribute and transmit the Information; adapt the Information; exploit the Information commercially and non-commercially",
     "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9220,7 +9489,8 @@
    {
     "quote": "PAHO copyright and terms pages (/en/copyright, /en/terms-use and variants) answered 404 on 2026-10-05. PAHO is WHO's regional office; WHO's own terms restrict commercial use, so a legal reading is needed before relying on it.",
     "url": "https://www.paho.org/en",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9262,7 +9532,8 @@
    {
     "quote": "No terms page on the site (/terms-of-use/ and /disclaimer/ answered 404 on 2026-10-05).",
     "url": "https://africacdc.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9304,7 +9575,8 @@
    {
     "quote": "if you wish to use or re-use ONS material, whether commercially or privately, you may do so freely without a specific application for a licence, subject to the conditions of the Open Government Licence and the Framework. If you are reproducing ONS content you must include a source accreditation to ONS.",
     "url": "https://www.ons.gov.uk/methodology/geography/licences",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9348,7 +9620,8 @@
    {
     "quote": "The information included in the site may be copied or reproduced with the exceptions below. … i. The copying or reproduction of the content for commercial purposes.",
     "url": "https://www.boj.or.jp/en/about/copyright.htm",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9392,7 +9665,8 @@
    {
     "quote": "You may … download, display or print the Resources for personal use or internal use within an individual organisation for non-commercial purposes.",
     "url": "https://www.bankofengland.co.uk/legal",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9435,7 +9709,8 @@
    {
     "quote": "The RBI disclaimer page states \"All Rights Reserved\" and no reuse terms; no terms-of-use page found on 2026-10-05.",
     "url": "https://www.rbi.org.in/Scripts/Disclaimer.aspx",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9478,7 +9753,8 @@
    {
     "quote": "OECD terms page answered 403 to both direct and fetch-tool requests on 2026-10-05.",
     "url": "https://www.oecd.org/en/about/terms-conditions.html",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9521,7 +9797,8 @@
    {
     "quote": "WTO copyright page redirects to a 404; the disclaimer gives no reuse terms (2026-10-05).",
     "url": "https://www.wto.org/english/info_e/disclaimer_e.htm",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9563,7 +9840,8 @@
    {
     "quote": "The API site links a Terms page that answered 403 on 2026-10-05.",
     "url": "https://carbonintensity.org.uk/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9605,7 +9883,8 @@
    {
     "quote": "Transparency Platform terms page answered 400 on 2026-10-05.",
     "url": "https://transparency.entsoe.eu/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9647,7 +9926,8 @@
    {
     "quote": "No terms or licence text on the site (2026-10-05).",
     "url": "https://pm25.lass-net.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9690,12 +9970,14 @@
    {
     "quote": "OpenAQ users must therefore review and comply with any terms published by data providers.",
     "url": "https://docs.openaq.org/about/terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "we provide no assurance that the data provided may be used free of any third-party claims.",
     "url": "https://docs.openaq.org/about/terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9737,7 +10019,8 @@
    {
     "quote": "Any commercial use of the RIPE Atlas Data is subject to prior permission by the RIPE NCC.",
     "url": "https://www.ripe.net/about-us/legal/ripe-atlas-service-terms-and-conditions/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9782,7 +10065,8 @@
    {
     "quote": "Use of the RIPEstat Service for commercial purposes, such as by providing paid services, products or any other derivatives that are based on the RIPEstat Service … is not allowed unless permission to do so is granted in writing by the RIPE NCC.",
     "url": "https://www.ripe.net/about-us/legal/ripestat-service-terms-and-conditions/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9826,7 +10110,8 @@
    {
     "quote": "© 2026 Open Observatory of Network Interference (OONI). Content available under a Creative Commons license.",
     "url": "https://ooni.org/about/data-policy/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9868,7 +10153,8 @@
    {
     "quote": "You agree not to (i) use or launch any automated system, including without limitation, \"robots,\" \"spiders,\" \"offline readers,\" and any other similar or analogous system",
     "url": "https://www.internetsociety.org/terms-of-use/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9910,12 +10196,14 @@
    {
     "quote": "Most content on GOV.UK is subject to Crown copyright protection and is published under the Open Government Licence ( OGL ), which also sets out which content is exempt.",
     "url": "https://www.gov.uk/help/terms-conditions",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "You are free to: copy, publish, distribute and transmit the Information; adapt the Information; exploit the Information commercially and non-commercially",
     "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -9957,12 +10245,14 @@
    {
     "quote": "Most content on GOV.UK is subject to Crown copyright protection and is published under the Open Government Licence ( OGL ), which also sets out which content is exempt.",
     "url": "https://www.gov.uk/help/terms-conditions",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "You are free to: copy, publish, distribute and transmit the Information; adapt the Information; exploit the Information commercially and non-commercially",
     "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10005,7 +10295,8 @@
    {
     "quote": "SNB copyright page not found at the linked paths (404, 2026-10-05).",
     "url": "https://www.snb.ch/en/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10048,12 +10339,14 @@
    {
     "quote": "the Bank permits you to freely use, copy, distribute and transmit its website content under the following terms: 1.1. Attribution You must attribute the Bank of Canada as the source of the content, and indicate if changes were made.",
     "url": "https://www.bankofcanada.ca/terms/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "If You provide content from this website through paid services … You must inform any prospective purchaser, prior to its distribution or sale, that said content was obtained from this website and that such information is available on this website free of charge.",
     "url": "https://www.bankofcanada.ca/terms/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10096,7 +10389,8 @@
    {
     "quote": "With exception of the Excluded Material, all RBA Material is provided under a Creative Commons Attribution 4.0 International License (CC BY 4.0 Licence ) and may be used in accordance with the terms of that licence.",
     "url": "https://www.rba.gov.au/copyright/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10141,12 +10435,14 @@
    {
     "quote": "All content is available under the Open Government Licence v3.0 , except where otherwise stated. However, please note that this licence does not cover the re-use of personal data.",
     "url": "https://www.thegazette.co.uk/terms-and-conditions",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "Live feed on 2026-10-08: notice code 2503 \"Bankruptcy Orders | DEREK THOMAS THOMPSON\", 2903 \"Deceased Estates | Jean Mickleburgh\" — private individuals as headlines, which the keep rule now drops.",
     "url": "https://www.thegazette.co.uk/all-notices/notice/data.feed?results-page-size=100",
-    "read_at": "2026-10-08"
+    "read_at": "2026-10-08",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-08",
@@ -10189,7 +10485,8 @@
    {
     "quote": "BSE terms and disclaimer pages render only with JavaScript; no text readable on 2026-10-05.",
     "url": "https://www.bseindia.com/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10231,7 +10528,8 @@
    {
     "quote": "mempool.space terms render only with JavaScript; no text readable on 2026-10-05.",
     "url": "https://mempool.space/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10273,7 +10571,8 @@
    {
     "quote": "Blockstream terms (effective 2018-01-16) read; no clause on the Esplora explorer API found.",
     "url": "https://blockstream.com/terms/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10317,7 +10616,8 @@
    {
     "quote": "You must not reproduce or store any part of this site in any other website or include it in any public or private electronic retrieval system or service without our prior written permission.",
     "url": "https://www.fca.org.uk/legal",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10360,7 +10660,8 @@
    {
     "quote": "Reproduction of all information on this site (ESMA Library) is authorised except as otherwise stated, pr[ovided the source is acknowledged]",
     "url": "https://www.esma.europa.eu/about-esma/legal-notice-and-data-protection",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10403,7 +10704,8 @@
    {
     "quote": "the content and material provided through the FINRA Website shall be used ONLY for your own non-commercial personal or professional use.",
     "url": "https://www.finra.org/terms-of-use",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10446,7 +10748,8 @@
    {
     "quote": "Council of the EU legal notice answered 403 on 2026-10-05.",
     "url": "https://www.consilium.europa.eu/en/legal-notice/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10489,7 +10792,8 @@
    {
     "quote": "IEA terms pages answered 403 on 2026-10-05.",
     "url": "https://www.iea.org/terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10532,7 +10836,8 @@
    {
     "quote": "OPEC terms pages answered 403 on 2026-10-05.",
     "url": "https://www.opec.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10574,7 +10879,8 @@
    {
     "quote": "IRENA terms page answered 403 on 2026-10-05.",
     "url": "https://www.irena.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10616,7 +10922,8 @@
    {
     "quote": "Licence allows applications that \"charge for your services and products that incorporate or integrates our CoinGecko API\", provided they display \"Powered by CoinGecko\" attribution (record of 2026-10-04 for the coded CoinGecko sources, same API).",
     "url": "https://www.coingecko.com/en/api_terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10659,7 +10966,8 @@
    {
     "quote": "mempool.space terms render only with JavaScript; no text readable on 2026-10-05.",
     "url": "https://mempool.space/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10703,7 +11011,8 @@
    {
     "quote": "ReliefWeb grants permission to Users to visit the Space and to download and copy the information, documents and materials (collectively, \"Materials\") from the Space for the User's personal, non-commercial use, without any right to resell or redistribute them or to compile or create derivative works therefrom",
     "url": "https://reliefweb.int/terms-conditions",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10748,7 +11057,8 @@
    {
     "quote": "UNHCR terms pages answered 403 on 2026-10-05.",
     "url": "https://www.unhcr.org/terms-and-conditions",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10790,7 +11100,8 @@
    {
     "quote": "IFRC GO publishes no terms readable without JavaScript; ifrc.org/terms-use answered 403 (2026-10-05).",
     "url": "https://go.ifrc.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10833,12 +11144,14 @@
    {
     "quote": "All other content on the FAO website (except where otherwise indicated), may be copied, printed and downloaded for private study, research and teaching purposes, and for use in non-commercial products or services",
     "url": "https://www.fao.org/contact-us/terms/en/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "All requests for translation and adaptation rights, and for resale and other commercial use rights should be addressed to [FAO]",
     "url": "https://www.fao.org/contact-us/terms/en/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10882,7 +11195,8 @@
    {
     "quote": "users of this website may make free use of the information obtained directly from it subject to the following conditions: When such information is distributed or reproduced, it must appear accurately and the ECB must be cited as the source.",
     "url": "https://www.ecb.europa.eu/services/using-our-site/disclaimer/html/index.en.html",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10925,7 +11239,8 @@
    {
     "quote": "IMF copyright and terms page answered 403 to both direct and fetch-tool requests on 2026-10-05.",
     "url": "https://www.imf.org/en/About/copyright-and-terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -10968,7 +11283,8 @@
    {
     "quote": "For the remainder of the Materials, you may make non-commercial uses thereof, but you may not make any derivative work or commercial use, including without limitation reselling them, charging to access them, charging to redistribute them, or charging for derivative works based on them, without the prior written consent of the r[ightsholder]",
     "url": "https://www.worldbank.org/ext/en/legal/terms-conditions",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11010,12 +11326,14 @@
    {
     "quote": "The copyright for the editorial content of this website, which is owned by the EU, is licensed under the Creative Commons Attribution 4.0 International licence .",
     "url": "https://ec.europa.eu/eurostat/help/copyright-notice",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "Reuse of statistical data, metadata, publications, and other dissemination tools published on this website for commercial or non-commercial purposes is authorised provided the source is acknowledged.",
     "url": "https://ec.europa.eu/eurostat/help/copyright-notice",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11059,7 +11377,8 @@
    {
     "quote": "All content is available under the Open Government Licence v3.0 , except where otherwise stated",
     "url": "https://www.gov.uk/government/organisations/companies-house/about/about-our-services",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11101,12 +11420,14 @@
    {
     "quote": "The editorial content of this website, which is owned by the EU, is licensed under the Creative Commons Attribution 4.0 International licence",
     "url": "https://op.europa.eu/en/web/about-us/legal-notices/publications-office-of-the-european-union-copyright",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "Retrieve published procurement notices from the TED website for analysis or reuse.",
     "url": "https://docs.ted.europa.eu/api/latest/index.html",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11148,7 +11469,8 @@
    {
     "quote": "you may not in any event use the APIs to facilitate commercial uses of the Materials … Those specific terms of use are available on the pages through which the relevant Materials are accessible.",
     "url": "https://www.worldbank.org/ext/en/legal/terms-conditions",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11190,7 +11512,8 @@
    {
     "quote": "you may use or reuse the content published on the Websites without prior permission but must adhere to and accept the terms of the Open Government Licence (OGL) v3.0. You must acknowledge the source of the content and include a link to the Open Government Licence",
     "url": "https://www.ncsc.gov.uk/section/about-this-website/terms-and-conditions",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11233,7 +11556,8 @@
    {
     "quote": "Unless otherwise noted, the reuse of this document is authorised under a Creative Commons Attribution 4.0 International (CC-BY 4.0) licence",
     "url": "https://cert.europa.eu/legal-notice",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11275,7 +11599,8 @@
    {
     "quote": "cyber.gov.au refused the connection on 2026-10-05; terms not read.",
     "url": "https://www.cyber.gov.au/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11317,7 +11642,8 @@
    {
     "quote": "JPCERT/CC copyright pages answered 404 on 2026-10-05.",
     "url": "https://www.jpcert.or.jp/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11360,7 +11686,8 @@
    {
     "quote": "Sauf mention explicite contraire, les contenus présents sur le site internet du CERT-FR sont couverts par la Licence ouverte / open licence, version 2.0 .",
     "url": "https://www.cert.ssi.gouv.fr/mentions-legales/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11403,7 +11730,8 @@
    {
     "quote": "The BSI Nutzungsbedingungen page loaded but its body text was not extractable on 2026-10-05.",
     "url": "https://www.bsi.bund.de/DE/Service/Nutzungsbedingungen/Nutzungsbedingungen_node.html",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11445,7 +11773,8 @@
    {
     "quote": "The following ecosystems have vulnerabilities encoded in this format: GitHub Advisory Database ( CC-BY 4.0 ) PyPI Advisory Database ( CC-BY 4.0 ) Go Vulnerability Database ( CC-BY 4.0 ) Rust Advisory Database ( CC0 1.0 )",
     "url": "https://google.github.io/osv.dev/data/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11487,12 +11816,14 @@
    {
     "quote": "Unless specifically set forth herein, these Terms do not restrict lawful access to or use of the contents of public repositories by third parties",
     "url": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "GitHub Advisory Database ( CC-BY 4.0 )",
     "url": "https://google.github.io/osv.dev/data/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11537,7 +11868,8 @@
    {
     "quote": "Unless otherwise specified, the Services are for your personal and non-commercial use.",
     "url": "https://www.microsoft.com/en-us/legal/terms-of-use",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11582,7 +11914,8 @@
    {
     "quote": "Canonical legal pages read on 2026-10-05 showed only navigation text. (Ubuntu advisories are CC BY-SA 4.0 in OSV — a verified alternative path via osv_dev.)",
     "url": "https://ubuntu.com/legal",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11624,7 +11957,8 @@
    {
     "quote": "The redhat.com terms give no licence for blog content. DISCOVERED: Red Hat security data, including an RHSA RSS feed, is CC BY 4.0 (access.redhat.com/security/data) — a verified licence for a different feed; adopting it is a source decision.",
     "url": "https://www.redhat.com/en/about/terms-use",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11667,7 +12001,8 @@
    {
     "quote": "No terms of use on the site (2026-10-05).",
     "url": "https://krebsonsecurity.com/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11710,7 +12045,8 @@
    {
     "quote": "Content that is publicly available on BleepingComputer.com may not be stored in a computer, except for personal and non-commercial use.",
     "url": "https://www.bleepingcomputer.com/terms-of-use/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11753,7 +12089,8 @@
    {
     "quote": "Terms page not found (/p/terms-of-use.html answered 404, 2026-10-05).",
     "url": "https://thehackernews.com/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11796,7 +12133,8 @@
    {
     "quote": "If your lawyers ask, the data is provided using a Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0) License .",
     "url": "https://isc.sans.edu/api/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11838,7 +12176,8 @@
    {
     "quote": "The blog moved to projectzero.google; no content licence found on 2026-10-05.",
     "url": "https://projectzero.google/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11881,7 +12220,8 @@
    {
     "quote": "You are free to use descriptive metadata 1 about arXiv e-prints under the terms of the Creative Commons Universal (CC0 1.0) Public Domain Declaration .",
     "url": "https://info.arxiv.org/help/api/tou.html",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11923,12 +12263,14 @@
    {
     "quote": "You may view (and, where applicable, listen to and/or watch) the content and applications available on the Site for your own private non-commercial use.",
     "url": "https://www.nature.com/info/terms-and-conditions",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "distribute, transmit, syndicate, sell or offer to sell or otherwise make available any content, files, feeds or data from a Site, whether publically available or not, except as specifically permitted by that Site",
     "url": "https://www.nature.com/info/terms-and-conditions",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -11970,7 +12312,8 @@
    {
     "quote": "Science / AAAS terms pages answered 403 on 2026-10-05.",
     "url": "https://www.science.org/content/page/terms-service",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12012,7 +12355,8 @@
    {
     "quote": "Reuters Agency terms page answered 404 (2026-10-05); the footer links \"Protection of Reuters Copyrights\" and \"License Reuters Content\", which suggests a licence is expected.",
     "url": "https://www.reutersagency.com/en/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12054,7 +12398,8 @@
    {
     "quote": "FeedX – RSS全文订阅 … Associated Press The Guardian China Daily South China Morning Post",
     "url": "https://feedx.net/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12096,7 +12441,8 @@
    {
     "quote": "all datasets released by the GDELT Project are available for unlimited and unrestricted use for any academic, commercial, or governmental use of any kind without fee.",
     "url": "https://www.gdeltproject.org/about.html",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12138,12 +12484,14 @@
    {
     "quote": "For business use of our RSS feeds you'll need to get",
     "url": "https://www.bbc.co.uk/usingthebbc/terms/can-i-use-bbc-content/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "b. For business You'll need a licence to use our metadata (such as images, text, media and the links to them).",
     "url": "https://www.bbc.com/usingthebbc/terms-of-use/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12185,12 +12533,14 @@
    {
     "quote": "In accessing the Service you agree that you do so only for your own personal, non-commercial use.",
     "url": "https://www.aljazeera.com/terms-and-conditions/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "You shall not authorise, encourage, permit or assist any unauthorised copying, text or data mining, or web scraping, in relation to the Service, including: (i) any \"spider\", \"scraper\", \"bot\" or other automated technology",
     "url": "https://www.aljazeera.com/terms-and-conditions/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12232,7 +12582,8 @@
    {
     "quote": "DW legal notice loaded without readable reuse terms; the fetch tool was refused (2026-10-05).",
     "url": "https://corporate.dw.com/en/legal-notice/a-15718492",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12274,7 +12625,8 @@
    {
     "quote": "France 24 legal pages answered 403/404 on 2026-10-05.",
     "url": "https://www.france24.com/en/legal-notice",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12316,12 +12668,14 @@
    {
     "quote": "You may display, excerpt from, and link to the Content Feeds on your personal site … or 501(c)(3) Nonprofit Corporation … provided that you abide by the restrictions",
     "url": "https://www.npr.org/about-npr/179876898/terms-of-use",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "You may not … use for commercial purposes any copyrighted material",
     "url": "https://www.npr.org/about-npr/179876898/terms-of-use",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12363,7 +12717,8 @@
    {
     "quote": "ABC terms of use answered 403 on 2026-10-05.",
     "url": "https://help.abc.net.au/hc/en-us/articles/360001548096-ABC-Terms-of-Use",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12405,7 +12760,8 @@
    {
     "quote": "CBC terms page renders only with JavaScript; no text on 2026-10-05.",
     "url": "https://cbc.radio-canada.ca/en/vision/governance/terms-of-use-digital-services",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12447,12 +12803,14 @@
    {
     "quote": "Your use of the Guardian Site and Guardian Content is for your own personal and non-commercial use only.",
     "url": "https://www.theguardian.com/help/terms-of-service",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "these are our terms and conditions for use of the network, which you may access in several ways, including but not limited to the World Wide Web via theguardian.com , digital television, PDA, mobile phone and RSS feeds.",
     "url": "https://www.theguardian.com/help/terms-of-service",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12494,7 +12852,8 @@
    {
     "quote": "Share and Reuse our articles and other media under free and open licenses.",
     "url": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12539,12 +12898,14 @@
    {
     "quote": "News-related material can be used as long as the appropriate credit is given and the United Nations is advised.",
     "url": "https://www.un.org/en/about-us/copyright",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "The United Nations grants permission to Users to visit the Site and to download and copy the information, documents and materials (collectively, \"Materials\") from the Site for the User's personal, non-commercial use, without any right to resell or redistribute them",
     "url": "https://www.un.org/en/about-us/terms-of-use",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12587,7 +12948,8 @@
    {
     "quote": "PAHO copyright and terms pages (/en/copyright, /en/terms-use and variants) answered 404 on 2026-10-05. PAHO is WHO's regional office; WHO's own terms restrict commercial use, so a legal reading is needed before relying on it.",
     "url": "https://www.paho.org/en",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12629,12 +12991,14 @@
    {
     "quote": "In accessing the Service you agree that you do so only for your own personal, non-commercial use.",
     "url": "https://www.aljazeera.com/terms-and-conditions/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "You shall not authorise, encourage, permit or assist any unauthorised copying, text or data mining, or web scraping, in relation to the Service, including: (i) any \"spider\", \"scraper\", \"bot\" or other automated technology",
     "url": "https://www.aljazeera.com/terms-and-conditions/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12676,12 +13040,14 @@
    {
     "quote": "For business use of our RSS feeds you'll need to get",
     "url": "https://www.bbc.co.uk/usingthebbc/terms/can-i-use-bbc-content/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "b. For business You'll need a licence to use our metadata (such as images, text, media and the links to them).",
     "url": "https://www.bbc.com/usingthebbc/terms-of-use/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12723,7 +13089,8 @@
    {
     "quote": "France 24 legal pages answered 403/404 on 2026-10-05.",
     "url": "https://www.france24.com/en/legal-notice",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12766,7 +13133,8 @@
    {
     "quote": "You must not use any part of the materials on our site for commercial purposes without obtaining a licence to do so from us or our licensors. You must not re-publish in any form any material found on our site without our express written permission.",
     "url": "https://www.middleeasteye.net/terms-and-conditions",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12808,7 +13176,8 @@
    {
     "quote": "AllAfrica terms paths answered 404 on 2026-10-05.",
     "url": "https://allafrica.com/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12850,7 +13219,8 @@
    {
     "quote": "Africanews terms answered 406 on 2026-10-05.",
     "url": "https://www.africanews.com/terms-and-conditions/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12892,7 +13262,8 @@
    {
     "quote": "Reprinting, copying, reproducing, publishing, giving an \"on-screen presentation\", assigning, modifying, publicly transmitting, making transmittable, communicating to the public, or otherwise using, in whole or in part, any Content or related information provided through the Services",
     "url": "https://www3.nhk.or.jp/nhkworld/en/terms/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12934,7 +13305,8 @@
    {
     "quote": "THG PUBLISHING PRIVATE LIMITED grants you a limited licence to access and make personal use of this site but not for commercial purposes.",
     "url": "https://www.thehindu.com/termsofuse/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -12976,7 +13348,8 @@
    {
     "quote": "CNA terms paths answered 404 on 2026-10-05.",
     "url": "https://www.channelnewsasia.com/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13018,12 +13391,14 @@
    {
     "quote": "You are expressly prohibited from using any automated system (including web crawlers, spiders, or scrapers) to access, extract, or index SCMP Content for any purpose.",
     "url": "https://www.scmp.com/terms-conditions",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "Your use of SCMP Service and SCMP Content in accordance with these terms and conditions is for your own personal and non-commercial use only.",
     "url": "https://www.scmp.com/terms-conditions",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13065,7 +13440,8 @@
    {
     "quote": "El País legal notice answered 403 on 2026-10-05.",
     "url": "https://elpais.com/estaticos/aviso-legal/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13107,7 +13483,8 @@
    {
     "quote": "está prohibido modificar, copiar, reutilizar, explotar, reproducir, comunicar públicamente, hacer segundas o posteriores publicaciones … la totalidad o parte de los contenidos incluidos en el Sitio Web si no se cuenta con la autorización expresa y por escrito de INFOBAE",
     "url": "https://www.infobae.com/terminos-y-condiciones/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13149,7 +13526,8 @@
    {
     "quote": "Euronews terms answered 406 on 2026-10-05.",
     "url": "https://www.euronews.com/terms-of-use",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13191,7 +13569,8 @@
    {
     "quote": "Le Monde legal pages answered 402 on 2026-10-05.",
     "url": "https://www.lemonde.fr/mentions-legales/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13233,7 +13612,8 @@
    {
     "quote": "das Auslesen der Inhalte aus den Produkten der SPIEGEL-Gruppe mittels technischer Hilfsmittel (bspw. Crawler, Spider, Text-/Data-Mining), die Indexierung dieser für eine Suche oder die automatisierte Analyse, Auswertung oder Aufbereitung in sonstiger Weise sowie die Nutzung für RSS-Feeds",
     "url": "https://www.spiegel.de/nutzungsbedingungen",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13275,7 +13655,8 @@
    {
     "quote": "Al Arabiya terms answered 403 on 2026-10-05.",
     "url": "https://www.alarabiya.net/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13317,7 +13698,8 @@
    {
     "quote": "Sky News Arabia terms are behind a bot-management challenge (2026-10-05).",
     "url": "https://www.skynewsarabia.com/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13360,7 +13742,8 @@
    {
     "quote": "APS shows \"جميع الحقوق محفوظة\" and no reuse terms; legal-notice path 404 (2026-10-05).",
     "url": "https://www.aps.dz/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13403,7 +13786,8 @@
    {
     "quote": "MAP shows \"جميع الحقوق محفوظة\" and no reuse terms; legal-notice path 404 (2026-10-05).",
     "url": "https://www.mapnews.ma/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13445,7 +13829,8 @@
    {
     "quote": "Al-Ahram answered 403 on 2026-10-05.",
     "url": "https://gate.ahram.org.eg/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13487,12 +13872,14 @@
    {
     "quote": "محتويات \"الخدمات\"، بما في ذلك \"الموقع\"، هي لاستخدامك الشخصي غير التجاري",
     "url": "https://www.annahar.com/terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "يُحظَّر نسخ أو تخزين أي \"محتوى\" لأغراض غير الاستعمال الشخصي، من دون الحصول على إذن مسب[ق]",
     "url": "https://www.annahar.com/terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13534,7 +13921,8 @@
    {
     "quote": "NDTV terms answered 403 on 2026-10-05.",
     "url": "https://www.ndtv.com/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13576,7 +13964,8 @@
    {
     "quote": "Dawn terms answered 403 on 2026-10-05.",
     "url": "https://www.dawn.com/terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13618,7 +14007,8 @@
    {
     "quote": "Any unauthorized use or reproduction of The Daily Star content for commercial purposes is strictly prohibited and constitutes copyright infringement liable to legal action.",
     "url": "https://www.thedailystar.net/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13660,7 +14050,8 @@
    {
     "quote": "Kathmandu Post terms page has no reuse clause in its readable text (2026-10-05).",
     "url": "https://kathmandupost.com/terms-of-use",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13702,7 +14093,8 @@
    {
     "quote": "Nation Media terms answered 403 on 2026-10-05.",
     "url": "https://nation.africa/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13744,7 +14136,8 @@
    {
     "quote": "Punch terms paths answered 404 on 2026-10-05.",
     "url": "https://punchng.com/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13786,7 +14179,8 @@
    {
     "quote": "News24 terms answered 403/404 on 2026-10-05.",
     "url": "https://www.news24.com/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13829,7 +14223,8 @@
    {
     "quote": "Addis Standard answered 403 on 2026-10-05.",
     "url": "https://addisstandard.com/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13871,7 +14266,8 @@
    {
     "quote": "Clarín terms paths answered 404 on 2026-10-05.",
     "url": "https://www.clarin.com/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13913,7 +14309,8 @@
    {
     "quote": "É proibida a reprodução do conteúdo desta página em qualquer meio de comunicação, eletrônico ou impresso, sem autorização escrita da Folhapress .",
     "url": "https://www.folha.uol.com.br/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13956,7 +14353,8 @@
    {
     "quote": "RFE/RL terms paths answered 404 on 2026-10-05.",
     "url": "https://www.rferl.org/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -13999,7 +14397,8 @@
    {
     "quote": "Kyiv Independent links a \"Content Licensing\" page that answered 404 on 2026-10-05; licensing appears to be offered commercially.",
     "url": "https://kyivindependent.com/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14041,7 +14440,8 @@
    {
     "quote": "Jakarta Post terms paths answered 404 on 2026-10-05.",
     "url": "https://www.thejakartapost.com/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14083,7 +14483,8 @@
    {
     "quote": "Bangkok Post answered 451 on 2026-10-05.",
     "url": "https://www.bangkokpost.com/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14125,7 +14526,8 @@
    {
     "quote": "RNZ terms paths answered 404 on 2026-10-05.",
     "url": "https://www.rnz.co.nz/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14169,7 +14571,8 @@
    {
     "quote": "you may not in any event use the APIs to facilitate commercial uses of the Materials … Those specific terms of use are available on the pages through which the relevant Materials are accessible.",
     "url": "https://www.worldbank.org/ext/en/legal/terms-conditions",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14214,7 +14617,8 @@
    {
     "quote": "Any other contents of the Copernicus Data Space Ecosystem portal are intended for non-commercial use.",
     "url": "https://dataspace.copernicus.eu/terms-and-conditions",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14256,12 +14660,14 @@
    {
     "quote": "Observed 2026-10-05 (moved): 404 on /api/3/action/package_search — the catalogue API path has changed. Disabled until a recheck shows the API answering; a refusal is the operator's terms (charter §3) and is not worked around. Batch 10.",
     "url": "https://catalog.data.gov",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet unavailable on 2026-10-05: {\"detail\":{},\"message\":\"Not Found\"} ",
     "url": "https://catalog.data.gov",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14303,12 +14709,14 @@
    {
     "quote": "The Licensor grants you a worldwide, royalty-free, perpetual, non-exclusive licence to use the Information subject to the conditions below.",
     "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "Licence facet 2026-10-05: 59451 datasets; top licences [['uk-ogl', 20520], ['cc-by', 1063], ['OGL-UK-3.0', 444], ['notspecified', 167], ['other-nc', 51], ['other-closed', 26]]",
     "url": "https://data.gov.uk",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14350,12 +14758,14 @@
    {
     "quote": "The Information Provider grants you a worldwide, royalty-free, perpetual, non-exclusive licence to use the Information, including for commercial purposes, subject to the terms below.",
     "url": "https://open.canada.ca/en/open-government-licence-canada",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "Licence facet 2026-10-05: 47964 datasets; top licences [['ca-ogl-lgo', 36013], ['yk-oglyk', 2919], ['ab-ogla', 2897], ['bc-oglbc', 1680], ['qc-cc-by', 1542], ['on-oglo', 988]]",
     "url": "https://open.canada.ca/data",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14397,12 +14807,14 @@
    {
     "quote": "With the exception of the Commonwealth Coat of Arms and where otherwise noted, this work is licensed under the CC BY 4.0 license.",
     "url": "https://data.gov.au/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "Licence facet 2026-10-05: 141312 datasets; top licences [['notspecified', 92826], ['cc-by', 18396], ['lsba', 11096], ['cc-by-4', 2839], ['other', 2789], ['CC-BY-2.5-AU', 2705]]",
     "url": "https://data.gov.au/data",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14444,12 +14856,14 @@
    {
     "quote": "Observed 2026-10-05 (bot-blocked): Imperva bot challenge (\"Pardon Our Interruption\") instead of the API. Disabled until a recheck shows the API answering; a refusal is the operator's terms (charter §3) and is not worked around. Batch 10.",
     "url": "https://catalogue.data.govt.nz",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet unavailable on 2026-10-05: <!DOCTYPE html> <html> <head>     <noscript>         <title>Pardon Our Interrupt",
     "url": "https://catalogue.data.govt.nz",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14491,12 +14905,14 @@
    {
     "quote": "\"For a dataset to be considered as Open Data, it must be associated with an Open Licence\" — yet the portal carries cc-by-nc, cc-by-nc-nd and cc-by-nc-sa datasets (licence facet, 2026-10-05).",
     "url": "https://data.gov.ie/pages/opendatalicence",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "paraphrase"
    },
    {
     "quote": "Licence facet 2026-10-05: 22762 datasets; top licences [['CC-BY-4.0', 22011], ['CC-BY-SA-4.0', 433], ['cc-by-nc-nd', 56], ['cc-zero', 28], ['notspecified', 28], ['cc-by-nc', 13]]",
     "url": "https://data.gov.ie",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14538,12 +14954,14 @@
    {
     "quote": "Speaks its own search API, not the CKAN Action API — the client would silently return nothing. Left listed because the harvesting relationship it records is used even while it is off.",
     "url": "https://data.europa.eu/api/hub/search",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet unavailable on 2026-10-05: not queried (portal disabled)",
     "url": "https://data.europa.eu/api/hub/search",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14585,12 +15003,14 @@
    {
     "quote": "Portal terms page not readable or not found on 2026-10-05.",
     "url": "https://www.govdata.de/impressum",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet 2026-10-05: 168729 datasets; top licences [['http://dcat-ap.de/def/licenses/dl-zero-de/2.0', 537], ['http://dcat-ap.de/def/licenses/dl-by-de/2.0', 318], ['http://dcat-ap.de/def/licenses/dl-by-de/2_0', 275], ['http://dcat-ap.de/def/licenses/dl-zero-de/2_0', 18], ['http://dcat-ap.de/def/licenses/official-work', 14], ['http://dcat-ap.de/def/licenses/geonutz/20130319', 8]]",
     "url": "https://ckan.govdata.de",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14632,12 +15052,14 @@
    {
     "quote": "Four terms of use apply per dataset, including \"Use for commercial purposes requires permission of the data owner.\"",
     "url": "https://opendata.swiss/en/terms-of-use/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "paraphrase"
    },
    {
     "quote": "Licence facet 2026-10-05: 16542 datasets; top licences []",
     "url": "https://opendata.swiss",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14679,12 +15101,14 @@
    {
     "quote": "Observed 2026-10-05 (moved): 404 HTML on the CKAN API path. Disabled until a recheck shows the API answering; a refusal is the operator's terms (charter §3) and is not worked around. Batch 10.",
     "url": "https://www.data.gv.at",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet unavailable on 2026-10-05: <!DOCTYPE html> <html lang=\"en\">   <head>     <meta charset=\"utf-8\">     <meta h",
     "url": "https://www.data.gv.at",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14726,12 +15150,14 @@
    {
     "quote": "Portal terms page not readable or not found on 2026-10-05.",
     "url": "https://data.overheid.nl/data",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet 2026-10-05: 20823 datasets; top licences [['http://creativecommons.org/licenses/by/4.0/deed.nl', 8854], ['http://creativecommons.org/publicdomain/zero/1.0/deed.nl', 5781], ['http://creativecommons.org/publicdomain/mark/1.0/deed.nl', 4003], ['http://standaarden.overheid.nl/owms/terms/geslotenlicentie', 1476], ['http://standaarden.overheid.nl/owms/terms/licentieonbekend', 664], ['http://creativecommons.org/licenses/by-sa/4.0/deed.nl', 41]]",
     "url": "https://data.overheid.nl/data",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14773,12 +15199,14 @@
    {
     "quote": "Exposes a DCAT-AP API rather than the CKAN Action API.",
     "url": "https://datos.gob.es/apidata",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet unavailable on 2026-10-05: not queried (portal disabled)",
     "url": "https://datos.gob.es/apidata",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14820,12 +15248,14 @@
    {
     "quote": "Observed 2026-10-05 (bot-blocked): 403 Forbidden to the engine's User-Agent. Disabled until a recheck shows the API answering; a refusal is the operator's terms (charter §3) and is not worked around. Batch 10.",
     "url": "https://www.avoindata.fi/data",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet unavailable on 2026-10-05: <html> <head><title>403 Forbidden</title></head> <body> <center><h1>403 Forbidde",
     "url": "https://www.avoindata.fi/data",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14867,12 +15297,14 @@
    {
     "quote": "Runs EntryScape, not CKAN.",
     "url": "https://admin.dataportal.se/store",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet unavailable on 2026-10-05: not queried (portal disabled)",
     "url": "https://admin.dataportal.se/store",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14914,12 +15346,14 @@
    {
     "quote": "DCAT-AP-NO endpoint, not the CKAN Action API.",
     "url": "https://data.norge.no",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet unavailable on 2026-10-05: not queried (portal disabled)",
     "url": "https://data.norge.no",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -14961,12 +15395,14 @@
    {
     "quote": "Observed 2026-10-05 (bot-blocked): 403 Forbidden to the engine's User-Agent. Disabled until a recheck shows the API answering; a refusal is the operator's terms (charter §3) and is not worked around. Batch 10.",
     "url": "https://www.dati.gov.it/opendata",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet unavailable on 2026-10-05: <!DOCTYPE HTML>  <html>  \t<head> \t\t<meta http-equiv=\"Content-Type\" content=\"text",
     "url": "https://www.dati.gov.it/opendata",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15008,12 +15444,14 @@
    {
     "quote": "Observed 2026-10-05 (moved): 404 JSON on the CKAN API path. Disabled until a recheck shows the API answering; a refusal is the operator's terms (charter §3) and is not worked around. Batch 10.",
     "url": "https://dados.gov.pt",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet unavailable on 2026-10-05: {\"error\":\"The requested URL was not found on the server. If you entered the URL ",
     "url": "https://dados.gov.pt",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15055,12 +15493,14 @@
    {
     "quote": "Observed 2026-10-05 (moved): connection reset / 404 on the CKAN API path. Disabled until a recheck shows the API answering; a refusal is the operator's terms (charter §3) and is not worked around. Batch 10.",
     "url": "https://data.gov.ro",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet unavailable on 2026-10-05: curl: (35) Recv failure: Connection reset by peer ",
     "url": "https://data.gov.ro",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15102,12 +15542,14 @@
    {
     "quote": "Observed 2026-10-05 (credential): 401 — the API now requires authentication. Disabled until a recheck shows the API answering; a refusal is the operator's terms (charter §3) and is not worked around. Batch 10.",
     "url": "https://dados.gov.br/dados",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet unavailable on 2026-10-05: ",
     "url": "https://dados.gov.br/dados",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15149,12 +15591,14 @@
    {
     "quote": "Observed 2026-10-05 (bot-blocked): Akamai \"Access Denied\" (403). Disabled until a recheck shows the API answering; a refusal is the operator's terms (charter §3) and is not worked around. Batch 10.",
     "url": "https://datos.gob.mx/busca",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet unavailable on 2026-10-05: <HTML><HEAD> <TITLE>Access Denied</TITLE> </HEAD><BODY> <H1>Access Denied</H1>  ",
     "url": "https://datos.gob.mx/busca",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15196,12 +15640,14 @@
    {
     "quote": "Portal terms page not readable or not found on 2026-10-05.",
     "url": "https://datos.gob.cl/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet 2026-10-05: 3235 datasets; top licences [['cc-nc', 1310], ['cc-by', 925], ['cc-zero', 480], ['odc-pddl', 378], ['odc-by', 53], ['odc-odbl', 50]]",
     "url": "https://datos.gob.cl",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15243,12 +15689,14 @@
    {
     "quote": "Portal terms page not readable or not found on 2026-10-05.",
     "url": "https://datos.gob.ar/acerca/seccion/marco-legal",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet 2026-10-05: 1287 datasets; top licences [['Creative Commons Attribution 4.0', 665], ['CC-BY-4.0', 475], ['ODbL-1.0', 26], ['cc-by', 23], ['other-open', 16], ['notspecified', 13]]",
     "url": "https://datos.gob.ar",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15290,12 +15738,14 @@
    {
     "quote": "Observed 2026-10-05 (bot-blocked): Cloudflare challenge (\"Just a moment...\") instead of the API. Disabled until a recheck shows the API answering; a refusal is the operator's terms (charter §3) and is not worked around. Batch 10.",
     "url": "https://africaopendata.org",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet unavailable on 2026-10-05: <!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta htt",
     "url": "https://africaopendata.org",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15337,12 +15787,14 @@
    {
     "quote": "Reached through the pan-African catalogue rather than separately; listed so the harvesting relationship is recorded.",
     "url": "https://africaopendata.org",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "Licence facet unavailable on 2026-10-05: not queried (portal disabled)",
     "url": "https://africaopendata.org",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15384,12 +15836,14 @@
    {
     "quote": "Migrated off CKAN to a bespoke API.",
     "url": "https://data.gov.sg",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet unavailable on 2026-10-05: not queried (portal disabled)",
     "url": "https://data.gov.sg",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15431,12 +15885,14 @@
    {
     "quote": "Portal terms page not readable or not found on 2026-10-05.",
     "url": "https://www.data.go.jp/terms-of-use",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet 2026-10-05: 18143 datasets; top licences []",
     "url": "https://www.data.go.jp/data",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15478,12 +15934,14 @@
    {
     "quote": "Bespoke API requiring a service key; catalogued for the source dossier.",
     "url": "https://www.data.go.kr",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet unavailable on 2026-10-05: not queried (portal disabled)",
     "url": "https://www.data.go.kr",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15525,12 +15983,14 @@
    {
     "quote": "HDX hosts datasets under several licences (\"HDX promotes the use of licenses developed by the Creative Commons Foundation and the Open Data Foundation\"); hdx-other and other-pd-nr datasets need a per-dataset reading.",
     "url": "https://data.humdata.org/faqs/licenses",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "paraphrase"
    },
    {
     "quote": "Licence facet 2026-10-05: 28248 datasets; top licences [['cc-by', 10340], ['hdx-other', 5912], ['cc-by-igo', 3903], ['hdx-odc-odbl', 3593], ['cc-by-sa', 2447], ['other-pd-nr', 851]]",
     "url": "https://data.humdata.org",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15572,12 +16032,14 @@
    {
     "quote": "OData/Athena API, not CKAN.",
     "url": "https://apps.who.int/gho",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    },
    {
     "quote": "Licence facet unavailable on 2026-10-05: not queried (portal disabled)",
     "url": "https://apps.who.int/gho",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15619,12 +16081,14 @@
    {
     "quote": "The majority of the Works are licensed under the Creative Commons Attribution license (CC BY 3.0 …). Works that are not subject to the CC BY license are clearly labeled with the specific license under which those works may be used.",
     "url": "https://energydata.info/terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    },
    {
     "quote": "Licence facet 2026-10-05: 1191 datasets; top licences [['CC-BY-4.0', 1061], ['CC0-1.0', 66], ['other-closed', 15], ['CC-BY-SA-4.0', 14], ['ODbL-1.0', 12], ['other-open', 8]]",
     "url": "https://energydata.info",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15666,7 +16130,8 @@
    {
     "quote": "You may use information from our Service for the following reasons, regardless of whether the information was scraped, collected through our API, or obtained otherwise: Researchers … for research purposes, only if any publications resulting from that research are open access. Archivists … for archival purposes.",
     "url": "https://docs.github.com/en/site-policy/acceptable-use-policies/github-acceptable-use-policies",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15708,7 +16173,8 @@
    {
     "quote": "Permission is granted to temporarily download one copy of the materials … for personal, non-commercial transitory viewing only.",
     "url": "https://dev.to/terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15750,7 +16216,8 @@
    {
     "quote": "Scraping or otherwise obtaining content, whether for training or extracting data for machine learning models, reverse-engineering any part of the Service, or for any other purpose. [prohibited]",
     "url": "https://replit.com/terms-of-service",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15792,7 +16259,8 @@
    {
     "quote": "If you are interested in using the Data APIs for commercial purposes … you will need to enter into a separate agreement with Reddit.",
     "url": "https://redditinc.com/policies/data-api-terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15834,7 +16302,8 @@
    {
     "quote": "Terms index read; no clause on automated profile lookups found (2026-10-05).",
     "url": "https://about.gitlab.com/terms/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15876,7 +16345,8 @@
    {
     "quote": "Terms page returned no readable clause on this use (2026-10-05).",
     "url": "https://docs.npmjs.com/policies/terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15918,7 +16388,8 @@
    {
     "quote": "Terms page returned no readable clause on this use (2026-10-05).",
     "url": "https://policies.python.org/pypi.org/Terms-of-Use/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -15960,7 +16431,8 @@
    {
     "quote": "By accessing Docker Hub … (including via … the Docker Hub HTTP API, or any automated tool), you agree to be bound by these Terms as an Unauthenticated User. Free Hub Access is subject to the rate limits and usage restrictions posted.",
     "url": "https://www.docker.com/legal/docker-terms-service/",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-05",
@@ -16002,7 +16474,8 @@
    {
     "quote": "Published-Data API: public data only; \"Your serial access rate is unlimited.\" No statement on commercial use.",
     "url": "https://www.chess.com/news/view/published-data-api",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "paraphrase"
    }
   ],
   "checked_at": "2026-10-05",
@@ -16044,7 +16517,8 @@
    {
     "quote": "Terms page returned no readable clause on this use (2026-10-05).",
     "url": "https://keybase.io/docs/terms",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",
@@ -16086,7 +16560,8 @@
    {
     "quote": "API documentation (github.com/HackerNews/API) not readable from here (403).",
     "url": "https://github.com/HackerNews/API",
-    "read_at": "2026-10-05"
+    "read_at": "2026-10-05",
+    "kind": "observation"
    }
   ],
   "checked_at": "2026-10-05",

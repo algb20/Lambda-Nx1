@@ -214,6 +214,16 @@ describe('S invariant 4 — every source is in the licence & usage registry (R31
     expect(licenseRecord('uk_companies_house')?.license_status).toBe('LEGAL_REVIEW_REQUIRED')
   })
 
+  it('labels our own notes as observations, never as the provider\'s words (R323)', () => {
+    // A verbatim quote is what the terms-change check compares against the live
+    // page; a note of ours ("answered 403 on 2026-10-05") would read as a
+    // changed clause. Full dates appear only in our notes.
+    const mislabelled = SOURCE_LICENSE_REGISTRY.flatMap((r) =>
+      r.evidence_reference.filter((e) => e.kind === 'quote' && /\b20\d\d-\d\d-\d\d\b/.test(e.quote)).map(() => r.source_id),
+    )
+    expect(mislabelled).toEqual([])
+  })
+
   it('has no record left standing on an unevidenced earlier licence', () => {
     // R318 read the terms behind every catalogue licence recorded before
     // 2026-10-04. A record may be UNCLEAR, but never silently inherited.
