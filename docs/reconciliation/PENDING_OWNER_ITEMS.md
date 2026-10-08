@@ -78,6 +78,12 @@ Listed so none is forgotten. Whether each is set in a given environment is **UNV
 | E1 | Quarantine stored Gazette findings that name private individuals (made before R321) | **Ready:** `db/ops/gazette-personal-quarantine.sql` and `gazette-personal-restore.sql`. Tested 2026-10-08 on a scratch PostgreSQL 16 loaded with `db/schema.sql`: quarantine, a second run that changes nothing, a full restore, and a restore after the investigation was deleted (those rows stay quarantined). **Not run on any live database.** Run after the deploy that carries `acd8c97`. | R321 |
 | E2 | Anything on Production (`DATABASE_URL`, `CRON_SECRET`, deploys) | — | R306 |
 
+## G. Repository actions
+
+| # | Action | Why | Source |
+|---|---|---|---|
+| G1 | Merge `claude/bittorent-network-app-c8j9pv` into `main` (via a pull request, when the owner asks for one) | `main` still has `source-map-js` 1.2.1 — GitHub Dependabot alert #15 (high), fixed on this branch in batch 17. It also carries batches 11–17. Merging does not deploy Production (R306) | Batch 17 |
+
 ## F. Open research that Claude continues (no owner action needed)
 
 These are tracked in `SOURCE_LICENSING_GAP_AUDIT_2026-10-05.md`, not here:
