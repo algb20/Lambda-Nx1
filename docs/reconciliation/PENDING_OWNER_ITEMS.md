@@ -5,7 +5,7 @@
 | **Purpose** | One living list of everything that cannot be finished in the repository: keys, environment variables, decisions, permissions, writes to live systems. Owner R322: «احفظ في قائمة غير المكتمل مثل المفاتيح أو المتغيرات وغيرها». |
 | **Rule** | No secret value is ever written here, in Git, or in any file (owner S2). A key is named; its value goes only into the hosting environment, by the owner. |
 | **Production** | Locked on `9c19303`. No Production environment variable or deploy is changed without a new owner decision (R306). |
-| **Updated** | 2026-10-08 (R324). Each item says where it came from. Close an item by striking it through, with the date and the commit or decision. |
+| **Updated** | 2026-10-08 (R325). Each item says where it came from. Close an item by striking it through, with the date and the commit or decision. |
 
 ## A. Source keys and tokens (environment only)
 
@@ -49,7 +49,7 @@ Listed so none is forgotten. Whether each is set in a given environment is **UNV
 | # | Decision | Source |
 |---|---|---|
 | C1 | Notify the UN, as its copyright notice requires for news material (keeps `un_news` and the UN feeds on the statements board) | R318; batch 11 §3.3 |
-| C2 | AI/ML use of source content when the terms say nothing (default for the AI analyst) | GL-08, BC-4 |
+| C2 | AI/ML use of source content when the terms say nothing (default for the AI analyst). Research done (batch 17): of 210 readable terms pages only GitHub, Docker Hub and Nominatim mention AI, none about summarising; the rest are silent | GL-08, BC-4 |
 | C3 | Username-presence capability (HIGH personal-data risk) | GL-10 |
 | C4 | Build a udata adapter (Portugal; it would also serve France's data.gouv.fr) | Batch 11 §5 |
 | C5 | Companies House: may officer and PSC data appear at all, and in what form? | GL-13; batch 14 |

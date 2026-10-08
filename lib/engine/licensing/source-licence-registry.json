@@ -361,19 +361,31 @@
   "authentication": "None",
   "prohibited_uses": [],
   "geographic_restrictions": null,
-  "ai_ml_use": "NOT_STATED",
+  "ai_ml_use": "CONDITIONAL",
   "training_use": "NOT_STATED",
   "provenance_requirements": "Each finding cites its source URL and retrieval time.",
   "legal_risk": "LOW",
   "license_status": "VERIFIED_CONDITIONAL",
   "basis": "EXPRESS_GRANT",
-  "conditions": "minIntervalMs 1100; engine User-Agent; ODbL attribution shown with Geo results; per-query use only.",
+  "conditions": "minIntervalMs 1100; engine User-Agent; ODbL attribution shown with Geo results; per-query use only. R325: no auto-complete — the geo gateway calls Nominatim only on an explicit submit (intelligence dashboard), never per keystroke; the AI analyst does not recommend the service to users.",
   "evidence_reference": [
    {
     "quote": "Nominatim usage policy: \"an absolute maximum of 1 request per second\"; identify with a real User-Agent; \"clearly display attribution\"; no reselling of geocoding results, no auto-complete, no bulk grids. Commercial apps are not excluded.",
     "url": "https://operations.osmfoundation.org/policies/nominatim/",
     "read_at": "2026-10-04",
     "kind": "paraphrase"
+   },
+   {
+    "quote": "LLMs may only suggest this service, if they prominently point to this usage policy and explain the restrictions of use to the user.",
+    "url": "https://operations.osmfoundation.org/policies/nominatim/",
+    "read_at": "2026-10-08",
+    "kind": "quote"
+   },
+   {
+    "quote": "Auto-complete search This is not yet supported by Nominatim and you must not implement such a service on the client side using the API.",
+    "url": "https://operations.osmfoundation.org/policies/nominatim/",
+    "read_at": "2026-10-08",
+    "kind": "quote"
    }
   ],
   "checked_at": "2026-10-04",
@@ -1428,12 +1440,12 @@
   "prohibited_uses": [],
   "geographic_restrictions": null,
   "ai_ml_use": "NOT_STATED",
-  "training_use": "NOT_STATED",
+  "training_use": "CONDITIONAL",
   "provenance_requirements": "Each finding cites its source URL and retrieval time.",
   "legal_risk": "MEDIUM",
   "license_status": "LEGAL_REVIEW_REQUIRED",
   "basis": "AMBIGUOUS_TERMS",
-  "conditions": "Reclassified R318: §H states no commercial bar (absence, not a grant), while the Acceptable Use Policy limits use of information collected from the Service to research and archival purposes (quoted under username.web:github). Kept running under review; public repository metadata only.",
+  "conditions": "Reclassified R318: §H states no commercial bar (absence, not a grant), while the Acceptable Use Policy limits use of information collected from the Service to research and archival purposes (quoted under username.web:github). Kept running under review; public repository metadata only. R325: training on GitHub content triggers the Access Reciprocity waiver (§D.9); Lambda trains no model.",
   "evidence_reference": [
    {
     "quote": "Terms §H: no prohibition on commercial products; forbids excessive requests, token sharing to exceed limits, and selling users' personal information.",
@@ -1445,6 +1457,12 @@
     "quote": "You may use information from our Service for the following reasons, regardless of whether the information was scraped, collected through our API, or obtained otherwise: Researchers … for research purposes, only if any publications resulting from that research are open access. Archivists … for archival purposes.",
     "url": "https://docs.github.com/en/site-policy/acceptable-use-policies/github-acceptable-use-policies",
     "read_at": "2026-10-05",
+    "kind": "quote"
+   },
+   {
+    "quote": "By using automated means to access, collect, or otherwise use (“Access”) any publicly accessible Content from the Service for the purpose of developing or training any commercially available artificial intelligence model, machine learning system, or similar technology (a \"Commercial AI System\"), you hereby waive any and all policies, terms, conditions, or contractual provisions governing products, services, websites or datasets you own or operate that would otherwise prohibit, restrict, or place conditions upon GitHub's Access",
+    "url": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service",
+    "read_at": "2026-10-08",
     "kind": "quote"
    }
   ],
@@ -11806,12 +11824,12 @@
   "prohibited_uses": [],
   "geographic_restrictions": null,
   "ai_ml_use": "NOT_STATED",
-  "training_use": "NOT_STATED",
+  "training_use": "CONDITIONAL",
   "provenance_requirements": "Each finding cites its source URL and retrieval time.",
   "legal_risk": "MEDIUM",
   "license_status": "LEGAL_REVIEW_REQUIRED",
   "basis": "AMBIGUOUS_TERMS",
-  "conditions": "Kept running under review: the advisory data is CC BY 4.0, but GitHub's acceptable-use limits on information collected from the Service (see username.web:github) need a legal reading for the Atom feed. The same advisories are available through osv_dev.",
+  "conditions": "Kept running under review: the advisory data is CC BY 4.0, but GitHub's acceptable-use limits on information collected from the Service (see username.web:github) need a legal reading for the Atom feed. The same advisories are available through osv_dev. R325: training on GitHub content triggers the Access Reciprocity waiver (§D.9); Lambda trains no model.",
   "evidence_reference": [
    {
     "quote": "Unless specifically set forth herein, these Terms do not restrict lawful access to or use of the contents of public repositories by third parties",
@@ -11823,6 +11841,12 @@
     "quote": "GitHub Advisory Database ( CC-BY 4.0 )",
     "url": "https://google.github.io/osv.dev/data/",
     "read_at": "2026-10-05",
+    "kind": "quote"
+   },
+   {
+    "quote": "By using automated means to access, collect, or otherwise use (“Access”) any publicly accessible Content from the Service for the purpose of developing or training any commercially available artificial intelligence model, machine learning system, or similar technology (a \"Commercial AI System\"), you hereby waive any and all policies, terms, conditions, or contractual provisions governing products, services, websites or datasets you own or operate that would otherwise prohibit, restrict, or place conditions upon GitHub's Access",
+    "url": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service",
+    "read_at": "2026-10-08",
     "kind": "quote"
    }
   ],
@@ -16120,17 +16144,23 @@
   "prohibited_uses": [],
   "geographic_restrictions": null,
   "ai_ml_use": "NOT_STATED",
-  "training_use": "NOT_STATED",
+  "training_use": "CONDITIONAL",
   "provenance_requirements": "Only presence and the public profile URL are reported; no profile content is stored.",
   "legal_risk": "HIGH",
   "license_status": "RESTRICTED",
   "basis": "EXPRESS_RESTRICTION",
-  "conditions": "Removed from the platform list (batch 10).",
+  "conditions": "Removed from the platform list (batch 10). R325: training on GitHub content triggers the Access Reciprocity waiver (§D.9); Lambda trains no model.",
   "evidence_reference": [
    {
     "quote": "You may use information from our Service for the following reasons, regardless of whether the information was scraped, collected through our API, or obtained otherwise: Researchers … for research purposes, only if any publications resulting from that research are open access. Archivists … for archival purposes.",
     "url": "https://docs.github.com/en/site-policy/acceptable-use-policies/github-acceptable-use-policies",
     "read_at": "2026-10-05",
+    "kind": "quote"
+   },
+   {
+    "quote": "By using automated means to access, collect, or otherwise use (“Access”) any publicly accessible Content from the Service for the purpose of developing or training any commercially available artificial intelligence model, machine learning system, or similar technology (a \"Commercial AI System\"), you hereby waive any and all policies, terms, conditions, or contractual provisions governing products, services, websites or datasets you own or operate that would otherwise prohibit, restrict, or place conditions upon GitHub's Access",
+    "url": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service",
+    "read_at": "2026-10-08",
     "kind": "quote"
    }
   ],
@@ -16421,7 +16451,7 @@
   "prohibited_uses": [],
   "geographic_restrictions": null,
   "ai_ml_use": "NOT_STATED",
-  "training_use": "NOT_STATED",
+  "training_use": "NO",
   "provenance_requirements": "Only presence and the public profile URL are reported; no profile content is stored.",
   "legal_risk": "HIGH",
   "license_status": "UNCLEAR",
@@ -16432,6 +16462,12 @@
     "quote": "By accessing Docker Hub … (including via … the Docker Hub HTTP API, or any automated tool), you agree to be bound by these Terms as an Unauthenticated User. Free Hub Access is subject to the rate limits and usage restrictions posted.",
     "url": "https://www.docker.com/legal/docker-terms-service/",
     "read_at": "2026-10-05",
+    "kind": "quote"
+   },
+   {
+    "quote": "Train competing artificial intelligence or machine learning models without our express written consent",
+    "url": "https://www.docker.com/legal/docker-terms-service/",
+    "read_at": "2026-10-08",
     "kind": "quote"
    }
   ],
