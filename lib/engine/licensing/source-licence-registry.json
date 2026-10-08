@@ -10106,7 +10106,7 @@
   "source_id": "uk_gazette",
   "kind": "catalogue",
   "provider": "His Majesty’s Stationery Office",
-  "official_url": "https://www.thegazette.co.uk/all-notices/notice/data.feed",
+  "official_url": "https://www.thegazette.co.uk/all-notices/notice/data.feed?results-page-size=100",
   "source_type": "atom",
   "dataset_api": "The Gazette — UK official public notices",
   "data_categories": [
@@ -10114,35 +10114,42 @@
    "official"
   ],
   "jurisdiction": "GB",
-  "license": "Creative Commons Attribution 4.0",
+  "license": "OGL v3.0 (personal data excluded)",
   "terms_url": "https://www.thegazette.co.uk/terms-and-conditions",
-  "commercial_use": "NOT_STATED",
-  "internal_use": "NOT_STATED",
-  "public_display": "NOT_STATED",
-  "redistribution": "NOT_STATED",
-  "derived_data": "NOT_STATED",
+  "commercial_use": "YES",
+  "internal_use": "YES",
+  "public_display": "CONDITIONAL",
+  "redistribution": "CONDITIONAL",
+  "derived_data": "CONDITIONAL",
   "caching": "NOT_STATED",
   "retention": "Not stated by the provider; Lambda keeps findings per its own retention rules.",
-  "attribution": null,
+  "attribution": "Contains public sector information licensed under the Open Government Licence v3.0 (The Gazette)",
   "rate_limits": "Engine spacing 3600 s; provider limit not stated",
   "authentication": "None",
-  "prohibited_uses": [],
+  "prohibited_uses": [
+   "re-use of personal data (outside the OGL)"
+  ],
   "geographic_restrictions": null,
   "ai_ml_use": "NOT_STATED",
   "training_use": "NOT_STATED",
   "provenance_requirements": "Each finding cites its source URL and retrieval time.",
   "legal_risk": "MEDIUM",
-  "license_status": "LEGAL_REVIEW_REQUIRED",
-  "basis": "AMBIGUOUS_TERMS",
-  "conditions": "Kept running under review: the OGL covers the notices but not the personal data in them (personal insolvency and deceased-estate notices name individuals). Corporate notices only, or a legal reading, before this can be verified (charter §3).",
+  "license_status": "VERIFIED_CONDITIONAL",
+  "basis": "EXPRESS_GRANT",
+  "conditions": "R321: company notices only. `keepItem` keeps notice codes 24xx (corporate insolvency) and 26xx (disclaimers) and drops bankruptcy orders, personal dividends, deceased estates and every other code before parsing (live 2026-10-08: 87 of 100 kept, all companies). Notice text may still name insolvency practitioners acting professionally. Findings already stored before R321 may hold personal-insolvency or deceased-estate headlines; removing them is a live-database write (owner action).",
   "evidence_reference": [
    {
     "quote": "All content is available under the Open Government Licence v3.0 , except where otherwise stated. However, please note that this licence does not cover the re-use of personal data.",
     "url": "https://www.thegazette.co.uk/terms-and-conditions",
     "read_at": "2026-10-05"
+   },
+   {
+    "quote": "Live feed on 2026-10-08: notice code 2503 \"Bankruptcy Orders | DEREK THOMAS THOMPSON\", 2903 \"Deceased Estates | Jean Mickleburgh\" — private individuals as headlines, which the keep rule now drops.",
+    "url": "https://www.thegazette.co.uk/all-notices/notice/data.feed?results-page-size=100",
+    "read_at": "2026-10-08"
    }
   ],
-  "checked_at": "2026-10-05",
+  "checked_at": "2026-10-08",
   "fallback_sources": []
  },
  {

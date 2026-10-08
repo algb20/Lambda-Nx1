@@ -1,5 +1,5 @@
 import type { Evidence, Source, SourceContext } from '../types'
-import { parseFeed } from '../feedxml'
+import { feedBlocks, parseFeed } from '../feedxml'
 import { publicationTime, publicationZoneOffset } from '../observed'
 import { USER_AGENT } from '../guardrail'
 import type { CatalogSource } from './types'
@@ -282,7 +282,8 @@ function fromJson(source: CatalogSource, body: unknown, retrievedAt: string): Ev
 
 /** RSS, RDF and Atom, through the parser the engine already owns. */
 function fromFeed(source: CatalogSource, xml: string, retrievedAt: string): Evidence[] {
-  return parseFeed(xml).flatMap((entry) => {
+  const kept = source.keepItem ? feedBlocks(xml).filter((item) => source.keepItem!.test(item)).join('\n') : xml
+  return parseFeed(kept).flatMap((entry) => {
     if (!entry.title) return []
     return [
       {

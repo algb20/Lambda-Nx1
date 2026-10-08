@@ -267,6 +267,20 @@ export interface CatalogSource {
    */
   formerUrls?: { url: string; until: string; why: string }[]
 
+  /**
+   * Which feed items this record may keep, judged on each item's own XML.
+   *
+   * A licence can cover a publisher's notices and stop short of the people in
+   * them. The Gazette is the case that needed it: its content is OGL v3.0, and
+   * the OGL "does not cover the re-use of personal data". The all-notices feed
+   * mixes company insolvency (codes 24xx) and disclaimers (26xx) with
+   * bankruptcy orders and deceased estates (25xx, 29xx), whose headlines are
+   * private individuals' names. Charter §3 forbids those as findings in any
+   * case. Items that fail the test are dropped before they are parsed, so
+   * nothing about them is stored or shown (R321).
+   */
+  keepItem?: { test: (itemXml: string) => boolean; why: string }
+
   /** Off by default when a source is heavy, noisy, or in trial. */
   enabled?: boolean
 

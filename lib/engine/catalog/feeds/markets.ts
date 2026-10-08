@@ -17,6 +17,18 @@ import { USER_AGENT } from '../../guardrail'
  * here is what *changes* a market: an intervention, a suspension, a supply
  * disruption, a filing.
  */
+/**
+ * Company notices only: corporate insolvency (24xx) and disclaimers (26xx).
+ * Personal insolvency (25xx), deceased estates (29xx) and every other notice
+ * that names private individuals are dropped — the OGL "does not cover the
+ * re-use of personal data" (thegazette.co.uk/terms-and-conditions, read
+ * 2026-10-05), and charter §3 forbids such findings (R321).
+ */
+const GAZETTE_COMPANY_NOTICES = {
+  test: (item: string) => /<f:notice-code>\s*2[46]\d\d\s*<\/f:notice-code>/.test(item),
+  why: 'OGL excludes personal data; company notices only (24xx, 26xx).',
+}
+
 export const MARKET_SOURCES: CatalogSource[] = [
   // ── Filings and regulators (verified live before being added) ────────────
   {
@@ -124,7 +136,8 @@ export const MARKET_SOURCES: CatalogSource[] = [
     key: 'uk_gazette',
     name: 'The Gazette — UK official public notices',
     publisher: 'His Majesty’s Stationery Office',
-    url: 'https://www.thegazette.co.uk/all-notices/notice/data.feed',
+    // 100 per page so the company notices left after `keepItem` still fill a run.
+    url: 'https://www.thegazette.co.uk/all-notices/notice/data.feed?results-page-size=100',
     kind: 'atom',
     discipline: 'fin',
     topics: ['corporate', 'official'],
@@ -134,6 +147,7 @@ export const MARKET_SOURCES: CatalogSource[] = [
     licence: ccBy('The Gazette, Open Government Licence v3.0', 'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/'),
     minIntervalSec: 3600,
     keyless: true,
+    keepItem: GAZETTE_COMPANY_NOTICES,
     note: 'The UK’s official record: insolvencies, strike-offs, appointments. A company’s death certificate is filed here first.',
   },
   {

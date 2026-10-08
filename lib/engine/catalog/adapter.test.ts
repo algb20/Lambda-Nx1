@@ -110,6 +110,19 @@ describe('nothing is invented', () => {
     expect(data.lon).toBeNull()
   })
 
+  it('drops feed items the record may not keep, before they are parsed (R321)', async () => {
+    const keep = { test: (item: string) => /<f:notice-code>24\d\d</.test(item), why: 'company notices only' }
+    const xml = `<feed>
+      <entry><title>ACME LTD</title><f:notice-code>2441</f:notice-code><link href="https://example.com/a"/></entry>
+      <entry><title>JANE PRIVATE PERSON</title><f:notice-code>2503</f:notice-code><link href="https://example.com/b"/></entry>
+    </feed>`
+    const filtered = catalogSource({ ...base, kind: 'atom', url: 'https://example.com/feed', keepItem: keep })
+    expect((await filtered.run(NO_INPUT, ctxReturning(xml))).map((i) => i.claim)).toEqual(['ACME LTD'])
+    // Without the rule both would have become findings — the control.
+    const unfiltered = catalogSource({ ...base, kind: 'atom', url: 'https://example.com/feed' })
+    expect((await unfiltered.run(NO_INPUT, ctxReturning(xml))).map((i) => i.claim)).toEqual(['ACME LTD', 'JANE PRIVATE PERSON'])
+  })
+
   it('takes the rating from the catalogue, never from the response', async () => {
     const source = catalogSource({ ...base, admiralty: 'D', path: 'items' })
     const [item] = await source.run(
