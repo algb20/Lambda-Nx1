@@ -35,6 +35,8 @@
  */
 import { assessTrust, sealFindings, type TrustScore } from '@/lib/engine/trust'
 import type { Evidence } from '@/lib/engine/types'
+import { creditOf } from '@/lib/engine/catalog/credits'
+import { LICENCE_TEXTS } from '@/lib/engine/licensing/licence-texts'
 
 export type ExportFormat = 'json' | 'csv' | 'markdown' | 'citations' | 'bibtex' | 'html'
 
@@ -62,6 +64,14 @@ export interface Reference {
   retrievedAt: string
   /** How many findings cite it. */
   findings: number
+  /**
+   * The credit the source's licence requires, carried into every copy (CC BY
+   * and OGL ask for it wherever the material is redistributed — an export is
+   * exactly that). Null when the source asks for none. (BC-8, R324)
+   */
+  credit: string | null
+  /** The verified licence and its text, when there is one. */
+  licence: { label: string; url: string } | null
 }
 
 export interface DossierFinding {
@@ -127,12 +137,16 @@ export function buildDossier(input: DossierInput): Dossier {
     const key = `${e.sourceKey}|${url ?? ''}`
     let ref = refs.get(key)
     if (!ref) {
+      const credit = creditOf(e.sourceKey)
+      const text = credit?.licence ? LICENCE_TEXTS.find((t) => t.label === credit.licence) : undefined
       ref = {
         n: refs.size + 1,
         sourceKey: e.sourceKey,
         url,
         retrievedAt: e.retrievedAt,
         findings: 0,
+        credit: credit?.credit ?? null,
+        licence: text ? { label: text.label, url: text.url } : null,
       }
       refs.set(key, ref)
     }
@@ -213,10 +227,13 @@ const CSV_COLUMNS = [
   'retrieved_at',
   'admiralty',
   'confidence',
+  'credit',
+  'licence',
 ] as const
 
 export function toCsv(d: Dossier): string {
-  const urlOf = (n: number) => d.references.find((r) => r.n === n)?.url ?? ''
+  const refOf = (n: number) => d.references.find((r) => r.n === n)
+  const urlOf = (n: number) => refOf(n)?.url ?? ''
   const rows = [
     CSV_COLUMNS.join(','),
     ...d.findings.map((f) =>
@@ -229,6 +246,8 @@ export function toCsv(d: Dossier): string {
         f.retrievedAt,
         f.admiralty ?? '',
         f.confidence,
+        refOf(f.reference)?.credit ?? '',
+        refOf(f.reference)?.licence?.label ?? '',
       ]
         .map(csvCell)
         .join(','),
@@ -343,14 +362,16 @@ export function toMarkdown(d: Dossier): string {
     '',
     ...d.references.map(
       (r) =>
-        `${r.n}. **${r.sourceKey}** — ${r.url ? `<${r.url}>` : 'no public URL'} — retrieved ${isoDay(
-          r.retrievedAt,
-        )} (${r.findings} finding${r.findings === 1 ? '' : 's'})`,
+        `${r.n}. **${r.credit ? `${mdCell(r.credit)}** (\`${r.sourceKey}\`)` : `${r.sourceKey}**`} — ${
+          r.url ? `<${r.url}>` : 'no public URL'
+        } — retrieved ${isoDay(r.retrievedAt)} (${r.findings} finding${r.findings === 1 ? '' : 's'})${
+          r.licence ? ` — licence: [${r.licence.label}](${r.licence.url})` : ''
+        }`,
     ),
     '',
     '---',
     '',
-    `Collected passively from public sources by ${PLATFORM}. Every finding above carries the source that reported it and the time it was retrieved; nothing is inferred beyond what those sources said. The seal is a fingerprint of the findings — recompute it to prove this document is unaltered.`,
+    `Collected passively from public sources by ${PLATFORM}. Every finding above carries the source that reported it and the time it was retrieved; nothing is inferred beyond what those sources said. Third-party material is reused under the licences and with the credits named in the references. The seal is a fingerprint of the findings — recompute it to prove this document is unaltered.`,
     '',
   )
   return out.join('\n')
@@ -398,9 +419,9 @@ export function toPrintableHtml(d: Dossier): string {
   const dir = dominantDirection(`${d.subject} ${d.note ?? ''} ${d.findings.map((f) => f.claim).join(' ')}`)
   const e = htmlEscape
 
-  const link = (url: string | null) => {
+  const link = (url: string | null, label?: string) => {
     const href = safeHref(url)
-    return href ? `<a href="${e(href)}">${e(href)}</a>` : '<span class="muted">no public URL</span>'
+    return href ? `<a href="${e(href)}">${e(label ?? href)}</a>` : '<span class="muted">no public URL</span>'
   }
 
   return `<!doctype html>
@@ -488,9 +509,11 @@ ${d.findings
 ${d.references
   .map(
     (r) =>
-      `  <li><strong>${e(r.sourceKey)}</strong> — ${link(r.url)} — retrieved ${e(
-        isoDay(r.retrievedAt),
-      )} <span class="muted">(${r.findings} finding${r.findings === 1 ? '' : 's'})</span></li>`,
+      `  <li><strong>${e(r.credit ?? r.sourceKey)}</strong>${r.credit ? ` <span class="muted">(${e(r.sourceKey)})</span>` : ''} — ${link(
+        r.url,
+      )} — retrieved ${e(isoDay(r.retrievedAt))} <span class="muted">(${r.findings} finding${r.findings === 1 ? '' : 's'})</span>${
+        r.licence ? ` — licence: ${link(r.licence.url, r.licence.label)}` : ''
+      }</li>`,
   )
   .join('\n')}
 </ol>
@@ -498,6 +521,7 @@ ${d.references
 <footer>
   Collected passively from public sources by ${e(PLATFORM)}. Every finding carries the source that
   reported it and the time it was retrieved; nothing is inferred beyond what those sources said.
+  Third-party material is reused under the licences and with the credits named in the references.
   The seal <span class="seal">${e(d.seal)}</span> is a fingerprint of the findings — recompute it to
   prove this document is unaltered.
 </footer>

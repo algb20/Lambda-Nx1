@@ -24,8 +24,8 @@ function goodProviders(u: string) {
     )
   if (url.hostname === 'fred.stlouisfed.org') {
     const id = url.searchParams.get('id') ?? ''
-    if (id === 'SP500')
-      return Promise.resolve(csv('observation_date,SP500\n2026-07-30,5000\n2026-07-31,5040'))
+    if (id === 'VIXCLS')
+      return Promise.resolve(csv('observation_date,VIXCLS\n2026-07-30,5000\n2026-07-31,5040'))
     if (id === 'DCOILWTICO')
       return Promise.resolve(csv('observation_date,DCOILWTICO\n2026-07-30,80\n2026-07-31,84'))
     return Promise.resolve(csv('', 404))
@@ -54,8 +54,8 @@ describe('marketsBoard', () => {
         // silently lost its stock and commodity sections.
         if (url.hostname === 'fred.stlouisfed.org') {
           const id = url.searchParams.get('id') ?? ''
-          if (id === 'SP500')
-            return Promise.resolve(csv('observation_date,SP500\n2026-07-30,5000\n2026-07-31,5040'))
+          if (id === 'VIXCLS')
+            return Promise.resolve(csv('observation_date,VIXCLS\n2026-07-30,5000\n2026-07-31,5040'))
           if (id === 'DCOILWTICO')
             return Promise.resolve(csv('observation_date,DCOILWTICO\n2026-07-30,80\n2026-07-31,84'))
           // Every other series is genuinely unavailable in this fixture, which
@@ -76,7 +76,7 @@ describe('marketsBoard', () => {
     expect(crypto.rows[0]).toMatchObject({ symbol: 'BTC', name: 'Bitcoin', price: 65000, change: 1.2 })
 
     const idx = b.sections.find((s) => s.key === 'indices')!
-    expect(idx.rows[0].symbol).toBe('SP500')
+    expect(idx.rows[0].symbol).toBe('VIXCLS')
     expect(idx.rows[0].change).toBeCloseTo(((5040 - 5000) / 5000) * 100, 5)
     // The observation date travels with the name: a daily close shown without
     // it reads as a live quote, and is not one.
@@ -146,5 +146,13 @@ describe('marketsBoard', () => {
      */
     expect(second.summary.instruments).toBeGreaterThan(0)
     expect(second.summary.instruments).toBeLessThanOrEqual(first.summary.instruments)
-  })
+  },
+  /**
+   * Two boards back to back pay the engine's real per-provider spacing (the
+   * second call waits out each source's minimum interval). Measured at 4.76 s
+   * before batch 06 and ~5.0 s after — on the edge of Vitest's 5 s default, so
+   * it failed intermittently under a loaded full run. The wait is the
+   * behaviour under test, so the limit is raised rather than the spacing faked.
+   */
+  15_000)
 })

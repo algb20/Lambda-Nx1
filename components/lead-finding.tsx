@@ -4,6 +4,7 @@ import { ExternalLink, Star } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { leadFinding, whyLead } from '@/lib/analysis/salience'
 import type { Evidence } from '@/lib/engine/types'
+import { SourceCredit } from '@/components/source-credit'
 
 /**
  * The finding to look at first.
@@ -49,9 +50,7 @@ export function LeadFinding({ findings }: { findings: Evidence[] }) {
         <span className="rounded bg-background/60 px-1.5 py-0.5 ring-1 ring-border">
           {whyLead(lead)}
         </span>
-        <span data-no-translate className="font-mono">
-          {evidence.sourceKey}
-        </span>
+        <SourceCredit sourceKey={evidence.sourceKey} />
         {href ? (
           <a
             href={href}

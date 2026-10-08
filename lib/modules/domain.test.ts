@@ -128,9 +128,13 @@ describe('investigateDomain (realistic provider responses)', () => {
     const registrar = report.sections.registration.find((e) => e.claim.startsWith('Registrar'))
     expect(registrar?.admiralty?.source).toBe('A')
 
-    // IP exposure was checked for the resolved IP.
-    expect(report.sections.ipExposure.length).toBeGreaterThan(0)
-    expect(report.sections.ipExposure.some((e) => e.claim.includes('Open ports'))).toBe(true)
+    // IP exposure (Shodan InternetDB) and scan history (urlscan) are withheld
+    // until a commercial licence / written permission exists (batch 06), so
+    // neither is asked and both sections are empty.
+    expect(report.sections.ipExposure).toEqual([])
+    const asked = vi.mocked(fetch).mock.calls.map((c) => new URL(String(c[0])).hostname)
+    expect(asked).not.toContain('internetdb.shodan.io')
+    expect(asked).not.toContain('urlscan.io')
 
     // History from Wayback.
     expect(report.sections.history[0]?.claim).toMatch(/Archived/)
@@ -141,7 +145,8 @@ describe('investigateDomain (realistic provider responses)', () => {
 
     // Every source that ran succeeded against the fixtures.
     expect(report.summary.sourcesFailed).toBe(0)
-    expect(report.summary.sourcesOk).toBeGreaterThanOrEqual(6)
+    // DNS is answered by the first resolver that responds, so four of the five run.
+    expect(report.summary.sourcesOk).toBeGreaterThanOrEqual(4)
   })
 
   it('degrades gracefully when a provider fails (fallback / no crash)', async () => {

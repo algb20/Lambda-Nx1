@@ -1,0 +1,5473 @@
+{
+ "checked_at": "2026-10-08T10:07:30.593Z",
+ "pages": 241,
+ "counts": {
+  "unreachable": 57,
+  "present": 162,
+  "not-checkable": 145,
+  "missing": 2,
+  "partial": 1
+ },
+ "changed": [
+  {
+   "source_id": "mempool",
+   "license_status": "UNCLEAR",
+   "state": "missing",
+   "quotes": [
+    {
+     "url": "https://mempool.space/docs/api/rest",
+     "read_at": "2026-10-04",
+     "state": "missing",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "mempool_network",
+   "license_status": "UNCLEAR",
+   "state": "missing",
+   "quotes": [
+    {
+     "url": "https://mempool.space/docs/api/rest",
+     "read_at": "2026-10-04",
+     "state": "missing",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "dns.google",
+   "license_status": "UNCLEAR",
+   "state": "partial",
+   "quotes": [
+    {
+     "url": "https://developers.google.com/terms",
+     "read_at": "2026-10-05",
+     "state": "partial",
+     "http": 200
+    }
+   ]
+  }
+ ],
+ "records": [
+  {
+   "source_id": "opensky",
+   "license_status": "RESTRICTED",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://opensky-network.org/about/terms-of-use",
+     "read_at": "2026-10-04",
+     "state": "unreachable",
+     "http": 503
+    }
+   ]
+  },
+  {
+   "source_id": "opensanctions",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.opensanctions.org/licensing/",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "urlscan",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://urlscan.io/terms/",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "shodan.internetdb",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://internetdb.shodan.io/",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "feodo",
+   "license_status": "RESTRICTED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://abuse.ch/terms-of-use/",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "urlhaus",
+   "license_status": "RESTRICTED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://abuse.ch/terms-of-use/",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "threatfox",
+   "license_status": "RESTRICTED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://abuse.ch/terms-of-use/",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "who_outbreaks",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.who.int/about/policies/terms-of-use",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "nominatim",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://operations.osmfoundation.org/policies/nominatim/",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "gravatar",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://docs.gravatar.com/rest/getting-started/",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "coingecko",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.coingecko.com/en/api_terms",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "coingecko_asset",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.coingecko.com/en/api_terms",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "coingecko_board",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.coingecko.com/en/api_terms",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "coingecko_exchanges",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.coingecko.com/en/api_terms",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "coingecko_global",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.coingecko.com/en/api_terms",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "coingecko_series",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.coingecko.com/en/api_terms",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "fred_commodities",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://fred.stlouisfed.org/legal/",
+     "read_at": "2026-10-04",
+     "state": "unreachable",
+     "http": 503
+    }
+   ]
+  },
+  {
+   "source_id": "fred_indices",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://fred.stlouisfed.org/legal/",
+     "read_at": "2026-10-04",
+     "state": "unreachable",
+     "http": 503
+    }
+   ]
+  },
+  {
+   "source_id": "sec_edgar",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.sec.gov/search-filings/edgar-search-assistance/accessing-edgar-data",
+     "read_at": "2026-10-04",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "sec_edgar_ranking",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.sec.gov/search-filings/edgar-search-assistance/accessing-edgar-data",
+     "read_at": "2026-10-04",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "sec_full_text",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.sec.gov/search-filings/edgar-search-assistance/accessing-edgar-data",
+     "read_at": "2026-10-04",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "edgar",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.sec.gov/search-filings/edgar-search-assistance/accessing-edgar-data",
+     "read_at": "2026-10-04",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "crossref",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.crossref.org/documentation/retrieve-metadata/rest-api/",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "gleif",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.gleif.org/en/meta/lei-data-terms-of-use/",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "gleif_ownership",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.gleif.org/en/meta/lei-data-terms-of-use/",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "arxiv",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://info.arxiv.org/help/api/tou.html",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "arxiv_watch",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://info.arxiv.org/help/api/tou.html",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "gdelt",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.gdeltproject.org/about.html",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ecb_policy_rate",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.ecb.europa.eu/services/disclaimer/html/index.en.html",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ecb_yield_curve",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.ecb.europa.eu/services/disclaimer/html/index.en.html",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "worldbank_economy",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://datacatalog.worldbank.org/public-licenses",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "worldbank_projects",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://datacatalog.worldbank.org/public-licenses",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "eurostat_hpi",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://ec.europa.eu/eurostat/web/main/help/copyright-notice",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "elexon_grid",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "github",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    },
+    {
+     "url": "https://docs.github.com/en/site-policy/acceptable-use-policies/github-acceptable-use-policies",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "faa_nasstatus",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "federal_register",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "noaa_ndbc",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "noaa_swpc",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "usaspending",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "usgs_quakes",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "usgs_recent",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "fred_housing",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://fred.stlouisfed.org/legal/",
+     "read_at": "2026-10-04",
+     "state": "unreachable",
+     "http": 503
+    }
+   ]
+  },
+  {
+   "source_id": "imf_commodities",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://fred.stlouisfed.org/legal/",
+     "read_at": "2026-10-04",
+     "state": "unreachable",
+     "http": 503
+    }
+   ]
+  },
+  {
+   "source_id": "ukhpi_landregistry",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.gov.uk/government/publications/about-the-uk-house-price-index/about-the-uk-house-price-index",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "pubmed",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.ncbi.nlm.nih.gov/home/about/policies/",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "wikipedia_itn",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "wikipedia_trending",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "hf_papers",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": null
+    }
+   ]
+  },
+  {
+   "source_id": "bis_speeches",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.bis.org/terms_conditions.htm",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "frankfurter",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://frankfurter.dev/",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "frankfurter_board",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://frankfurter.dev/",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ecb_reference_rates",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://frankfurter.dev/",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "wikidata",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.wikidata.org/wiki/Wikidata:Licensing",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "mempool",
+   "license_status": "UNCLEAR",
+   "state": "missing",
+   "quotes": [
+    {
+     "url": "https://mempool.space/docs/api/rest",
+     "read_at": "2026-10-04",
+     "state": "missing",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "mempool_network",
+   "license_status": "UNCLEAR",
+   "state": "missing",
+   "quotes": [
+    {
+     "url": "https://mempool.space/docs/api/rest",
+     "read_at": "2026-10-04",
+     "state": "missing",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "radio_browser",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.radio-browser.info/",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "iso_mic_registry",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.iso20022.org/sites/default/files/2020-02/ISO10383_Terms_of_use.pdf",
+     "read_at": "2026-10-04",
+     "state": "unreachable",
+     "http": "error"
+    }
+   ]
+  },
+  {
+   "source_id": "official_statements",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": null
+    }
+   ]
+  },
+  {
+   "source_id": "dns.google",
+   "license_status": "UNCLEAR",
+   "state": "partial",
+   "quotes": [
+    {
+     "url": "https://developers.google.com/terms",
+     "read_at": "2026-10-05",
+     "state": "partial",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "dns.cloudflare",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://developers.cloudflare.com/1.1.1.1/terms-of-use/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "wayback",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": null
+    }
+   ]
+  },
+  {
+   "source_id": "wikimedia_pageviews",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://dumps.wikimedia.org/other/pageviews/readme.html",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "courtlistener",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": null
+    }
+   ]
+  },
+  {
+   "source_id": "gdacs",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://commission.europa.eu/legal-notice_en",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "crtsh",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": null
+    }
+   ]
+  },
+  {
+   "source_id": "xposedornot",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": null
+    }
+   ]
+  },
+  {
+   "source_id": "solana_rpc",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": null
+    }
+   ]
+  },
+  {
+   "source_id": "celestrak",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": null
+    }
+   ]
+  },
+  {
+   "source_id": "ckan_federation",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": null
+    }
+   ]
+  },
+  {
+   "source_id": "crypto_news",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": null
+    }
+   ]
+  },
+  {
+   "source_id": "ethereum_rpc",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.publicnode.com/terms",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.publicnode.com/terms",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.publicnode.com/terms",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.publicnode.com/terms",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "factcheck",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": null
+    }
+   ]
+  },
+  {
+   "source_id": "hackernews",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": null
+    }
+   ]
+  },
+  {
+   "source_id": "iss_position",
+   "license_status": "UNCLEAR",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://wheretheiss.at/w/developer",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "openalex",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://github.com/ourresearch/openalex-docs",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "pi_network",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": null
+    }
+   ]
+  },
+  {
+   "source_id": "rdap",
+   "license_status": "UNCLEAR",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://rdap.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "username.web",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": null
+    }
+   ]
+  },
+  {
+   "source_id": "who_don",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.who.int/about/policies/terms-of-use",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.who.int/about/policies/terms-of-use",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "who_emro",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.who.int/about/policies/terms-of-use",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.who.int/about/policies/terms-of-use",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "who_afro",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.who.int/about/policies/terms-of-use",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.who.int/about/policies/terms-of-use",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "bis_press",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.bis.org/terms_conditions.htm",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "opensanctions_updates",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.opensanctions.org/licensing/",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "open_meteo_severe",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://open-meteo.com/en/terms",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "opensky_states",
+   "license_status": "EXPIRED_OR_CHANGED",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://opensky-network.org/about/terms-of-use",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 503
+    }
+   ]
+  },
+  {
+   "source_id": "global_fishing_watch",
+   "license_status": "PROHIBITED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://globalfishingwatch.org/our-apis/documentation",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "epo_ops_patents",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.epo.org/en/searching-for-patents/data/web-services/ops",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "google_factcheck_tools",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://developers.google.com/fact-check/tools/api/terms",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "feodo_tracker",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://abuse.ch/terms-of-use/",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://abuse.ch/terms-of-use/",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "urlhaus_recent",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://abuse.ch/terms-of-use/",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://abuse.ch/terms-of-use/",
+     "read_at": "2026-10-04",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "snopes",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.snopes.com/terms-of-use/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.snopes.com/terms-of-use/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "politifact",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.politifact.com/copyright/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "factcheck_org",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.factcheck.org/copyright-policy/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.factcheck.org/copyright-policy/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "fullfact",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://fullfact.org/terms-and-conditions/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "lead_stories",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://leadstories.com/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "cointelegraph",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://cointelegraph.com/terms-and-privacy",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "bitcoin_magazine",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://bitcoinmagazine.com/terms-of-use",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "solana_news",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://solana.com/tos",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://solana.com/tos",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ethereum_foundation_blog",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://ethereum.org/en/terms-of-use/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://ethereum.org/en/terms-of-use/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "coindesk",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.coindesk.com/terms-of-use",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "pi_network_blog",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://minepi.com/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "bitcoin_optech",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://bitcoinops.org/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ecdc_threats",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.ecdc.europa.eu/en/copyright",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.ecdc.europa.eu/en/copyright",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "eluniversal_mx",
+   "license_status": "PROHIBITED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.eluniversal.com.mx/robots.txt",
+     "read_at": "2026-10-04",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "usgs_quakes_hour",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "usgs_quakes_day_m25",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "usgs_quakes_week_significant",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "nasa_eonet",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "nws_alerts",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "nhc_atlantic",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "nhc_pacific",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "tsunami_gov",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "noaa_swpc_alerts",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "noaa_swpc_kindex",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "nasa_donki",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "usgs_volcano",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "nist_cyber",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "bls_us",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "census_us",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "eia_electricity",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "noaa_coops_water",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "usgs_water_alerts",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "sec_edgar_current",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "fed_speeches",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "sec_edgar_10k",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "sec_litigation",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "sec_press",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "cftc_press",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ofac_recent",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "treasury_press",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "eia_today",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "usda_reports",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "cdc_outbreaks",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "fed_press",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "nasa_breaking",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "cisa_advisories",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "cisa_kev",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "nvd_recent",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "uspto_odp_patents",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "sam_gov_exclusions",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "usgs_m2m_landsat",
+   "license_status": "VERIFIED_ALLOWED",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.law.cornell.edu/uscode/text/17/105",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "emsc_quakes",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.seismicportal.eu/fdsn-wsevent.html",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "bgs_quakes",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.bgs.ac.uk/bgs-intellectual-property-rights/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "geonet_quakes",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.geonet.org.nz/policy",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "gdacs_alerts",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://commission.europa.eu/legal-notice_en",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://commission.europa.eu/legal-notice_en",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "reliefweb_disasters",
+   "license_status": "RESTRICTED",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://reliefweb.int/terms-conditions",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 202
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_andorra",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_austria",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_belgium",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_bosnia_herzegovina",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_bulgaria",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_croatia",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_cyprus",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_czechia",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_denmark",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_estonia",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_finland",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_france",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_germany",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_greece",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_hungary",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_iceland",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_ireland",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_israel",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_italy",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_latvia",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_lithuania",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_luxembourg",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_malta",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_moldova",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_montenegro",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_netherlands",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_norway",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_poland",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_portugal",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_republic_of_north_macedonia",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_romania",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_serbia",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_slovakia",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_slovenia",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_spain",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_sweden",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_switzerland",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_ukraine",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteoalarm_united_kingdom",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://api.meteoalarm.org/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "si_volcano_weekly",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://volcano.si.edu/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "nsidc_news",
+   "license_status": "UNCLEAR",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://nsidc.org/about/data-use-and-copyright",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "copernicus_news",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.copernicus.eu/en/access-data/copyright-and-licences",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "esa_observing",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.esa.int/Services/Terms_and_conditions",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "openaq_latest",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://docs.openaq.org/about/terms",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://docs.openaq.org/about/terms",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ietf_rfc",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://trustee.ietf.org/documents/trust-legal-provisions/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "w3c_news",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.w3.org/copyright/document-license-2023/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "jma_quakes",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.jma.go.jp/jma/kishou/info/coment.html",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.jma.go.jp/jma/en/copyright.html",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ingv_quakes",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.ingv.it/note-legali",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ign_spain_quakes",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.ign.es/resources/licencia/Condiciones_licenciaUso_IGN.pdf",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": "error"
+    }
+   ]
+  },
+  {
+   "source_id": "ga_quakes",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.ga.gov.au/copyright",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "nrcan_quakes",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://natural-resources.canada.ca/corporate/terms-conditions",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "metoffice_warnings",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.metoffice.gov.uk/policies/legal",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "dwd_warnings",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.dwd.de/DE/service/rechtliche_hinweise/rechtliche_hinweise_node.html",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "meteofrance_vigilance",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://meteofrance.com/droits-de-reproduction",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://meteofrance.com/droits-de-reproduction",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "bom_warnings",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.bom.gov.au/catalogue/data-feeds.shtml",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "imd_india",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://mausam.imd.gov.in/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "cwa_taiwan",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.cwa.gov.tw/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "kma_korea",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.weather.go.kr/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "pagasa_philippines",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.pagasa.dost.gov.ph/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "inmet_brazil",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://portal.inmet.gov.br/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "smn_mexico",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://smn.conagua.gob.mx/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "saws_south_africa",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.weathersa.co.za/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 503
+    }
+   ]
+  },
+  {
+   "source_id": "ukhsa_alerts",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.gov.uk/help/terms-conditions",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "paho_alerts",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.paho.org/en",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "africa_cdc",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://africacdc.org/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ons_uk",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.ons.gov.uk/methodology/geography/licences",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "boj_japan",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.boj.or.jp/en/about/copyright.htm",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "boe_uk",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.bankofengland.co.uk/legal",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "rbi_india",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.rbi.org.in/Scripts/Disclaimer.aspx",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "oecd_newsroom",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.oecd.org/en/about/terms-conditions.html",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "wto_news",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.wto.org/english/info_e/disclaimer_e.htm",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "uk_carbon_intensity",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://carbonintensity.org.uk/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "entsoe_transparency",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://transparency.entsoe.eu/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "pm25_lass",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://pm25.lass-net.org/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "openaq_measurements",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://docs.openaq.org/about/terms",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://docs.openaq.org/about/terms",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ripe_atlas_anchors",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.ripe.net/about-us/legal/ripe-atlas-service-terms-and-conditions/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ripe_stat_announced",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.ripe.net/about-us/legal/ripestat-service-terms-and-conditions/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ooni_measurements",
+   "license_status": "UNCLEAR",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://ooni.org/about/data-policy/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "internet_outage_isoc",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.internetsociety.org/terms-of-use/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "gov_uk_aaib",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.gov.uk/help/terms-conditions",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "gov_uk_maib",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.gov.uk/help/terms-conditions",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "snb_press",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.snb.ch/en/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "boc_press",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.bankofcanada.ca/terms/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.bankofcanada.ca/terms/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "rba_media",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.rba.gov.au/copyright/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "uk_gazette",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.thegazette.co.uk/terms-and-conditions",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.thegazette.co.uk/all-notices/notice/data.feed?results-page-size=100",
+     "read_at": "2026-10-08",
+     "state": "unreachable",
+     "http": "error"
+    }
+   ]
+  },
+  {
+   "source_id": "bse_india",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.bseindia.com/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "mempool_blocks",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://mempool.space/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "blockstream_blocks",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://blockstream.com/terms/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "fca_uk",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.fca.org.uk/legal",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "esma_eu",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.esma.europa.eu/about-esma/legal-notice-and-data-protection",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "finra_actions",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.finra.org/terms-of-use",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "eu_sanctions_map",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.consilium.europa.eu/en/legal-notice/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "iea_news",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.iea.org/terms",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "opec_press",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.opec.org/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "irena_news",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.irena.org/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "coingecko_trending",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.coingecko.com/en/api_terms",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "mempool_space",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://mempool.space/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "reliefweb_reports",
+   "license_status": "RESTRICTED",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://reliefweb.int/terms-conditions",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 202
+    }
+   ]
+  },
+  {
+   "source_id": "unhcr_news",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.unhcr.org/terms-and-conditions",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "ifrc_appeals",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://go.ifrc.org/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "fao_giews",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.fao.org/contact-us/terms/en/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.fao.org/contact-us/terms/en/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ecb_press",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.ecb.europa.eu/services/using-our-site/disclaimer/html/index.en.html",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "imf_news",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.imf.org/en/About/copyright-and-terms",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "worldbank_news",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.worldbank.org/ext/en/legal/terms-conditions",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "eurostat_releases",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://ec.europa.eu/eurostat/help/copyright-notice",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://ec.europa.eu/eurostat/help/copyright-notice",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "uk_companies_house",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.gov.uk/government/organisations/companies-house/about/about-our-services",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ted_europa",
+   "license_status": "UNCLEAR",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://op.europa.eu/en/web/about-us/legal-notices/publications-office-of-the-european-union-copyright",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://docs.ted.europa.eu/api/latest/index.html",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "worldbank_procurement",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.worldbank.org/ext/en/legal/terms-conditions",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ncsc_uk",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.ncsc.gov.uk/section/about-this-website/terms-and-conditions",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "cert_eu",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://cert.europa.eu/legal-notice",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "acsc_australia",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.cyber.gov.au/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 503
+    }
+   ]
+  },
+  {
+   "source_id": "jpcert",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.jpcert.or.jp/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "cert_fr",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.cert.ssi.gouv.fr/mentions-legales/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "bsi_germany",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.bsi.bund.de/DE/Service/Nutzungsbedingungen/Nutzungsbedingungen_node.html",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "osv_dev",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://google.github.io/osv.dev/data/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "github_advisories",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://google.github.io/osv.dev/data/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "microsoft_msrc",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.microsoft.com/en-us/legal/terms-of-use",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ubuntu_usn",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://ubuntu.com/legal",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "redhat_security",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.redhat.com/en/about/terms-use",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "krebs",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://krebsonsecurity.com/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "bleepingcomputer",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.bleepingcomputer.com/terms-of-use/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "thehackernews",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://thehackernews.com/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "sans_isc",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://isc.sans.edu/api/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "project_zero",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://projectzero.google/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "arxiv_cs",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://info.arxiv.org/help/api/tou.html",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "nature_news",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.nature.com/info/terms-and-conditions",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.nature.com/info/terms-and-conditions",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "science_news",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.science.org/content/page/terms-service",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "reuters_world",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.reutersagency.com/en/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "ap_topnews",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://feedx.net/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "afp_via_gdelt",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.gdeltproject.org/about.html",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "bbc_world",
+   "license_status": "RESTRICTED",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.bbc.co.uk/usingthebbc/terms/can-i-use-bbc-content/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    },
+    {
+     "url": "https://www.bbc.com/usingthebbc/terms-of-use/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "aljazeera",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.aljazeera.com/terms-and-conditions/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.aljazeera.com/terms-and-conditions/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "dw_world",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://corporate.dw.com/en/legal-notice/a-15718492",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "france24",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.france24.com/en/legal-notice",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 404
+    }
+   ]
+  },
+  {
+   "source_id": "npr_world",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.npr.org/about-npr/179876898/terms-of-use",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.npr.org/about-npr/179876898/terms-of-use",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "abc_au",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://help.abc.net.au/hc/en-us/articles/360001548096-ABC-Terms-of-Use",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "cbc_world",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://cbc.radio-canada.ca/en/vision/governance/terms-of-use-digital-services",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "guardian_world",
+   "license_status": "RESTRICTED",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.theguardian.com/help/terms-of-service",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    },
+    {
+     "url": "https://www.theguardian.com/help/terms-of-service",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "wikipedia_current",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "un_news",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.un.org/en/about-us/copyright",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.un.org/en/about-us/terms-of-use",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "paho_news",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.paho.org/en",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "aljazeera_arabic",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.aljazeera.com/terms-and-conditions/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.aljazeera.com/terms-and-conditions/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "bbc_arabic",
+   "license_status": "RESTRICTED",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.bbc.co.uk/usingthebbc/terms/can-i-use-bbc-content/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    },
+    {
+     "url": "https://www.bbc.com/usingthebbc/terms-of-use/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "france24_arabic",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.france24.com/en/legal-notice",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 404
+    }
+   ]
+  },
+  {
+   "source_id": "middleeasteye",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.middleeasteye.net/terms-and-conditions",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "allafrica",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://allafrica.com/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "africanews",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.africanews.com/terms-and-conditions/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "nhk_world",
+   "license_status": "RESTRICTED",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www3.nhk.or.jp/nhkworld/en/terms/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "the_hindu",
+   "license_status": "RESTRICTED",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.thehindu.com/termsofuse/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "channel_news_asia",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.channelnewsasia.com/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "scmp_news",
+   "license_status": "PROHIBITED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.scmp.com/terms-conditions",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.scmp.com/terms-conditions",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "elpais_america",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://elpais.com/estaticos/aviso-legal/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "infobae",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.infobae.com/terminos-y-condiciones/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "euronews",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.euronews.com/terms-of-use",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 404
+    }
+   ]
+  },
+  {
+   "source_id": "lemonde_international",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.lemonde.fr/mentions-legales/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "spiegel_international",
+   "license_status": "PROHIBITED",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.spiegel.de/nutzungsbedingungen",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "alarabiya",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.alarabiya.net/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "skynewsarabia",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.skynewsarabia.com/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "aps_algeria",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.aps.dz/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "map_morocco",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.mapnews.ma/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ahram_egypt",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://gate.ahram.org.eg/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "annahar_lebanon",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.annahar.com/terms",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://www.annahar.com/terms",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ndtv_india",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.ndtv.com/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "dawn_pakistan",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.dawn.com/terms",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "thedailystar_bd",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.thedailystar.net/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "kathmandupost",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://kathmandupost.com/terms-of-use",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "nation_kenya",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://nation.africa/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "punch_nigeria",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://punchng.com/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "news24_za",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.news24.com/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ethiopia_addisstandard",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://addisstandard.com/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "clarin_ar",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.clarin.com/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "folha_br",
+   "license_status": "RESTRICTED",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.folha.uol.com.br/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "rferl",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.rferl.org/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "kyivindependent",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://kyivindependent.com/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "jakartapost",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.thejakartapost.com/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "bangkokpost",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.bangkokpost.com/",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 451
+    }
+   ]
+  },
+  {
+   "source_id": "rnz_pacific",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.rnz.co.nz/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "worldbank_debarred",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.worldbank.org/ext/en/legal/terms-conditions",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "copernicus_dataspace",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://dataspace.copernicus.eu/terms-and-conditions",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:us_data_gov",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://catalog.data.gov",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    },
+    {
+     "url": "https://catalog.data.gov",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:uk_data_gov",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://data.gov.uk",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:ca_open",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://open.canada.ca/en/open-government-licence-canada",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://open.canada.ca/data",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:au_data_gov",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://data.gov.au/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://data.gov.au/data",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:nz_data_govt",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://catalogue.data.govt.nz",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    },
+    {
+     "url": "https://catalogue.data.govt.nz",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:ie_data_gov",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://data.gov.ie/pages/opendatalicence",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://data.gov.ie",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:eu_data_europa",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://data.europa.eu/api/hub/search",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    },
+    {
+     "url": "https://data.europa.eu/api/hub/search",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:de_govdata",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.govdata.de/impressum",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    },
+    {
+     "url": "https://ckan.govdata.de",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:ch_opendata",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://opendata.swiss/en/terms-of-use/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://opendata.swiss",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:at_data_gv",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.data.gv.at",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    },
+    {
+     "url": "https://www.data.gv.at",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:nl_overheid",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://data.overheid.nl/data",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    },
+    {
+     "url": "https://data.overheid.nl/data",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:es_datos",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://datos.gob.es/apidata",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    },
+    {
+     "url": "https://datos.gob.es/apidata",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:fi_avoindata",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.avoindata.fi/data",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    },
+    {
+     "url": "https://www.avoindata.fi/data",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:se_dataportal",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://admin.dataportal.se/store",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    },
+    {
+     "url": "https://admin.dataportal.se/store",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:no_data",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://data.norge.no",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    },
+    {
+     "url": "https://data.norge.no",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:it_dati",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.dati.gov.it/opendata",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    },
+    {
+     "url": "https://www.dati.gov.it/opendata",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:pt_dados",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://dados.gov.pt",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    },
+    {
+     "url": "https://dados.gov.pt",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:ro_data_gov",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://data.gov.ro",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 503
+    },
+    {
+     "url": "https://data.gov.ro",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 503
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:br_dados",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://dados.gov.br/dados",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    },
+    {
+     "url": "https://dados.gov.br/dados",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:mx_datos",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://datos.gob.mx/busca",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 404
+    },
+    {
+     "url": "https://datos.gob.mx/busca",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 404
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:cl_datos",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://datos.gob.cl/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    },
+    {
+     "url": "https://datos.gob.cl",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:ar_datos",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://datos.gob.ar/acerca/seccion/marco-legal",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 404
+    },
+    {
+     "url": "https://datos.gob.ar",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:africa_open_data",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://africaopendata.org",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    },
+    {
+     "url": "https://africaopendata.org",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:ke_open_data",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://africaopendata.org",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    },
+    {
+     "url": "https://africaopendata.org",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:sg_data_gov",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://data.gov.sg",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    },
+    {
+     "url": "https://data.gov.sg",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:jp_data_go",
+   "license_status": "UNCLEAR",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://www.data.go.jp/terms-of-use",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 404
+    },
+    {
+     "url": "https://www.data.go.jp/data",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": "error"
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:kr_data_go",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://www.data.go.kr",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    },
+    {
+     "url": "https://www.data.go.kr",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:hdx_unocha",
+   "license_status": "LEGAL_REVIEW_REQUIRED",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://data.humdata.org/faqs/licenses",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 202
+    },
+    {
+     "url": "https://data.humdata.org",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 202
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:who_gho",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://apps.who.int/gho",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    },
+    {
+     "url": "https://apps.who.int/gho",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "ckan:energydata_info",
+   "license_status": "VERIFIED_CONDITIONAL",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://energydata.info/terms",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    },
+    {
+     "url": "https://energydata.info",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "username.web:github",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://docs.github.com/en/site-policy/acceptable-use-policies/github-acceptable-use-policies",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "username.web:devto",
+   "license_status": "RESTRICTED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://dev.to/terms",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "username.web:replit",
+   "license_status": "PROHIBITED",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://replit.com/terms-of-service",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "username.web:reddit",
+   "license_status": "RESTRICTED",
+   "state": "unreachable",
+   "quotes": [
+    {
+     "url": "https://redditinc.com/policies/data-api-terms",
+     "read_at": "2026-10-05",
+     "state": "unreachable",
+     "http": 403
+    }
+   ]
+  },
+  {
+   "source_id": "username.web:gitlab",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://about.gitlab.com/terms/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "username.web:npm",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://docs.npmjs.com/policies/terms",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "username.web:pypi",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://policies.python.org/pypi.org/Terms-of-Use/",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "username.web:dockerhub",
+   "license_status": "UNCLEAR",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.docker.com/legal/docker-terms-service/",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "username.web:chesscom",
+   "license_status": "UNCLEAR",
+   "state": "present",
+   "quotes": [
+    {
+     "url": "https://www.chess.com/news/view/published-data-api",
+     "read_at": "2026-10-05",
+     "state": "present",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "username.web:keybase",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://keybase.io/docs/terms",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  },
+  {
+   "source_id": "username.web:hackernews",
+   "license_status": "UNCLEAR",
+   "state": "not-checkable",
+   "quotes": [
+    {
+     "url": "https://github.com/HackerNews/API",
+     "read_at": "2026-10-05",
+     "state": "not-checkable",
+     "http": 200
+    }
+   ]
+  }
+ ]
+}

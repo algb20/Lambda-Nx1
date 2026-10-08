@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { classifyGeo, investigateGeo } from './geo'
+import { classifyGeo, investigateGeo, FLIGHTS_WITHHELD } from './geo'
+import { geoGatewaySources, geoGatewayCatalog } from '../engine/sources'
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
@@ -33,24 +34,22 @@ describe('investigateGeo', () => {
     expect(r.findings.some((f) => /Place: Eiffel Tower, Paris, France/.test(f.claim))).toBe(true)
   })
 
-  it('reads a live flight state via OpenSky', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn((u: string) => {
-        const url = new URL(u)
-        if (url.hostname === 'opensky-network.org')
-          return Promise.resolve(
-            json({ time: 1, states: [['4ca7b3', 'RYR123 ', 'Ireland', 1, 1, 2.2945, 48.8584, 10000, false, 240, 90, 0, null, 10500, '1000', false, 0]] }),
-          )
-        return Promise.resolve(json({}, 404))
-      }),
-    )
-    const r = await investigateGeo('4ca7b3')
-    expect(r.kind).toBe('flight')
-    expect(r.findings[0].claim).toMatch(/Flight RYR123 \(Ireland\): 48\.858, 2\.295, 10000 m, 240 m\/s/)
+  /**
+   * OpenSky's terms require a prior agreement for commercial REST use. The
+   * catalogue and the reconciled baseline already excluded it; the gateway had
+   * kept calling it (batch 05). A flight query is refused with the reason, and
+   * nothing is sent to OpenSky.
+   */
+  it('withholds live flight lookup, says why, and never calls OpenSky', async () => {
+    const fetchSpy = vi.fn(() => Promise.resolve(json({}, 404)))
+    vi.stubGlobal('fetch', fetchSpy)
+    await expect(investigateGeo('4ca7b3')).rejects.toThrow(FLIGHTS_WITHHELD)
+    expect(fetchSpy).not.toHaveBeenCalled()
+    expect(geoGatewaySources.map((s) => s.key)).not.toContain('opensky')
+    expect(geoGatewayCatalog.find((r) => r.key === 'opensky')?.enabled).toBe(false)
   })
 
   it('rejects too-short input', async () => {
-    await expect(investigateGeo('x')).rejects.toThrow(/place, "lat,lon", or an aircraft/)
+    await expect(investigateGeo('x')).rejects.toThrow(/place or a "lat,lon"/)
   })
 })

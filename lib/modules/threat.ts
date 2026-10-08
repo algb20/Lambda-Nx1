@@ -36,6 +36,10 @@ export interface ThreatReport {
   summary: { hits: number; sourcesOk: number; sourcesFailed: number }
 }
 
+/** Said plainly rather than answered with "not flagged" (batch 07). */
+export const THREAT_WITHHELD =
+  'Threat lookup is withheld: its sources (abuse.ch) admit only authenticated users, and commercial use may require a subscription. Lambda NX does not hold that access yet, so an indicator cannot be checked — which is not the same as clean.'
+
 export async function investigateThreat(input: string): Promise<ThreatReport> {
   registerThreatGateway()
   const indicator = input.trim()
@@ -43,6 +47,9 @@ export async function investigateThreat(input: string): Promise<ThreatReport> {
   if (type === 'unknown') {
     throw new Error('Enter an IP address, domain, URL, or file hash')
   }
+  // No permitted source means no check — and an unchecked indicator must not
+  // come back looking clean (S invariant 15: missing data is never "no event").
+  if (registry.sourcesFor('threat').length === 0) throw new Error(THREAT_WITHHELD)
   const generatedAt = new Date().toISOString()
   const value = type === 'url' ? hostOf(indicator) : indicator
 

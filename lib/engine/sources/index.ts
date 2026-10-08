@@ -67,21 +67,39 @@ import { piNetworkChain, ethereumChain, solanaChain, exchangeVenues, multiChainS
 import { ckanFederation, openDataActivePortalCount } from './opendata'
 import { ecbYieldCurve, ecbPolicyRate, referenceRates } from './rates'
 
-export const moduleOneSources: Source[] = [
-  cloudflareDns,
-  googleDns,
-  rdap,
-  crtsh,
-  wayback,
-  urlscan,
-  internetdb,
-]
+/**
+ * `urlscan` and `internetdb` (Shodan) are out of the domain gateway (batch 06).
+ * Their own terms, read 2026-10-04:
+ * - Shodan InternetDB: "free for non-commercial use … If you're using the
+ *   InternetDB API to make money then you need an enterprise license."
+ * - urlscan.io: "Commercial use of any part of our service requires express
+ *   written permission."
+ * This product has paid tiers. The adapters stay for the day a licence or
+ * permission exists; the report hides the two empty sections.
+ */
+export const moduleOneSources: Source[] = [cloudflareDns, googleDns, rdap, crtsh, wayback]
 
 export const moduleTwoSources: Source[] = [usernameWeb, xposedornot, gravatar]
 
-export const threatGatewaySources: Source[] = [feodo, urlhaus, threatfox]
+/**
+ * Empty until abuse.ch access is arranged (batch 07): its terms admit only
+ * authenticated users and say commercial use may need a Spamhaus subscription;
+ * ThreatFox and URLhaus already answered 401 to every keyless call. The
+ * threat gateway says so plainly rather than reporting "not flagged" — an
+ * empty check is not a clean bill (S invariant 15).
+ */
+export const threatGatewaySources: Source[] = []
 
-export const financeGatewaySources: Source[] = [opensanctions, gleif, mempool]
+/**
+ * OpenSanctions is out of the gateway (batch 06). Two facts, both measured on
+ * 2026-10-04: its hosted API answers **401 "No API key provided"** to every
+ * keyless call, so the source had been failing on each use; and its data is
+ * **CC BY-NC 4.0** — "commercial use requires a paid license"
+ * (opensanctions.org/licensing). This product has paid tiers. The adapter is
+ * kept for the day a commercial licence and key exist; sanctions coverage
+ * continues through the official lists in the catalogue.
+ */
+export const financeGatewaySources: Source[] = [gleif, mempool]
 
 export const marketsGatewaySources: Source[] = [coingecko, edgar, frankfurter, worldbankEconomy]
 
@@ -109,7 +127,15 @@ export const marketsBoardSources: Source[] = [
   frankfurterBoard,
 ]
 
-export const geoGatewaySources: Source[] = [nominatim, opensky]
+/**
+ * OpenSky is out of the gateway, matching its catalogue record and the
+ * reconciled baseline (§34: "OpenSky excluded by the licence gate"): its terms
+ * require a prior agreement for commercial REST use, and this product has paid
+ * tiers. The coded adapter had stayed in this list, so the gateway called the
+ * same API the licence registry refuses — found 2026-10-04 (batch 05). The
+ * adapter is kept for the day an agreement exists.
+ */
+export const geoGatewaySources: Source[] = [nominatim]
 
 export const researchGatewaySources: Source[] = [openalex, crossref, pubmed, githubTrend, arxiv, hackerNews]
 
@@ -155,8 +181,9 @@ export const moduleOneSourceCatalog: CatalogRow[] = [
   { key: 'rdap', name: 'RDAP registration', capability: 'whois', passive: true, enabled: true },
   { key: 'crtsh', name: 'crt.sh Certificate Transparency', capability: 'subdomains', passive: true, enabled: true },
   { key: 'wayback', name: 'Wayback Machine', capability: 'archive', passive: true, enabled: true },
-  { key: 'urlscan', name: 'urlscan.io', capability: 'tech', passive: true, enabled: true },
-  { key: 'shodan.internetdb', name: 'Shodan InternetDB', capability: 'ip_reputation', passive: true, enabled: true },
+  // Withheld: commercial use needs urlscan's written permission / a Shodan enterprise licence.
+  { key: 'urlscan', name: 'urlscan.io', capability: 'tech', passive: true, enabled: false },
+  { key: 'shodan.internetdb', name: 'Shodan InternetDB', capability: 'ip_reputation', passive: true, enabled: false },
 ]
 
 export const moduleTwoSourceCatalog: CatalogRow[] = [
@@ -166,13 +193,15 @@ export const moduleTwoSourceCatalog: CatalogRow[] = [
 ]
 
 export const threatGatewayCatalog: CatalogRow[] = [
-  { key: 'feodo', name: 'Feodo Tracker (abuse.ch)', capability: 'threat', passive: true, enabled: true },
-  { key: 'urlhaus', name: 'URLhaus (abuse.ch)', capability: 'threat', passive: true, enabled: true },
-  { key: 'threatfox', name: 'ThreatFox (abuse.ch)', capability: 'threat', passive: true, enabled: true },
+  // Withheld until abuse.ch access is arranged — see threatGatewaySources.
+  { key: 'feodo', name: 'Feodo Tracker (abuse.ch)', capability: 'threat', passive: true, enabled: false },
+  { key: 'urlhaus', name: 'URLhaus (abuse.ch)', capability: 'threat', passive: true, enabled: false },
+  { key: 'threatfox', name: 'ThreatFox (abuse.ch)', capability: 'threat', passive: true, enabled: false },
 ]
 
 export const financeGatewayCatalog: CatalogRow[] = [
-  { key: 'opensanctions', name: 'OpenSanctions', capability: 'sanctions', passive: true, enabled: true },
+  // Withheld: API key and a commercial licence required — see financeGatewaySources.
+  { key: 'opensanctions', name: 'OpenSanctions', capability: 'sanctions', passive: true, enabled: false },
   { key: 'gleif', name: 'GLEIF (LEI)', capability: 'sanctions', passive: true, enabled: true },
   { key: 'mempool', name: 'mempool.space (BTC)', capability: 'wallet', passive: true, enabled: true },
 ]
@@ -235,7 +264,8 @@ export const marketsBoardCatalog: CatalogRow[] = [
 
 export const geoGatewayCatalog: CatalogRow[] = [
   { key: 'nominatim', name: 'Nominatim (OpenStreetMap)', capability: 'geo', passive: true, enabled: true },
-  { key: 'opensky', name: 'OpenSky Network (flights)', capability: 'geo', passive: true, enabled: true },
+  // Withheld until a commercial agreement with OpenSky exists — see geoGatewaySources.
+  { key: 'opensky', name: 'OpenSky Network (flights)', capability: 'geo', passive: true, enabled: false },
 ]
 
 export const researchGatewayCatalog: CatalogRow[] = [
@@ -268,7 +298,8 @@ export const worldEventsGatewayCatalog: CatalogRow[] = [
   { key: 'usgs_recent', name: 'USGS seismic (M2.5+ past day)', capability: 'world_events', passive: true, enabled: true },
   { key: 'gdacs', name: 'GDACS (UN/EC disaster alerts)', capability: 'world_events', passive: true, enabled: true },
   { key: 'nws_alerts', name: 'NOAA/NWS active alerts (US)', capability: 'world_events', passive: true, enabled: true },
-  { key: 'who_outbreaks', name: 'WHO Disease Outbreak News', capability: 'world_events', passive: true, enabled: true },
+  // Withheld: WHO's terms require written authorization for commercial use.
+  { key: 'who_outbreaks', name: 'WHO Disease Outbreak News', capability: 'world_events', passive: true, enabled: false },
   { key: 'iss_position', name: 'ISS live position', capability: 'world_events', passive: true, enabled: true },
 ]
 

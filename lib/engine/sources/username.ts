@@ -16,11 +16,21 @@ interface Platform {
 
 const byStatus = (status: number) => status === 200
 
+/**
+ * Removed in batch 10, by each site's own terms (read 2026-10-05):
+ * - GitHub — information from the Service, "whether scraped, collected through
+ *   our API, or obtained otherwise", may be used for research (non-personal,
+ *   open-access publications) or archiving; a commercial profile lookup is
+ *   neither.
+ * - Dev.to — "personal, non-commercial transitory viewing only".
+ * - Replit — "Scraping or otherwise obtaining content … for any other purpose"
+ *   is prohibited.
+ * - Reddit — "If you are interested in using the Data APIs for commercial
+ *   purposes … you will need to enter into a separate agreement with Reddit."
+ * The remaining sites state no rule on this use (UNCLEAR in the registry).
+ */
 const PLATFORMS: Platform[] = [
-  { name: 'GitHub', host: 'github.com', url: (u) => `https://github.com/${u}`, present: byStatus },
   { name: 'GitLab', host: 'gitlab.com', url: (u) => `https://gitlab.com/${u}`, present: byStatus },
-  { name: 'Dev.to', host: 'dev.to', url: (u) => `https://dev.to/${u}`, present: byStatus },
-  { name: 'Replit', host: 'replit.com', url: (u) => `https://replit.com/@${u}`, present: byStatus },
   { name: 'npm', host: 'www.npmjs.com', url: (u) => `https://www.npmjs.com/~${u}`, present: byStatus },
   { name: 'PyPI', host: 'pypi.org', url: (u) => `https://pypi.org/user/${u}/`, present: byStatus },
   {
@@ -33,12 +43,6 @@ const PLATFORMS: Platform[] = [
     name: 'Chess.com',
     host: 'api.chess.com',
     url: (u) => `https://api.chess.com/pub/player/${u}`,
-    present: byStatus,
-  },
-  {
-    name: 'Reddit',
-    host: 'www.reddit.com',
-    url: (u) => `https://www.reddit.com/user/${u}/about.json`,
     present: byStatus,
   },
   {

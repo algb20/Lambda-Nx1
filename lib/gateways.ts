@@ -106,7 +106,7 @@ export const GATEWAY_GUIDANCE: Record<Mode, GatewayGuidance> = {
       'Everything public about a domain: DNS records, registration, subdomains, hosting, the IPs it resolves to, and how that has changed over time.',
     example: 'wikipedia.org',
     limit:
-      'Passive only — no port scans, no probing, no connection to the domain. Absence of a record is not evidence of absence.',
+      'Passive only — no port scans, no probing, no connection to the domain. Absence of a record is not evidence of absence. Open-port exposure and scan history are withheld until the providers\' commercial licences exist.',
   },
   username: {
     answers:
@@ -274,7 +274,7 @@ export const GATEWAY_GUIDANCE: Record<Mode, GatewayGuidance> = {
   },
   geo: {
     answers:
-      'A place, a coordinate, or an aircraft by its ICAO24 hex — with the public position and transport data around it.',
+      'A place or a coordinate — with the public position and transport data around it. Live flight lookup is withheld until a licence agreement with OpenSky exists.',
     example: '48.8584,2.2945',
     limit:
       'Public feeds only, at their own resolution and delay. It never tracks a person.',

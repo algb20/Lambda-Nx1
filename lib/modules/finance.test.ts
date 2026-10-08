@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { classifyFinance, investigateFinance } from './finance'
+import { financeGatewaySources } from '../engine/sources'
 
 function res(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
@@ -16,23 +17,24 @@ describe('classifyFinance', () => {
 })
 
 describe('investigateFinance', () => {
-  it('screens an entity against sanctions + GLEIF', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn((u: string) => {
-        const host = new URL(u).hostname
-        if (host === 'api.opensanctions.org')
-          return Promise.resolve(res({ results: [{ caption: 'John Doe', schema: 'Person', datasets: ['us_ofac'] }] }))
-        if (host === 'api.gleif.org')
-          return Promise.resolve(res({ data: [{ attributes: { lei: '5493001KJTIIGC8Y1R12', entity: { legalName: { name: 'Acme' } } } }] }))
-        return Promise.resolve(res({}, 404))
-      }),
-    )
+  /**
+   * OpenSanctions is withheld (batch 06): its API refuses keyless calls (401)
+   * and its data is CC BY-NC — commercial use needs a paid licence. The entity
+   * screen therefore reads GLEIF, and never calls OpenSanctions.
+   */
+  it('identifies an entity through GLEIF and never calls OpenSanctions', async () => {
+    const fetchSpy = vi.fn((u: string) => {
+      const host = new URL(u).hostname
+      if (host === 'api.gleif.org')
+        return Promise.resolve(res({ data: [{ attributes: { lei: '5493001KJTIIGC8Y1R12', entity: { legalName: { name: 'Acme' } } } }] }))
+      return Promise.resolve(res({}, 404))
+    })
+    vi.stubGlobal('fetch', fetchSpy)
     const report = await investigateFinance('Acme')
     expect(report.type).toBe('entity')
-    expect(report.summary.matches).toBe(2)
-    expect(report.findings.some((f) => /Sanctions\/PEP/.test(f.claim))).toBe(true)
     expect(report.findings.some((f) => /GLEIF/.test(f.claim))).toBe(true)
+    expect(fetchSpy.mock.calls.some((c) => new URL(String(c[0])).hostname === 'api.opensanctions.org')).toBe(false)
+    expect(financeGatewaySources.map((s) => s.key)).not.toContain('opensanctions')
   })
 
   it('reads Bitcoin ledger facts for an address', async () => {

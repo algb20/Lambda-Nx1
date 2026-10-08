@@ -1,5 +1,5 @@
 import type { CatalogSource } from '../types'
-import { publicFeed } from '../licence'
+import { nonCommercial, publicFeed } from '../licence'
 
 /**
  * Fact-checking publishers — the claim record.
@@ -54,7 +54,10 @@ export const FACTCHECK_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'C',
     independence: 'snopes',
-    licence: publicFeed('Snopes', 'https://www.snopes.com/terms-of-use/'),
+    // Terms (read 2026-10-05): "You may view and print content for personal,
+    // non-commercial use only"; "Use automated systems (bots, scrapers) without
+    // written permission" is prohibited. RESTRICTED (batch 10).
+    licence: nonCommercial('Snopes — personal, non-commercial; automated access needs written permission', 'https://www.snopes.com/terms-of-use/'),
     minIntervalSec: 1800,
     keyless: true,
     enabled: false,
@@ -71,7 +74,10 @@ export const FACTCHECK_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'C',
     independence: 'fullfact',
-    licence: publicFeed('Full Fact', 'https://fullfact.org/about/legal/'),
+    // "The content of this website is copyright Full Fact unless otherwise
+    // stated. For licensing requests, please contact us." No grant, no ban on
+    // the feed: LEGAL_REVIEW_REQUIRED in the registry; kept running (R317).
+    licence: publicFeed('Full Fact', 'https://fullfact.org/terms-and-conditions/'),
     minIntervalSec: 1800,
     keyless: true,
     enabled: false,
@@ -88,7 +94,9 @@ export const FACTCHECK_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'C',
     independence: 'politifact',
-    licence: publicFeed('PolitiFact', 'https://www.politifact.com/terms-of-use/'),
+    // Copyright page (read 2026-10-05): "The site's content is for your personal,
+    // non-commercial use." RESTRICTED (batch 10).
+    licence: nonCommercial('PolitiFact — personal, non-commercial use', 'https://www.politifact.com/copyright/'),
     minIntervalSec: 1800,
     keyless: true,
     enabled: false,
@@ -105,7 +113,10 @@ export const FACTCHECK_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'C',
     independence: 'factcheck-org',
-    licence: publicFeed('FactCheck.org', 'https://www.factcheck.org/terms-of-use/'),
+    // Copyright policy (read 2026-10-05): articles "may be reprinted or
+    // distributed, without charge, online", with FactCheck.org credited
+    // prominently. VERIFIED_CONDITIONAL.
+    licence: publicFeed('FactCheck.org', 'https://www.factcheck.org/copyright-policy/'),
     minIntervalSec: 1800,
     keyless: true,
     enabled: false,

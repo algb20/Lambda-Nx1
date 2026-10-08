@@ -252,3 +252,18 @@ Each conflict follows CONFLICT → EVIDENCE → IMPACT → PROPOSED RESOLUTION �
 | Research-owner specification work on the RESEARCH REQUIRED / SPECIFICATION rows | Production publishing (R) |
 | Maintenance batches the owner authorises (e.g. D-01 Next.js 15.5.27) | Phase 31 |
 | Owner actions: Netlify deploy lock; source-population decisions | — |
+
+---
+
+## F. Update after the Recovery Supplement (ledger R297)
+
+See `SUPPLEMENT_INTAKE_2026-10-04.md`.
+
+| Item | Change |
+|---|---|
+| **B.3 Phase 28 / 29** | Unchanged: VERBATIM in the Build Package (Technology; Real-Time/Live). The Supplement's "Phase 28 — Geopolitical / Phase 29 — Technology" are Master **sections** §28/§29, not phases. **SC-01** awaits approval. |
+| **B.3 30.27.2–5** | Status recorded at the more conservative value — **SPECIFICATION IN PROGRESS** — until GAP-S1 is decided (**SC-02**). 30.26 stays SPECIFIED (reconstructed). |
+| **C.2 rows** affected by SC-02 — G09, G10, G11, G12, G13, G14 | "Next stage" moves from CONTRACT to **SPECIFICATION** |
+| **GAP-S2** | The Supplement confirms that exact B, I, J, N, O and P texts are not in current files: **RECOVERY REQUIRED** |
+| **GAP-S4** | Partly answered: B, C, I and J existed as stages (**SC-04**). The sequence needs amending by the research owner. |
+| Resumption | Still **S** (owner decision 2). The Supplement's "M continuation target" is the superseded pointer (**SC-03**). |

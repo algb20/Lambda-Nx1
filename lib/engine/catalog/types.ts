@@ -238,6 +238,18 @@ export interface CatalogSource {
      * than publishing half a sentence.
      */
     titleTemplate?: string
+    /**
+     * The record's own page, built from its fields, for publishers whose API
+     * gives only a relative path. Same `{field}` rules as `titleTemplate`; the
+     * result is used only if it is an absolute http(s) URL, otherwise the
+     * ordinary `url` lookup applies. It is a link for the reader — the engine
+     * never fetches it, so it does not widen the guardrail's host list.
+     *
+     * WHO's Disease Outbreak News API carries `ItemDefaultUrl: "/2026-DON618"`;
+     * without this every finding would cite the API endpoint instead of the
+     * outbreak notice it came from.
+     */
+    urlTemplate?: string
     title?: string
     url?: string
     time?: string
@@ -246,6 +258,46 @@ export interface CatalogSource {
     summary?: string
     magnitude?: string
   }
+
+  /**
+   * Addresses this record used before, newest first — kept when a publisher
+   * moves a feed and the record is repaired (owner R312: "preserve the old URL
+   * as historical metadata"). `until` is the date the replacement was verified;
+   * `why` is what was observed at the old address. Never fetched.
+   */
+  formerUrls?: { url: string; until: string; why: string }[]
+
+  /**
+   * Which feed items this record may keep, judged on each item's own XML.
+   *
+   * A licence can cover a publisher's notices and stop short of the people in
+   * them. The Gazette is the case that needed it: its content is OGL v3.0, and
+   * the OGL "does not cover the re-use of personal data". The all-notices feed
+   * mixes company insolvency (codes 24xx) and disclaimers (26xx) with
+   * bankruptcy orders and deceased estates (25xx, 29xx), whose headlines are
+   * private individuals' names. Charter §3 forbids those as findings in any
+   * case. Items that fail the test are dropped before they are parsed, so
+   * nothing about them is stored or shown (R321).
+   */
+  keepItem?: { test: (itemXml: string) => boolean; why: string }
+
+  /**
+   * How the feed reaches us when its host is not the publisher's own (GL-14).
+   *
+   * - `publisher-hosted` — a hosting service the publisher itself uses and
+   *   links (FeedBurner for The Hacker News); `evidence` says where.
+   * - `aggregator` — a service that licenses its own index of other people's
+   *   material (GDELT); the publisher's rights are not the aggregator's to grant.
+   * - `unverified` — a hosting service whose link from the publisher could not
+   *   be confirmed.
+   * - `unofficial-refeed` — a third party republishing someone else's feed.
+   *   No licence from the publisher reaches us through it, so the licence gate
+   *   must refuse it (a conformance test checks this).
+   *
+   * Batch 11 found `ap_topnews` reading AP stories from feedx.net, a personal
+   * full-text re-feed, catalogued as if it were AP (R318, R322).
+   */
+  via?: { kind: 'publisher-hosted' | 'aggregator' | 'unverified' | 'unofficial-refeed'; host: string; evidence: string }
 
   /** Off by default when a source is heavy, noisy, or in trial. */
   enabled?: boolean

@@ -1,5 +1,5 @@
 import type { CatalogSource } from '../types'
-import { publicFeed } from '../licence'
+import { needsAgreement, nonCommercial, publicFeed } from '../licence'
 
 /**
  * The long tail of regional reporting.
@@ -107,14 +107,17 @@ export const REGIONAL_EXTRA_SOURCES: CatalogSource[] = [
     key: 'annahar_lebanon',
     name: 'النهار',
     publisher: 'An-Nahar',
-    url: 'https://www.annahar.com/rss/latest-news.xml',
+    // The publisher's own /rss (verified 2026-10-04: 50 items, newest that day;
+    // robots.txt does not disallow it).
+    url: 'https://www.annahar.com/rss',
+    formerUrls: [{ url: 'https://www.annahar.com/rss/latest-news.xml', until: '2026-10-04', why: '404 since 2026-08-14' }],
     kind: 'rss',
     discipline: 'osint',
     topics: ['news'],
     coverage: ['LB'],
     admiralty: 'C',
     independence: 'annahar',
-    licence: publicFeed('An-Nahar', 'https://www.annahar.com/'),
+    licence: nonCommercial('An-Nahar (personal, non-commercial use, R318)', 'https://www.annahar.com/terms'),
     minIntervalSec: 1800,
     keyless: true,
   },
@@ -131,6 +134,7 @@ export const REGIONAL_EXTRA_SOURCES: CatalogSource[] = [
     coverage: ['IN'],
     admiralty: 'C',
     independence: 'ndtv',
+    via: { kind: 'unverified', host: 'feeds.feedburner.com', evidence: 'NDTV\'s RSS page answered 403 on 2026-10-08, so its link to this FeedBurner feed could not be confirmed.' },
     licence: publicFeed('NDTV', 'https://www.ndtv.com/'),
     minIntervalSec: 1800,
     keyless: true,
@@ -161,7 +165,7 @@ export const REGIONAL_EXTRA_SOURCES: CatalogSource[] = [
     coverage: ['BD'],
     admiralty: 'B',
     independence: 'dailystar-bd',
-    licence: publicFeed('The Daily Star', 'https://www.thedailystar.net/'),
+    licence: needsAgreement('The Daily Star (commercial use needs authorization, R318)', 'https://www.thedailystar.net/'),
     minIntervalSec: 1800,
     keyless: true,
   },
@@ -272,7 +276,7 @@ export const REGIONAL_EXTRA_SOURCES: CatalogSource[] = [
     coverage: ['BR'],
     admiralty: 'B',
     independence: 'folha',
-    licence: publicFeed('Folha de S.Paulo', 'https://www.folha.uol.com.br/'),
+    licence: needsAgreement('Folha de S.Paulo (reproduction needs written Folhapress authorization, R318)', 'https://www.folha.uol.com.br/'),
     minIntervalSec: 1800,
     keyless: true,
   },
@@ -280,7 +284,11 @@ export const REGIONAL_EXTRA_SOURCES: CatalogSource[] = [
     key: 'eluniversal_mx',
     name: 'El Universal',
     publisher: 'El Universal (Mexico)',
-    url: 'https://www.eluniversal.com.mx/rss.xml',
+    // The publisher's current feed. It answers (100 items, 2026-10-04), but
+    // robots.txt has denied every agent by default since 2026-09-24, so the
+    // record stays quarantined as a refusal — see quarantine.ts.
+    url: 'https://www.eluniversal.com.mx/arc/outboundfeeds/rss/?outputType=xml',
+    formerUrls: [{ url: 'https://www.eluniversal.com.mx/rss.xml', until: '2026-10-04', why: '404 since 2026-08-14' }],
     kind: 'rss',
     discipline: 'osint',
     topics: ['news'],

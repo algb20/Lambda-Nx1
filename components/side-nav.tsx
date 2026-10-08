@@ -94,6 +94,17 @@ export function SideNav({
           </button>
         )
       })}
+      {/*
+        The credits and licence links that CC BY, OGL and the other source
+        licences require wherever their data appears (R320). One link from the
+        rail that sits beside every surface showing that data.
+      */}
+      <a
+        href="/terms#sources"
+        className="mt-3 px-3 text-[11px] text-muted-foreground hover:text-foreground hover:underline"
+      >
+        Sources &amp; credits
+      </a>
     </nav>
   )
 }

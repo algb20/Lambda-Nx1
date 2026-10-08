@@ -52,6 +52,28 @@ const EXECUTABLE = process.env.CHROMIUM_PATH ?? '/opt/pw-browsers/chromium'
  */
 const LAUNCH_ARGS = ['--no-sandbox', '--no-proxy-server']
 
+/**
+ * Each browser context is a separate visitor, so each gets its own address.
+ *
+ * The app limits callers by address (`config/rate-limits.json`, `gateway`), and
+ * every context here comes from 127.0.0.1. Four suites run back to back from
+ * that one address spent one visitor's budget between them, and the run failed
+ * on whichever page happened to cross it — 12/13 with the failing test moving
+ * between runs (maintenance batch 02, §3.2). That measured the harness, not the
+ * app, and it said nothing true about any provider's limit.
+ *
+ * So a context announces a distinct address from 198.51.100.0/24 (TEST-NET-2,
+ * RFC 5737 — reserved for documentation, never routed) through the same
+ * forwarded header the limiter reads behind a CDN. The production limiter is
+ * unchanged and its own tests still exercise it; a single page load that
+ * overruns the budget would still fail here, which is the one real signal.
+ */
+let visitorsSeen = 0
+export function visitorHeaders(): Record<string, string> {
+  visitorsSeen = (visitorsSeen % 254) + 1
+  return { 'x-forwarded-for': `198.51.100.${visitorsSeen}` }
+}
+
 /** Widths a real person uses. Named, because a failure should say "phone". */
 export const VIEWPORTS = [
   { name: 'phone-small', width: 320, height: 640 },
@@ -237,6 +259,7 @@ export async function visit(
   const b = await getBrowser()
   contextsOpened++
   const ctx = await b.newContext({
+    extraHTTPHeaders: visitorHeaders(),
     viewport: { width: vp.width, height: vp.height },
     deviceScaleFactor: 1,
     isMobile: vp.width < 768,

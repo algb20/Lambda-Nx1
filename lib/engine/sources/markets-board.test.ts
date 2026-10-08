@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
-import { fredIndices, fredCommodities } from './markets-board'
+import { fredIndices, fredCommodities, FRED_SERIES, FRED_PRE_APPROVAL_REQUIRED } from './markets-board'
 import type { SourceContext, SourceInput } from '../types'
 
 const INPUT: SourceInput = { capability: 'market_board', value: '' }
 
 /** FRED's real CSV shape: a header, then `date,value`, with `.` for no data. */
-const CSV = `observation_date,SP500
+const CSV = `observation_date,VIXCLS
 2026-08-12,7810.11
 2026-08-13,7798.99
 2026-08-14,7785.76
@@ -31,6 +31,29 @@ describe('FRED market series', () => {
   it('carries the observation date, so a close is not mistaken for a quote', async () => {
     const [first] = await fredIndices.run(INPUT, ctx(CSV))
     expect(first.claim).toContain('2026-08-14')
+  })
+
+  /**
+   * FRED's terms (fred.stlouisfed.org/legal): "Copyrighted: Pre-approval
+   * required" series belong to a third party; the others may be used
+   * commercially with attribution to FRED and to the original source.
+   */
+  it('never requests a series that needs the copyright holder\'s permission', async () => {
+    const ids = FRED_SERIES.map((s) => s.id)
+    for (const blocked of FRED_PRE_APPROVAL_REQUIRED) expect(ids).not.toContain(blocked)
+    // Withdrawn by FRED on 2024-06-03; its CSV answers 404.
+    expect(ids).not.toContain('WILL5000PRFC')
+    const fetch = vi.fn(async (_url: string) => ({ ok: true, status: 200, text: async () => CSV }))
+    await fredIndices.run(INPUT, { fetch } as unknown as SourceContext)
+    const asked = fetch.mock.calls.map((c) => new URL(String(c[0])).searchParams.get('id'))
+    expect(asked.some((id) => (FRED_PRE_APPROVAL_REQUIRED as readonly string[]).includes(id ?? ''))).toBe(false)
+  })
+
+  it('names FRED and the original source on every row', async () => {
+    const [first] = await fredIndices.run(INPUT, ctx(CSV))
+    expect(first.claim).toContain('Cboe via FRED')
+    const [oil] = await fredCommodities.run(INPUT, ctx(CSV))
+    expect(oil.claim).toContain('U.S. EIA via FRED')
   })
 
   it('grades the Federal Reserve publishing its own series as primary', async () => {
@@ -84,12 +107,13 @@ describe('FRED market series', () => {
           : { ok: true, status: 200, text: async () => CSV }
       }),
     } as unknown as SourceContext
-    const out = await fredIndices.run(INPUT, flaky)
+    // Commodities, because it has several series; indices has one since batch 06.
+    const out = await fredCommodities.run(INPUT, flaky)
     expect(out.length).toBeGreaterThan(0)
   })
 
   it('is spaced politely but inside the request budget', async () => {
-    // Nine series at the 2000ms used elsewhere would exceed the orchestrator's
+    // Nine series (the board's size before batch 06) at the 2000ms used elsewhere would exceed the orchestrator's
     // 8s deadline and lose the whole source — which is exactly what happened.
     expect(fredIndices.minIntervalMs).toBeLessThanOrEqual(500)
     expect(fredIndices.minIntervalMs).toBeGreaterThan(0)

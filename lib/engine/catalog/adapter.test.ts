@@ -110,6 +110,19 @@ describe('nothing is invented', () => {
     expect(data.lon).toBeNull()
   })
 
+  it('drops feed items the record may not keep, before they are parsed (R321)', async () => {
+    const keep = { test: (item: string) => /<f:notice-code>24\d\d</.test(item), why: 'company notices only' }
+    const xml = `<feed>
+      <entry><title>ACME LTD</title><f:notice-code>2441</f:notice-code><link href="https://example.com/a"/></entry>
+      <entry><title>JANE PRIVATE PERSON</title><f:notice-code>2503</f:notice-code><link href="https://example.com/b"/></entry>
+    </feed>`
+    const filtered = catalogSource({ ...base, kind: 'atom', url: 'https://example.com/feed', keepItem: keep })
+    expect((await filtered.run(NO_INPUT, ctxReturning(xml))).map((i) => i.claim)).toEqual(['ACME LTD'])
+    // Without the rule both would have become findings — the control.
+    const unfiltered = catalogSource({ ...base, kind: 'atom', url: 'https://example.com/feed' })
+    expect((await unfiltered.run(NO_INPUT, ctxReturning(xml))).map((i) => i.claim)).toEqual(['ACME LTD', 'JANE PRIVATE PERSON'])
+  })
+
   it('takes the rating from the catalogue, never from the response', async () => {
     const source = catalogSource({ ...base, admiralty: 'D', path: 'items' })
     const [item] = await source.run(
@@ -243,6 +256,34 @@ describe('a headline built from a record that has none', () => {
 
   it('is inert when no template was declared', () => {
     expect(fillTemplate(undefined, { v: '0.821' })).toBeNull()
+  })
+})
+
+/**
+ * WHO's outbreak API gives each notice only a relative path. A finding must
+ * cite the notice, not the API it was read from — and a template that cannot
+ * produce a whole address must not produce half of one.
+ */
+describe('a citation built from a record that has only a relative path', () => {
+  const who = { ...base, path: 'value', map: { title: 'Title', urlTemplate: 'https://www.who.int/item{ItemDefaultUrl}' } }
+
+  it('cites the record page the template builds', async () => {
+    const [item] = await catalogSource(who).run(
+      NO_INPUT,
+      ctxReturning({ value: [{ Title: 'Ebola — DRC', ItemDefaultUrl: '/2026-DON618' }] }),
+    )
+    expect(item.sourceUrl).toBe('https://www.who.int/item/2026-DON618')
+  })
+
+  it('falls back to the declared address when the field is missing', async () => {
+    const [item] = await catalogSource(who).run(NO_INPUT, ctxReturning({ value: [{ Title: 'No path' }] }))
+    expect(item.sourceUrl).toBe(base.url)
+  })
+
+  it('never cites something that is not an http(s) address', async () => {
+    const source = catalogSource({ ...who, map: { title: 'Title', urlTemplate: '{ItemDefaultUrl}' } })
+    const [item] = await source.run(NO_INPUT, ctxReturning({ value: [{ Title: 'Bad', ItemDefaultUrl: 'javascript:alert(1)' }] }))
+    expect(item.sourceUrl).toBe(base.url)
   })
 })
 

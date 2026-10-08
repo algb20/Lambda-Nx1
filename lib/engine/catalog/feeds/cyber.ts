@@ -1,5 +1,5 @@
 import type { CatalogSource, Licence } from '../types'
-import { PUBLIC_DOMAIN, ccBy, publicFeed } from '../licence'
+import { PUBLIC_DOMAIN, ccBy, nonCommercial, publicFeed } from '../licence'
 
 /**
  * Cyber threat and vulnerability sources.
@@ -19,14 +19,23 @@ import { PUBLIC_DOMAIN, ccBy, publicFeed } from '../licence'
  * licence, because it is genuinely its own terms and pretending otherwise is
  * how a licence gets mis-stated in the permissive direction.
  */
+/**
+ * abuse.ch terms of use (read 2026-10-04, abuse.ch/terms-of-use): "Access to the
+ * abuse.ch Platforms is provided only to: Authenticated Users", and "use … by
+ * companies, networks, or individuals with commercial or for-profit needs may
+ * require a paid subscription, which will be managed by Spamhaus". Measured the
+ * same day: the ThreatFox and URLhaus APIs answer 401 without a key. Recorded
+ * as needing an agreement until an account (and, if required, a subscription)
+ * exists — batch 07. It was recorded as open data with commercial use allowed.
+ */
 const ABUSE_CH: Licence = {
   id: 'abuse-ch',
-  name: 'abuse.ch open data',
-  commercialUse: true,
+  name: 'abuse.ch (authenticated users; commercial use may require a Spamhaus subscription)',
+  commercialUse: false,
   storage: true,
-  redistribute: true,
+  redistribute: false,
   attribution: 'abuse.ch',
-  termsUrl: 'https://abuse.ch/',
+  termsUrl: 'https://abuse.ch/terms-of-use/',
 }
 
 export const CYBER_SOURCES: CatalogSource[] = [
@@ -277,7 +286,7 @@ export const CYBER_SOURCES: CatalogSource[] = [
     coverage: 'global',
     // A about Microsoft products — nobody is better placed. Not a general A.
     admiralty: 'A',
-    licence: publicFeed('Microsoft MSRC', 'https://www.microsoft.com/legal'),
+    licence: nonCommercial('Microsoft (personal, non-commercial use unless otherwise specified, R318)', 'https://www.microsoft.com/en-us/legal/terms-of-use'),
     minIntervalSec: 3600,
     keyless: true,
   },
@@ -337,7 +346,7 @@ export const CYBER_SOURCES: CatalogSource[] = [
     topics: ['cyber-advisory', 'news'],
     coverage: 'global',
     admiralty: 'C',
-    licence: publicFeed('BleepingComputer', 'https://www.bleepingcomputer.com/'),
+    licence: nonCommercial('BleepingComputer (storage for personal, non-commercial use only, R318)', 'https://www.bleepingcomputer.com/terms-of-use/'),
     minIntervalSec: 3600,
     keyless: true,
   },
@@ -351,6 +360,7 @@ export const CYBER_SOURCES: CatalogSource[] = [
     topics: ['cyber-advisory', 'news'],
     coverage: 'global',
     admiralty: 'C',
+    via: { kind: 'publisher-hosted', host: 'feeds.feedburner.com', evidence: 'thehackernews.com links https://feeds.feedburner.com/TheHackersNews (read 2026-10-08).' },
     licence: publicFeed('The Hacker News', 'https://thehackernews.com/'),
     minIntervalSec: 3600,
     keyless: true,
@@ -365,7 +375,7 @@ export const CYBER_SOURCES: CatalogSource[] = [
     topics: ['cyber-advisory', 'malware'],
     coverage: 'global',
     admiralty: 'B',
-    licence: publicFeed('SANS Internet Storm Center', 'https://isc.sans.edu/'),
+    licence: nonCommercial('SANS Internet Storm Center (CC BY-NC-SA 4.0, R318)', 'https://isc.sans.edu/api/'),
     minIntervalSec: 3600,
     keyless: true,
   },
@@ -373,13 +383,14 @@ export const CYBER_SOURCES: CatalogSource[] = [
     key: 'project_zero',
     name: 'Google Project Zero',
     publisher: 'Google',
-    url: 'https://googleprojectzero.blogspot.com/feeds/posts/default',
+    url: 'https://projectzero.google/feed.xml',
+    formerUrls: [{ url: 'https://googleprojectzero.blogspot.com/feeds/posts/default', until: '2026-10-08', why: 'redirects to projectzero.google/feed.xml — the blog moved off Blogspot' }],
     kind: 'atom',
     discipline: 'cyber',
     topics: ['vulnerability'],
     coverage: 'global',
     admiralty: 'A',
-    licence: publicFeed('Google Project Zero', 'https://googleprojectzero.blogspot.com/'),
+    licence: publicFeed('Google Project Zero', 'https://projectzero.google/'),
     minIntervalSec: 21600,
     keyless: true,
   },

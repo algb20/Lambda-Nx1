@@ -39,7 +39,9 @@ export const rdap: Source = {
   capability: 'whois',
   passive: true,
   hosts: ['rdap.org'],
-  minIntervalMs: 500,
+  // rdap.org (read 2026-10-05): "Cloudflare limits clients to a maximum of 10
+  // requests in 10 seconds", aggregated by IP. 500 ms allowed twenty (batch 09).
+  minIntervalMs: 1000,
   async run(input, ctx) {
     const retrievedAt = new Date().toISOString()
     const url = `https://rdap.org/domain/${encodeURIComponent(input.value)}`

@@ -16,8 +16,19 @@ import { join } from 'node:path'
  * example when a lockfile is regenerated on a branch that predates the fix.
  */
 
-const FLOORS: Record<string, { min: string; why: string }> = {
-  sharp: { min: '0.35.4', why: 'GHSA-g89c-p67h-r497, GHSA-2jg2-4ch7-h545 (libheif)' },
+/**
+ * `pin` says where the floor is held: `overrides` for a transitive package we
+ * force, `dependencies` for one we declare directly.
+ *
+ * `next` 15.5.27 (2026-09-30) fixes GHSA-f87g-xv8r-7p7x (metadata image route
+ * information disclosure), GHSA-4jqv-mc3x-m676 and GHSA-mcj8-r9mp-w47p (SSG/ISR
+ * cache poisoning); 15.5.26 hardened `next/og`. `npm audit` did not report
+ * them on 2026-10-04, which is exactly why the floor is written down here
+ * rather than left to the advisory database's timing.
+ */
+const FLOORS: Record<string, { min: string; why: string; pin: 'overrides' | 'dependencies' }> = {
+  sharp: { min: '0.35.4', why: 'GHSA-g89c-p67h-r497, GHSA-2jg2-4ch7-h545 (libheif)', pin: 'overrides' },
+  next: { min: '15.5.27', why: 'GHSA-f87g-xv8r-7p7x, GHSA-4jqv-mc3x-m676, GHSA-mcj8-r9mp-w47p', pin: 'dependencies' },
 }
 
 const root = process.cwd()
@@ -38,11 +49,11 @@ function atLeast(version: string, min: string): boolean {
 }
 
 describe('dependency security floors', () => {
-  for (const [name, { min, why }] of Object.entries(FLOORS)) {
+  for (const [name, { min, why, pin }] of Object.entries(FLOORS)) {
     it(`pins ${name} at or above ${min} (${why})`, () => {
-      const override = pkg.overrides?.[name]
-      expect(override, `${name} override`).toBeTruthy()
-      expect(atLeast(override, min), `override ${override}`).toBe(true)
+      const declared = pkg[pin]?.[name]
+      expect(declared, `${name} in ${pin}`).toBeTruthy()
+      expect(atLeast(declared, min), `${pin} ${declared}`).toBe(true)
     })
 
     it(`resolves every installed copy of ${name} at or above ${min}`, () => {

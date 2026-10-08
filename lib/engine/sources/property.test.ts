@@ -40,7 +40,7 @@ describe('United States — FRED housing', () => {
    * draw a housing market that fell to nothing.
    */
   it('skips the no-observation marker rather than reading it as zero', async () => {
-    const gaps = `observation_date,CSUSHPINSA
+    const gaps = `observation_date,MSPUS
 2026-04-01,334.0
 2026-05-01,.
 2026-06-01,335.1
@@ -62,6 +62,19 @@ describe('United States — FRED housing', () => {
   it('grades the Federal Reserve publishing its own series as primary', async () => {
     const [first] = await usHousing.run(INPUT, ctx(CSV))
     expect(first.admiralty).toEqual({ source: 'A', info: 1 })
+  })
+
+  /**
+   * FRED marks Case-Shiller "Copyrighted: Pre-Approval Required" (S&P
+   * CoreLogic); the others may be used commercially with attribution to FRED
+   * and the original source (batch 08).
+   */
+  it('never asks for Case-Shiller, and names FRED and the original source', async () => {
+    const fetch = vi.fn(async (_url: string) => ({ ok: true, status: 200, text: async () => CSV }))
+    const rows = await usHousing.run(INPUT, { fetch } as unknown as SourceContext)
+    const asked = fetch.mock.calls.map((c) => new URL(String(c[0])).searchParams.get('id'))
+    expect(asked).not.toContain('CSUSHPINSA')
+    expect(rows.every((r) => /via FRED/.test(String((r.data as { name?: string }).name ?? r.claim)))).toBe(true)
   })
 
   it('only ever reads FRED, and only reads', async () => {

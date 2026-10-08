@@ -175,7 +175,7 @@ export const CAPABILITIES: Capability[] = [
     id: 'calibration',
     name: 'Calibration ledger',
     description:
-      'Our own assessments scored against what actually happened: a weighted accuracy, overall, by author and by confidence band.',
+      'Forecasts and claims — ours and others\' — scored against what actually happened: a weighted accuracy, overall, by author and by confidence band.',
     family: 'analysis',
     minPlan: 'pro',
     status: 'built-not-gated',

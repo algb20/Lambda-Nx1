@@ -9,6 +9,7 @@ import { Radio, Fingerprint, Clock, CalendarClock, User, AlertCircle } from 'luc
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { TargetProfile, TimelineEvent } from '@/lib/modules/target'
+import { SourceCredit } from '@/components/source-credit'
 
 type ConnState = 'connecting' | 'live' | 'error'
 
@@ -33,7 +34,7 @@ function EventRow({ e }: { e: TimelineEvent }) {
         )}
         <div className="mt-0.5 flex items-center gap-2 text-[10px] text-muted-foreground">
           <span className={`font-medium uppercase ${KIND_STYLE[e.kind]}`}>{e.kind}</span>
-          <span className="font-mono">{e.sourceKey}</span>
+          <SourceCredit sourceKey={e.sourceKey} />
           <span>· {new Date(e.at).toLocaleString()}</span>
         </div>
       </div>
@@ -153,7 +154,7 @@ export function TargetTracker({ query }: { query: string }) {
             <div key={i} className="flex items-start justify-between gap-3 border-b border-border/40 py-2 last:border-0">
               <span className="text-sm">{e.claim}</span>
               <Badge variant="secondary" className="shrink-0 text-[10px]">
-                {e.sourceKey}
+                <SourceCredit sourceKey={e.sourceKey} />
               </Badge>
             </div>
           ))}

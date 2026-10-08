@@ -1,5 +1,5 @@
 import type { CatalogSource } from '../types'
-import { PUBLIC_DOMAIN, ccBy, publicFeed } from '../licence'
+import { PUBLIC_DOMAIN, WHO_TERMS, ccBy, needsAgreement, nonCommercial, publicFeed } from '../licence'
 
 /**
  * Institutional and official publication.
@@ -17,14 +17,32 @@ export const OFFICIAL_SOURCES: CatalogSource[] = [
     key: 'who_don',
     name: 'WHO Disease Outbreak News',
     publisher: 'World Health Organization',
-    url: 'https://www.who.int/feeds/entity/csr/don/en/rss.xml',
-    kind: 'rss',
+    /**
+     * WHO retired the DON RSS feed (404). The notices are now served from
+     * WHO's own content API on who.int — the endpoint its Disease Outbreak News
+     * page reads. That endpoint is first-party but not separately documented,
+     * so it is watched by the same daily recheck as every other record.
+     * Verified 2026-10-04: 200, 50 notices, newest 2026-DON618 of 2026-09-25,
+     * and each `ItemDefaultUrl` resolves to the notice page (200).
+     */
+    url: 'https://www.who.int/api/news/diseaseoutbreaknews?sf_culture=en&$orderby=PublicationDate%20desc&$top=50',
+    kind: 'json',
+    path: 'value',
+    map: {
+      title: 'Title',
+      time: 'PublicationDate',
+      summary: 'Summary',
+      urlTemplate: 'https://www.who.int/emergencies/disease-outbreak-news/item{ItemDefaultUrl}',
+    },
+    formerUrls: [
+      { url: 'https://www.who.int/feeds/entity/csr/don/en/rss.xml', until: '2026-10-04', why: '404 since 2026-08-14' },
+    ],
     discipline: 'humint',
     topics: ['health'],
     coverage: 'global',
     admiralty: 'A',
     independence: 'who',
-    licence: publicFeed('World Health Organization', 'https://www.who.int/about/policies/terms-of-use'),
+    licence: WHO_TERMS,
     minIntervalSec: 3600,
     keyless: true,
     note: 'The authoritative record of verified outbreaks.',
@@ -33,7 +51,13 @@ export const OFFICIAL_SOURCES: CatalogSource[] = [
     key: 'ecdc_threats',
     name: 'ECDC communicable disease threats',
     publisher: 'European Centre for Disease Prevention and Control',
-    url: 'https://www.ecdc.europa.eu/en/taxonomy/term/1416/feed',
+    // ECDC renumbered its taxonomy. Term 1505 is the "Communicable disease
+    // threats report" feed listed on https://www.ecdc.europa.eu/en/rss-feeds
+    // (verified 2026-10-04: the weekly CDTR, week 40 the newest).
+    url: 'https://www.ecdc.europa.eu/en/taxonomy/term/1505/feed',
+    formerUrls: [
+      { url: 'https://www.ecdc.europa.eu/en/taxonomy/term/1416/feed', until: '2026-10-04', why: '404 since 2026-08-14' },
+    ],
     kind: 'rss',
     discipline: 'humint',
     topics: ['health'],
@@ -63,7 +87,27 @@ export const OFFICIAL_SOURCES: CatalogSource[] = [
     key: 'reliefweb_reports',
     name: 'ReliefWeb situation reports',
     publisher: 'UN OCHA',
-    url: 'https://api.reliefweb.int/v1/reports?appname=lambda-nx&limit=50&sort[]=date:desc&profile=list',
+    url: 'https://api.reliefweb.int/v2/reports?limit=50&sort[]=date:desc&profile=list',
+    /**
+     * v1 is gone (410). v2 is the documented successor, and since 1 November
+     * 2025 it requires an appname pre-approved by ReliefWeb
+     * (https://apidoc.reliefweb.int/parameters#appname); without one it answers
+     * 403 "You are not using an approved appname" (re-measured 2026-10-04).
+     * So this is a registration, not a keyless feed: it runs only when the
+     * deployment sets `RELIEFWEB_APPNAME`, and the name is read from there
+     * rather than written here.
+     */
+    urlFor: () =>
+      `https://api.reliefweb.int/v2/reports?appname=${encodeURIComponent(
+        process.env.RELIEFWEB_APPNAME?.trim() ?? '',
+      )}&limit=50&sort[]=date:desc&profile=list`,
+    formerUrls: [
+      {
+        url: 'https://api.reliefweb.int/v1/reports?appname=lambda-nx&limit=50&sort[]=date:desc&profile=list',
+        until: '2026-10-04',
+        why: '410 Gone — v1 retired',
+      },
+    ],
     kind: 'json',
     path: 'data',
     discipline: 'humint',
@@ -71,9 +115,10 @@ export const OFFICIAL_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'A',
     independence: 'un-ocha',
-    licence: ccBy('UN OCHA ReliefWeb', 'https://reliefweb.int/terms-conditions'),
+    licence: nonCommercial('UN OCHA ReliefWeb (personal, non-commercial use, R318)', 'https://reliefweb.int/terms-conditions'),
     minIntervalSec: 1800,
-    keyless: true,
+    keyless: false,
+    keyEnv: 'RELIEFWEB_APPNAME',
     map: { title: 'fields.title', time: 'fields.date.created' },
   },
   {
@@ -121,7 +166,7 @@ export const OFFICIAL_SOURCES: CatalogSource[] = [
     topics: ['humanitarian', 'drought'],
     coverage: 'global',
     admiralty: 'A',
-    licence: ccBy('FAO GIEWS', 'https://www.fao.org/contact-us/terms/en/'),
+    licence: needsAgreement('FAO website content other than news releases (non-commercial; commercial rights on request, R318)', 'https://www.fao.org/contact-us/terms/en/'),
     minIntervalSec: 7200,
     keyless: true,
   },
@@ -183,7 +228,7 @@ export const OFFICIAL_SOURCES: CatalogSource[] = [
     topics: ['economy', 'official'],
     coverage: 'global',
     admiralty: 'A',
-    licence: ccBy('World Bank', 'https://www.worldbank.org/en/about/legal/terms-of-use-for-datasets'),
+    licence: nonCommercial('World Bank website materials (non-commercial, R318)', 'https://www.worldbank.org/ext/en/legal/terms-conditions'),
     minIntervalSec: 3600,
     keyless: true,
   },
@@ -191,13 +236,19 @@ export const OFFICIAL_SOURCES: CatalogSource[] = [
     key: 'bis_press',
     name: 'Bank for International Settlements',
     publisher: 'Bank for International Settlements',
-    url: 'https://www.bis.org/doclist/all_rss.xml',
+    // "Media releases", listed on https://www.bis.org/rss (verified 2026-10-04,
+    // RSS 1.0 / RDF, newest item 2026-10-01).
+    url: 'https://www.bis.org/doclist/all_pressrels.rss',
+    formerUrls: [{ url: 'https://www.bis.org/doclist/all_rss.xml', until: '2026-10-04', why: '404 since 2026-08-14' }],
     kind: 'rss',
     discipline: 'fin',
     topics: ['economy', 'official'],
     coverage: 'global',
     admiralty: 'A',
-    licence: publicFeed('Bank for International Settlements', 'https://www.bis.org/terms_conditions.htm'),
+    // BIS terms (read 2026-10-04): redistribution "for non-commercial
+    // purposes"; commercial reproduction needs written permission. This
+    // reverses the batch-04 release under a feed-syndication licence (batch 08).
+    licence: needsAgreement('Bank for International Settlements', 'https://www.bis.org/terms_conditions.htm'),
     minIntervalSec: 7200,
     keyless: true,
   },
@@ -227,7 +278,13 @@ export const OFFICIAL_SOURCES: CatalogSource[] = [
     topics: ['sanctions', 'corporate'],
     coverage: 'global',
     admiralty: 'B',
-    licence: ccBy('OpenSanctions', 'https://www.opensanctions.org/licensing/'),
+    /**
+     * Was recorded as CC BY. The publisher's own licensing page (read
+     * 2026-10-04): "Creative Commons 4.0 Attribution NonCommercial"; commercial
+     * use needs a paid licence. Recorded as non-commercial, so the licence gate
+     * withholds it from this paid product (batch 06).
+     */
+    licence: nonCommercial('OpenSanctions — CC BY-NC 4.0 (commercial use requires a paid licence)', 'https://www.opensanctions.org/licensing/'),
     minIntervalSec: 86400,
     keyless: true,
     note: 'Consolidated sanctions and PEP data, assembled from official lists.',
@@ -247,7 +304,13 @@ export const OFFICIAL_SOURCES: CatalogSource[] = [
     keyless: false,
     keyEnv: 'COMPANIES_HOUSE_API_KEY',
     enabled: false,
-    note: 'Needs a free key. Registered but inert until one is set.',
+    // A stub, not an integration: the URL is the register's web front end,
+    // not its API (api.company-information.service.gov.uk), and there is no
+    // field mapping, so a key alone would produce nothing. The register is
+    // also personal data — officers and persons with significant control —
+    // which the OGL does not cover. It stays off until the owner decides what
+    // of it may appear (PENDING_OWNER_ITEMS C5; conformance test, R322).
+    note: 'Stub: web front end, no API mapping; personal data (officers, PSCs). Off until owner decision C5.',
   },
 
   // ── Procurement ──────────────────────────────────────────────────────────

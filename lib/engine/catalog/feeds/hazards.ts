@@ -1,5 +1,5 @@
 import type { CatalogSource } from '../types'
-import { PUBLIC_DOMAIN, ccBy, publicFeed } from '../licence'
+import { PUBLIC_DOMAIN, ccBy, nonCommercial, publicFeed } from '../licence'
 
 /**
  * Hazard and Earth-observation sources: what instruments and official agencies
@@ -167,7 +167,7 @@ export const HAZARD_SOURCES: CatalogSource[] = [
     // Deliberately its own group: EMSC solves independently of the USGS, which
     // is exactly what makes agreement between them worth something.
     independence: 'emsc',
-    licence: ccBy('European-Mediterranean Seismological Centre', 'https://www.seismicportal.eu/'),
+    licence: ccBy('EMSC — European-Mediterranean Seismological Centre (CC BY 4.0)', 'https://www.seismicportal.eu/fdsn-wsevent.html'),
     minIntervalSec: 300,
     keyless: true,
     map: {
@@ -251,7 +251,14 @@ export const HAZARD_SOURCES: CatalogSource[] = [
     key: 'reliefweb_disasters',
     name: 'ReliefWeb disasters',
     publisher: 'UN OCHA',
-    url: 'https://api.reliefweb.int/v2/disasters?appname=lambda-nx&limit=50&sort[]=date:desc&profile=list',
+    url: 'https://api.reliefweb.int/v2/disasters?limit=50&sort[]=date:desc&profile=list',
+    // The approved appname comes from the deployment, as the note below says.
+    // It used to be written into `url` as `lambda-nx`, so setting the variable
+    // would have changed nothing (found 2026-10-04, batch 04).
+    urlFor: () =>
+      `https://api.reliefweb.int/v2/disasters?appname=${encodeURIComponent(
+        process.env.RELIEFWEB_APPNAME?.trim() ?? '',
+      )}&limit=50&sort[]=date:desc&profile=list`,
     kind: 'json',
     path: 'data',
     discipline: 'humint',
@@ -259,7 +266,7 @@ export const HAZARD_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'A',
     independence: 'un-ocha',
-    licence: ccBy('UN OCHA ReliefWeb', 'https://reliefweb.int/terms-conditions'),
+    licence: nonCommercial('UN OCHA ReliefWeb (personal, non-commercial use, R318)', 'https://reliefweb.int/terms-conditions'),
     minIntervalSec: 1800,
     /**
      * Not keyless any more, and off until that is resolved.

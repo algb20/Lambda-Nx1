@@ -97,7 +97,7 @@ export const BOARDS: BoardDefinition[] = [
     key: 'officials',
     capability: 'officials',
     title: 'Officials & statements',
-    note: 'What central bank governors actually said, in their own words, collected by the BIS. Public acts of office — never private life.',
+    note: 'Withheld: this board reads central-bank speeches collected by the BIS, whose terms allow reproduction for non-commercial purposes only; commercial use needs the BIS’s written permission, which Lambda NX does not yet hold.',
     searchable: true,
   },
   {
@@ -132,7 +132,10 @@ export const BOARDS: BoardDefinition[] = [
     key: 'grid',
     capability: 'power_grid',
     title: 'Power grid',
-    note: 'Britain’s electricity, metered half-hourly by the body that settles the market — not an estimate of what the grid is doing, the figure it is paid on.',
+    // Elexon's BMRS licence allows commercial use on condition of this exact
+    // attribution: "Contains BMRS data © Elexon Limited copyright and database
+    // right [year]."
+    note: `Britain’s electricity, metered half-hourly by the body that settles the market — not an estimate of what the grid is doing, the figure it is paid on. Contains BMRS data © Elexon Limited copyright and database right ${new Date().getUTCFullYear()}.`,
     searchable: false,
   },
   {

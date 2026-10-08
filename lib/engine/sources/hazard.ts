@@ -382,4 +382,8 @@ export const issPosition: Source = {
   },
 }
 
-export const hazardSources: Source[] = [gdacsAlerts, nwsAlerts, whoOutbreaks, issPosition]
+/**
+ * `whoOutbreaks` is withheld: WHO's terms require written authorization for
+ * commercial use (WHO_TERMS, batch 07). The adapter is kept.
+ */
+export const hazardSources: Source[] = [gdacsAlerts, nwsAlerts, issPosition]

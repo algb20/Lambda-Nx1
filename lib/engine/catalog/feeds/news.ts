@@ -1,5 +1,5 @@
 import type { CatalogSource } from '../types'
-import { ccBy, publicFeed } from '../licence'
+import { ccBy, needsAgreement, nonCommercial, publicFeed } from '../licence'
 
 /**
  * News and reporting.
@@ -52,7 +52,8 @@ export const NEWS_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'B',
     independence: 'ap',
-    licence: publicFeed('Associated Press'),
+    via: { kind: 'unofficial-refeed', host: 'feedx.net', evidence: 'feedx.net is a third-party full-text re-feed of AP and other publishers, not an AP service (batch 11).' },
+    licence: needsAgreement('Associated Press via an unofficial third-party re-feed (no AP licence reaches us through it, R318)', 'https://feedx.net/'),
     minIntervalSec: 900,
     keyless: true,
   },
@@ -70,6 +71,7 @@ export const NEWS_SOURCES: CatalogSource[] = [
     // GDELT indexes everyone, so it is nobody's independent confirmation: it
     // is a view over the same corpus the other entries sit inside.
     independence: 'gdelt-aggregate',
+    via: { kind: 'aggregator', host: 'api.gdeltproject.org', evidence: 'GDELT licenses its own index; the headlines remain the publishers\' (registry: LEGAL_REVIEW_REQUIRED).' },
     licence: publicFeed('The GDELT Project', 'https://www.gdeltproject.org/about.html'),
     minIntervalSec: 900,
     keyless: true,
@@ -89,7 +91,7 @@ export const NEWS_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'B',
     independence: 'bbc',
-    licence: publicFeed('BBC News', 'https://www.bbc.co.uk/usingthebbc/terms/'),
+    licence: needsAgreement('BBC News (business use of RSS feeds needs a BBC licence, R318)', 'https://www.bbc.co.uk/usingthebbc/terms/can-i-use-bbc-content/'),
     minIntervalSec: 900,
     keyless: true,
   },
@@ -104,7 +106,7 @@ export const NEWS_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'B',
     independence: 'aljazeera',
-    licence: publicFeed('Al Jazeera', 'https://www.aljazeera.com/terms-and-conditions/'),
+    licence: nonCommercial('Al Jazeera (personal, non-commercial use; no bots, R318)', 'https://www.aljazeera.com/terms-and-conditions/'),
     minIntervalSec: 900,
     keyless: true,
   },
@@ -149,7 +151,7 @@ export const NEWS_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'B',
     independence: 'npr',
-    licence: publicFeed('NPR', 'https://www.npr.org/about-npr/179876898/terms-of-use'),
+    licence: nonCommercial('NPR content feeds (personal or 501(c)(3) non-profit sites only, R318)', 'https://www.npr.org/about-npr/179876898/terms-of-use'),
     minIntervalSec: 1800,
     keyless: true,
   },
@@ -194,7 +196,7 @@ export const NEWS_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'B',
     independence: 'guardian',
-    licence: publicFeed('The Guardian', 'https://www.theguardian.com/help/terms-of-service'),
+    licence: nonCommercial('The Guardian (personal, non-commercial use, RSS included, R318)', 'https://www.theguardian.com/help/terms-of-service'),
     minIntervalSec: 1800,
     keyless: true,
   },
@@ -255,7 +257,7 @@ export const RESEARCH_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'A',
     independence: 'nature',
-    licence: publicFeed('Nature', 'https://www.nature.com/info/terms-and-conditions'),
+    licence: nonCommercial('Nature (private non-commercial use; feeds not to be syndicated, R318)', 'https://www.nature.com/info/terms-and-conditions'),
     minIntervalSec: 7200,
     keyless: true,
   },
@@ -307,7 +309,7 @@ export const VERIFIED_NEWS_SOURCES: CatalogSource[] = [
     // operations, which is a different thing from reporting on a member state.
     admiralty: 'B',
     independence: 'un-news',
-    licence: publicFeed('United Nations', 'https://www.un.org/en/about-us/terms-of-use'),
+    licence: publicFeed('United Nations', 'https://www.un.org/en/about-us/copyright'),
     minIntervalSec: 1800,
     keyless: true,
     note: 'Verified answering 2026-08-14. Replaces the ReliefWeb feeds, whose v1 API was retired.',

@@ -1,5 +1,5 @@
 import type { CatalogSource } from '../types'
-import { PUBLIC_DOMAIN, ccBy, publicFeed } from '../licence'
+import { PUBLIC_DOMAIN, ccBy, needsAgreement, publicFeed } from '../licence'
 
 /**
  * Infrastructure: energy, connectivity, transport and the environment they run
@@ -134,7 +134,16 @@ export const INFRASTRUCTURE_SOURCES: CatalogSource[] = [
     topics: ['weather'],
     coverage: 'global',
     admiralty: 'B',
-    licence: ccBy('Open-Meteo (ECMWF, NOAA, DWD, Météo-France models)', 'https://open-meteo.com/en/license'),
+    /**
+     * The data is CC BY 4.0, but the *free API service* is not: Open-Meteo's
+     * terms (https://open-meteo.com/en/terms, read 2026-10-04) say "You may
+     * only use the free API services for non-commercial purposes", with
+     * commercial use through a subscription. This product has paid tiers, so
+     * the record was transcribed in the permissive direction — harmless only
+     * because it is disabled. Recorded as needing an agreement, so the licence
+     * gate refuses it until one exists (maintenance batch 04).
+     */
+    licence: needsAgreement('Open-Meteo (free API: non-commercial only)', 'https://open-meteo.com/en/terms'),
     minIntervalSec: 900,
     keyless: true,
     enabled: false,
@@ -154,7 +163,7 @@ export const INFRASTRUCTURE_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'A',
     independence: 'ripe',
-    licence: ccBy('RIPE NCC Atlas', 'https://atlas.ripe.net/legal/'),
+    licence: needsAgreement('RIPE Atlas (commercial use needs RIPE NCC permission, R318)', 'https://www.ripe.net/about-us/legal/ripe-atlas-service-terms-and-conditions/'),
     minIntervalSec: 7200,
     keyless: true,
     map: { title: 'fqdn', lat: 'geometry.coordinates.1', lon: 'geometry.coordinates.0' },
@@ -187,7 +196,7 @@ export const INFRASTRUCTURE_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'A',
     independence: 'ripe',
-    licence: ccBy('RIPE NCC', 'https://stat.ripe.net/docs/terms'),
+    licence: needsAgreement('RIPEstat (commercial use needs written RIPE NCC permission, R318)', 'https://www.ripe.net/about-us/legal/ripestat-service-terms-and-conditions/'),
     minIntervalSec: 3600,
     keyless: true,
     enabled: false,

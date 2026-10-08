@@ -131,6 +131,10 @@ export function UserPreferences() {
         <a href="/terms" className="hover:text-foreground hover:underline">
           Terms of use
         </a>
+        <span>·</span>
+        <a href="/terms#sources" className="hover:text-foreground hover:underline">
+          Sources &amp; credits
+        </a>
       </p>
       {/* Which build is serving this page — settles "am I looking at the
           latest work?" without a hosting dashboard. */}

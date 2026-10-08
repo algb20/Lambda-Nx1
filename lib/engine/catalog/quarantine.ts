@@ -39,6 +39,13 @@
  * `sec_litigation`, `cisa_advisories`, `nsidc_news`, `redhat_security`,
  * `kyivindependent` — each had an item within two days.
  *
+ * The same bar released `scmp_news` on 2026-10-04 (owner, ledger R311). It
+ * had answered 403, then 405 on 2026-08-22; the recheck that day read 50
+ * items, the newest from that afternoon, with readable headlines, and its
+ * robots.txt does not disallow the feed path (it asks a 10 s crawl delay; we
+ * poll every 1800 s). Its entry is removed here and kept as history in
+ * `docs/reconciliation/MAINTENANCE_BATCH_03.md`.
+ *
  * Two entries also named keys that no longer exist in the catalogue at all
  * (`sec_edgar_filings`, `meteoalarm_europe`). A quarantine entry for a record
  * nobody holds withholds nothing; they are gone.
@@ -62,6 +69,10 @@
  *   reporting on a live board looking exactly like today's apart from a date
  *   nobody reads. Found by `lib/analysis/staleness.ts`, which measures the
  *   newest item each feed offers rather than whether it answered.
+ * - **`credential`** — the publisher requires a registration we do not hold
+ *   (an approved appname, an account key). Not a fault on either side; the
+ *   release is an owner action, documented on the record, and the secret or
+ *   name lives in the deployment's environment, never in this repository.
  *
  * ## What is NOT done here
  *
@@ -75,7 +86,7 @@
  * left open and the blind-spot map reports it.
  */
 
-export type QuarantineReason = 'bot-blocked' | 'moved' | 'unreachable' | 'frozen'
+export type QuarantineReason = 'bot-blocked' | 'moved' | 'unreachable' | 'frozen' | 'credential'
 
 export interface QuarantinedSource {
   key: string
@@ -98,6 +109,8 @@ export interface QuarantinedSource {
  */
 const PROBED = '2026-08-14'
 const REPROBED = '2026-08-22'
+/** Production's `/api/diagnose`, confirmed from a second network the same day. */
+const OBSERVED_2026_10_04 = '2026-10-04'
 
 const q = (
   key: string,
@@ -119,11 +132,11 @@ export const QUARANTINE: QuarantinedSource[] = [
   q('eu_sanctions_map', 'bot-blocked', 403, 'Returns HTML rather than the declared feed; the Council press feed covers the same designations.'),
   q('alarabiya', 'bot-blocked', 403),
   q('ahram_egypt', 'bot-blocked', 403),
-  { key: 'scmp_news', reason: 'bot-blocked', status: 405, observedOn: REPROBED,
-    note: 'Now 405 Method Not Allowed rather than 403 — a different refusal, still a refusal.' },
   q('nation_kenya', 'bot-blocked', 403),
   q('map_morocco', 'bot-blocked', 403),
   q('ethiopia_addisstandard', 'bot-blocked', 403),
+  { key: 'bse_india', reason: 'bot-blocked', status: 403, observedOn: OBSERVED_2026_10_04,
+    note: 'Akamai "Access Denied" — the same refusal as BLS. Seen by Production and re-requested from a second network.' },
 
   // ── Answering perfectly, publishing nothing. ─────────────────────────────
   {
@@ -153,21 +166,20 @@ export const QUARANTINE: QuarantinedSource[] = [
       'GDACS, which is a real coverage gap, not a solved one.',
   },
   q('reuters_world', 'moved', 404, 'Reuters withdrew its public RSS entirely. No first-party replacement exists.'),
-  q('reliefweb_reports', 'moved', 410, 'ReliefWeb retired the v1 API. v2 answers 403 to our agent; needs the appname registration their terms describe.'),
-  { key: 'reliefweb_disasters', reason: 'moved', status: 403, observedOn: REPROBED,
-    note: 'Same v1 retirement. Now answers 403 rather than 410 — the endpoint exists again and refuses us, which is the appname registration their terms describe.' },
-  q('who_don', 'moved', 404, 'WHO reorganised its Disease Outbreak News feed.'),
-  q('who_afro', 'moved', 404),
+  { key: 'reliefweb_reports', reason: 'credential', status: 403, observedOn: OBSERVED_2026_10_04,
+    note: 'Repaired 2026-10-04 to v2 (v1 was 410). v2 answers 403 "You are not using an approved appname": since 2025-11-01 ReliefWeb issues appnames on request. Owner action: request one, set RELIEFWEB_APPNAME in the deployment.' },
+  { key: 'reliefweb_disasters', reason: 'credential', status: 403, observedOn: OBSERVED_2026_10_04,
+    note: 'Same registration as reliefweb_reports: v2 answers 403 until an approved appname is set in RELIEFWEB_APPNAME. Was recorded as moved (2026-08-22, 403).' },
+  { key: 'who_afro', reason: 'frozen', status: 200, observedOn: OBSERVED_2026_10_04,
+    note: 'Repaired 2026-10-04 to its current address (/rss/emergencies.xml, listed on afro.who.int/rss-feeds). It answers, but its newest item is from 2025 — frozen, not released.' },
   q('paho_alerts', 'moved', 404, 'Superseded by the paho_news record, which was verified answering.'),
-  q('ecdc_threats', 'moved', 404),
   q('fao_giews', 'moved', 404),
-  q('bis_press', 'moved', 404),
   q('finra_actions', 'moved', 404),
   q('treasury_press', 'moved', 404),
   q('urlhaus_recent', 'moved', 404, 'abuse.ch moved to an authenticated API; the coded urlhaus source is unaffected.'),
   q('jakartapost', 'moved', 404),
-  q('eluniversal_mx', 'moved', 404),
-  q('annahar_lebanon', 'moved', 404),
+  { key: 'eluniversal_mx', reason: 'bot-blocked', status: 200, observedOn: OBSERVED_2026_10_04,
+    note: 'Repaired 2026-10-04 to the publisher\'s current feed, which answers — but robots.txt (edition of 2026-09-24) disallows every agent not on its list. A robots refusal is the provider\'s terms (charter §3), so it stays out.' },
   // Its advertised replacement answers 403 — a bot challenge, which §3 of
   // the charter forbids working around. It stays out until it answers.
   q('skynewsarabia', 'bot-blocked', 403),
@@ -182,6 +194,8 @@ export const QUARANTINE: QuarantinedSource[] = [
   { key: 'afp_via_gdelt', reason: 'unreachable', status: 429, observedOn: REPROBED,
     note: 'GDELT rate-limits the probe. Re-checked 2026-08-22 and still 429, so this is their standing limit for us rather than one bad sweep.' },
   q('smn_mexico', 'unreachable', 500),
+  { key: 'nasa_donki', reason: 'unreachable', status: 429, observedOn: OBSERVED_2026_10_04,
+    note: 'NASA answers 429 OVER_RATE_LIMIT on the shared DEMO_KEY (Production received HTML instead of JSON). A shared anonymous key on shared serverless addresses is a standing limit, as with afp_via_gdelt. The lasting fix is a registered api.nasa.gov key — an owner decision, not a workaround.' },
   { key: 'ted_europa', reason: 'moved', status: 404, observedOn: REPROBED,
     note: 'Was 202 Accepted with no body; now 404. The async endpoint we were calling is gone, so this is a moved record needing a new URL, not an unreachable one waiting to recover.' },
 ]

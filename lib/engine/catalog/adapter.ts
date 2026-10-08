@@ -1,5 +1,5 @@
 import type { Evidence, Source, SourceContext } from '../types'
-import { parseFeed } from '../feedxml'
+import { feedBlocks, parseFeed } from '../feedxml'
 import { publicationTime, publicationZoneOffset } from '../observed'
 import { USER_AGENT } from '../guardrail'
 import type { CatalogSource } from './types'
@@ -220,6 +220,17 @@ export function fillTemplate(template: string | undefined, row: unknown): string
   return trimmed.length > 0 ? trimmed : null
 }
 
+/** A filled `urlTemplate` is only a citation if it is a whole http(s) address. */
+function absoluteHttpUrl(candidate: string | null): string | null {
+  if (!candidate) return null
+  try {
+    const url = new URL(candidate)
+    return url.protocol === 'https:' || url.protocol === 'http:' ? url.toString() : null
+  } catch {
+    return null
+  }
+}
+
 /** Arbitrary JSON, guided by the record's `path` and `map`. */
 function fromJson(source: CatalogSource, body: unknown, retrievedAt: string): Evidence[] {
   // A GeoJSON-shaped payload is read as GeoJSON even when declared `json`,
@@ -244,7 +255,12 @@ function fromJson(source: CatalogSource, body: unknown, retrievedAt: string): Ev
       {
         claim,
         sourceKey: source.key,
-        sourceUrl: str(dig(row, map.url)) ?? str(dig(row, 'url')) ?? str(dig(row, 'link')) ?? source.url,
+        sourceUrl:
+          absoluteHttpUrl(fillTemplate(map.urlTemplate, row)) ??
+          str(dig(row, map.url)) ??
+          str(dig(row, 'url')) ??
+          str(dig(row, 'link')) ??
+          source.url,
         retrievedAt,
         publishedAt: publicationTime(dig(row, map.time) ?? dig(row, 'time') ?? dig(row, 'date')),
         admiralty: { source: source.admiralty, info: 2 },
@@ -266,7 +282,8 @@ function fromJson(source: CatalogSource, body: unknown, retrievedAt: string): Ev
 
 /** RSS, RDF and Atom, through the parser the engine already owns. */
 function fromFeed(source: CatalogSource, xml: string, retrievedAt: string): Evidence[] {
-  return parseFeed(xml).flatMap((entry) => {
+  const kept = source.keepItem ? feedBlocks(xml).filter((item) => source.keepItem!.test(item)).join('\n') : xml
+  return parseFeed(kept).flatMap((entry) => {
     if (!entry.title) return []
     return [
       {

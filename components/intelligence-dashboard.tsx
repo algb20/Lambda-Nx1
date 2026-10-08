@@ -28,6 +28,7 @@ import {
 } from 'lucide-react'
 import { Sparkles, Building2, Scale, FileText, Mic, Pickaxe, Sun, Satellite, Megaphone, Coins, Waves, BadgeCheck } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { PoweredByCoinGecko } from '@/components/powered-by-coingecko'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -71,6 +72,7 @@ import { PREDICATE_LABEL } from '@/lib/engine/ontology'
 import { proposePivots } from '@/lib/modules/copilot'
 import type { Evidence } from '@/lib/engine/types'
 import type { AnalystVerdict, Severity } from '@/lib/ai/types'
+import { SourceCredit } from '@/components/source-credit'
 
 type Result =
   | { kind: 'nexus'; data: NexusReport }
@@ -125,7 +127,7 @@ const MODES: Array<{ id: Mode; label: string; icon: typeof Globe; placeholder: s
   { id: 'markets', label: 'Markets', icon: LineChart, placeholder: 'BTC, AAPL, or USD/EUR' },
   { id: 'procurement', label: 'Contracts', icon: Gavel, placeholder: 'company, agency or project name' },
   { id: 'ownership', label: 'Ownership', icon: Network, placeholder: 'company / legal-entity name' },
-  { id: 'geo', label: 'Geo', icon: MapPin, placeholder: 'place, "lat,lon", or aircraft ICAO24 hex' },
+  { id: 'geo', label: 'Geo', icon: MapPin, placeholder: 'place or "lat,lon"' },
   { id: 'research', label: 'Research', icon: Microscope, placeholder: 'a topic, technology or research question' },
   { id: 'reference', label: 'Facts', icon: BookOpen, placeholder: 'a company, person or place — structured facts' },
   { id: 'open-data', label: 'Open data', icon: Library, placeholder: 'a subject — searched across every national catalogue at once' },
@@ -183,7 +185,7 @@ function SourceTag({ e }: { e: EvidenceItem }) {
         </Badge>
       ) : null}
       <Badge variant="secondary" className="text-[10px]">
-        {e.sourceKey}
+        <SourceCredit sourceKey={e.sourceKey} sourceUrl={e.sourceUrl} />
       </Badge>
     </div>
   )
@@ -435,6 +437,15 @@ function ResearchView({ r }: { r: ResearchReport }) {
           ))
         )}
       </Card>
+      {/* NCBI asks that its disclaimer be evident to users of services built
+          on E-utilities; arXiv metadata is CC0 and we never imply endorsement. */}
+      <p className="px-1 text-[11px] text-muted-foreground">
+        Biomedical records from PubMed via NCBI E-utilities —{' '}
+        <a href="https://www.ncbi.nlm.nih.gov/home/about/policies/" target="_blank" rel="noopener noreferrer" className="hover:underline">
+          NCBI disclaimer and copyright
+        </a>
+        ; abstracts belong to their publishers. arXiv metadata is CC0; this product is not endorsed by arXiv.
+      </p>
     </div>
   )
 }
@@ -915,10 +926,18 @@ function GeoView({ r }: { r: GeoReport }) {
       ) : null}
       <Card className="p-4">
         <h4 className="mb-1 text-sm font-semibold">Geospatial results</h4>
+        {/* Nominatim's usage policy (osmfoundation.org): results carry the ODbL
+            attribution "as suitable for your medium". */}
+        <p className="mb-1 text-[11px] text-muted-foreground">
+          Places ©{' '}
+          <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" className="hover:underline">
+            OpenStreetMap contributors
+          </a>{' '}
+          (ODbL), via Nominatim
+        </p>
         {r.findings.length === 0 ? (
           <p className="py-2 text-sm text-muted-foreground">
-            No public geospatial match. Try a place, a &quot;lat,lon&quot; pair, or an aircraft
-            ICAO24 hex.
+            No public geospatial match. Try a place or a &quot;lat,lon&quot; pair.
           </p>
         ) : (
           r.findings.map((e, i) => (
@@ -1286,6 +1305,19 @@ function NewsView({ r, onReload, loading }: { r: NewsReport; onReload: () => voi
         A story is graded by how many <em>independent origins</em> reported it: twenty outlets
         carrying one wire is one confirmation, not twenty.
       </p>
+      {/* GDELT's terms: "any use or redistribution of the data must include a
+          citation to the GDELT Project and a link to this website". */}
+      <p className="px-1 text-[11px] text-muted-foreground">
+        Article discovery in part via{' '}
+        <a href="https://www.gdeltproject.org/" target="_blank" rel="noopener noreferrer" className="hover:underline">
+          the GDELT Project
+        </a>
+        . Wikipedia &ldquo;In the news&rdquo; text is{' '}
+        <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer" className="hover:underline">
+          CC BY-SA 4.0
+        </a>
+        , each item linked to its article.
+      </p>
     </div>
   )
 }
@@ -1576,9 +1608,13 @@ function BoardView({ r, onReload, loading }: { r: MarketsBoardReport; onReload: 
         ))
       )}
       <p className="px-1 text-[11px] text-muted-foreground">
-        Quotes from public sources (CoinGecko · Stooq · ECB), shown as published — never a
-        prediction. Change shown is intraday vs. session open where available.
+        Shown as published — never a prediction. Crypto from CoinGecko; indices and commodities
+        are FRED daily closes (Federal Reserve Bank of St. Louis, with the original source named on
+        each row), dated; FX reference rates from the European Central Bank, via Frankfurter. Percentage
+        changes are computed by Lambda NX from the published values; the values themselves are not
+        modified.
       </p>
+      <PoweredByCoinGecko className="px-1" />
     </div>
   )
 }
@@ -1947,6 +1983,14 @@ function PropertyView({ r }: { r: PropertyReport }) {
         ) : null}
       </Card>
 
+      {/* Eurostat: reuse "authorised provided the source is acknowledged"; UK HPI
+          is Open Government Licence v3.0. Each row also links to its source. */}
+      <p className="px-1 text-[11px] text-muted-foreground">
+        Figures as published by Eurostat, FRED (Federal Reserve Bank of St. Louis, original source
+        named on each row) and HM Land Registry. Contains HM Land Registry data © Crown copyright and
+        database right {new Date().getUTCFullYear()}. This data is licensed under the Open Government
+        Licence v3.0.
+      </p>
       {r.sections.length === 0 ? (
         <Card className="p-4 text-sm text-muted-foreground">
           No housing figures came back. The statistical authorities may be rate-limiting us — press Load

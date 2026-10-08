@@ -10,6 +10,7 @@
  */
 import { NextResponse } from 'next/server'
 import { RateLimiter, callerKey, rateLimitHeaders, type RateLimitOptions } from '@/lib/rate-limit'
+import { callerLimit } from '@/lib/limits'
 import {
   databaseAvailability,
   describeDatabaseError,
@@ -31,7 +32,7 @@ import { CODE_TTL_MINUTES } from '@/lib/auth/verification'
  * `issueCode` closes the other half, where one attacker cycles through IPs
  * against a single victim's inbox.
  */
-export const CODE_LIMIT: RateLimitOptions = { limit: 10, windowMs: 60_000 }
+export const CODE_LIMIT: RateLimitOptions = callerLimit('code')
 export const codeLimiter = new RateLimiter(CODE_LIMIT)
 
 /**

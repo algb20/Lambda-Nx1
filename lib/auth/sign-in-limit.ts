@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { RateLimiter, callerKey, rateLimitHeaders, type RateLimitOptions } from '@/lib/rate-limit'
+import { callerLimit } from '@/lib/limits'
 
 /**
  * The tighter policy sign-in was promised and never given.
@@ -42,8 +43,8 @@ import { RateLimiter, callerKey, rateLimitHeaders, type RateLimitOptions } from 
  * cost of guessing a great deal, and it is not a lockout.
  */
 
-/** Attempts per minute from one address, across every sign-in surface. */
-export const SIGN_IN_LIMIT: RateLimitOptions = { limit: 10, windowMs: 60_000 }
+/** Attempts per minute from one address, across every sign-in surface. Value: `config/rate-limits.json`. */
+export const SIGN_IN_LIMIT: RateLimitOptions = callerLimit('signIn')
 
 /**
  * Attempts per minute against one identity, from anywhere.
@@ -51,7 +52,7 @@ export const SIGN_IN_LIMIT: RateLimitOptions = { limit: 10, windowMs: 60_000 }
  * Higher than the caller limit on purpose — see above on why a tight number
  * here is a denial-of-service handed to anyone who knows a user's email.
  */
-export const SIGN_IN_SUBJECT_LIMIT: RateLimitOptions = { limit: 20, windowMs: 60_000 }
+export const SIGN_IN_SUBJECT_LIMIT: RateLimitOptions = callerLimit('signInSubject')
 
 export const signInLimiter = new RateLimiter(SIGN_IN_LIMIT)
 export const signInSubjectLimiter = new RateLimiter(SIGN_IN_SUBJECT_LIMIT)

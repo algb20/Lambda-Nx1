@@ -1,5 +1,9 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { catalogAttributions } from '@/lib/engine/catalog'
+import { SOURCE_LICENSE_REGISTRY, usagePolicy } from '@/lib/engine/licensing/registry'
+import { licenceTextsInUse } from '@/lib/engine/licensing/licence-texts'
+import { activePortals } from '@/lib/engine/registries/ckan/portals'
 
 /**
  * Terms of use.
@@ -14,14 +18,41 @@ export const metadata: Metadata = {
   description: 'The rules for using Lambda, and the limits of what its findings mean.',
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ id, title, children }: { id?: string; title: string; children: React.ReactNode }) {
   return (
-    <section className="space-y-2">
+    <section id={id} className="scroll-mt-20 space-y-2">
       <h2 className="text-lg font-semibold">{title}</h2>
       <div className="space-y-2 text-sm leading-relaxed text-muted-foreground">{children}</div>
     </section>
   )
 }
+
+/**
+ * Credits owed under the sources' own terms (CC BY, OGL, ODbL, ECB, FRED, …),
+ * from the licence & usage registry and the catalogue. `catalogAttributions`
+ * was written for exactly this and never displayed anywhere (R317 audit).
+ * Withheld sources owe nothing because nothing of theirs is shown.
+ */
+const ACTIVE_PORTALS = new Set(activePortals().map((p) => 'ckan:' + p.key))
+
+const SOURCE_ATTRIBUTIONS = [
+  ...new Set([
+    ...catalogAttributions(),
+    ...SOURCE_LICENSE_REGISTRY.filter(
+      (r) =>
+        r.attribution &&
+        usagePolicy(r.license_status) !== 'WITHHOLD' &&
+        // A portal that is switched off shows nothing, so owes nothing.
+        (r.kind !== 'ckan-portal' || ACTIVE_PORTALS.has(r.source_id)),
+    ).map((r) => r.attribution as string),
+  ]),
+].sort((a, b) => a.localeCompare(b))
+
+/** Licence texts owed by the sources shown, derived from the registry (R320). */
+const LICENCE_TEXTS_IN_USE = licenceTextsInUse(
+  SOURCE_LICENSE_REGISTRY,
+  (r) => r.kind !== 'ckan-portal' || ACTIVE_PORTALS.has(r.source_id),
+)
 
 export default function TermsPage() {
   return (
@@ -120,6 +151,33 @@ export default function TermsPage() {
           You are responsible for keeping your password. Because we store only a hash of it, we
           cannot recover it — we can only help you start again. You may erase your account at any
           time from Preferences → Account, and it is erased immediately.
+        </p>
+      </Section>
+
+      <Section id="sources" title="Data sources and attributions">
+        <p>
+          Lambda reads public sources under each provider&rsquo;s own terms, recorded with the quoted
+          text and the date it was read. Several of those terms ask to be credited wherever their data
+          appears; each finding also links to its source. The credits owed are:
+        </p>
+        <ul className="list-disc space-y-1 pl-5">
+          {SOURCE_ATTRIBUTIONS.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+        <p>
+          Licence texts:{' '}
+          {LICENCE_TEXTS_IN_USE.map((t, i) => (
+            <span key={t.id}>
+              {i > 0 ? ' · ' : null}
+              <a href={t.url} className="text-primary hover:underline">
+                {t.label}
+              </a>
+            </span>
+          ))}
+          .{' '}
+          Where Lambda computes a change or a count from published values, the values themselves are
+          not modified and the computation is labelled as ours.
         </p>
       </Section>
 

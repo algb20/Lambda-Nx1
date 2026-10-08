@@ -6,7 +6,19 @@
 > architectural reference — that is the Master Living Implementation Blueprint —
 > and it never competes with it.
 
-## 0. Precedence and status (owner decisions, 2026-10-03 — ledger R293)
+## 0. Precedence and status (owner decisions R293, restated R301 — 2026-10-04)
+
+**Governance split (R301-2):**
+- **CLAUDE.md** governs the current repository and actual execution.
+- **The Master Living Blueprint** governs the target architecture, research,
+  specifications, contracts, phases and acceptance criteria.
+- Between them sits an explicit layer:
+  **Current-System Reality → Target Architecture → Migration/Implementation Contracts.**
+- Neither cancels the other. The existing system is not treated as absent, and the
+  Blueprint is not lowered to match the code.
+- Working document: `docs/reconciliation/CANONICAL_RECONCILIATION.md`.
+
+The chain below (R293) applies to target matters:
 
 **Order of authority**, highest first:
 
@@ -71,6 +83,13 @@ A Master subsystem is coded only from a task sheet in the Build Package §53 for
 - Conflicts move through `CONFLICT → EVIDENCE → IMPACT → PROPOSED RESOLUTION → APPROVAL`.
 - Architecture is never changed because a name, version or implementation detail
   differs, until the official or project source proves it.
+- Current repository technologies (Next.js, Netlify/Vercel, Supabase, Drizzle, Pi
+  adapters) are **existing implementation constraints**, not canonical architecture
+  decisions (R298).
+- No destructive rewrite happens until an explicit migration or replacement decision
+  exists (R298).
+- Every Blueprint ↔ Existing System difference and every specification conflict goes in
+  `docs/reconciliation/COMPATIBILITY_GAP_LEDGER.md` until it is decided.
 
 ## 1. What this project is
 
@@ -120,17 +139,41 @@ families **extend, never replace** this method. Family roadmap: `docs/GATEWAYS.m
 1. **No temporary solutions.** Every point is built *finally*. A module is "done" only
    when it: works for real, is tested with real tests, handles errors and edge cases,
    is documented, and contains **no `TODO`/mock/`Math.random()` placeholders**. See §6.
-2. **Research boundary.** Architecture research and adoption decisions belong to the
-   research stage and the Master, not to Claude.
-   - Claude verifies the facts needed to implement an *already specified* contract, for
-     example a specified source's live response shape.
-   - Claude reports anything else it observes as **DISCOVERED**, with evidence, and never
-     adopts it on its own. The Radar (`docs/RADAR.md`) gathers such observations.
-   - Specification text Claude does not have is never guessed. A dependent item is
-     recorded as one of:
-     - **NOT SUPPLIED TO CLAUDE** — the text exists in the owner's library, but no one
-       has handed it over;
-     - **BLOCKED — SOURCE SPEC MISSING** — the text is confirmed absent.
+2. **Research and correction boundary (owner R312, 2026-10-04 — refines the earlier
+   "implementation-only" wording).** Claude is **not** the architectural owner.
+   - **Never allowed:** inventing requirements; silent redesign; removing difficult
+     requirements; downgrading contracts; replacing approved architecture; silent
+     contract changes; fabricating historical decisions.
+   - **Authorized and expected:**
+     - inspect the repository before changing it;
+     - research official and current documentation;
+     - verify standards, APIs, dependencies, versions and claims;
+     - detect contradictions, missing contracts, stale assumptions, broken links, bad
+       configuration, security issues and defects;
+     - fix a defect when the correct fix is clear and consistent with the approved
+       architecture — the smallest compatible correction;
+     - research a verified official replacement for a moved, failed or obsolete source.
+   - **A new architectural decision** is never invented silently. It is recorded with:
+     problem, evidence, alternatives, recommended decision, impact, migration
+     requirements, tests, acceptance criteria and status. It is flagged for owner
+     approval when it materially changes the architecture.
+   - **Missing major specifications** are reconstructed from these sources, in this order:
+     1. the Master;
+     2. project documents;
+     3. the repository;
+     4. prior approved decisions;
+     5. official standards;
+     6. authoritative documentation;
+     7. research evidence.
+
+     Reconstructed text is labelled **RECONSTRUCTED**. Unrecoverable history is marked
+     **MISSING HISTORICAL SOURCE**, with a **CURRENT RECONSTRUCTION PROPOSAL** that is
+     never presented as an earlier decision.
+   - Ordinary corrective engineering is not blocked by a missing future specification.
+   - Superseded wording, kept for history: "Claude verifies the facts needed to implement
+     an *already specified* contract … reports anything else as DISCOVERED and never
+     adopts it on its own". The labels NOT SUPPLIED TO CLAUDE and BLOCKED — SOURCE SPEC
+     MISSING remain valid for text that exists elsewhere or is confirmed absent.
 3. **Our own technology.** We build our own engine, algorithms, storage and analysis —
    not a thin wrapper over someone else's product. Inspire from the best, then build
    stronger in our own way.
@@ -267,9 +310,36 @@ When two files or two decisions conflict:
 Records live in `docs/reconciliation/`: the Contradiction Register in the baseline, and
 `CONTINUITY_M_S.md`.
 
-**Phase state (2026-10-03):**
-- Operational resumption point: **30.27.8.S** — BLOCKED by the Build Package's own terms
-  (§29.4) until its source contracts are consolidated and its open conflicts decided.
+**Phase state (2026-10-04, R302):**
+- **Operational resumption point: 30.27.8.S — Cross-Contract Consistency / Closure Gate**
+  (owner, R302). Step 1 of the R301 pipeline (Canonical Reconciliation) is closed for
+  W1, W2, W4 and W5. Audit, recovery and consolidation continue as preparation for S.
+  ~~No code changes (R299).~~ **Superseded by R312:**
+  - corrective maintenance and the contract-recovery task proceed under §2 rule 2;
+  - Master subsystems are still coded only after their contract is closed, starting
+    from the Build Package for the first executable unit;
+  - Production stays locked (R306).
+- 30.27.8 letter sequence (owner, R302): A → B → C → D → E → F → G → H → I → J → K → L →
+  M → N → O → P → Q → R → S. M–R are preserved history, not a return point.
+- Verification ladders are preserved as independent frameworks until S defines a
+  Verification-Level Crosswalk (R302). No numeric conversion between ladders.
+- Forecast is an independent intelligence layer and never becomes World State or
+  canonical truth. The Calibration Ledger is an evaluation record, not a forecast (R302).
+- Text classes: SOURCE-PRESERVED / CONSOLIDATED / RECONSTRUCTED. Never write ORIGINAL
+  without the original text (R302).
+- **Phase sequence (R304, `docs/reconciliation/RECORD_PHASE_SEQUENCE_R304.md`):**
+  - Phase 28 = Technology Intelligence.
+  - **Phase 29 = Live Intelligence.** The verbatim specification ("Real-Time Intelligence
+    Fabric …") is retained and authoritative. Later integration into other layers is
+    documented as a coverage mapping, never as deletion.
+  - **Phase 30 = Contract Hardening / Closure:** 30.25 Gap Audit → 30.26 Data Contracts →
+    30.27 Interface Contracts → 30.27.8 … S. Closure and verification come before any
+    move to Phase 31.
+  - **Supply Chain ≠ Phase 30.** It is domain / intelligence coverage.
+  - **Companies & Facilities ≠ a replacement for Phase 29.** It is a Domain Pack
+    (R301-1), linked to Technology Intelligence and the World Model.
+  - The working point is unchanged. The phases are not re-ordered, and nothing is
+    IMPLEMENTED because of this correction.
 - 30.27.8.M is history only.
 - Phase 30 is NOT COMPLETE. Phase 31 is BLOCKED until Phase 30 closes.
 - This reconciliation stage is **30.27.8.RB**. R remains Artifact / Export /
@@ -289,7 +359,7 @@ SCOPE → REQUIREMENTS → DEPENDENCIES → CONTRACTS → IMPACT → IMPLEMENTAT
 | Lane | What it covers | Precondition |
 |---|---|---|
 | Audit | Read, test and inspect, including read-only inspection of live systems. | Always allowed. |
-| Maintenance | Defects and security in the Existing System. No new architecture, schema or contract. Path: REPRODUCE → ROOT CAUSE → PATCH → TEST → REGRESSION TEST → VERIFY → REPORT. | Explicit owner authorisation per batch. Batch 01: `docs/reconciliation/MAINTENANCE_BATCH_01.md`. |
+| Maintenance | Defects and security in the Existing System. No new architecture, schema or contract. Path: REPRODUCE → ROOT CAUSE → PATCH → TEST → REGRESSION TEST → VERIFY → REPORT. | Standing authorisation since R312, for defects whose correct fix is clear and consistent with the approved architecture, and for verified repair of moved or failed sources. Each batch is still recorded (`docs/reconciliation/MAINTENANCE_BATCH_NN.md`). Anything that changes architecture, schema or contract is flagged for approval. *(Before R312: explicit owner authorisation per batch.)* |
 | Implementation | A Master subsystem. | A closed implementation package (Master §70.6). Otherwise stop and report the exact gap. |
 
 **Live systems** — database, hosting, environment, DNS:
@@ -302,6 +372,12 @@ SCOPE → REQUIREMENTS → DEPENDENCIES → CONTRACTS → IMPACT → IMPLEMENTAT
 Publication / Export / Share contract (30.27.8.R) is closed and has passed test, failure
 test and acceptance. CI, builds, previews/staging and automated tests continue. Do not
 publish to Production.
+
+**Production stays on deploy `9c19303` with its database connection unrepaired (R306).**
+Production's `DATABASE_URL` currently fails, and that deploy predates the `publish` pause.
+Repairing the connection would let it auto-publish again. Do not change Production's
+`DATABASE_URL` or `CRON_SECRET`, and do not deploy, without a new explicit owner decision
+(`docs/reconciliation/CURRENT_SYSTEM_AUDIT_2026-10-04.md` §6).
 
 Scheduled **content** publication (`publish` job) is paused for the same reason (R294):
 it sits in `UNSCHEDULED` in `lib/ops/schedule.ts`, and a test fails if it is scheduled

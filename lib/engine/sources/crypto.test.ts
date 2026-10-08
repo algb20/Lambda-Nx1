@@ -288,7 +288,9 @@ describe('the news half', () => {
   it('separates what a network announced from what the press reported about it', () => {
     const feeds = cryptoFeeds()
     const pi = feeds.find((f) => f.key === 'pi_network_blog')!
-    const press = feeds.find((f) => f.key === 'cointelegraph')!
+    // Cointelegraph was the press example; its terms allow personal use only
+    // (batch 10), so CoinDesk stands in.
+    const press = feeds.find((f) => f.key === 'coindesk')!
     expect(publisherTier(pi)).toBe('From the networks themselves')
     expect(publisherTier(press)).toBe('Specialist press')
   })
@@ -319,9 +321,14 @@ describe('the news half', () => {
   it('grades an announcement above a report about one', async () => {
     const out = await cryptoNews.run(ask(''), ctxOf(() => ({ text: RSS })))
     const primary = out.find((e) => e.sourceKey === 'pi_network_blog')
-    const press = out.find((e) => e.sourceKey === 'cointelegraph')
+    const press = out.find((e) => e.sourceKey === 'coindesk')
     expect(primary?.admiralty).toEqual({ source: 'A', info: 1 })
     expect(press?.admiralty?.info).toBe(3)
+  })
+
+  it('never fetches a publisher whose terms forbid this product (batch 10)', async () => {
+    const keys = cryptoFeeds().map((f) => f.key)
+    for (const withheld of ['cointelegraph', 'bitcoin_magazine', 'solana_news']) expect(keys).not.toContain(withheld)
   })
 
   it('lifts headlines that mention the subject into their own box', async () => {
