@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { catalogAttributions } from '@/lib/engine/catalog'
 import { SOURCE_LICENSE_REGISTRY, usagePolicy } from '@/lib/engine/licensing/registry'
+import { licenceTextsInUse } from '@/lib/engine/licensing/licence-texts'
 import { activePortals } from '@/lib/engine/registries/ckan/portals'
 
 /**
@@ -17,9 +18,9 @@ export const metadata: Metadata = {
   description: 'The rules for using Lambda, and the limits of what its findings mean.',
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ id, title, children }: { id?: string; title: string; children: React.ReactNode }) {
   return (
-    <section className="space-y-2">
+    <section id={id} className="scroll-mt-20 space-y-2">
       <h2 className="text-lg font-semibold">{title}</h2>
       <div className="space-y-2 text-sm leading-relaxed text-muted-foreground">{children}</div>
     </section>
@@ -46,6 +47,12 @@ const SOURCE_ATTRIBUTIONS = [
     ).map((r) => r.attribution as string),
   ]),
 ].sort((a, b) => a.localeCompare(b))
+
+/** Licence texts owed by the sources shown, derived from the registry (R320). */
+const LICENCE_TEXTS_IN_USE = licenceTextsInUse(
+  SOURCE_LICENSE_REGISTRY,
+  (r) => r.kind !== 'ckan-portal' || ACTIVE_PORTALS.has(r.source_id),
+)
 
 export default function TermsPage() {
   return (
@@ -147,7 +154,7 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section title="Data sources and attributions">
+      <Section id="sources" title="Data sources and attributions">
         <p>
           Lambda reads public sources under each provider&rsquo;s own terms, recorded with the quoted
           text and the date it was read. Several of those terms ask to be credited wherever their data
@@ -160,15 +167,15 @@ export default function TermsPage() {
         </ul>
         <p>
           Licence texts:{' '}
-          <a href="https://creativecommons.org/licenses/by/4.0/" className="text-primary hover:underline">CC BY 4.0</a>
-          {' · '}
-          <a href="https://creativecommons.org/licenses/by-sa/4.0/" className="text-primary hover:underline">CC BY-SA 4.0</a>
-          {' · '}
-          <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" className="text-primary hover:underline">Open Government Licence v3.0</a>
-          {' · '}
-          <a href="https://open.canada.ca/en/open-government-licence-canada" className="text-primary hover:underline">Open Government Licence – Canada</a>
-          {' · '}
-          <a href="https://opendatacommons.org/licenses/odbl/1-0/" className="text-primary hover:underline">ODbL 1.0</a>.
+          {LICENCE_TEXTS_IN_USE.map((t, i) => (
+            <span key={t.id}>
+              {i > 0 ? ' · ' : null}
+              <a href={t.url} className="text-primary hover:underline">
+                {t.label}
+              </a>
+            </span>
+          ))}
+          .{' '}
           Where Lambda computes a change or a count from published values, the values themselves are
           not modified and the computation is labelled as ours.
         </p>
