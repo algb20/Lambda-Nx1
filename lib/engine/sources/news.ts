@@ -47,7 +47,12 @@ export const gdeltNews: Source = {
   capability: 'news',
   passive: true,
   hosts: ['api.gdeltproject.org'],
-  minIntervalMs: 1500,
+  // GDELT: "Please limit requests to one every 5 seconds" (its 429 body,
+  // 2026-10-08). Was 1500 ms (R327). Kept per source, not in HOST_INTERVALS:
+  // a 5 s host gap exceeds MAX_HOST_WAIT_MS by design. The catalogue's
+  // afp_via_gdelt reads the same host every 15 minutes; a rare collision shows
+  // as a visible 429 for that run, never as silent data.
+  minIntervalMs: 5000,
   async run(input, ctx) {
     const topic = input.value.trim()
     if (topic.length < 2) return [] // topic-less "top news" is served by Wikipedia

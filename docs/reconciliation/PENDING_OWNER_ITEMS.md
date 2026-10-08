@@ -5,7 +5,7 @@
 | **Purpose** | One living list of everything that cannot be finished in the repository: keys, environment variables, decisions, permissions, writes to live systems. Owner R322: «احفظ في قائمة غير المكتمل مثل المفاتيح أو المتغيرات وغيرها». |
 | **Rule** | No secret value is ever written here, in Git, or in any file (owner S2). A key is named; its value goes only into the hosting environment, by the owner. |
 | **Production** | Locked on `9c19303`. No Production environment variable or deploy is changed without a new owner decision (R306). |
-| **Updated** | 2026-10-08 (R326). Each item says where it came from. Close an item by striking it through, with the date and the commit or decision. |
+| **Updated** | 2026-10-08 (R327). Each item says where it came from. Close an item by striking it through, with the date and the commit or decision. |
 
 ## A. Source keys and tokens (environment only)
 
@@ -27,6 +27,7 @@ Setting a key is not enough. Each source still runs only if its licence allows i
 | `USGS_M2M_TOKEN` | `keyed.ts` | USGS machine-to-machine data | US gov | — |
 | `USPTO_ODP_KEY` | `keyed.ts` | US patents | US gov | — |
 | `WORLDBANK_API_KEY` | `keyed.ts` | World Bank keyed API | see registry | — |
+| `OPENALEX_API_KEY` | `openalex` (research gateway) | Its own request budget: keyless calls share a daily budget per IP address, and serverless addresses exhaust it (429 on 2026-10-08) | verified (CC0) | Free key from OpenAlex. Batch 19 wired it; without it the source works until the shared budget runs out |
 | api.data.gov key (name to be fixed when wired) | CKAN `us_data_gov` | US open-data catalogue (moved to api.gsa.gov) | public domain metadata | Batch 11 §5; code change needed after the key exists |
 
 ## B. Platform variables (owner sets per environment)
