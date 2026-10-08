@@ -5,7 +5,7 @@
 | **Purpose** | One living list of everything that cannot be finished in the repository: keys, environment variables, decisions, permissions, writes to live systems. Owner R322: «احفظ في قائمة غير المكتمل مثل المفاتيح أو المتغيرات وغيرها». |
 | **Rule** | No secret value is ever written here, in Git, or in any file (owner S2). A key is named; its value goes only into the hosting environment, by the owner. |
 | **Production** | Locked on `9c19303`. No Production environment variable or deploy is changed without a new owner decision (R306). |
-| **Updated** | 2026-10-08 (R325). Each item says where it came from. Close an item by striking it through, with the date and the commit or decision. |
+| **Updated** | 2026-10-08 (R326). Each item says where it came from. Close an item by striking it through, with the date and the commit or decision. |
 
 ## A. Source keys and tokens (environment only)
 
@@ -90,4 +90,6 @@ These are tracked in `SOURCE_LICENSING_GAP_AUDIT_2026-10-05.md`, not here:
 - the 74 unreadable terms pages;
 - the fallbacks still missing (GL-09);
 - terms-change detection (GL-06);
-- per-finding attribution (GL-04).
+- per-finding attribution (GL-04);
+- a current official CDC outbreak feed to replace `cdc_outbreaks` (batch 18);
+- re-reading the 12 sources quarantined on 2026-10-08 from a second network.

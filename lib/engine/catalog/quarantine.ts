@@ -111,6 +111,19 @@ const PROBED = '2026-08-14'
 const REPROBED = '2026-08-22'
 /** Production's `/api/diagnose`, confirmed from a second network the same day. */
 const OBSERVED_2026_10_04 = '2026-10-04'
+/**
+ * The audit of 2026-10-08 (batch 18), from the build environment only. A
+ * refusal seen from one network may be specific to it; the daily recheck
+ * releases any entry that answers and reads, so a wrong call costs a day.
+ */
+const OBSERVED_2026_10_08 = '2026-10-08'
+const o8 = (key: string, reason: QuarantineReason, status: number, note: string): QuarantinedSource => ({
+  key,
+  reason,
+  status,
+  observedOn: OBSERVED_2026_10_08,
+  note,
+})
 
 const q = (
   key: string,
@@ -196,6 +209,22 @@ export const QUARANTINE: QuarantinedSource[] = [
   q('smn_mexico', 'unreachable', 500),
   { key: 'nasa_donki', reason: 'unreachable', status: 429, observedOn: OBSERVED_2026_10_04,
     note: 'NASA answers 429 OVER_RATE_LIMIT on the shared DEMO_KEY (Production received HTML instead of JSON). A shared anonymous key on shared serverless addresses is a standing limit, as with afp_via_gdelt. The lasting fix is a registered api.nasa.gov key — an owner decision, not a workaround.' },
+  // ── Audit of 2026-10-08 (batch 18, R326). One network; see o8. ─────────
+  // si_volcano_weekly is NOT added: its 403 page still reads "Smithsonian site
+  // temporarily unavailable" (2026-10-08), the case the 2026-10-04 decision
+  // and its test keep out of quarantine.
+  o8('dw_world', 'bot-blocked', 403, 'rss.dw.com answers 403.'),
+  o8('channel_news_asia', 'bot-blocked', 403, 'The outbound RSS endpoint answers 403.'),
+  o8('elpais_america', 'bot-blocked', 403, 'feeds.elpais.com answers 403.'),
+  o8('lemonde_international', 'bot-blocked', 403, 'The full-text RSS answers 403.'),
+  o8('punch_nigeria', 'bot-blocked', 403, 'The WordPress feed answers 403.'),
+  o8('clarin_ar', 'bot-blocked', 403, 'The RSS answers 403.'),
+  o8('bangkokpost', 'unreachable', 451, '451 Unavailable For Legal Reasons — a geographic or legal block on this network, not a moved feed.'),
+  o8('cdc_outbreaks', 'frozen', 200, 'The URL is the CDC "2019 Novel Coronavirus" feed (lastBuildDate 2025-03-31, no items), not an outbreaks feed. Needs a current CDC outbreak feed before release.'),
+  o8('nist_cyber', 'frozen', 200, 'Answers an RSS channel titled "News and Events Feed by Topic" with no items and no dates.'),
+  o8('africa_cdc', 'frozen', 200, 'Channel rebuilt the same day (lastBuildDate 2026-10-08) but carries zero items.'),
+  o8('rferl', 'frozen', 200, 'Channel rebuilt the same day but carries zero items.'),
+  o8('pm25_lass', 'frozen', 200, 'The API answers {"num_of_records": 0, "feeds": []}.'),
   { key: 'ted_europa', reason: 'moved', status: 404, observedOn: REPROBED,
     note: 'Was 202 Accepted with no body; now 404. The async endpoint we were calling is gone, so this is a moved record needing a new URL, not an unreachable one waiting to recover.' },
 ]

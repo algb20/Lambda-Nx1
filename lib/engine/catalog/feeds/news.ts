@@ -216,7 +216,11 @@ export const NEWS_SOURCES: CatalogSource[] = [
     licence: publicFeed('Wikipedia (CC BY-SA)', 'https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use'),
     minIntervalSec: 3600,
     keyless: true,
-    note: 'A summary written by editors from other coverage — a map of attention, not a source.',
+    // Off by decision (R326): the parse API returns the portal as HTML, which
+    // the catalogue adapter cannot read — this record has never produced a
+    // finding. The same coverage comes from the coded `wikipedia_itn` source.
+    enabled: false,
+    note: 'A summary written by editors from other coverage — a map of attention, not a source. Off: HTML payload the adapter cannot read; covered by wikipedia_itn.',
   },
 ]
 

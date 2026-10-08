@@ -178,8 +178,16 @@ export const SCIENCE_SOURCES: CatalogSource[] = [
     key: 'usgs_volcano',
     name: 'USGS Volcano Hazards — activity notices',
     publisher: 'US Geological Survey',
-    url: 'https://volcanoes.usgs.gov/vhp/rss/hans.xml',
-    kind: 'rss',
+    // The HANS RSS now redirects to a web page (2026-10-08). HANS publishes the
+    // same notices through its public API (R326).
+    url: 'https://volcanoes.usgs.gov/hans-public/api/notice/getNewestOrRecent',
+    formerUrls: [{ url: 'https://volcanoes.usgs.gov/vhp/rss/hans.xml', until: '2026-10-08', why: 'redirects to www.usgs.gov/natural-hazards/volcano-hazards/ (HTML)' }],
+    kind: 'json',
+    map: {
+      titleTemplate: '{noticeType}: {volcanoes} ({obsFullname})',
+      url: 'notice_url',
+      time: 'sent_unixtime',
+    },
     discipline: 'geoint',
     topics: ['volcano'],
     coverage: ['US'],
