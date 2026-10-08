@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { StandingBrief } from '@/lib/modules/brief-shared'
 import type { ReadingStrength } from '@/lib/analysis/reasoning'
+import { aiDisclosure } from '@/lib/ai/disclosure'
 
 /**
  * The standing brief.
@@ -109,7 +110,7 @@ export function StandingBriefPanel() {
             wrote the sentence they are about to act on.
           */}
           <span className="text-[11px] text-muted-foreground">
-            {brief.verdict.model ? `${brief.verdict.provider} · ${brief.verdict.model}` : 'computed — no model'}
+            {aiDisclosure(brief.verdict)}
           </span>
           <Button size="sm" variant="ghost" onClick={() => void load()} disabled={loading}>
             <Radio className={`h-3.5 w-3.5 ${loading ? 'animate-pulse' : ''}`} />

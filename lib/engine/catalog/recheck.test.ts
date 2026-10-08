@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
+import { CATALOG } from './index'
 import {
   judgeProbe,
+  licenceHold,
   MAX_ITEM_AGE_DAYS,
   orphanedEntries,
   probeOrder,
@@ -212,5 +214,36 @@ describe('the report tells a reader what to do', () => {
     for (const r of [summarise([], [], 0), summarise([rec('a', 'recovered')], ['b'], 1)]) {
       expect(r.advice.length).toBeGreaterThan(20)
     }
+  })
+})
+
+describe('a reachable feed is not a permitted one (batch 20)', () => {
+  // On 2026-10-08 eluniversal_mx answered 100 fresh items and the run advised
+  // releasing it; its robots.txt still disallows unlisted agents and the
+  // registry records it PROHIBITED.
+  const fresh = () =>
+    new Response(
+      `<rss><channel><item><title>Fresh item</title><link>https://example.org/a</link><pubDate>${new Date().toUTCString()}</pubDate></item></channel></rss>`,
+      { status: 200, headers: { 'content-type': 'application/rss+xml' } },
+    )
+
+  it('holds a withheld source even when it answers with recent items', async () => {
+    const report = await recheckQuarantine({ fetchImpl: (async () => fresh()) as unknown as typeof fetch, pauseMs: 0 })
+    const withheld = recheckable().filter(({ source }) => licenceHold(source) !== null).map(({ entry }) => entry.key)
+    expect(withheld).toContain('eluniversal_mx')
+    for (const key of withheld) {
+      expect(report.recovered.map((r) => r.key), key).not.toContain(key)
+    }
+    // Sources that could not even be asked (ReliefWeb without its appname) stay
+    // 'still-refused'; every one that answered is held, never recovered.
+    const el = report.others.find((o) => o.key === 'eluniversal_mx')!
+    expect(el.verdict).toBe('answers-but-withheld')
+    expect(el.detail).toContain('still withheld: licence status PROHIBITED')
+    expect(report.advice).not.toContain('eluniversal_mx')
+  })
+
+  it('names no hold for a source whose licence allows it', () => {
+    const open = CATALOG.find((s) => s.key === 'cdc_outbreaks')!
+    expect(licenceHold(open)).toBeNull()
   })
 })

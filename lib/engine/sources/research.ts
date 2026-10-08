@@ -44,7 +44,15 @@ export const openalex: Source = {
   async run(input, ctx) {
     const q = input.value.trim()
     if (q.length < 2) return []
-    const url = `https://api.openalex.org/works?search=${encodeURIComponent(q)}&per-page=5&${MAILTO}`
+    // OpenAlex now budgets keyless calls per IP address ("This request has no
+    // API key, so it counts against the free daily budget shared by everyone
+    // on your network's IP address", 429 body, 2026-10-08). Shared serverless
+    // addresses exhaust that budget. Keys are free; the key is read from the
+    // environment only and never written anywhere (R327, PENDING A).
+    const key = process.env.OPENALEX_API_KEY?.trim()
+    const url =
+      `https://api.openalex.org/works?search=${encodeURIComponent(q)}&per-page=5&${MAILTO}` +
+      (key ? `&api_key=${encodeURIComponent(key)}` : '')
     const res = await ctx.fetch(url)
     expectOk('openalex', res)
     const j = (await res.json().catch(() => null)) as OpenAlexResponse | null

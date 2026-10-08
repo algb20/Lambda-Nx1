@@ -195,7 +195,9 @@ async function audit(source: CatalogSource): Promise<Finding> {
           (candidates.length ? ` — the site advertises: ${candidates.join(' , ')}` : ''),
       }
     }
-    const read = source.kind === 'json' ? readJson(source, text) : readFeed(text)
+    // GeoJSON is JSON. Reading it as RSS reported the three USGS earthquake
+    // feeds as "quiet" while they carried events (R326).
+    const read = source.kind === 'json' || source.kind === 'geojson' ? readJson(source, text) : readFeed(text)
     const verdict: Verdict =
       read.records === 0 ? 'quiet' : read.detail.startsWith('NO READABLE') ? 'unreadable' : 'readable'
     return { key: source.key, verdict, status: res.status, bytes: text.length, ...read }

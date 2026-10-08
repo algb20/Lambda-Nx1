@@ -71,11 +71,25 @@ export const OFFICIAL_SOURCES: CatalogSource[] = [
     key: 'cdc_outbreaks',
     name: 'US CDC outbreak notices',
     publisher: 'US Centers for Disease Control and Prevention',
-    url: 'https://tools.cdc.gov/api/v2/resources/media/403372.rss',
+    // CDC's own syndication catalogue lists this as "CDC Outbreaks - US Based"
+    // (tools.cdc.gov/api/v2/resources/media?mediatype=Feed). Items link through
+    // CDC's downloader, which redirects to the outbreak page on www.cdc.gov.
+    // Its newest item was 2026-09-28 when read on 2026-10-08.
+    url: 'https://tools.cdc.gov/api/v2/resources/media/285676.rss',
+    formerUrls: [
+      {
+        url: 'https://tools.cdc.gov/api/v2/resources/media/403372.rss',
+        until: '2026-10-08',
+        why: 'That is the CDC "2019 Novel Coronavirus" feed (lastBuildDate 2025-03-31, no items), not an outbreaks feed (batch 18 quarantine; batch 20 repair).',
+      },
+    ],
     kind: 'rss',
     discipline: 'humint',
     topics: ['health'],
-    coverage: 'global',
+    // The feed is the US-based list. CDC's international list (media 733939)
+    // carried four items, the newest 2026-05-31: too sparse to stand in for
+    // global coverage, and claiming 'global' here would hide that blind spot.
+    coverage: ['US'],
     admiralty: 'A',
     licence: PUBLIC_DOMAIN,
     minIntervalSec: 3600,

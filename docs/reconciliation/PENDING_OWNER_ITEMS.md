@@ -5,7 +5,7 @@
 | **Purpose** | One living list of everything that cannot be finished in the repository: keys, environment variables, decisions, permissions, writes to live systems. Owner R322: «احفظ في قائمة غير المكتمل مثل المفاتيح أو المتغيرات وغيرها». |
 | **Rule** | No secret value is ever written here, in Git, or in any file (owner S2). A key is named; its value goes only into the hosting environment, by the owner. |
 | **Production** | Locked on `9c19303`. No Production environment variable or deploy is changed without a new owner decision (R306). |
-| **Updated** | 2026-10-08 (R324). Each item says where it came from. Close an item by striking it through, with the date and the commit or decision. |
+| **Updated** | 2026-10-08 (R328). Each item says where it came from. Close an item by striking it through, with the date and the commit or decision. |
 
 ## A. Source keys and tokens (environment only)
 
@@ -27,6 +27,7 @@ Setting a key is not enough. Each source still runs only if its licence allows i
 | `USGS_M2M_TOKEN` | `keyed.ts` | USGS machine-to-machine data | US gov | — |
 | `USPTO_ODP_KEY` | `keyed.ts` | US patents | US gov | — |
 | `WORLDBANK_API_KEY` | `keyed.ts` | World Bank keyed API | see registry | — |
+| `OPENALEX_API_KEY` | `openalex` (research gateway) | Its own request budget: keyless calls share a daily budget per IP address, and serverless addresses exhaust it (429 on 2026-10-08) | verified (CC0) | Free key from OpenAlex. Batch 19 wired it; without it the source works until the shared budget runs out |
 | api.data.gov key (name to be fixed when wired) | CKAN `us_data_gov` | US open-data catalogue (moved to api.gsa.gov) | public domain metadata | Batch 11 §5; code change needed after the key exists |
 
 ## B. Platform variables (owner sets per environment)
@@ -49,7 +50,7 @@ Listed so none is forgotten. Whether each is set in a given environment is **UNV
 | # | Decision | Source |
 |---|---|---|
 | C1 | Notify the UN, as its copyright notice requires for news material (keeps `un_news` and the UN feeds on the statements board) | R318; batch 11 §3.3 |
-| C2 | AI/ML use of source content when the terms say nothing (default for the AI analyst) | GL-08, BC-4 |
+| C2 | AI/ML use of source content when the terms say nothing (default for the AI analyst). Research done (batch 17): of 210 readable terms pages only GitHub, Docker Hub and Nominatim mention AI, none about summarising; the rest are silent | GL-08, BC-4 |
 | C3 | Username-presence capability (HIGH personal-data risk) | GL-10 |
 | C4 | Build a udata adapter (Portugal; it would also serve France's data.gouv.fr) | Batch 11 §5 |
 | C5 | Companies House: may officer and PSC data appear at all, and in what form? | GL-13; batch 14 |
@@ -57,6 +58,7 @@ Listed so none is forgotten. Whether each is set in a given environment is **UNV
 | C7 | XposedOrNot: does Lambda's use count as "personal and low-volume"? | R317 |
 | C8 | Approve Blueprint changes BC-1 to BC-8 (licence registry into the Policy Engine, terms-change detection, and the rest) in the Master unification session. Already built in the repository: `npm run check:terms` (BC-5, manual today) and credits beside findings and in every export (BC-8; social publishing waits for 30.27.8.R) | Gap audit §4; batch 15 |
 | C9 | Lift the Production pause, when 30.27.8.R is closed | R294, R306 |
+| C10 | EU AI Act Art. 50(4): before publishing resumes, the Publication contract decides whether AI-written text carries the disclosure or passes a recorded human editorial review. Also: is Lambda a "deployer" publishing "to inform the public"? (legal advice). The interface already labels AI text "AI-generated" (batch 20) | R328; `docs/RESEARCH/FIELD_2026-10-08.md` §1 |
 
 ## D. Permissions and agreements to request (owner action)
 
@@ -78,10 +80,19 @@ Listed so none is forgotten. Whether each is set in a given environment is **UNV
 | E1 | Quarantine stored Gazette findings that name private individuals (made before R321) | **Ready:** `db/ops/gazette-personal-quarantine.sql` and `gazette-personal-restore.sql`. Tested 2026-10-08 on a scratch PostgreSQL 16 loaded with `db/schema.sql`: quarantine, a second run that changes nothing, a full restore, and a restore after the investigation was deleted (those rows stay quarantined). **Not run on any live database.** Run after the deploy that carries `acd8c97`. | R321 |
 | E2 | Anything on Production (`DATABASE_URL`, `CRON_SECRET`, deploys) | — | R306 |
 
+## G. Repository actions
+
+| # | Action | Why | Source |
+|---|---|---|---|
+| G1 | Merge `claude/bittorent-network-app-c8j9pv` into `main` (via a pull request, when the owner asks for one) | `main` still has `source-map-js` 1.2.1 — GitHub Dependabot alert #15 (high), fixed on this branch in batch 17. It also carries batches 11–17. Merging does not deploy Production (R306) | Batch 17 |
+
 ## F. Open research that Claude continues (no owner action needed)
 
 These are tracked in `SOURCE_LICENSING_GAP_AUDIT_2026-10-05.md`, not here:
 - the 74 unreadable terms pages;
 - the fallbacks still missing (GL-09);
 - terms-change detection (GL-06);
-- per-finding attribution (GL-04).
+- per-finding attribution (GL-04);
+- ~~a current official CDC outbreak feed to replace `cdc_outbreaks` (batch 18)~~ — done 2026-10-08, batch 20 (CDC media 285676);
+- re-reading the 12 sources quarantined on 2026-10-08 from a second network (re-read from this network in batch 20: all still refused);
+- research findings F-2 to F-4 (conditional GET, GDELT export files, C2PA) in `docs/RESEARCH/FIELD_2026-10-08.md`.

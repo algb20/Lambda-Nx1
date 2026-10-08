@@ -73,6 +73,7 @@ import { proposePivots } from '@/lib/modules/copilot'
 import type { Evidence } from '@/lib/engine/types'
 import type { AnalystVerdict, Severity } from '@/lib/ai/types'
 import { SourceCredit } from '@/components/source-credit'
+import { aiDisclosure } from '@/lib/ai/disclosure'
 
 type Result =
   | { kind: 'nexus'; data: NexusReport }
@@ -1901,7 +1902,7 @@ function AiAnalystPanel({ subject, gateway, findings }: { subject: string; gatew
                 </Badge>
               ) : null}
               {verdict.model ? (
-                <span className="text-[10px] text-muted-foreground">{verdict.model}</span>
+                <span className="text-[10px] text-muted-foreground">{aiDisclosure(verdict)}</span>
               ) : null}
             </div>
             <p className="text-sm leading-relaxed">{verdict.summary}</p>

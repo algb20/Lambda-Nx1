@@ -3,6 +3,7 @@ import { rdap } from './rdap'
 import { nominatim } from './geo'
 import { pubmed, arxiv } from './research'
 import { issPosition } from './hazard'
+import { gdeltNews } from './news'
 
 /**
  * Spacing that providers' own terms require (read 2026-10-04/05; batch 09).
@@ -18,6 +19,7 @@ const REQUIRED_GAP_MS: Array<[string, { minIntervalMs?: number }, number, string
   ['NCBI E-utilities', pubmed, 334, '"no more than 3 requests every 1 second"'],
   ['arXiv API', arxiv, 3000, '"no more than one request every three seconds"'],
   ['wheretheiss.at', issPosition, 1000, '"limited to roughly 1 per second"'],
+  ['GDELT DOC API', gdeltNews, 5000, '"Please limit requests to one every 5 seconds" (429 body, 2026-10-08)'],
 ]
 
 describe('sources keep to the rate their provider publishes', () => {

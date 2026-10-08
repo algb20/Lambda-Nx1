@@ -78,8 +78,20 @@ export const NATIONAL_SOURCES: CatalogSource[] = [
     key: 'ga_quakes',
     name: 'Geoscience Australia — earthquakes',
     publisher: 'Geoscience Australia',
-    url: 'https://earthquakes.ga.gov.au/feeds/atom.xml',
-    kind: 'atom',
+    // The Atom feed now serves the web app's HTML (2026-10-08). The same
+    // events come from GA's own WFS service as GeoJSON (R326).
+    url: 'https://earthquakes.ga.gov.au/geoserver/earthquakes/wfs?service=WFS&request=getfeature&typeNames=earthquakes:earthquakes_seven_days&outputFormat=application/json',
+    formerUrls: [{ url: 'https://earthquakes.ga.gov.au/feeds/atom.xml', until: '2026-10-08', why: 'answers 200 with the Earthquakes@GA web app (HTML), not Atom' }],
+    kind: 'json',
+    path: 'features',
+    map: {
+      titleTemplate: 'Earthquake — {properties.description}',
+      urlTemplate: 'https://earthquakes.ga.gov.au/event/{properties.event_id}',
+      time: 'properties.origin_time',
+      lat: 'properties.latitude',
+      lon: 'properties.longitude',
+      magnitude: 'properties.preferred_magnitude',
+    },
     discipline: 'geoint',
     topics: ['earthquake'],
     coverage: ['AU'],
