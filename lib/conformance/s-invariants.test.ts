@@ -204,6 +204,16 @@ describe('S invariant 4 — every source is in the licence & usage registry (R31
     }
   })
 
+  it('keeps Companies House off until the owner decides on its personal data (R322)', () => {
+    // Officers and persons with significant control are private individuals;
+    // the OGL excludes personal data. Switching the record on — even by setting
+    // its key — must be a deliberate decision, so it fails here first.
+    const ch = CATALOG.find((c) => c.key === 'uk_companies_house')!
+    expect(ch.enabled).toBe(false)
+    expect(activeSources().some((s) => s.key === 'uk_companies_house')).toBe(false)
+    expect(licenseRecord('uk_companies_house')?.license_status).toBe('LEGAL_REVIEW_REQUIRED')
+  })
+
   it('has no record left standing on an unevidenced earlier licence', () => {
     // R318 read the terms behind every catalogue licence recorded before
     // 2026-10-04. A record may be UNCLEAR, but never silently inherited.

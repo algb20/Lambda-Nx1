@@ -52,6 +52,7 @@ export const NEWS_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'B',
     independence: 'ap',
+    via: { kind: 'unofficial-refeed', host: 'feedx.net', evidence: 'feedx.net is a third-party full-text re-feed of AP and other publishers, not an AP service (batch 11).' },
     licence: needsAgreement('Associated Press via an unofficial third-party re-feed (no AP licence reaches us through it, R318)', 'https://feedx.net/'),
     minIntervalSec: 900,
     keyless: true,
@@ -70,6 +71,7 @@ export const NEWS_SOURCES: CatalogSource[] = [
     // GDELT indexes everyone, so it is nobody's independent confirmation: it
     // is a view over the same corpus the other entries sit inside.
     independence: 'gdelt-aggregate',
+    via: { kind: 'aggregator', host: 'api.gdeltproject.org', evidence: 'GDELT licenses its own index; the headlines remain the publishers\' (registry: LEGAL_REVIEW_REQUIRED).' },
     licence: publicFeed('The GDELT Project', 'https://www.gdeltproject.org/about.html'),
     minIntervalSec: 900,
     keyless: true,

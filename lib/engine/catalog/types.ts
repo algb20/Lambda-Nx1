@@ -281,6 +281,24 @@ export interface CatalogSource {
    */
   keepItem?: { test: (itemXml: string) => boolean; why: string }
 
+  /**
+   * How the feed reaches us when its host is not the publisher's own (GL-14).
+   *
+   * - `publisher-hosted` — a hosting service the publisher itself uses and
+   *   links (FeedBurner for The Hacker News); `evidence` says where.
+   * - `aggregator` — a service that licenses its own index of other people's
+   *   material (GDELT); the publisher's rights are not the aggregator's to grant.
+   * - `unverified` — a hosting service whose link from the publisher could not
+   *   be confirmed.
+   * - `unofficial-refeed` — a third party republishing someone else's feed.
+   *   No licence from the publisher reaches us through it, so the licence gate
+   *   must refuse it (a conformance test checks this).
+   *
+   * Batch 11 found `ap_topnews` reading AP stories from feedx.net, a personal
+   * full-text re-feed, catalogued as if it were AP (R318, R322).
+   */
+  via?: { kind: 'publisher-hosted' | 'aggregator' | 'unverified' | 'unofficial-refeed'; host: string; evidence: string }
+
   /** Off by default when a source is heavy, noisy, or in trial. */
   enabled?: boolean
 

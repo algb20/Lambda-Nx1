@@ -304,7 +304,13 @@ export const OFFICIAL_SOURCES: CatalogSource[] = [
     keyless: false,
     keyEnv: 'COMPANIES_HOUSE_API_KEY',
     enabled: false,
-    note: 'Needs a free key. Registered but inert until one is set.',
+    // A stub, not an integration: the URL is the register's web front end,
+    // not its API (api.company-information.service.gov.uk), and there is no
+    // field mapping, so a key alone would produce nothing. The register is
+    // also personal data — officers and persons with significant control —
+    // which the OGL does not cover. It stays off until the owner decides what
+    // of it may appear (PENDING_OWNER_ITEMS C5; conformance test, R322).
+    note: 'Stub: web front end, no API mapping; personal data (officers, PSCs). Off until owner decision C5.',
   },
 
   // ── Procurement ──────────────────────────────────────────────────────────

@@ -189,4 +189,4 @@ Full audit: `SOURCE_LICENSING_GAP_AUDIT_2026-10-05.md`. Registry: `lib/engine/li
 | GL-09 | Several capabilities without verified fallback | Resilience (§45), independence (J) | GAP | BC-7 |
 | GL-10 | Username-presence check (HIGH personal-data risk) | Charter §3 | DECISION REQUIRED | Owner |
 | GL-13 | OGL-licensed sources carrying personal data (Gazette, Companies House) | Charter §3; data minimisation | GAP narrowed: Gazette filtered to company notices (R321, REPO-TESTED); Companies House inert | Owner: purge pre-R321 stored findings; filter before enabling Companies House |
-| GL-14 | A catalogue feed hosted by an unofficial re-publisher (withheld) | Provenance (§31) | GAP | Catalogue rule: host belongs to publisher |
+| GL-14 | A catalogue feed hosted by an unofficial re-publisher (withheld) | Provenance (§31) | Closed in repository (R322, REPO-TESTED): `via` field + provenance test | — |

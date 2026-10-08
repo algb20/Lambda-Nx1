@@ -11044,7 +11044,9 @@
   "attribution": null,
   "rate_limits": "Engine spacing 3600 s; provider limit not stated",
   "authentication": "Key: COMPANIES_HOUSE_API_KEY",
-  "prohibited_uses": [],
+  "prohibited_uses": [
+   "personal data of officers and persons with significant control (outside the OGL)"
+  ],
   "geographic_restrictions": null,
   "ai_ml_use": "NOT_STATED",
   "training_use": "NOT_STATED",
@@ -11052,7 +11054,7 @@
   "legal_risk": "MEDIUM",
   "license_status": "LEGAL_REVIEW_REQUIRED",
   "basis": "AMBIGUOUS_TERMS",
-  "conditions": "Kept running under review: GOV.UK pages are OGL, but the register holds personal data (officers, persons with significant control), which the OGL does not cover. A legal reading is needed (charter §3).",
+  "conditions": "Kept running under review: GOV.UK pages are OGL, but the register holds personal data (officers, persons with significant control), which the OGL does not cover. A legal reading is needed (charter §3). R322: the catalogue record is a stub (web front end, no API mapping); a conformance test keeps it off until owner decision C5.",
   "evidence_reference": [
    {
     "quote": "All content is available under the Open Government Licence v3.0 , except where otherwise stated",
@@ -11804,7 +11806,7 @@
   "source_id": "project_zero",
   "kind": "catalogue",
   "provider": "Google",
-  "official_url": "https://googleprojectzero.blogspot.com/feeds/posts/default",
+  "official_url": "https://projectzero.google/feed.xml",
   "source_type": "atom",
   "dataset_api": "Google Project Zero",
   "data_categories": [
@@ -11831,7 +11833,7 @@
   "legal_risk": "MEDIUM",
   "license_status": "UNCLEAR",
   "basis": "TERMS_NOT_READ",
-  "conditions": "Kept running under review (R317): no licence could be read, and the source is not withdrawn for that alone. Headline, summary and link only.",
+  "conditions": "Kept running under review (R317): no licence could be read, and the source is not withdrawn for that alone. Headline, summary and link only. R322: feed moved from googleprojectzero.blogspot.com (now a redirect) to projectzero.google/feed.xml; old URL kept in formerUrls.",
   "evidence_reference": [
    {
     "quote": "The blog moved to projectzero.google; no content licence found on 2026-10-05.",

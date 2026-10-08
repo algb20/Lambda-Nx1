@@ -134,6 +134,7 @@ export const REGIONAL_EXTRA_SOURCES: CatalogSource[] = [
     coverage: ['IN'],
     admiralty: 'C',
     independence: 'ndtv',
+    via: { kind: 'unverified', host: 'feeds.feedburner.com', evidence: 'NDTV\'s RSS page answered 403 on 2026-10-08, so its link to this FeedBurner feed could not be confirmed.' },
     licence: publicFeed('NDTV', 'https://www.ndtv.com/'),
     minIntervalSec: 1800,
     keyless: true,
