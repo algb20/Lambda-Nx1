@@ -394,6 +394,11 @@ memories."
 We have `/llms.txt` and a documented REST surface. We do not have MCP. This is
 the largest genuine capability gap in this survey and it is ours to close.
 
+> **Superseded in part, 2026-10-08 (R328):** the repository now serves an MCP
+> endpoint (`app/api/mcp`), so "we do not have MCP" is no longer true. Kept as
+> history. The 2026 state of the field, including World Monitor v2.10.0's
+> corroboration-over-MCP, is in `docs/RESEARCH/FIELD_2026-10-08.md`.
+
 ## Where we now stand, honestly
 
 | Capability | Them (best in field) | Us | Verdict |
@@ -453,3 +458,9 @@ document shows a worked answer to:
    the header 208px out of alignment, a globe that stopped growing at 574px, a
    rail rendering blank — was invisible to 2,309 passing tests and obvious in
    one screenshot.
+
+## 2026-10-08 update
+
+Read again for R328: `docs/RESEARCH/FIELD_2026-10-08.md` covers World Monitor v2.10.0,
+SitDeck, ShadowBroker (new, AGPL-3.0), OpenCTI v7, Dataminr–ThreatConnect, GDELT,
+C2PA and EU AI Act Article 50. Every finding there is DISCOVERED.

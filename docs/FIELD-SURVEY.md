@@ -34,6 +34,7 @@ figure is the platform's own claim rather than something observed, it says
 | 18 | **MapLibre GL** | `maplibre/maplibre-gl-js` | BSD-3 | Vector-tile rendering, self-hostable | Renderer only |
 | 19 | **deck.gl** | `visgl/deck.gl` | MIT | Layer model: Scatterplot, Arc, H3Hexagon, Heatmap | Renderer only |
 | 20 | **PMTiles** | `protomaps/PMTiles` | BSD-3 | Single-file tile archive — basemaps with no tile server | Static data only |
+| 33 | **ShadowBroker** (added 2026-10-08) | `BigBodyCobain/Shadowbroker` | **AGPL-3.0** | Many live layers on one map (aviation, maritime, satellites, GPS jamming, SAR change detection); states no telemetry | Server-side "IP sweep" and CCTV-network layers cross our passive and no-surveillance lines (§3); AGPL blocks reuse |
 
 ## B. Products we can only observe
 

@@ -220,7 +220,6 @@ export const QUARANTINE: QuarantinedSource[] = [
   o8('punch_nigeria', 'bot-blocked', 403, 'The WordPress feed answers 403.'),
   o8('clarin_ar', 'bot-blocked', 403, 'The RSS answers 403.'),
   o8('bangkokpost', 'unreachable', 451, '451 Unavailable For Legal Reasons — a geographic or legal block on this network, not a moved feed.'),
-  o8('cdc_outbreaks', 'frozen', 200, 'The URL is the CDC "2019 Novel Coronavirus" feed (lastBuildDate 2025-03-31, no items), not an outbreaks feed. Needs a current CDC outbreak feed before release.'),
   o8('nist_cyber', 'frozen', 200, 'Answers an RSS channel titled "News and Events Feed by Topic" with no items and no dates.'),
   o8('africa_cdc', 'frozen', 200, 'Channel rebuilt the same day (lastBuildDate 2026-10-08) but carries zero items.'),
   o8('rferl', 'frozen', 200, 'Channel rebuilt the same day but carries zero items.'),

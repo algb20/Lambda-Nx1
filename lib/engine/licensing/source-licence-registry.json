@@ -5765,13 +5765,13 @@
   "source_id": "cdc_outbreaks",
   "kind": "catalogue",
   "provider": "US Centers for Disease Control and Prevention",
-  "official_url": "https://tools.cdc.gov/api/v2/resources/media/403372.rss",
+  "official_url": "https://tools.cdc.gov/api/v2/resources/media/285676.rss",
   "source_type": "rss",
   "dataset_api": "US CDC outbreak notices",
   "data_categories": [
    "health"
   ],
-  "jurisdiction": "global",
+  "jurisdiction": "US",
   "license": "Public domain (government work)",
   "terms_url": null,
   "commercial_use": "YES",

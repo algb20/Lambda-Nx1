@@ -4,6 +4,8 @@ import { USER_AGENT } from '../guardrail'
 import { decodeBody, requestUrl } from './adapter'
 import { CATALOG } from './index'
 import { QUARANTINE, type QuarantinedSource } from './quarantine'
+import { licenceProblem } from './licence'
+import { licenseRecord, usagePolicy } from '../licensing/registry'
 import type { CatalogSource } from './types'
 
 /**
@@ -80,6 +82,12 @@ export type Verdict =
   | 'answers-but-stale'
   /** A quarantine entry naming a key the catalogue no longer holds. */
   | 'no-record'
+  /**
+   * Answers with recent items, but its licence withholds it (a robots refusal,
+   * non-commercial terms). Releasing it from quarantine would change nothing,
+   * and advising a release would be wrong.
+   */
+  | 'answers-but-withheld'
 
 export interface Probe {
   /** HTTP status, or `0` when the request did not complete at all. */
@@ -147,6 +155,22 @@ export function judgeProbe(probe: Probe, nowMs = Date.now()): { verdict: Verdict
     verdict: 'recovered',
     detail: `answered 200 with ${probe.items} items, newest ${ageDays} day${ageDays === 1 ? '' : 's'} old`,
   }
+}
+
+/**
+ * Why a source stays off whatever the network says, or null.
+ *
+ * 2026-10-08 (batch 20): `eluniversal_mx` answered 100 fresh items and the run
+ * advised releasing it, but its robots.txt still disallows every agent not on
+ * its list and the registry records it PROHIBITED. A reachable feed is not a
+ * permitted one; the licence decides.
+ */
+export function licenceHold(source: CatalogSource): string | null {
+  const problem = licenceProblem(source.licence)
+  if (problem) return problem
+  const record = licenseRecord(source.key)
+  if (record && usagePolicy(record.license_status) === 'WITHHOLD') return `licence status ${record.license_status}`
+  return null
 }
 
 /** The quarantined keys that still have a catalogue record to probe. */
@@ -335,7 +359,11 @@ export async function recheckQuarantine(options?: {
       continue
     }
     const probe = await probeSource(source, fetchImpl, new Date(now()))
-    const { verdict, detail } = judgeProbe(probe, now())
+    const judged = judgeProbe(probe, now())
+    const hold = judged.verdict === 'recovered' ? licenceHold(source) : null
+    const { verdict, detail } = hold
+      ? { verdict: 'answers-but-withheld' as const, detail: `${judged.detail}, but still withheld: ${hold}` }
+      : judged
     results.push({
       key: entry.key,
       was: { reason: entry.reason, status: entry.status, observedOn: entry.observedOn },

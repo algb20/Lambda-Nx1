@@ -58,10 +58,34 @@ describe('sources repaired in batch 18', () => {
   })
 
   it('keeps every old address as history, never fetched', () => {
-    for (const key of ['ga_quakes', 'usgs_volcano', 'cert_fr']) {
+    for (const key of ['ga_quakes', 'usgs_volcano', 'cert_fr', 'cdc_outbreaks']) {
       const r = record(key)
       expect(r.formerUrls?.[0].until, key).toBe('2026-10-08')
       expect(r.url, key).not.toBe(r.formerUrls?.[0].url)
     }
+  })
+})
+
+describe('source repaired in batch 20', () => {
+  // A trimmed copy of CDC's "Outbreaks - US Based" feed as served on 2026-10-08.
+  const CDC_RSS = `<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0"><channel><title>CDC Outbreaks - US Based</title>
+<item>
+<title>&lt;em&gt;E. coli&lt;/em&gt; Outbreak linked to Raw Milk Cheese</title>
+<description>&lt;em&gt;E. coli&lt;/em&gt; Outbreak linked to Raw Milk Cheese</description>
+<link>https://tools.cdc.gov/api/embed/downloader/download.asp?m=285676&amp;c=766541</link>
+<pubDate>Mon, 28 Sep 2026 15:14:00 GMT</pubDate>
+<category>E. coli Infection</category>
+</item></channel></rss>`
+  const rssCtx = { fetch: async () => new Response(CDC_RSS, { status: 200, headers: { 'content-type': 'application/rss+xml' } }) }
+
+  it("reads CDC's current outbreak feed, not the frozen COVID one", async () => {
+    const r = record('cdc_outbreaks')
+    expect(r.url).toBe('https://tools.cdc.gov/api/v2/resources/media/285676.rss')
+    expect(r.coverage).toEqual(['US'])
+    const [item] = await catalogSource(r).run(NO_INPUT, rssCtx)
+    expect(item.claim).toBe('E. coli Outbreak linked to Raw Milk Cheese')
+    expect(item.sourceUrl).toBe('https://tools.cdc.gov/api/embed/downloader/download.asp?m=285676&c=766541')
+    expect(item.publishedAt).toBe('2026-09-28T15:14:00.000Z')
   })
 })
