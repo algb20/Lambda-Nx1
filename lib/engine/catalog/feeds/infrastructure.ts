@@ -1,5 +1,5 @@
 import type { CatalogSource } from '../types'
-import { PUBLIC_DOMAIN, ccBy, needsAgreement, publicFeed } from '../licence'
+import { PUBLIC_DOMAIN, ccBy, needsAgreement, publicFeed, nonCommercial } from '../licence'
 
 /**
  * Infrastructure: energy, connectivity, transport and the environment they run
@@ -29,7 +29,8 @@ export const INFRASTRUCTURE_SOURCES: CatalogSource[] = [
     coverage: ['GB'],
     admiralty: 'A',
     independence: 'nationalgrid-eso',
-    licence: ccBy('National Grid ESO, Carbon Intensity API', 'https://carbonintensity.org.uk/'),
+    // "Our API is licensed under the CC BY 4.0 license." (carbonintensity.org.uk, read 2026-10-08, batch 21)
+    licence: ccBy('Carbon Intensity API — National Energy System Operator (NESO), CC BY 4.0', 'https://carbonintensity.org.uk/'),
     minIntervalSec: 1800,
     keyless: true,
     /**
@@ -229,7 +230,9 @@ export const INFRASTRUCTURE_SOURCES: CatalogSource[] = [
     topics: ['connectivity'],
     coverage: 'global',
     admiralty: 'B',
-    licence: ccBy('OONI', 'https://ooni.org/about/data-policy/'),
+    // OONI data is CC BY-NC-SA 4.0 (github.com/ooni/license, data/LICENSE.md, read
+    // 2026-10-08, batch 21) — not CC BY as recorded before. Non-commercial: withheld.
+    licence: nonCommercial('OONI (data under CC BY-NC-SA 4.0, batch 21)', 'https://github.com/ooni/license/blob/master/data/LICENSE.md'),
     minIntervalSec: 3600,
     keyless: true,
     /**

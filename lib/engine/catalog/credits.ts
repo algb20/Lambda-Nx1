@@ -5,7 +5,7 @@
  * after changing a catalogue licence or a registry attribution;
  * `credits.test.ts` recomputes this and fails if it has drifted.
  *
- * 183 entries — sources that owe a credit and are not withheld.
+ * 176 entries — sources that owe a credit and are not withheld.
  */
 
 export interface SourceCredit {
@@ -32,7 +32,6 @@ export const SOURCE_CREDITS: Readonly<Record<string, SourceCredit>> = {
   "blockstream_blocks": { credit: "Blockstream" },
   "boc_press": { credit: "Bank of Canada" },
   "bse_india": { credit: "BSE India" },
-  "bsi_germany": { credit: "CERT-Bund / BSI" },
   "cbc_world": { credit: "CBC News" },
   "cert_eu": { credit: "CERT-EU (CC BY 4.0)", licence: "CC BY 4.0" },
   "cert_fr": { credit: "CERT-FR / ANSSI (Licence Ouverte 2.0)", licence: "Licence Ouverte 2.0" },
@@ -86,7 +85,7 @@ export const SOURCE_CREDITS: Readonly<Record<string, SourceCredit>> = {
   "gov_uk_aaib": { credit: "Contains public sector information licensed under the Open Government Licence v3.0 (AAIB)", licence: "Open Government Licence v3.0" },
   "gov_uk_maib": { credit: "Contains public sector information licensed under the Open Government Licence v3.0 (MAIB)", licence: "Open Government Licence v3.0" },
   "iea_news": { credit: "IEA" },
-  "ietf_rfc": { credit: "IETF Trust" },
+  "ietf_rfc": { credit: "IETF — RFC text, unmodified (IETF Trust Legal Provisions)" },
   "ifrc_appeals": { credit: "IFRC GO" },
   "ign_spain_quakes": { credit: "© Instituto Geográfico Nacional (CC BY 4.0)", licence: "CC BY 4.0" },
   "imd_india": { credit: "India Meteorological Department" },
@@ -153,10 +152,9 @@ export const SOURCE_CREDITS: Readonly<Record<string, SourceCredit>> = {
   "ndtv_india": { credit: "NDTV" },
   "news24_za": { credit: "News24" },
   "nominatim": { credit: "© OpenStreetMap contributors", licence: "ODbL 1.0" },
-  "nsidc_news": { credit: "NSIDC" },
+  "nsidc_news": { credit: "National Snow and Ice Data Center" },
   "oecd_newsroom": { credit: "OECD" },
   "ons_uk": { credit: "Source: Office for National Statistics licensed under the Open Government Licence v3.0", licence: "Open Government Licence v3.0" },
-  "ooni_measurements": { credit: "OONI" },
   "opec_press": { credit: "OPEC" },
   "openaq_latest": { credit: "OpenAQ contributors" },
   "openaq_measurements": { credit: "OpenAQ" },
@@ -170,20 +168,16 @@ export const SOURCE_CREDITS: Readonly<Record<string, SourceCredit>> = {
   "punch_nigeria": { credit: "The Punch" },
   "rba_media": { credit: "Reserve Bank of Australia (CC BY 4.0)", licence: "CC BY 4.0" },
   "rbi_india": { credit: "Reserve Bank of India" },
-  "redhat_security": { credit: "Red Hat" },
   "reuters_world": { credit: "Reuters" },
   "rferl": { credit: "RFE/RL" },
-  "rnz_pacific": { credit: "RNZ" },
   "saws_south_africa": { credit: "South African Weather Service" },
   "science_news": { credit: "Science / AAAS" },
   "si_volcano_weekly": { credit: "Smithsonian Global Volcanism Program" },
   "skynewsarabia": { credit: "Sky News Arabia" },
   "smn_mexico": { credit: "SMN / CONAGUA" },
-  "snb_press": { credit: "Swiss National Bank" },
   "ted_europa": { credit: "Publications Office of the EU (TED)" },
   "thehackernews": { credit: "The Hacker News" },
-  "ubuntu_usn": { credit: "Canonical" },
-  "uk_carbon_intensity": { credit: "National Grid ESO, Carbon Intensity API" },
+  "uk_carbon_intensity": { credit: "Carbon Intensity API — National Energy System Operator (NESO), CC BY 4.0", licence: "CC BY 4.0" },
   "uk_companies_house": { credit: "Companies House, Open Government Licence v3.0" },
   "uk_gazette": { credit: "Contains public sector information licensed under the Open Government Licence v3.0 (The Gazette)", licence: "Open Government Licence v3.0" },
   "ukhpi_landregistry": { credit: "Contains HM Land Registry data © Crown copyright and database right", licence: "Open Government Licence v3.0" },
@@ -198,7 +192,6 @@ export const SOURCE_CREDITS: Readonly<Record<string, SourceCredit>> = {
   "worldbank_economy": { credit: "World Bank", licence: "CC BY 4.0" },
   "worldbank_procurement": { credit: "The World Bank" },
   "worldbank_projects": { credit: "World Bank", licence: "CC BY 4.0" },
-  "wto_news": { credit: "World Trade Organization" },
 }
 
 /** The credit a source's licence requires, or undefined if it asks for none. */

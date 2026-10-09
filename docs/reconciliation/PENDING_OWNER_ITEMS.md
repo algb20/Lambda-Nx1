@@ -5,7 +5,7 @@
 | **Purpose** | One living list of everything that cannot be finished in the repository: keys, environment variables, decisions, permissions, writes to live systems. Owner R322: «احفظ في قائمة غير المكتمل مثل المفاتيح أو المتغيرات وغيرها». |
 | **Rule** | No secret value is ever written here, in Git, or in any file (owner S2). A key is named; its value goes only into the hosting environment, by the owner. |
 | **Production** | Locked on `9c19303`. No Production environment variable or deploy is changed without a new owner decision (R306). |
-| **Updated** | 2026-10-08 (R328). Each item says where it came from. Close an item by striking it through, with the date and the commit or decision. |
+| **Updated** | 2026-10-08 (R329). Each item says where it came from. Close an item by striking it through, with the date and the commit or decision. |
 
 ## A. Source keys and tokens (environment only)
 
@@ -72,6 +72,11 @@ Listed so none is forgotten. Whether each is set in a given environment is **UNV
 | D6 | RIPE NCC | Commercial use of RIPEstat / Atlas, or use RouteViews (CC BY 4.0) instead | Batches 11–12 |
 | D7 | Brazil open-data portal | API token | Batch 10 |
 | D8 | Mexico, Africa open-data portals | Allow-listing (they block automated requests) | Batch 10 |
+| D10 | JPCERT/CC | Courtesy notice by email (office@jpcert.or.jp) that Lambda quotes its advisories — JPCERT asks for it; the source runs meanwhile | Batch 21 |
+| D11 | WTO | Written permission for commercial use (permissions by e-mail to the WTO) — `wto_news` withheld until then | Batch 21 |
+| D12 | BSI (CERT-Bund) | Licence agreement for commercial use — `bsi_germany` withheld until then | Batch 21 |
+| D13 | RNZ | Express permission to aggregate its RSS feeds — `rnz_pacific` withheld until then | Batch 21 |
+| D14 | OONI, Swiss National Bank, Canonical (Ubuntu), Red Hat | Commercial-use permission, if their coverage is wanted. Alternatives exist for two: Ubuntu advisories through OSV, and Red Hat's CC BY 4.0 security data (a source decision) | Batch 21 |
 
 ## E. Writes to live systems awaiting per-action authorisation
 

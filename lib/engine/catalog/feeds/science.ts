@@ -101,7 +101,10 @@ export const SCIENCE_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'A',
     independence: 'nsidc',
-    licence: ccBy('NSIDC', 'https://nsidc.org/about/use_copyright.html'),
+    // "You may download and use photographs, imagery, or text from our web site, unless
+    // limitations for its use are specifically stated. Please credit the National Snow
+    // and Ice Data Center" (NSIDC Citation Policies, read 2026-10-08, batch 21).
+    licence: ccBy('National Snow and Ice Data Center', 'https://nsidc.org/ru/node/46234'),
     minIntervalSec: 21600,
     keyless: true,
   },

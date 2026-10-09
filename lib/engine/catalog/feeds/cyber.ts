@@ -1,5 +1,5 @@
 import type { CatalogSource, Licence } from '../types'
-import { PUBLIC_DOMAIN, ccBy, nonCommercial, publicFeed } from '../licence'
+import { PUBLIC_DOMAIN, ccBy, nonCommercial, publicFeed, needsAgreement } from '../licence'
 
 /**
  * Cyber threat and vulnerability sources.
@@ -154,7 +154,7 @@ export const CYBER_SOURCES: CatalogSource[] = [
     topics: ['cyber-advisory', 'vulnerability'],
     coverage: 'global',
     admiralty: 'A',
-    licence: publicFeed('CERT-Bund / BSI', 'https://www.bsi.bund.de/'),
+    licence: needsAgreement('CERT-Bund / BSI ("Eine kommerzielle Verwendung von Inhalten … bedarf einer lizenzrechtlichen Vereinbarung mit dem BSI", batch 21)', 'https://www.bsi.bund.de/DE/Service/Nutzungsbedingungen/Nutzungsbedingungen_node.html'),
     minIntervalSec: 3600,
     keyless: true,
   },
@@ -301,7 +301,7 @@ export const CYBER_SOURCES: CatalogSource[] = [
     topics: ['vulnerability'],
     coverage: 'global',
     admiralty: 'A',
-    licence: publicFeed('Canonical', 'https://ubuntu.com/legal'),
+    licence: nonCommercial('Canonical (website content "for personal, education and non-commercial use only", batch 21)', 'https://ubuntu.com/legal/terms'),
     minIntervalSec: 3600,
     keyless: true,
   },
@@ -317,7 +317,7 @@ export const CYBER_SOURCES: CatalogSource[] = [
     topics: ['vulnerability'],
     coverage: 'global',
     admiralty: 'A',
-    licence: publicFeed('Red Hat', 'https://www.redhat.com/en/about/terms-use'),
+    licence: needsAgreement('Red Hat (unlicensed content may be copied only "for your own personal or internal business purposes", batch 21)', 'https://www.redhat.com/en/about/terms-use'),
     minIntervalSec: 7200,
     keyless: true,
   },

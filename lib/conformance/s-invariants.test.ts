@@ -204,6 +204,18 @@ describe('S invariant 4 — every source is in the licence & usage registry (R31
     }
   })
 
+  it('keeps the publishers whose terms were first read in batch 21 withheld (R329)', () => {
+    // Non-commercial or permission-required terms, quoted in each record:
+    // OONI data is CC BY-NC-SA (it had been recorded as CC BY), WTO and BSI
+    // require permission for commercial use, SNB and Canonical allow
+    // non-commercial use only, Red Hat personal or internal business use only,
+    // RNZ forbids aggregating its RSS feeds on other websites.
+    for (const k of ['ooni_measurements', 'wto_news', 'snb_press', 'bsi_germany', 'ubuntu_usn', 'redhat_security', 'rnz_pacific']) {
+      expect(policyOf(k), k).toBe('WITHHOLD')
+      expect(activeSources().some((s) => s.key === k), k).toBe(false)
+    }
+  })
+
   it('keeps Companies House off until the owner decides on its personal data (R322)', () => {
     // Officers and persons with significant control are private individuals;
     // the OGL excludes personal data. Switching the record on — even by setting

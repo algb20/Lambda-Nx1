@@ -3908,3 +3908,21 @@ VERIFIED_ALLOWED / VERIFIED_CONDITIONAL / RESTRICTED / PROHIBITED / UNCLEAR / LE
   - قرار النشر لاحقًا مسجّل للمالك كبند C10.
 
 لم يُفتح Pull Request. لم يُمسّ Production.
+
+## R329 — 2026-10-08 — «اكمل»
+
+**الترتيب:** الموجة W5 من `WORK_PLAN_R328.md`، أي صفحات الشروط التي لم تُقرأ.
+
+### R329 — ما نُفِّذ
+
+**التفاصيل:** `docs/reconciliation/MAINTENANCE_BATCH_21.md`.
+
+قُرئت شروط 12 مصدرًا لم تكن قد قُرئت من قبل، وكل قرار فيها قائم على نص المزوّد نفسه:
+- **أربعة تحقّقت:** UK Carbon Intensity (CC BY 4.0)، وIETF، وJPCERT، وNSIDC.
+- **سبعة حُجبت:** OONI (بياناته غير تجارية، والسجل كان يقول خطأً CC BY)، وWTO، والبنك الوطني السويسري، وBSI، وUbuntu، وRed Hat، وRNZ (تمنع تجميع خلاصاتها).
+- **واحد بقي غامضًا:** Google Project Zero.
+- **المصادر الفعّالة:** 127 ← 120.
+
+أُضيفت إلى قائمة المالك طلبات الإذن D10–D14.
+
+لم يُفتح Pull Request. لم يُمسّ Production.
