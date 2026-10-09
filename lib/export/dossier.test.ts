@@ -187,7 +187,7 @@ describe('toCsv', () => {
 
   it('leads with a header row and uses CRLF', () => {
     expect(csv.split('\r\n')[0]).toBe(
-      'claim,entity,source,reference,source_url,retrieved_at,admiralty,confidence,credit,licence',
+      'claim,entity,source,reference,source_url,retrieved_at,admiralty,confidence,credit,licence,confirmed_unchanged_at',
     )
     expect(csv.endsWith('\r\n')).toBe(true)
   })
@@ -383,5 +383,30 @@ describe('credits travel with the data (BC-8, R324)', () => {
     expect(toPrintableHtml(d)).toContain('<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>')
     expect(toCsv(d)).toMatch(/M5\.1 quake.*EMSC.*CC BY 4\.0/)
     expect(JSON.parse(toJson(d)).references[0].credit).toContain('EMSC')
+  })
+})
+
+describe('a record the provider confirmed unchanged says so in every copy (C14)', () => {
+  const d = dossier([
+    ev({ confirmedUnchangedAt: '2026-08-11T08:00:00.000Z' }),
+    ev({ claim: 'second finding', confirmedUnchangedAt: '2026-08-11T10:00:00.000Z' }),
+  ])
+
+  it('keeps the earliest retrieval and the latest confirmation, separately', () => {
+    expect(d.references[0].retrievedAt).toBe('2026-08-10T09:00:00.000Z')
+    expect(d.references[0].confirmedUnchangedAt).toBe('2026-08-11T10:00:00.000Z')
+  })
+
+  it('writes both dates in the citations, Markdown, HTML and CSV', () => {
+    expect(toCitations(d)).toContain('Retrieved 2026-08-10. Confirmed unchanged 2026-08-11.')
+    expect(toMarkdown(d)).toContain('retrieved 2026-08-10, confirmed unchanged 2026-08-11')
+    expect(toPrintableHtml(d)).toContain('confirmed unchanged 2026-08-11')
+    expect(toCsv(d).split(/\r?\n/)[1].endsWith('2026-08-11T08:00:00.000Z')).toBe(true)
+  })
+
+  it('says nothing of the kind for a record received in full', () => {
+    const plain = dossier()
+    expect(plain.references[0].confirmedUnchangedAt).toBeNull()
+    expect(toCitations(plain)).not.toContain('Confirmed unchanged')
   })
 })
