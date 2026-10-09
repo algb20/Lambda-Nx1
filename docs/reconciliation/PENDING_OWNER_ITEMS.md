@@ -5,7 +5,7 @@
 | **Purpose** | One living list of everything that cannot be finished in the repository: keys, environment variables, decisions, permissions, writes to live systems. Owner R322: «احفظ في قائمة غير المكتمل مثل المفاتيح أو المتغيرات وغيرها». |
 | **Rule** | No secret value is ever written here, in Git, or in any file (owner S2). A key is named; its value goes only into the hosting environment, by the owner. |
 | **Production** | Locked on `9c19303`. No Production environment variable or deploy is changed without a new owner decision (R306). |
-| **Updated** | 2026-10-09 (R335). Each item says where it came from. Close an item by striking it through, with the date and the commit or decision. |
+| **Updated** | 2026-10-09 (R337). Each item says where it came from. Close an item by striking it through, with the date and the commit or decision. |
 
 ## A. Source keys and tokens (environment only)
 
@@ -93,7 +93,7 @@ Listed so none is forgotten. Whether each is set in a given environment is **UNV
 
 | # | Action | Why | Source |
 |---|---|---|---|
-| G1 | ~~Merge to `main`~~ — **done through batch 20**: PR #77 is merged on `main`, which now carries `source-map-js` 1.2.2 (Dependabot #15 fixed there). Batches 21 onward: new PR opened 2026-10-09 at the owner's request (R335); merge only on request. Merging does not deploy Production (R306) | Batch 17; R335 |
+| G1 | ~~Merge to `main`~~ — **closed 2026-10-09**: PR #77 (through batch 20) and PR #78 (batches 21–28) are merged on `main` (`d938680`, 10:28 UTC). Merging did not deploy Production (R306) | Batch 17; R335; R337 |
 
 ## F. Open research that Claude continues (no owner action needed)
 
