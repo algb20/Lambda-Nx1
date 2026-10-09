@@ -2632,11 +2632,11 @@
   "dataset_api": "courtlistener",
   "data_categories": [],
   "jurisdiction": "see provider",
-  "license": "NOT_STATED",
-  "terms_url": null,
-  "commercial_use": "NOT_STATED",
+  "license": "Court opinions: generally public domain (per Free Law Project); CourtListener Terms of Use",
+  "terms_url": "https://www.courtlistener.com/terms/",
+  "commercial_use": "CONDITIONAL",
   "internal_use": "NOT_STATED",
-  "public_display": "NOT_STATED",
+  "public_display": "CONDITIONAL",
   "redistribution": "NOT_STATED",
   "derived_data": "NOT_STATED",
   "caching": "NOT_STATED",
@@ -2644,24 +2644,40 @@
   "attribution": null,
   "rate_limits": null,
   "authentication": "None",
-  "prohibited_uses": [],
+  "prohibited_uses": [
+   "Any FCRA purpose: eligibility for credit, insurance, employment, government benefits or housing (15 U.S.C. § 1681b(a))",
+   "Generating a consumer report (15 U.S.C. § 1681a(d))",
+   "Presenting data as if Free Law Project produced, endorsed or verified an AI-generated analysis of it"
+  ],
   "geographic_restrictions": null,
   "ai_ml_use": "NOT_STATED",
   "training_use": "NOT_STATED",
   "provenance_requirements": "Each finding cites its source URL and retrieval time.",
   "legal_risk": "MEDIUM",
-  "license_status": "UNCLEAR",
-  "basis": "TERMS_NOT_READ",
-  "conditions": null,
+  "license_status": "LEGAL_REVIEW_REQUIRED",
+  "basis": "AMBIGUOUS_TERMS",
+  "conditions": "Runs keyless (no credentials, so the credentials clause does not bite). Two conditions reach Lambda's users, not only Lambda: no FCRA use of anything derived from CourtListener, and no presentation implying Free Law Project verified AI analysis (the AI-generated label of batch 20 keeps the line). Whether Lambda's own terms must pass the FCRA restriction on to users is owner decision C13.",
   "evidence_reference": [
    {
-    "quote": "courtlistener.com/terms answers 403 to both readers (2026-10-04, 2026-10-05).",
-    "url": "",
-    "read_at": "2026-10-04",
-    "kind": "observation"
+    "quote": "judicial opinions, motions, and other filings are generally in the public domain",
+    "url": "https://www.courtlistener.com/terms/",
+    "read_at": "2026-10-09",
+    "kind": "quote"
+   },
+   {
+    "quote": "you agree that you will not use Courtlistener.com and any information derived therefrom: (1) as a factor in establishing an individual's eligibility for credit, insurance, employment, government benefits, housing, or any other FCRA purpose",
+    "url": "https://www.courtlistener.com/terms/",
+    "read_at": "2026-10-09",
+    "kind": "quote"
+   },
+   {
+    "quote": "If you republish or display our data, do not present it in a way that suggests Free Law Project produced, endorsed, or verified an AI-generated analysis of it.",
+    "url": "https://www.courtlistener.com/terms/",
+    "read_at": "2026-10-09",
+    "kind": "quote"
    }
   ],
-  "checked_at": "2026-10-05",
+  "checked_at": "2026-10-09",
   "fallback_sources": []
  },
  {

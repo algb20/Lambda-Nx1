@@ -61,6 +61,7 @@ Listed so none is forgotten. Whether each is set in a given environment is **UNV
 | C10 | EU AI Act Art. 50(4): before publishing resumes, the Publication contract decides whether AI-written text carries the disclosure or passes a recorded human editorial review. Also: is Lambda a "deployer" publishing "to inform the public"? (legal advice). The interface already labels AI text "AI-generated" (batch 20) | R328; `docs/RESEARCH/FIELD_2026-10-08.md` §1 |
 | C11 | Adopt licence-verified fallbacks as new sources: Kystverket open AIS (NLOD, Norway only), Tor metrics/Onionoo (CC0), adsb.lol historical flights (ODbL, share-alike on the database). Each needs a source specification before code | GL-09; batch 22 |
 | C12 | Retry budget (BP §15, NEW-05): may the engine retry a failed call within one run, how often, and with what backoff? The part charter §3 already requires — never calling a host before its `Retry-After` — is built (batch 24); no retry was added | NEW-05; batch 24 |
+| C13 | CourtListener's terms forbid any FCRA use of data derived from it (credit, employment, housing, insurance eligibility; consumer reports). Should Lambda's own terms of service pass that restriction to users, and should court-record results carry a notice? The source runs under review meanwhile (LEGAL_REVIEW_REQUIRED) | Batch 26 |
 
 ## D. Permissions and agreements to request (owner action)
 
