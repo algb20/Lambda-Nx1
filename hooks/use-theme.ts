@@ -8,9 +8,8 @@ export function useTheme() {
   useEffect(() => {
     // Check localStorage or system preference
     const stored = localStorage.getItem("theme") as "light" | "dark" | null
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-
-    const initialTheme = stored || (prefersDark ? "dark" : "light")
+    // Dark unless the reader chose light: the reference design is dark (R338).
+    const initialTheme = stored || "dark"
     setTheme(initialTheme)
     document.documentElement.classList.toggle("dark", initialTheme === "dark")
   }, [])

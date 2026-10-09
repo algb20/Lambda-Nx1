@@ -10,6 +10,7 @@ import { SideNav } from "@/components/side-nav"
 import { Header } from "@/components/header"
 import { ErrorBoundary } from "@/components/error-boundary"
 import { PanelSkeleton } from "@/components/panel-skeleton"
+import { useT, useCurated } from "@/lib/i18n"
 import { HOME_TAB, pathForTab, resolveTab, tabDef, type Tab } from "@/lib/navigation"
 
 /**
@@ -72,26 +73,26 @@ const GlobeWorkspace = dynamic(
   { loading: () => <PanelSkeleton label="World surface" /> },
 )
 const LiveColumns = dynamic(() => import("@/components/live-columns").then((m) => m.LiveColumns))
-/**
- * The rail never renders below 1280px — it checks a real media query and
- * returns null — so on a phone it was pure download. `ssr: false` makes that
- * literal: a narrow screen never fetches it at all, and a wide one picks it up
- * after the page it is meant to sit beside is already on screen.
- */
-const ContextRail = dynamic(() => import("@/components/context-rail").then((m) => m.ContextRail), {
-  ssr: false,
+const HomeDashboard = dynamic(() => import("@/components/home-dashboard").then((m) => m.HomeDashboard), {
+  loading: () => <PanelSkeleton label="Home" />,
 })
+const CountryDossier = dynamic(() => import("@/components/country-dossier").then((m) => m.CountryDossier), {
+  loading: () => <PanelSkeleton label="Risks" />,
+})
+const RadarKnowledgeBase = dynamic(
+  () => import("@/components/radar-knowledge-base").then((m) => m.RadarKnowledgeBase),
+  { loading: () => <PanelSkeleton label="Knowledge base" /> },
+)
 
 /**
  * The shell.
  *
  * Two things about its shape are deliberate.
  *
- * **Five tabs, not nine.** Four destinations did not earn a permanent slot in
- * front of every user: two were empty placeholders, one duplicated the floating
- * feedback button, and one answered a question that belongs inside Radar. The
- * reasoning lives with the list in `lib/navigation.ts`, and old ids still
- * resolve so no saved link lands on a blank screen.
+ * **Sections, grouped.** The owner's reference design (R338) lays the product
+ * out as eleven sections in three groups — main, analysis, library — beside a
+ * persistent sidebar. The list and its reasoning live in `lib/navigation.ts`,
+ * and old ids still resolve so no saved link lands on a blank screen.
  *
  * **Every tab has a URL.** The shell used to keep the active tab in component
  * state and nothing else, which meant the entire product lived at one address.
@@ -132,11 +133,8 @@ export default function HomePage({ initialTab }: { initialTab?: Tab } = {}) {
    * window in the first place.
    */
   /**
-   * The globe is home, so a bare `/` with no `initialTab` is the globe.
-   *
-   * `HOME_TAB` rather than a literal, because the home tab and the path mapping
-   * below have to agree — and when they were two literals in two files they
-   * were exactly the kind of pair that drifts.
+   * A bare `/` with no `initialTab` is the home dashboard. `HOME_TAB` rather
+   * than a literal, because the home tab and the path mapping must agree.
    */
   const [activeTab, setTab] = useState<Tab>(initialTab ?? HOME_TAB)
 
@@ -190,12 +188,14 @@ export default function HomePage({ initialTab }: { initialTab?: Tab } = {}) {
   }
 
   /*
-    The bottom padding clears the tab bar, and the tab bar itself now grows by
-    the phone's safe-area inset — so a fixed `pb-20` leaves the last row of
-    every page under the system's home indicator on the devices that have one.
-    The padding tracks the bar instead of guessing at it. `env()` is 0 wherever
-    there is no inset, so nothing else changes, and `lg:!pb-0` still wins on a
-    wide screen because an `!important` rule beats an inline style.
+    The bottom padding clears the phone bar, which grows by the safe-area
+    inset; `env()` is 0 wherever there is no inset, and `lg:!pb-0` wins on a
+    wide screen, where the sidebar replaces the bar.
+
+    The frame is the R338 reference design: header across the top, sidebar
+    down the left, the page beside it at full width. Width is decided in
+    lib/shell-width.ts, so the header's brand block and the sidebar share one
+    edge by construction.
   */
   return (
     <div
@@ -204,214 +204,110 @@ export default function HomePage({ initialTab }: { initialTab?: Tab } = {}) {
     >
       <Header onNavigate={navigate} tab={activeTab} />
 
-      {/* One keystroke to any of five tabs and twenty-seven gateways. Mounted
-          at the shell so it works from every panel, including a broken one. */}
-      <CommandPalette onNavigate={navigate} />
+      {/* One keystroke to any section and gateway; the header's search opens it. */}
+      <CommandPalette onNavigate={navigate} showTrigger={false} />
 
-      {/*
-        Width is earned, not taken. `lg` brings the navigation rail and real
-        content width; `xl` brings a second column beside it. Simply raising the
-        cap without the rail would make it worse — a single column stretched to
-        1600px gives 200-character lines nobody can read, and the page still has
-        nothing on either side. A wide screen is a different arrangement, not a
-        tall screen with more room.
-      */}
-      {/*
-        The globe tab is a workspace, not an article.
-
-        Every other tab is reading — a feed, a report, a settings page — and
-        reading wants a measured column, because a 200-character line is a line
-        nobody finishes. The world surface is the opposite: it is a display
-        somebody watches, and on a wide screen a centred column leaves half the
-        monitor empty while the map is squeezed and the live rows sit below the
-        fold. So this tab drops the container entirely and takes the viewport.
-
-        The cap stays for everything else, and that is deliberate rather than
-        lazy: width is earned by what a screen is *for*.
-      */}
-      <div
-        className={
-          // Markets is a workspace too, by the rule stated just above: width is
-          // earned by what a screen is for. A wall of tables in a reading
-          // column wastes the monitor and squeezes every number.
-          activeTab === "globe"
-            ? "flex w-full gap-0 px-0 py-0"
-            : `${shellContainerFor(activeTab)} flex gap-6 py-4 lg:gap-8 lg:py-6`
-        }
-      >
+      <div className="flex w-full">
         <SideNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
         {/*
-          Each tab is isolated. A throw inside one used to unmount the whole tree
-          and leave a blank white page — the user lost the entire product, with no
-          message, to one failing panel. Keyed by tab so switching away from a
-          broken panel clears its error instead of trapping the user there.
-
-          `min-w-0` matters: without it a wide child (a table, the globe canvas)
-          pushes the flex row past the viewport and the whole page scrolls
-          sideways.
+          Each tab is isolated: a throw inside one panel shows a message in that
+          panel instead of blanking the product. Keyed by tab so switching away
+          clears it. `min-w-0` stops a wide child (a table, the map canvas) from
+          pushing the row past the viewport.
         */}
-        <main
-          className={
-            activeTab === "globe" || activeTab === "markets"
-              ? "w-full min-w-0"
-              : "mx-auto w-full min-w-0 max-w-2xl lg:mx-0 lg:max-w-none"
-          }
-        >
-          <ErrorBoundary key={activeTab} label={tabDef(activeTab).label}>
-            {activeTab === "feed" && <HomeFeed onNavigate={navigate} />}
-            {activeTab === "globe" && (
-              /*
-                Two panes on a wide screen, stacked on a narrow one.
-
-                The columns run beside the map rather than beneath it because a
-                globe answers "where" and cannot answer "what happened" — a dot
-                has no headline. On a monitor there is room for both, and putting
-                the reading below the map wastes half the display and makes
-                learning anything a scroll. Below `xl` the panes stack, because
-                two columns on a phone is two unreadable columns.
-
-                Both panes read one sweep from the shared store, so a dot and the
-                row describing it can never come from two different pictures of
-                the world.
-              */
-              <div className="flex min-h-[calc(100vh-3.5rem)] flex-col xl:flex-row">
-                {/*
-                  The map takes the monitor; the reading takes a rail.
-
-                  This was the other way round and it was measured, not
-                  disliked. The map pane carried `xl:max-w-[38rem]` and the rail
-                  `flex-1`, so every pixel past 1440 went to the rail and none
-                  to the globe:
-
-                  | Viewport | Globe canvas | Rail  | Text in the rail |
-                  |----------|--------------|-------|------------------|
-                  | 1280     | 502px        | 505px | 415 chars        |
-                  | 1440     | 574px        | 592px | 415 chars        |
-                  | 1920     | **574px**    | 1072px| 415 chars        |
-                  | 2560     | **574px**    | 1712px| 415 chars        |
-
-                  On a 2560 monitor two thirds of the screen held four hundred
-                  characters and the product's flagship surface stayed at
-                  574px. A display that does not grow with the display it is on
-                  is not an operations surface, whatever it is called.
-
-                  So the cap moves to the rail, which is the pane that has a
-                  natural right width — a subject box is readable at about
-                  19rem and gains nothing from more. The map takes what is
-                  left, which is now everything a bigger monitor adds.
-                */}
-                <div className="min-w-0 flex-1 space-y-6 px-4 py-4 xl:overflow-y-auto">
-                {/*
-                  The brief leads the map rather than sitting behind a button.
-                  It reads the same world picture the globe draws, and the
-                  analysis is the thing a user came for — a map of dots asks
-                  them to do the triage themselves, which is what every
-                  comparable board already does.
-
-                  It is here rather than in a sixth tab because the five-tab
-                  shell was a deliberate decision (see lib/navigation.ts): one
-                  tab per question a user arrives with. "What does the world
-                  picture mean" is the same question as "where is it", answered
-                  one layer up.
-                */}
-                {/*
-                  The map leads, the reading follows.
-
-                  These were the other way round, and it was wrong for the one
-                  reason that matters: a user opening the globe tab came to see
-                  the world. Putting an analytic summary above the map means
-                  the thing they asked for is below the fold on a phone, and
-                  the first impression of a *map* product is a wall of text.
-
-                  The brief keeps its place immediately beneath — close enough
-                  to read together, second because it explains what the map is
-                  already showing.
-                */}
-                {/*
-                  Four workspaces, not one column.
-
-                  The map led and the brief followed, and below both hung the
-                  category feeds and the country picture — four unrelated jobs
-                  stacked into nine thousand pixels. The map still leads: it is
-                  the first tab, and it is what a reader opening a globe came
-                  for. The other three are counted beside it rather than buried
-                  under it. See components/globe-workspace.tsx.
-                */}
-                <GlobeWorkspace />
-                {/*
-                  Offered at the foot of the brief, where somebody has just read
-                  one and knows what they would be getting. A subscribe box at
-                  the top of a page asks people to commit to something they have
-                  not seen yet, which is how it gets ignored.
-                */}
-                <FollowByEmail />
-                </div>
-
-                {/*
-                  The live columns. `sticky` on the tall pane rather than the
-                  short one: the reading scrolls, the world stays put, which is
-                  how an operations display behaves and the opposite of how an
-                  article does.
-                */}
-                <aside className="min-w-0 shrink-0 border-t border-border xl:sticky xl:top-14 xl:h-[calc(100vh-3.5rem)] xl:w-[26rem] xl:border-l xl:border-t-0 2xl:w-[32rem]">
+        <main className="min-w-0 flex-1">
+          <div className={shellContainerFor(activeTab)}>
+            <ErrorBoundary key={activeTab} label={tabDef(activeTab).label}>
+              {activeTab === "home" && <HomeDashboard onNavigate={navigate} />}
+              {activeTab === "situations" && (
+                <PageFrame tab="situations" note="Every live report, by category, with its source and time. Grouping into situation objects arrives with M-3.">
                   <LiveColumns />
-                </aside>
-              </div>
-            )}
-            {/*
-              A destination of its own, unlike the standing brief above — which
-              stays inside the globe tab precisely because it answers the same
-              question the map does, one layer up. "What are prices and markets
-              doing" is not that question, and the data behind it was already
-              complete and going nowhere. See lib/navigation.ts.
-            */}
-            {activeTab === "markets" && (
-              <div className="px-4 py-4">
-                <MarketsPanel />
-              </div>
-            )}
-            {activeTab === "intelligence" && <IntelligenceDashboard />}
-            {activeTab === "monitor" && (
-              <div className="space-y-6">
-                <MonitoringDashboard />
-                {/*
-                  Calibration is not a separate destination: it answers "how
-                  well has this monitoring called things", which is a question
-                  about Radar and belongs on the same screen as Radar.
-                */}
-                <CalibrationScoreboard />
-              </div>
-            )}
-            {activeTab === "account" && <UserPreferences />}
-          </ErrorBoundary>
+                </PageFrame>
+              )}
+              {activeTab === "globe" && (
+                /*
+                  The map takes the frame; the reading takes a rail.
+
+                  Measured before: with the map pane capped at 38rem and the
+                  rail `flex-1`, the globe canvas stopped at 574px while the rail
+                  reached 1712px on a 2560 monitor, holding 415 characters. The
+                  cap belongs on the rail, which has a natural right width.
+                */
+                <div className="flex min-h-[calc(100vh-4rem)] flex-col xl:flex-row">
+                  <div className="min-w-0 flex-1 space-y-6 px-3 py-4 sm:px-4 lg:px-6 xl:overflow-y-auto">
+                    <GlobeWorkspace />
+                    <FollowByEmail />
+                  </div>
+                  <aside className="min-w-0 shrink-0 border-t border-border xl:sticky xl:top-16 xl:h-[calc(100vh-4rem)] xl:w-[26rem] xl:border-s xl:border-t-0 2xl:w-[32rem]">
+                    <LiveColumns />
+                  </aside>
+                </div>
+              )}
+              {activeTab === "markets" && (
+                <PageFrame tab="markets" note="Prices and series as each source publishes them. Nothing here is predicted.">
+                  <MarketsPanel />
+                </PageFrame>
+              )}
+              {activeTab === "intelligence" && (
+                <PageFrame tab="intelligence" note="Every gateway over one engine: investigate a domain, a company, a vessel, a threat.">
+                  <IntelligenceDashboard />
+                </PageFrame>
+              )}
+              {activeTab === "monitor" && (
+                <PageFrame tab="monitor" note="What you watch, checked on a schedule, with every change kept as evidence.">
+                  <MonitoringDashboard />
+                </PageFrame>
+              )}
+              {activeTab === "feed" && (
+                <PageFrame tab="feed" note="The analysed feed and briefs, each finding linked to its source.">
+                  <HomeFeed onNavigate={navigate} />
+                </PageFrame>
+              )}
+              {activeTab === "forecast" && (
+                <PageFrame tab="forecast" note="Only what can be scored: every call is logged before the outcome and graded after it. A forecast is never presented as fact.">
+                  <CalibrationScoreboard />
+                </PageFrame>
+              )}
+              {activeTab === "risks" && (
+                <PageFrame tab="risks" note="Reported signal per country, beside how well we can observe it. Not a forecast.">
+                  <CountryDossier />
+                </PageFrame>
+              )}
+              {activeTab === "knowledge" && (
+                <PageFrame tab="knowledge" note="The method, the sources and the terms behind every finding.">
+                  <RadarKnowledgeBase />
+                </PageFrame>
+              )}
+              {activeTab === "account" && (
+                <PageFrame tab="account" note="Your account, plan, language and data.">
+                  <UserPreferences />
+                </PageFrame>
+              )}
+            </ErrorBoundary>
+          </div>
         </main>
-
-        {/*
-          Mounts only above 1280px — gated on a real media query rather than
-          hidden with CSS, so a laptop does not pay for the fetch.
-
-          Never on the globe tab. The rail exists to put context beside a page
-          that is being *read*; the world surface has its own live columns doing
-          that job better, and running both left the map 518px wide on a 1600px
-          monitor — three panes fighting over one screen, which is how a display
-          ends up smaller than the article next to it.
-        */}
-        {/*
-          Not on a dashboard either.
-
-          The rail puts context beside a page being *read*. Beside the markets
-          page it did the opposite: two short cards against a very long column
-          of tables, so most of that side of the screen was empty — the owner's
-          *"فراغات كثيرة غير مستغلة"*, a lot of unused blank space. The markets
-          page has its own context in every row.
-        */}
-        {activeTab === "globe" || activeTab === "markets" ? null : (
-          <ContextRail onNavigate={navigate} />
-        )}
       </div>
 
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+    </div>
+  )
+}
+
+/** The page heading every section shares in the R338 design. */
+function PageFrame({ tab, note, children }: { tab: Tab; note: string; children: React.ReactNode }) {
+  const t = useT()
+  const curated = useCurated()
+  const key = tabDef(tab).i18nKey
+  return (
+    <div className="space-y-4">
+      <header>
+        <h1 data-no-translate={curated(key) || undefined} className="text-xl font-bold tracking-tight sm:text-2xl">
+          {t(key)}
+        </h1>
+        <p className="mt-0.5 text-sm text-muted-foreground">{note}</p>
+      </header>
+      {children}
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { TABS } from '@/lib/navigation'
+import { HOME_TAB, TABS } from '@/lib/navigation'
 
 /**
  * The sitemap.
@@ -28,9 +28,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     { url: base, lastModified: now, changeFrequency: 'hourly', priority: 1 },
-    // `feed` is the root above; listing it again under /feed would give one
-    // screen two addresses and split every signal between them.
-    ...TABS.filter((t) => t !== 'feed').map((tab) => ({
+    // The home tab is the root above; listing it again under /home would give
+    // one screen two addresses and split every signal between them.
+    ...TABS.filter((t) => t !== HOME_TAB).map((tab) => ({
       url: `${base}/${tab}`,
       lastModified: now,
       // The globe and the gateways change with the world; the account screen

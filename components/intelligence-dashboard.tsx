@@ -2340,8 +2340,9 @@ export function IntelligenceDashboard() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-baseline justify-between gap-2">
-        <h2 className="text-xl font-bold">Intelligence</h2>
+      {/* The page heading is the shell's (R338); the count stays, as the one
+          number on this screen. */}
+      <div className="flex justify-end">
         <span className="text-[11px] text-muted-foreground">{MODES.length} gateways</span>
       </div>
 

@@ -134,11 +134,21 @@ describe('the header and the page share one shell', () => {
    * that hard-codes a width into either file puts the two back out of step
    * silently, and no screenshot in CI would catch it.
    */
-  for (const file of ['components/header.tsx', 'app/page.tsx']) {
-    it(`${file} takes its width from lib/shell-width`, () => {
+  it('app/page.tsx takes its width from lib/shell-width', () => {
+    const source = code('app/page.tsx')
+    expect(source).toContain('shellContainerFor')
+    expect(source).toMatch(/from ["']@\/lib\/shell-width["']/)
+  })
+
+  /**
+   * In the R338 frame the shared edge is the sidebar's: the brand block in the
+   * header sits exactly above it. Both read one constant.
+   */
+  for (const file of ['components/header.tsx', 'components/side-nav.tsx']) {
+    it(`${file} takes the sidebar width from lib/shell-width`, () => {
       const source = code(file)
-      expect(source).toContain('shellContainerFor')
-      expect(source).toMatch(/from ["']@\/lib\/shell-width["']/)
+      expect(source).toContain('SIDEBAR_WIDTH')
+      expect(source).not.toMatch(/\blg:w-(60|64)\b/)
     })
   }
 

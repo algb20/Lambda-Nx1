@@ -1,31 +1,51 @@
 'use client'
 
-import { Zap, Globe2, Brain, Radar, User, CandlestickChart} from 'lucide-react'
+import {
+  Home,
+  Globe2,
+  Siren,
+  Radar,
+  Map as MapIcon,
+  BarChart3,
+  FileText,
+  LineChart,
+  ShieldAlert,
+  Library,
+  Settings,
+  ChevronRight,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useT, useCurated } from '@/lib/i18n'
-import { TAB_DEFS, type Tab } from '@/lib/navigation'
+import { TAB_DEFS, type Tab, type NavGroup } from '@/lib/navigation'
+import { usePassiveWorldReport } from '@/hooks/use-world-report'
+import { tierCounts } from '@/lib/world/tiers'
+import { WorldClock } from '@/components/world-clock'
+import { SIDEBAR_WIDTH } from '@/lib/shell-width'
 
 /**
- * The desktop navigation rail.
+ * The sidebar of the R338 reference design: one line per section, the active
+ * one in solid blue, a count of critical events beside "Situations & Alerts",
+ * and the clock at the foot.
  *
- * On a wide screen the product was rendering a phone: a single 672px column
- * centred in a sea of empty background, with a bottom bar stretched across a
- * 27-inch monitor. It read as an app someone had forgotten to make into a site.
- *
- * So the same five destinations get a persistent left rail above `lg`, with
- * room for the one-line description each tab already carries — and the bottom
- * bar hides itself there. Below `lg` nothing changes: the phone layout was
- * right for a phone, and the charter says preserve the design rather than
- * redesign it.
+ * The count is read passively: it appears once some page has loaded the world
+ * sweep, and the sidebar never starts one itself (see
+ * `subscribeToWorldPassively`). An absent badge means "not loaded", never zero.
  */
-const ICONS: Record<Tab, typeof Zap> = {
-  feed: Zap,
-  globe: Globe2,
-  markets: CandlestickChart,
-  intelligence: Brain,
+export const TAB_ICONS: Record<Tab, typeof Home> = {
+  home: Home,
+  intelligence: Globe2,
+  situations: Siren,
   monitor: Radar,
-  account: User,
+  globe: MapIcon,
+  markets: BarChart3,
+  feed: FileText,
+  forecast: LineChart,
+  risks: ShieldAlert,
+  knowledge: Library,
+  account: Settings,
 }
+
+const GROUP_ORDER: NavGroup[] = ['main', 'analysis', 'library']
 
 export function SideNav({
   activeTab,
@@ -35,76 +55,67 @@ export function SideNav({
   setActiveTab: (tab: Tab) => void
 }) {
   const t = useT()
-  // Shield only what we wrote for this language — see lib/i18n/dictionaries.
   const curated = useCurated()
+  const { report } = usePassiveWorldReport()
+  // Placed and unplaceable alike, the same population the Home cards count.
+  const critical = report ? tierCounts(report.events.concat(report.unplaceable)).critical : null
 
   return (
     <nav
       aria-label="Sections"
-      className="sticky top-20 hidden w-60 shrink-0 flex-col gap-1 lg:flex"
+      className={`sticky top-16 hidden h-[calc(100vh-4rem)] shrink-0 ${SIDEBAR_WIDTH} flex-col gap-3 overflow-y-auto border-e border-sidebar-border bg-sidebar px-3 py-4 lg:flex in-data-[sign-in-prompt=open]:pb-32`}
     >
-      {TAB_DEFS.map((tab) => {
-        const Icon = ICONS[tab.id]
-        const active = activeTab === tab.id
-        return (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            aria-current={active ? 'page' : undefined}
-            className={cn(
-              'group flex items-start gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left transition-colors',
-              active
-                ? 'border-border bg-card text-foreground'
-                : 'text-muted-foreground hover:bg-card/60 hover:text-foreground',
-            )}
-          >
-            <Icon
-              className={cn('mt-0.5 h-4.5 w-4.5 shrink-0', active ? 'text-primary' : '')}
-              style={{ width: 18, height: 18 }}
-            />
-            <span className="min-w-0">
-              {/*
-                Curated, so the machine translator must not touch it.
+      {GROUP_ORDER.map((group) => (
+        <ul key={group} className="space-y-1">
+          {TAB_DEFS.filter((d) => d.group === group).map((tab) => {
+            const Icon = TAB_ICONS[tab.id]
+            const active = activeTab === tab.id
+            return (
+              <li key={tab.id}>
+                <button
+                  onClick={() => setActiveTab(tab.id)}
+                  aria-current={active ? 'page' : undefined}
+                  title={tab.description}
+                  className={cn(
+                    'group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-start text-sm transition-colors',
+                    active
+                      ? 'bg-gradient-to-r from-primary to-primary/80 font-semibold text-primary-foreground shadow-lg shadow-primary/20'
+                      : 'text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+                  )}
+                >
+                  <Icon className="h-[18px] w-[18px] shrink-0" />
+                  <span data-no-translate={curated(tab.i18nKey) || undefined} className="min-w-0 flex-1 truncate">
+                    {t(tab.i18nKey)}
+                  </span>
+                  {tab.id === 'situations' && critical ? (
+                    <span
+                      className="rounded-full bg-red-600 px-1.5 text-[11px] font-semibold leading-5 text-white"
+                      title={`${critical} critical events in the current sweep`}
+                    >
+                      {critical}
+                    </span>
+                  ) : null}
+                  {tab.id !== 'home' && !active ? (
+                    <ChevronRight className="h-4 w-4 shrink-0 opacity-40 rtl:rotate-180" />
+                  ) : null}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      ))}
 
-                `AutoTranslate` walks every text node on the page and rewrites
-                it. That is right for content the engine produced — a headline,
-                an agency name — and wrong for a label the dictionary already
-                translated deliberately. It re-translated `الرئيسية` into
-                `فور`, `الإعدادات` into `جحيم` ("hell") and `مراقبة` into
-                `حمى` ("fever"), because a two-word label out of context is
-                exactly what a machine translator gets wrong.
-
-                `lib/i18n/translate.ts` already states the rule — "a
-                hand-written string always wins over a machine one" — and the
-                DOM sweep runs after render, so without this attribute the
-                implementation contradicts it.
-              */}
-              <span data-no-translate={curated(tab.i18nKey) || undefined} className="block text-sm font-medium leading-tight">
-                {t(tab.i18nKey)}
-              </span>
-              {/*
-                The description is the reason a rail beats a bar: a bottom bar
-                has room for a five-letter word, and "Radar" alone does not tell
-                a new user what is behind it.
-              */}
-              <span className="mt-0.5 block text-[11px] leading-snug text-muted-foreground">
-                {tab.description}
-              </span>
-            </span>
-          </button>
-        )
-      })}
-      {/*
-        The credits and licence links that CC BY, OGL and the other source
-        licences require wherever their data appears (R320). One link from the
-        rail that sits beside every surface showing that data.
-      */}
-      <a
-        href="/terms#sources"
-        className="mt-3 px-3 text-[11px] text-muted-foreground hover:text-foreground hover:underline"
-      >
-        Sources &amp; credits
-      </a>
+      <div className="mt-auto space-y-3">
+        <WorldClock compact />
+        {/* The credits and licence links CC BY, OGL and the other source
+            licences require wherever their data appears (R320). */}
+        <a
+          href="/terms#sources"
+          className="block px-1 text-[11px] text-muted-foreground hover:text-foreground hover:underline"
+        >
+          Sources &amp; credits
+        </a>
+      </div>
     </nav>
   )
 }

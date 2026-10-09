@@ -39,7 +39,21 @@ function humanise(mode: string): string {
     .join(' ')
 }
 
-export function CommandPalette({ onNavigate }: { onNavigate: (target: string) => void }) {
+/** Dispatch on `window` to open the palette from anywhere (the header's search box). */
+export const OPEN_PALETTE_EVENT = 'lambda:open-palette'
+
+export function openCommandPalette(): void {
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event(OPEN_PALETTE_EVENT))
+}
+
+export function CommandPalette({
+  onNavigate,
+  showTrigger = true,
+}: {
+  onNavigate: (target: string) => void
+  /** Its own small "Search ⌘K" button. Off where the header carries the search box. */
+  showTrigger?: boolean
+}) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState(0)
@@ -98,8 +112,17 @@ export function CommandPalette({ onNavigate }: { onNavigate: (target: string) =>
         setOpen((wasOpen) => !wasOpen)
       }
     }
+    // The header's search box opens it too (R338): one search for the product.
+    const onOpen = () => {
+      returnFocusRef.current = document.activeElement as HTMLElement | null
+      setOpen(true)
+    }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    window.addEventListener(OPEN_PALETTE_EVENT, onOpen)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener(OPEN_PALETTE_EVENT, onOpen)
+    }
   }, [])
 
   useEffect(() => {
@@ -110,6 +133,7 @@ export function CommandPalette({ onNavigate }: { onNavigate: (target: string) =>
   useEffect(() => setSelected(0), [query])
 
   if (!open) {
+    if (!showTrigger) return null
     return (
       <button
         onClick={() => {

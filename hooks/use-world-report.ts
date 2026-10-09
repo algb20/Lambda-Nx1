@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from 'react'
 import {
   subscribeToWorld,
+  subscribeToWorldPassively,
   worldOnServer,
   worldState,
   type WorldState,
@@ -17,4 +18,9 @@ import {
  */
 export function useWorldReport(): WorldState {
   return useSyncExternalStore(subscribeToWorld, worldState, worldOnServer)
+}
+
+/** The world report if something has loaded it, without loading it (R338). */
+export function usePassiveWorldReport(): WorldState {
+  return useSyncExternalStore(subscribeToWorldPassively, worldState, worldOnServer)
 }

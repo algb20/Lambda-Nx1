@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { TABS, TAB_DEFS, resolveTab, tabDef } from './navigation'
+import { BAR_TABS, TABS, TAB_DEFS, resolveTab, tabDef } from './navigation'
 
 /**
  * Navigation is one of the few things where a mistake is invisible to tests but
@@ -39,23 +39,32 @@ describe('the tab list', () => {
    * At the narrowest phone we support, six tabs still clear the minimum with
    * room to spare. Seven would not, and this test will say so.
    */
-  it('leaves every tab a target a thumb can actually hit', () => {
+  it('leaves every phone-bar slot a target a thumb can actually hit', () => {
+    // The phone bar holds the bar tabs plus "More", which opens the rest as a
+    // sheet (R338). The sidebar carries the full list on a wide screen.
     const NARROWEST_PHONE_PX = 320
     const MIN_TOUCH_TARGET_PX = 44
-    const perTab = NARROWEST_PHONE_PX / TABS.length
-    expect(
-      perTab,
-      `${TABS.length} tabs gives each ${perTab.toFixed(1)}px on a ${NARROWEST_PHONE_PX}px screen`,
-    ).toBeGreaterThanOrEqual(MIN_TOUCH_TARGET_PX)
+    const slots = BAR_TABS.length + 1
+    const perSlot = NARROWEST_PHONE_PX / slots
+    expect(perSlot, `${slots} slots gives each ${perSlot.toFixed(1)}px`).toBeGreaterThanOrEqual(MIN_TOUCH_TARGET_PX)
+    expect(slots).toBeLessThanOrEqual(5)
   })
 
   /**
-   * A separate ceiling, because touch targets are not the only cost. Every tab
-   * spends a permanent slot in front of every user, and the list this replaced
-   * had nine — four of which led to placeholders.
+   * The list is the owner's reference design (R338), section for section. A
+   * new entry is a design decision, so it has to be made here on purpose.
+   * Opportunities, Decisions and Workspace are absent until their Track M
+   * units give them something real to show.
    */
-  it('does not grow without the growth being deliberate', () => {
-    expect(TABS.length).toBeLessThanOrEqual(6)
+  it('is exactly the R338 section list', () => {
+    expect([...TABS]).toEqual([
+      'home', 'intelligence', 'situations', 'monitor', 'globe',
+      'markets', 'feed', 'forecast', 'risks', 'knowledge', 'account',
+    ])
+  })
+
+  it('puts every tab in a sidebar group', () => {
+    for (const def of TAB_DEFS) expect(['main', 'analysis', 'library']).toContain(def.group)
   })
 })
 
@@ -71,8 +80,8 @@ describe('resolveTab', () => {
     expect(resolveTab('enterprise')).toBe('intelligence')
   })
 
-  it('sends calibration into Radar, whose question it answers', () => {
-    expect(resolveTab('calibration')).toBe('monitor')
+  it('sends calibration to Forecast & Scenarios, whose ledger it is', () => {
+    expect(resolveTab('calibration')).toBe('forecast')
   })
 
   it('sends ideas and preferences to the account tab', () => {

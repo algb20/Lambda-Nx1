@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import HomePage from '../page'
-import { TABS, tabDef, type Tab } from '@/lib/navigation'
+import { HOME_TAB, TABS, tabDef, type Tab } from '@/lib/navigation'
 
 /**
  * The tabs, as real addresses.
@@ -26,16 +26,16 @@ import { TABS, tabDef, type Tab } from '@/lib/navigation'
  * Every tab renders the same shell with a different panel, so four page files
  * would be four copies of one import. The dynamic segment is validated against
  * the tab list and anything else is a genuine 404 — `/nonsense` must not render
- * the feed, or every typo becomes a soft-404 that search engines index.
+ * the home page, or every typo becomes a soft-404 that search engines index.
  *
  * `generateStaticParams` pre-renders all four at build time, so they are static
  * documents with real metadata rather than server work per request.
  */
 export function generateStaticParams() {
-  // `feed` is the root and is served by `app/page.tsx`; listing it here too
-  // would give one screen two addresses, which splits every link and every
+  // The home tab is the root and is served by `app/page.tsx`; listing it here
+  // too would give one screen two addresses, which splits every link and every
   // ranking signal between them.
-  return TABS.filter((t) => t !== 'feed').map((tab) => ({ tab }))
+  return TABS.filter((t) => t !== HOME_TAB).map((tab) => ({ tab }))
 }
 
 export const dynamicParams = false
@@ -65,7 +65,7 @@ export async function generateMetadata({
 export default async function TabPage({ params }: { params: Promise<{ tab: string }> }) {
   const { tab } = await params
   // A path that is not a tab is not a tab. Rendering the shell for it would
-  // make every mistyped URL a page that returns 200 and shows the feed.
+  // make every mistyped URL a page that returns 200 and shows the home page.
   if (!(TABS as readonly string[]).includes(tab)) notFound()
   /**
    * The tab is handed to the shell rather than left for it to work out.

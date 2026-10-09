@@ -67,5 +67,7 @@ Each unit is one commit batch with tests, recorded in `MAINTENANCE_BATCH_NN.md` 
 
 | Unit | Status |
 |---|---|
-| D-1 | In progress |
+| D-1 | REPO-PRESENT + REPO-TESTED (batch 29) |
+| D-2 | REPO-PRESENT + REPO-TESTED (batch 29) |
+| D-3 | In progress — every section renders in the new frame; thin pages and duplicated inner headings remain |
 | Others | Planned |

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Radar, ShieldCheck, X } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { AuthForm } from '@/components/auth-form'
@@ -55,6 +55,20 @@ export function StandaloneSignInPrompt() {
    * A spinner here would put a placeholder over a platform that never needed
    * the answer — the gateways do not care whether anyone is signed in.
    */
+  /**
+   * Tells the frame the card is on screen (R338). The sidebar keeps its clock
+   * at the foot, exactly where this card sits on a wide screen, so while the
+   * card is showing the sidebar makes room for it instead of being covered.
+   */
+  const visible = status === 'ready' && !user && !dismissed
+  useEffect(() => {
+    if (!visible) return
+    document.documentElement.dataset.signInPrompt = 'open'
+    return () => {
+      delete document.documentElement.dataset.signInPrompt
+    }
+  }, [visible])
+
   if (status !== 'ready' || user) return null
 
   return (
@@ -87,17 +101,17 @@ export function StandaloneSignInPrompt() {
               tablet it landed in the middle of the page and covered the globe's
               legend.
 
-              So on a narrow screen it is one line: what it is, and a way in.
-              The full invitation is still there for anyone who taps, and the
-              whole card is unchanged from `lg` up, where there is room at the
-              foot of the navigation column for it to sit beside the product
-              rather than on top of it.
+              So it is one line: what it is, and a way in. The full invitation
+              is still there for anyone who taps. Since the R338 frame it is one
+              line at every width too: the foot of the sidebar holds the clock,
+              and the sidebar makes room for this card rather than being
+              covered by it.
             */}
             <div className="flex items-start gap-2">
               <Radar className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold">Keep your work</p>
-                <div className={open ? '' : 'hidden lg:block'}>
+                <div className={open ? '' : 'hidden'}>
                   <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">
                     Everything here works without an account. One keeps your investigations, monitors
                     and settings across devices.

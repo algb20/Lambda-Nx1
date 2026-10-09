@@ -61,87 +61,67 @@ import { ALL_MODES } from './gateways'
  * with `account` lifted out of the bar entirely and into the header, where
  * accounts live in every application anyone has used.
  */
-export const TABS = ['feed', 'markets', 'globe', 'intelligence', 'monitor', 'account'] as const
+/**
+ * R338 (2026-10-09): the owner rejected the five-tab shell and gave a reference
+ * design — a sidebar of named sections with Home first. The reasoning above is
+ * kept as history; the rule it served still holds, and every entry below leads
+ * to something real. Sections the reference shows that have no source yet
+ * (Opportunities, Decisions, Workspace) are not listed until their Track M unit
+ * makes them real (docs/reconciliation/BUILD_PLAN_R338.md).
+ */
+export const TABS = [
+  'home',
+  'intelligence',
+  'situations',
+  'monitor',
+  'globe',
+  'markets',
+  'feed',
+  'forecast',
+  'risks',
+  'knowledge',
+  'account',
+] as const
+
+/** Where the product opens: the dashboard, as in the reference design. */
+export const HOME_TAB: Tab = 'home'
 
 /**
- * Where the product opens.
- *
- * `/` is the globe. The feed keeps its own path rather than the root, because a
- * home page is a claim about what the product is, and the claim this product
- * makes is the world — not a list of posts about it.
+ * The phone bar: three destinations and "More", as in the reference phone
+ * layout. Everything else is one tap away in the "More" sheet.
  */
-export const HOME_TAB: Tab = 'globe'
-
-/**
- * The five in the phone bar, in bar order, with the globe at the centre.
- *
- * `account` is deliberately not among them: five destinations plus a settings
- * screen is six cramped targets on a 360px phone, and the settings screen is
- * not a destination anyone navigates *to* — it is somewhere you go once and
- * leave. It lives in the header, always visible, signed in or not.
- */
-export const BAR_TABS: readonly Tab[] = ['feed', 'markets', 'globe', 'intelligence', 'monitor']
-
-/** The index of the globe in `BAR_TABS` — the raised, larger button. */
-export const BAR_CENTRE = BAR_TABS.indexOf('globe')
+export const BAR_TABS: readonly Tab[] = ['home', 'intelligence', 'globe']
 
 export type Tab = (typeof TABS)[number]
 
+/** Sidebar grouping, in reading order. */
+export type NavGroup = 'main' | 'analysis' | 'library'
+
 export interface TabDef {
   id: Tab
-  /** Short label for the mobile bar, where horizontal room is the constraint. */
+  /** Short label for the phone bar, where horizontal room is the constraint. */
   short: string
-  /** Full label for the desktop sidebar and the error boundary's message. */
+  /** Full label for the sidebar and the error boundary's message. */
   label: string
-  /** One line explaining the destination — the desktop rail has room for it. */
+  /** One line explaining the destination. */
   description: string
   /** i18n key, so a translated shell stays in step with this list. */
   i18nKey: string
+  group: NavGroup
 }
 
 export const TAB_DEFS: readonly TabDef[] = [
-  {
-    id: 'feed',
-    short: 'Feed',
-    label: 'The feed',
-    description: 'Published research, signals and what is happening now',
-    i18nKey: 'nav.feed',
-  },
-  {
-    id: 'markets',
-    short: 'Markets',
-    label: 'Markets & chains',
-    description: 'Live prices, network conditions, and where the volume actually trades',
-    i18nKey: 'nav.markets',
-  },
-  {
-    id: 'globe',
-    short: 'World',
-    label: 'The world map',
-    description: 'The standing brief, and live events on the globe with the agency that measured each',
-    i18nKey: 'nav.globe',
-  },
-  {
-    id: 'intelligence',
-    short: 'Gateways',
-    label: 'The intelligence gateways',
-    description: `Run an investigation across ${ALL_MODES.length} passive gateways`,
-    i18nKey: 'nav.intelligence',
-  },
-  {
-    id: 'monitor',
-    short: 'Radar',
-    label: 'Radar monitoring',
-    description: 'What is being watched for you, and how well it has called things',
-    i18nKey: 'nav.monitor',
-  },
-  {
-    id: 'account',
-    short: 'You',
-    label: 'Your account',
-    description: 'Profile, plan, groups, ideas and settings',
-    i18nKey: 'nav.preferences',
-  },
+  { id: 'home', short: 'Home', label: 'Home', description: 'The world at a glance: situations, alerts, indicators and source health', i18nKey: 'nav.home', group: 'main' },
+  { id: 'intelligence', short: 'Intel', label: 'Global Intelligence', description: `Run an investigation across ${ALL_MODES.length} passive gateways`, i18nKey: 'nav.intelligence', group: 'main' },
+  { id: 'situations', short: 'Alerts', label: 'Situations & Alerts', description: 'Live events by severity, corroboration and region', i18nKey: 'nav.situations', group: 'main' },
+  { id: 'monitor', short: 'Watch', label: 'Monitoring & Watchlist', description: 'What is being watched for you, and what changed', i18nKey: 'nav.monitor', group: 'main' },
+  { id: 'globe', short: 'Maps', label: 'Maps & Geospatial', description: 'The live world on a map and a globe, with the agency that measured each event', i18nKey: 'nav.globe', group: 'main' },
+  { id: 'markets', short: 'Data', label: 'Data & Analytics', description: 'Prices, chains, exchanges and the flows behind them', i18nKey: 'nav.markets', group: 'analysis' },
+  { id: 'feed', short: 'Research', label: 'Research', description: 'Published research, signals and what is happening now', i18nKey: 'nav.feed', group: 'analysis' },
+  { id: 'forecast', short: 'Forecast', label: 'Forecast & Scenarios', description: 'Forward-looking claims and how well they were called', i18nKey: 'nav.forecast', group: 'analysis' },
+  { id: 'risks', short: 'Risks', label: 'Risks', description: 'Country pictures built from the events, sources and gaps behind them', i18nKey: 'nav.risks', group: 'analysis' },
+  { id: 'knowledge', short: 'Library', label: 'Knowledge Base', description: 'What the radar has found and kept, with its sources', i18nKey: 'nav.knowledge', group: 'library' },
+  { id: 'account', short: 'You', label: 'Settings', description: 'Profile, plan, language, theme and account', i18nKey: 'nav.preferences', group: 'library' },
 ]
 
 /** Legacy tab ids kept working, so an old link or saved state still lands somewhere sane. */
@@ -149,8 +129,8 @@ const MOVED: Record<string, Tab> = {
   // The two placeholders. Saved investigations live with the gateways now.
   personal: 'intelligence',
   enterprise: 'intelligence',
-  // Calibration answers a Radar question.
-  calibration: 'monitor',
+  // Calibration is the evaluation of forward-looking claims (R338).
+  calibration: 'forecast',
   // Ideas is in the account panel, and on every screen via the floating button.
   ideas: 'account',
   // Renamed.

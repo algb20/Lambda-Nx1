@@ -1,117 +1,119 @@
 "use client"
 
-import { Zap, Globe2, Brain, Radar, User, CandlestickChart } from "lucide-react"
+import { useState } from "react"
+import { MoreHorizontal, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useT, useCurated } from "@/lib/i18n"
-import { BAR_TABS, tabDef, type Tab } from "@/lib/navigation"
-
-/**
- * The mobile navigation bar.
- *
- * Five destinations, generated from the one tab list rather than written out
- * button by button. The hand-written version had nine buttons across a phone —
- * each a 10px label under an icon, two of them leading to empty placeholder
- * screens — and it could disagree with any other navigation surface, because
- * every entry was a separate literal.
- *
- * Hidden above `lg`, where the desktop rail takes over: a bottom bar stretched
- * across a desktop monitor is the single clearest sign that a site is really a
- * phone app in a browser.
- */
-const ICONS: Record<Tab, typeof Zap> = {
-  feed: Zap,
-  globe: Globe2,
-  markets: CandlestickChart,
-  intelligence: Brain,
-  monitor: Radar,
-  account: User,
-}
+import { BAR_TABS, TAB_DEFS, tabDef, type Tab } from "@/lib/navigation"
+import { TAB_ICONS } from "@/components/side-nav"
 
 interface BottomNavProps {
   activeTab: Tab
   setActiveTab: (tab: Tab) => void
 }
 
+/**
+ * The phone bar of the R338 reference design: Home, Intelligence, Maps and
+ * "More", which opens every other section as a sheet.
+ *
+ * The safe-area padding stays: iOS draws its home indicator over the last
+ * ~34px and Android its gesture bar, and Pi Browser is a mobile webview, so a
+ * bar without it puts our labels under the operating system's own control.
+ */
 export function BottomNav({ activeTab, setActiveTab }: BottomNavProps) {
   const t = useT()
-  // Shield only what we wrote for this language — see lib/i18n/dictionaries.
   const curated = useCurated()
-  return (
-    <nav
-      aria-label="Sections"
-      /*
-        The bar sits on the very bottom edge, which on a phone is not the bottom
-        of the screen. iOS draws its home indicator over the last ~34px and
-        Android its gesture bar, so without the safe-area inset the tab labels
-        live underneath the system's own control — unreadable, and a tap there
-        goes to the operating system rather than to us. Pi Browser is a mobile
-        webview, so this is the app's primary surface, not an edge case.
+  const [moreOpen, setMoreOpen] = useState(false)
+  const inBar = (BAR_TABS as readonly Tab[]).includes(activeTab)
 
-        `env()` is 0 on every device that has no inset, so this costs desktop
-        and older phones nothing.
-      */
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 lg:hidden"
-    >
-      <div className="container mx-auto max-w-2xl px-4">
-        <div className="flex items-center justify-around py-3">
+  const go = (id: Tab) => {
+    setMoreOpen(false)
+    setActiveTab(id)
+  }
+
+  return (
+    <>
+      {moreOpen ? (
+        <div className="fixed inset-0 z-[60] lg:hidden" role="dialog" aria-modal="true" aria-label="All sections">
+          <button className="absolute inset-0 bg-black/60" aria-label="Close" onClick={() => setMoreOpen(false)} />
+          <div
+            style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+            className="absolute inset-x-0 bottom-0 max-h-[80vh] overflow-y-auto rounded-t-2xl border-t border-border bg-card p-4"
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-sm font-semibold">All sections</span>
+              <button onClick={() => setMoreOpen(false)} aria-label="Close" className="touch-target rounded-md p-1 hover:bg-muted">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <ul className="grid grid-cols-3 gap-2">
+              {TAB_DEFS.map((def) => {
+                const Icon = TAB_ICONS[def.id]
+                const active = activeTab === def.id
+                return (
+                  <li key={def.id}>
+                    <button
+                      onClick={() => go(def.id)}
+                      aria-current={active ? "page" : undefined}
+                      className={cn(
+                        "flex h-full w-full flex-col items-center gap-1.5 rounded-xl border p-3 text-center text-[11px] transition-colors",
+                        active ? "border-primary bg-primary/15 text-primary" : "border-border bg-background/40 hover:bg-muted",
+                      )}
+                    >
+                      <Icon className="h-5 w-5" />
+                      <span data-no-translate={curated(def.i18nKey) || undefined} className="leading-tight">
+                        {t(def.i18nKey)}
+                      </span>
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        </div>
+      ) : null}
+
+      <nav
+        aria-label="Sections"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 lg:hidden"
+      >
+        <div className="mx-auto flex max-w-2xl items-center justify-around px-4 py-2">
           {BAR_TABS.map((id) => {
             const tab = tabDef(id)
-            const Icon = ICONS[id]
+            const Icon = TAB_ICONS[id]
             const active = activeTab === id
-            /**
-             * The globe is the centre of the bar and is drawn as the centre.
-             *
-             * Not decoration: it is the surface this product exists to show, it
-             * is where the app opens, and the middle slot is the one a thumb
-             * reaches without the hand moving. A bar of five identical targets
-             * says every destination is equally the point, which is not true
-             * here and was the owner's complaint.
-             *
-             * The lift is small — a slightly larger icon in a filled disc that
-             * rises above the row — because a floating action button in the
-             * middle of a *navigation* bar is a different control and would
-             * teach the wrong thing.
-             */
-            const centre = id === 'globe'
             return (
               <button
                 key={id}
-                onClick={() => setActiveTab(id)}
+                onClick={() => go(id)}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "touch-target flex flex-col items-center gap-1 transition-colors",
-                  centre && "-mt-4",
+                  "touch-target flex min-w-16 flex-col items-center gap-1 transition-colors",
                   active ? "text-primary" : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                {centre ? (
-                  <span
-                    className={cn(
-                      "flex h-11 w-11 items-center justify-center rounded-full ring-1 transition-colors",
-                      active
-                        ? "bg-primary text-primary-foreground ring-primary/40"
-                        : "bg-muted text-foreground ring-border",
-                    )}
-                  >
-                    <Icon className="h-6 w-6" />
-                  </span>
-                ) : (
-                  <Icon className="h-5 w-5" />
-                )}
-                {/* Curated by the dictionary — see side-nav for why the machine
-                    translator must not touch it. */}
-                <span
-                  data-no-translate={curated(tab.i18nKey) || undefined}
-                  className={cn("text-[10px]", centre ? "font-semibold" : "font-medium")}
-                >
-                  {t(tab.i18nKey)}
+                <Icon className="h-5 w-5" />
+                <span data-no-translate={curated(tab.i18nKey) || undefined} className="text-[10px] font-medium">
+                  {tab.short}
                 </span>
               </button>
             )
           })}
+          <button
+            onClick={() => setMoreOpen(true)}
+            aria-haspopup="dialog"
+            aria-expanded={moreOpen}
+            className={cn(
+              "touch-target flex min-w-16 flex-col items-center gap-1 transition-colors",
+              !inBar ? "text-primary" : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <MoreHorizontal className="h-5 w-5" />
+            <span className="text-[10px] font-medium">{inBar ? "More" : tabDef(activeTab).short}</span>
+          </button>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   )
 }

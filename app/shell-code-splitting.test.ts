@@ -38,8 +38,10 @@ const PANELS = [
   'user-preferences',
   'globe-workspace',
   'live-columns',
-  // Never renders below 1280px, so on a phone a static import is pure download.
-  'context-rail',
+  // R338 sections.
+  'home-dashboard',
+  'country-dossier',
+  'radar-knowledge-base',
 ]
 
 describe('the shell loads one tab, not five', () => {
@@ -65,8 +67,8 @@ describe('the shell loads one tab, not five', () => {
    * spinner — the thing `app/[tab]/page.tsx` exists for. `ssr: false` on a
    * panel would hand all of it back silently.
    *
-   * The rail is the deliberate exception: it renders null below 1280px and has
-   * no server output to preserve.
+   * (The context rail used to be the one exception; the R338 shell removed
+   * it, so there is none.)
    */
   it('keeps the panels server-rendered', () => {
     // Comment lines are dropped first: the prose above the rail explains why it
@@ -83,6 +85,6 @@ describe('the shell loads one tab, not five', () => {
     expect(
       optedOut,
       'a panel with ssr: false stops being prerendered, so its tab URL serves a spinner to readers and to crawlers alike',
-    ).toEqual(['ContextRail'])
+    ).toEqual([])
   })
 })

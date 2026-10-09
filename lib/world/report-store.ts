@@ -190,6 +190,21 @@ export function subscribeToWorld(onChange: () => void): () => void {
   }
 }
 
+/**
+ * Subscribe without starting anything.
+ *
+ * For chrome that should reflect the world when it is already loaded — the
+ * sidebar's alert badge — but must not make every page pay for a sweep of
+ * every source just to draw a number (R338). It sees the report as soon as any
+ * real consumer loads it.
+ */
+export function subscribeToWorldPassively(onChange: () => void): () => void {
+  listeners.add(onChange)
+  return () => {
+    listeners.delete(onChange)
+  }
+}
+
 /** Test seam: forget everything this module remembers. */
 export function resetWorldForTests(): void {
   state = EMPTY

@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 
-import { Moon, Sun, ShieldCheck, CreditCard, Languages, UserCircle2 } from "lucide-react"
+import { Moon, Sun, CreditCard, Languages, UserCircle2, Search, Bell } from "lucide-react"
+import { SIDEBAR_WIDTH } from "@/lib/shell-width"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { PostureBadge } from "@/components/posture-badge"
@@ -12,7 +13,10 @@ import { useI18n, CURATED_LOCALES, SUPPORTED_LOCALES, LOCALE_LABELS } from "@/li
 import { usePiAuthOptional } from "@/contexts/pi-auth-context"
 import { SUBSCRIPTION_VISIBLE } from "@/lib/plans/plans"
 import { useViewer } from "@/hooks/use-viewer"
-import { shellContainerFor } from "@/lib/shell-width"
+import { openCommandPalette } from "@/components/command-palette"
+import { usePassiveWorldReport } from "@/hooks/use-world-report"
+import { tierCounts } from "@/lib/world/tiers"
+import { HeaderClock } from "@/components/header-clock"
 
 /**
  * `onNavigate` exists for one reason: the "Pay with π" button used to do
@@ -23,13 +27,8 @@ import { shellContainerFor } from "@/lib/shell-width"
  */
 export function Header({
   onNavigate,
-  /**
-   * Which tab is open, so the header shares the page's width instead of
-   * keeping its own. It was `max-w-2xl` while the content had grown to `88rem`
-   * — measured 80px out of alignment at 1440px and 208px at 1920px. See
-   * lib/shell-width.ts.
-   */
-  tab = 'feed',
+  /** Which tab is open, so the account button can mark itself current. */
+  tab = 'home',
 }: { onNavigate?: (tab: string) => void; tab?: string } = {}) {
   const { theme, toggleTheme } = useTheme()
   const { locale, setLocale, t } = useI18n()
@@ -48,6 +47,9 @@ export function Header({
    */
   const { user } = useViewer()
   const username = user?.username ?? pi?.userData?.username ?? null
+  const { report } = usePassiveWorldReport()
+  // Placed and unplaceable alike, the same population the Home cards count.
+  const critical = report ? tierCounts(report.events.concat(report.unplaceable)).critical : null
 
   const [langOpen, setLangOpen] = useState(false)
   const [langQuery, setLangQuery] = useState('')
@@ -78,21 +80,55 @@ export function Header({
     : orderedLocales
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
-      <div className={`${shellContainerFor(tab)} py-3`}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <BrandMark size={24} title="Lambda" className="text-primary" />
-              <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-card" />
+    <header className="sticky top-0 z-50 h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <div className="flex h-full items-center gap-3 px-3 lg:px-0">
+        {/* Brand, as wide as the sidebar beneath it (R338 reference design). */}
+        <div className={`flex shrink-0 items-center gap-2.5 lg:px-4 ${SIDEBAR_WIDTH}`}>
+          <BrandMark size={34} title="Lambda NX" className="text-primary" />
+          <div className="leading-tight">
+            <div className="text-lg font-bold tracking-tight">
+              Lambda <span className="text-primary">NX</span>
             </div>
-            <div>
-              <h1 className="text-lg font-bold leading-none tracking-tight">Lambda</h1>
-              <p className="text-[10px] text-muted-foreground leading-none">{t('app.tagline')}</p>
-            </div>
+            <div className="hidden text-[11px] text-muted-foreground sm:block">{t('app.tagline')}</div>
           </div>
+        </div>
 
-          <div className="flex items-center gap-2">
+        {/* One search for the product: opens the command palette (⌘K). */}
+        <button
+          type="button"
+          onClick={openCommandPalette}
+          aria-label="Search"
+          className="hidden h-10 min-w-0 flex-1 items-center gap-3 rounded-xl border border-border bg-card/70 px-4 text-start text-sm text-muted-foreground transition-colors hover:border-primary/60 md:flex lg:max-w-3xl"
+        >
+          <Search className="h-4 w-4 shrink-0" />
+          <span className="min-w-0 flex-1 truncate">Search anything… countries, companies, markets, events, assets</span>
+          <kbd className="rounded border border-border px-1.5 font-mono text-[10px]">⌘K</kbd>
+        </button>
+
+        <div className="ms-auto flex items-center gap-1.5 pe-1 lg:pe-4">
+          <button
+            type="button"
+            onClick={openCommandPalette}
+            aria-label="Search"
+            className="touch-target flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted md:hidden"
+          >
+            <Search className="h-4 w-4" />
+          </button>
+          <HeaderClock />
+          <button
+            type="button"
+            onClick={() => onNavigate?.('situations')}
+            aria-label="Critical events"
+            title={critical === null ? 'Situations & alerts' : `${critical} critical events in the current sweep`}
+            className="touch-target relative flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
+          >
+            <Bell className="h-4 w-4" />
+            {critical ? (
+              <span className="absolute -end-0.5 -top-0.5 min-w-4 rounded-full bg-red-600 px-1 text-center text-[10px] font-semibold leading-4 text-white">
+                {critical > 99 ? '99+' : critical}
+              </span>
+            ) : null}
+          </button>
             {/*
               The compliance claim, checked rather than asserted.
 
@@ -236,7 +272,6 @@ export function Header({
                 <UserCircle2 className="h-4 w-4" />
               </Button>
             ) : null}
-          </div>
         </div>
       </div>
     </header>

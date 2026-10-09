@@ -3,6 +3,7 @@ import {
   loadWorld,
   resetWorldForTests,
   subscribeToWorld,
+  subscribeToWorldPassively,
   worldState,
 } from './report-store'
 import type { WorldEventsReport } from '@/lib/modules/world-events-shared'
@@ -235,3 +236,21 @@ describe('the refresh clock reads the whole world', () => {
     stop()
   })
 })
+
+describe('a passive subscriber never starts a sweep (R338)', () => {
+  beforeEach(() => resetWorldForTests())
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('does not fetch, and still hears the report once someone else loads it', async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify(report()), { status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+    let heard = 0
+    const stop = subscribeToWorldPassively(() => (heard += 1))
+    expect(fetchMock).not.toHaveBeenCalled()
+    await loadWorld(false, 'full')
+    expect(heard).toBeGreaterThan(0)
+    expect(worldState().report).not.toBeNull()
+    stop()
+  })
+})
+
