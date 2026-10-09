@@ -1,5 +1,7 @@
 # 30.27.8.S — Open-Question List (Claude-prepared; NOT a source)
 
+> **Owner decision R338, 2026-10-09.** Asked directly whether to adopt every "Proposed" line below as a decision, the owner answered: «اعتمد التوصيات كلها» — adopt all of them. D1–D8 are therefore **DECIDED (owner, R338)** exactly as proposed in the Summary table. The text of each entry is unchanged and kept as the record of the options considered.
+
 > **Status correction — owner R308, 2026-10-04.** This file is **not** a project source and holds **no decisions**.
 > It was written by Claude on 2026-10-04 (R307) as a list of eight open questions, drawn from earlier conflict records (GAP-S1, SC-09, CONF-S01, R302 W2 and W1, R302 §5.1, R304 §3, CONF-S03).
 > No original "S decisions" document has been supplied to Claude. **That source is MISSING SOURCE.**

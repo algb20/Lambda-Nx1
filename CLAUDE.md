@@ -188,8 +188,13 @@ families **extend, never replace** this method. Family roadmap: `docs/GATEWAYS.m
 6. **One engine, many gateways.** Every new capability is a new source/family over the
    *same* engine (guardrail + registry + analysis core) — never a parallel stack. The
    passive-only and legal guardrails (§3) apply to every family, always.
-7. **Preserve the design.** Keep the existing shell and visual language; realize fake as
-   real without redesigning (see §1).
+7. ~~**Preserve the design.** Keep the existing shell and visual language; realize fake as
+   real without redesigning (see §1).~~
+   **Superseded by owner R338 (2026-10-09):** the current design and layout are not
+   accepted. The owner's reference design (dark intelligence dashboard, sidebar navigation,
+   KPI cards, layered map, feed, indicators, watchlist, risks, health, assistant) is applied
+   to every page. Unchanged: every number shown is real or computed and says so; nothing
+   fake is introduced to fill a design slot.
 8. **Beat the field, permanently.**
    - **Ownership:** continuous study of the field is a research-stage duty. Its findings
      reach the code only through the Master and an approved specification (§0, rule 2).
@@ -309,6 +314,12 @@ When two files or two decisions conflict:
 
 Records live in `docs/reconciliation/`: the Contradiction Register in the baseline, and
 `CONTINUITY_M_S.md`.
+
+**R338 (2026-10-09):** the owner adopted the recommendations D1–D8 of `S_DECISION_DOSSIER`
+as decisions and asked for the rest to be built, with keys supplied at the end.
+Master subsystems are implemented from task sheets written against the decided contracts
+(`docs/reconciliation/BUILD_PLAN_R338.md`). Production stays locked (R306) and the
+Publication pause (R294) stands until the owner lifts them.
 
 **Phase state (2026-10-04, R302):**
 - **Operational resumption point: 30.27.8.S — Cross-Contract Consistency / Closure Gate**
