@@ -99,7 +99,57 @@ export class RateLimitedError extends Error {
   }
 }
 
+/**
+ * The longest wait a provider's `Retry-After` can impose on us.
+ *
+ * NASA once answered with roughly five hours (batch 05). A day bounds a
+ * malformed or hostile value without second-guessing any real one.
+ */
+export const MAX_RETRY_AFTER_MS = 24 * 60 * 60 * 1000
+
+/**
+ * Read a `Retry-After` header: delay-seconds or an HTTP-date (RFC 9110 §10.2.3).
+ * Returns the wait in milliseconds from `now`, or null when absent or unreadable.
+ */
+export function retryAfterMs(value: string | null, now: number = Date.now()): number | null {
+  if (!value) return null
+  const v = value.trim()
+  if (/^\d+$/.test(v)) return Math.min(Number(v) * 1000, MAX_RETRY_AFTER_MS)
+  const at = Date.parse(v)
+  if (!Number.isFinite(at)) return null
+  return Math.min(Math.max(at - now, 0), MAX_RETRY_AFTER_MS)
+}
+
+/**
+ * The provider told us when to come back, and that time has not come.
+ *
+ * Not `RateLimitedError`: that one means *we* chose to wait, and the
+ * orchestrator reports it as a healthy source answering from cache. This is the
+ * provider refusing us, so it is reported as a failure — with the provider's
+ * own deadline — while the last good answer is still served.
+ */
+export class ProviderCooldownError extends Error {
+  constructor(
+    readonly sourceKey: string,
+    readonly host: string,
+    readonly untilMs: number,
+  ) {
+    super(`${sourceKey}: ${host} asked us to wait until ${new Date(untilMs).toISOString()} (Retry-After)`)
+    this.name = 'ProviderCooldownError'
+  }
+}
+
 export class Guardrail {
+  /**
+   * Hosts that answered 429 or 503 with `Retry-After`, and when they said we
+   * may return (charter §3: respect rate limits; NEW-05).
+   *
+   * Only the provider's own instruction is honoured — no retry is added. Before
+   * this, a 429 was reported and the next sweep called again at once, however
+   * long the provider had asked us to stay away.
+   */
+  private readonly cooldownUntil = new Map<string, number>()
+
   private readonly allowedHosts = new Set<string>()
   private readonly lastCallAt = new Map<string, number>()
   /**
@@ -163,6 +213,10 @@ export class Guardrail {
        *
        * A host with no entry in the table costs nothing here at all.
        */
+      const host = parsed.hostname.toLowerCase()
+      const until = this.cooldownUntil.get(host) ?? 0
+      if (until > Date.now()) throw new ProviderCooldownError(sourceKey, host, until)
+
       await this.hostBudget.take(parsed.hostname)
 
       /**
@@ -230,7 +284,12 @@ export class Guardrail {
        */
       const deadline = AbortSignal.timeout(REQUEST_TIMEOUT_MS)
       const signal = init?.signal ? AbortSignal.any([init.signal, deadline]) : deadline
-      return fetch(url, { ...init, method, headers, signal })
+      const res = await fetch(url, { ...init, method, headers, signal })
+      if (res.status === 429 || res.status === 503) {
+        const wait = retryAfterMs(res.headers.get('retry-after'))
+        if (wait && wait > 0) this.cooldownUntil.set(host, Date.now() + wait)
+      }
+      return res
     }
   }
 }

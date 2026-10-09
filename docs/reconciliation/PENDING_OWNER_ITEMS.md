@@ -5,7 +5,7 @@
 | **Purpose** | One living list of everything that cannot be finished in the repository: keys, environment variables, decisions, permissions, writes to live systems. Owner R322: «احفظ في قائمة غير المكتمل مثل المفاتيح أو المتغيرات وغيرها». |
 | **Rule** | No secret value is ever written here, in Git, or in any file (owner S2). A key is named; its value goes only into the hosting environment, by the owner. |
 | **Production** | Locked on `9c19303`. No Production environment variable or deploy is changed without a new owner decision (R306). |
-| **Updated** | 2026-10-09 (R330). Each item says where it came from. Close an item by striking it through, with the date and the commit or decision. |
+| **Updated** | 2026-10-09 (R332). Each item says where it came from. Close an item by striking it through, with the date and the commit or decision. |
 
 ## A. Source keys and tokens (environment only)
 
@@ -60,6 +60,7 @@ Listed so none is forgotten. Whether each is set in a given environment is **UNV
 | C9 | Lift the Production pause, when 30.27.8.R is closed | R294, R306 |
 | C10 | EU AI Act Art. 50(4): before publishing resumes, the Publication contract decides whether AI-written text carries the disclosure or passes a recorded human editorial review. Also: is Lambda a "deployer" publishing "to inform the public"? (legal advice). The interface already labels AI text "AI-generated" (batch 20) | R328; `docs/RESEARCH/FIELD_2026-10-08.md` §1 |
 | C11 | Adopt licence-verified fallbacks as new sources: Kystverket open AIS (NLOD, Norway only), Tor metrics/Onionoo (CC0), adsb.lol historical flights (ODbL, share-alike on the database). Each needs a source specification before code | GL-09; batch 22 |
+| C12 | Retry budget (BP §15, NEW-05): may the engine retry a failed call within one run, how often, and with what backoff? The part charter §3 already requires — never calling a host before its `Retry-After` — is built (batch 24); no retry was added | NEW-05; batch 24 |
 
 ## D. Permissions and agreements to request (owner action)
 

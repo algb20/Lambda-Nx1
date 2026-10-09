@@ -10131,7 +10131,7 @@
   "conditions": "Withheld from Lambda (R317): restricted terms withhold the source until permission is granted. Earlier record said CC BY 4.0; the data licence is non-commercial.",
   "evidence_reference": [
    {
-    "quote": "This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License",
+    "quote": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License",
     "url": "https://raw.githubusercontent.com/ooni/license/master/data/LICENSE.md",
     "read_at": "2026-10-08",
     "kind": "quote"
