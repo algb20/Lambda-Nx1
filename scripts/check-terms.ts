@@ -22,7 +22,8 @@ const CONCURRENCY = 6
 const TIMEOUT_MS = 25_000
 const USER_AGENT = `LambdaNX-terms-check/1.0 (+${process.env.ENGINE_CONTACT ?? 'licence review'})`
 
-type Page = { status: number | 'error'; text: string; error?: string }
+/** `binary`: the page answered, but as a PDF or other non-text body we cannot compare. */
+type Page = { status: number | 'error'; text: string; error?: string; binary?: boolean }
 
 async function fetchPage(url: string): Promise<Page> {
   try {
@@ -33,7 +34,9 @@ async function fetchPage(url: string): Promise<Page> {
     })
     const type = res.headers.get('content-type') ?? ''
     // A PDF or other binary licence text cannot be compared as page text.
-    if (res.ok && !/html|text|xml|json/.test(type)) return { status: 'error', text: '', error: `unreadable content-type ${type}` }
+    // It answered, so it is not "unreachable" (batch 25: the IETF TLP PDF was
+    // counted as an outage). It is simply not checkable as text.
+    if (res.ok && !/html|text|xml|json/.test(type)) return { status: res.status, text: '', binary: true, error: `content-type ${type}` }
     const body = await res.text()
     return { status: res.status, text: res.ok ? htmlToText(body) : '' }
   } catch (e) {
@@ -60,7 +63,7 @@ async function main() {
     const quotes = r.evidence_reference.map((e) => {
       const page = pages.get(e.url)
       const state: QuoteState | 'unreachable' =
-        !page ? 'not-checkable' : page.status !== 200 ? 'unreachable' : checkEvidence(page.text, e)
+        !page || page.binary ? 'not-checkable' : page.status !== 200 ? 'unreachable' : checkEvidence(page.text, e)
       return { url: e.url, read_at: e.read_at, state, http: page?.status ?? null }
     })
     const checkable = quotes.filter((q) => q.state !== 'unreachable').map((q) => q.state as QuoteState)
