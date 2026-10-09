@@ -380,7 +380,7 @@ export const REGIONAL_EXTRA_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'B',
     independence: 'rnz',
-    licence: publicFeed('RNZ', 'https://www.rnz.co.nz/about/terms-and-conditions'),
+    licence: needsAgreement('RNZ ("The RSS Feeds must not be used to aggregate content on other websites. They are intended for personal use only.", batch 21)', 'https://www.rnz.co.nz/about/legal'),
     minIntervalSec: 3600,
     keyless: true,
     note: 'Pacific island coverage that is otherwise a near-total blind spot.',

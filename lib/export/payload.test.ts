@@ -83,3 +83,12 @@ describe('toEvidenceList', () => {
     expect(toEvidenceList(atLimit)).toHaveLength(MAX_FINDINGS)
   })
 })
+
+describe('the confirmation date survives the trip to the server (C14)', () => {
+  it('keeps a valid confirmedUnchangedAt and drops an unreadable one', () => {
+    const base = { claim: 'c', sourceKey: 's', retrievedAt: '2026-08-10T09:00:00.000Z', confidence: 'possible' }
+    expect(toEvidence({ ...base, confirmedUnchangedAt: '2026-08-11T10:00:00.000Z' })!.confirmedUnchangedAt).toBe('2026-08-11T10:00:00.000Z')
+    expect(toEvidence({ ...base, confirmedUnchangedAt: 'yesterday' })!.confirmedUnchangedAt).toBeUndefined()
+    expect(toEvidence(base)!.confirmedUnchangedAt).toBeUndefined()
+  })
+})

@@ -226,7 +226,10 @@ export function scoreConfidence(event: FusedEvent, now: number = Date.now()): Co
  */
 export function explain(breakdown: ConfidenceBreakdown): string {
   const parts = [
-    `Confidence ${breakdown.overall}% (${breakdown.grade}).`,
+    // Out of 100, never "%": this is a weighted support score, and a percent
+    // sign reads as a probability (S invariant 14: confidence is never treated
+    // as probability or truth).
+    `Confidence score ${breakdown.overall}/100 (${breakdown.grade}) — how well supported, not how likely.`,
     `Reliability ${breakdown.reliability}, corroboration ${breakdown.corroboration}, freshness ${breakdown.freshness}, completeness ${breakdown.completeness}.`,
     ...breakdown.reasons.map((r) => `· ${r}`),
   ]

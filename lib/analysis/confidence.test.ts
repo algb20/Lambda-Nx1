@@ -175,3 +175,16 @@ describe('determinism', () => {
     )
   })
 })
+
+describe('the score is never written as a probability (S invariant 14)', () => {
+  it('renders the support score out of 100 and says it is not a likelihood', () => {
+    const text = explain({
+      reliability: 80, corroboration: 70, freshness: 85, completeness: 65,
+      overall: 75, grade: 'probable', reasons: [], unknowns: [],
+    })
+    expect(text).toContain('75/100')
+    expect(text).toContain('not how likely')
+    expect(text).not.toMatch(/\d%/)
+  })
+})
+

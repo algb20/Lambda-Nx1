@@ -98,7 +98,7 @@ export const MARKET_SOURCES: CatalogSource[] = [
     coverage: ['CH'],
     admiralty: 'A',
     independence: 'snb',
-    licence: publicFeed('Swiss National Bank', 'https://www.snb.ch/'),
+    licence: nonCommercial('Swiss National Bank (information and data may be used "for non-commercial purposes", batch 21)', 'https://www.snb.ch/en/srv/disclaimer_copyright'),
     minIntervalSec: 3600,
     keyless: true,
   },

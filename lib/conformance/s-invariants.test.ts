@@ -204,6 +204,31 @@ describe('S invariant 4 — every source is in the licence & usage registry (R31
     }
   })
 
+  it('keeps the publishers whose terms were first read in batch 21 withheld (R329)', () => {
+    // Non-commercial or permission-required terms, quoted in each record:
+    // OONI data is CC BY-NC-SA (it had been recorded as CC BY), WTO and BSI
+    // require permission for commercial use, SNB and Canonical allow
+    // non-commercial use only, Red Hat personal or internal business use only,
+    // RNZ forbids aggregating its RSS feeds on other websites.
+    for (const k of ['ooni_measurements', 'wto_news', 'snb_press', 'bsi_germany', 'ubuntu_usn', 'redhat_security', 'rnz_pacific']) {
+      expect(policyOf(k), k).toBe('WITHHOLD')
+      expect(activeSources().some((s) => s.key === k), k).toBe(false)
+    }
+  })
+
+  it('never names a withheld source as a fallback (R330)', () => {
+    // A fallback is what runs when the primary cannot. On 2026-10-09 the RIPE
+    // Atlas record still offered ooni_measurements, withheld the day before
+    // (its data is CC BY-NC-SA 4.0). A fallback that cannot run is a gap
+    // written as if it were cover.
+    const ids = new Set(SOURCE_LICENSE_REGISTRY.map((r) => r.source_id))
+    const named = SOURCE_LICENSE_REGISTRY.flatMap((r) =>
+      r.fallback_sources.map((f) => ({ from: r.source_id, to: f.split(/[\s(]/)[0] })).filter(({ to }) => ids.has(to)),
+    )
+    expect(named.length).toBeGreaterThan(0)
+    expect(named.filter(({ to }) => policyOf(to) === 'WITHHOLD')).toEqual([])
+  })
+
   it('keeps Companies House off until the owner decides on its personal data (R322)', () => {
     // Officers and persons with significant control are private individuals;
     // the OGL excludes personal data. Switching the record on — even by setting

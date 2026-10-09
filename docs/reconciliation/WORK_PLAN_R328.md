@@ -71,6 +71,8 @@ Kept in full in `PENDING_OWNER_ITEMS.md`, and that file is updated in every batc
 
 | Wave | Status |
 |---|---|
-| W1 | Done (batch 20) |
-| W2–W4 | In progress (batch 20) |
-| W5–W8 | Planned |
+| W1–W4 | Done (batch 20) |
+| W5 | Done (batch 21): 12 records decided; ~20 still unreadable, listed |
+| W6 | Done (batch 22): candidates DISCOVERED; owner C11 |
+| W7 | Done (batch 23): invariant matrix refreshed; invariant 14 fixed and tested |
+| W8 | Ongoing |

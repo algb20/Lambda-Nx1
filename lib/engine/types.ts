@@ -116,6 +116,16 @@ export interface Evidence {
    * signals feed can do.
    */
   publishedAt?: string | null
+  /**
+   * When the provider last **confirmed this record unchanged** — a `304 Not
+   * Modified` to a conditional request — without sending it again.
+   *
+   * Kept apart from `retrievedAt` by owner decision C14 (R335): `retrievedAt`
+   * stays the moment we actually received the record, so nothing is dressed as
+   * freshly fetched; this field says how recently the provider vouched that
+   * nothing changed. Absent when the record arrived in a full response.
+   */
+  confirmedUnchangedAt?: string
   admiralty?: Admiralty
   confidence: Confidence
   /** Raw normalized payload, kept for the archive. */

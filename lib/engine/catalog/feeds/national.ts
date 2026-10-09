@@ -493,7 +493,7 @@ export const NATIONAL_SOURCES: CatalogSource[] = [
     coverage: 'global',
     admiralty: 'A',
     independence: 'wto',
-    licence: publicFeed('World Trade Organization', 'https://www.wto.org/english/info_e/cpyrit_e.htm'),
+    licence: needsAgreement('World Trade Organization ("Commercial use of materials from the website requires written permission from the WTO", batch 21)', 'https://www.wto.org/english/info_e/copyrights_permissions_e.htm'),
     minIntervalSec: 7200,
     keyless: true,
   },

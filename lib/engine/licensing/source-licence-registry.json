@@ -2632,11 +2632,11 @@
   "dataset_api": "courtlistener",
   "data_categories": [],
   "jurisdiction": "see provider",
-  "license": "NOT_STATED",
-  "terms_url": null,
-  "commercial_use": "NOT_STATED",
+  "license": "Court opinions: generally public domain (per Free Law Project); CourtListener Terms of Use",
+  "terms_url": "https://www.courtlistener.com/terms/",
+  "commercial_use": "CONDITIONAL",
   "internal_use": "NOT_STATED",
-  "public_display": "NOT_STATED",
+  "public_display": "CONDITIONAL",
   "redistribution": "NOT_STATED",
   "derived_data": "NOT_STATED",
   "caching": "NOT_STATED",
@@ -2644,24 +2644,40 @@
   "attribution": null,
   "rate_limits": null,
   "authentication": "None",
-  "prohibited_uses": [],
+  "prohibited_uses": [
+   "Any FCRA purpose: eligibility for credit, insurance, employment, government benefits or housing (15 U.S.C. § 1681b(a))",
+   "Generating a consumer report (15 U.S.C. § 1681a(d))",
+   "Presenting data as if Free Law Project produced, endorsed or verified an AI-generated analysis of it"
+  ],
   "geographic_restrictions": null,
   "ai_ml_use": "NOT_STATED",
   "training_use": "NOT_STATED",
   "provenance_requirements": "Each finding cites its source URL and retrieval time.",
   "legal_risk": "MEDIUM",
-  "license_status": "UNCLEAR",
-  "basis": "TERMS_NOT_READ",
-  "conditions": null,
+  "license_status": "LEGAL_REVIEW_REQUIRED",
+  "basis": "AMBIGUOUS_TERMS",
+  "conditions": "Runs keyless (no credentials, so the credentials clause does not bite). Two conditions reach Lambda's users, not only Lambda: no FCRA use of anything derived from CourtListener, and no presentation implying Free Law Project verified AI analysis (the AI-generated label of batch 20 keeps the line). Whether Lambda's own terms must pass the FCRA restriction on to users is owner decision C13.",
   "evidence_reference": [
    {
-    "quote": "courtlistener.com/terms answers 403 to both readers (2026-10-04, 2026-10-05).",
-    "url": "",
-    "read_at": "2026-10-04",
-    "kind": "observation"
+    "quote": "judicial opinions, motions, and other filings are generally in the public domain",
+    "url": "https://www.courtlistener.com/terms/",
+    "read_at": "2026-10-09",
+    "kind": "quote"
+   },
+   {
+    "quote": "you agree that you will not use Courtlistener.com and any information derived therefrom: (1) as a factor in establishing an individual's eligibility for credit, insurance, employment, government benefits, housing, or any other FCRA purpose",
+    "url": "https://www.courtlistener.com/terms/",
+    "read_at": "2026-10-09",
+    "kind": "quote"
+   },
+   {
+    "quote": "If you republish or display our data, do not present it in a way that suggests Free Law Project produced, endorsed, or verified an AI-generated analysis of it.",
+    "url": "https://www.courtlistener.com/terms/",
+    "read_at": "2026-10-09",
+    "kind": "quote"
    }
   ],
-  "checked_at": "2026-10-05",
+  "checked_at": "2026-10-09",
   "fallback_sources": []
  },
  {
@@ -8434,16 +8450,16 @@
    "weather"
   ],
   "jurisdiction": "global",
-  "license": "Creative Commons Attribution 4.0",
-  "terms_url": "https://nsidc.org/about/data-use-and-copyright",
-  "commercial_use": "NOT_STATED",
-  "internal_use": "NOT_STATED",
-  "public_display": "NOT_STATED",
-  "redistribution": "NOT_STATED",
+  "license": "NSIDC Citation Policies (use with credit)",
+  "terms_url": "https://nsidc.org/ru/node/46234",
+  "commercial_use": "CONDITIONAL",
+  "internal_use": "YES",
+  "public_display": "CONDITIONAL",
+  "redistribution": "CONDITIONAL",
   "derived_data": "NOT_STATED",
   "caching": "NOT_STATED",
   "retention": "Not stated by the provider; Lambda keeps findings per its own retention rules.",
-  "attribution": null,
+  "attribution": "National Snow and Ice Data Center",
   "rate_limits": "Engine spacing 21600 s; provider limit not stated",
   "authentication": "None",
   "prohibited_uses": [],
@@ -8451,19 +8467,19 @@
   "ai_ml_use": "NOT_STATED",
   "training_use": "NOT_STATED",
   "provenance_requirements": "Each finding cites its source URL and retrieval time.",
-  "legal_risk": "MEDIUM",
-  "license_status": "UNCLEAR",
-  "basis": "AMBIGUOUS_TERMS",
-  "conditions": "Kept running under review: NSIDC states terms for data and imagery, not for the text of its news posts.",
+  "legal_risk": "LOW",
+  "license_status": "VERIFIED_CONDITIONAL",
+  "basis": "EXPRESS_GRANT",
+  "conditions": "Credit the National Snow and Ice Data Center; items whose own page states a limitation are excluded by that statement. The grant is general, not commercial-specific; the photographs clause separately allows commercial use but forbids re-selling.",
   "evidence_reference": [
    {
-    "quote": "Unless otherwise specified, you may use our photographs and imagery for commercial purposes; however, you may not re-sell them.",
-    "url": "https://nsidc.org/about/data-use-and-copyright",
-    "read_at": "2026-10-05",
+    "quote": "You may download and use photographs, imagery, or text from our web site, unless limitations for its use are specifically stated. Please credit the National Snow and Ice Data Center",
+    "url": "https://nsidc.org/ru/node/46234",
+    "read_at": "2026-10-08",
     "kind": "quote"
    }
   ],
-  "checked_at": "2026-10-05",
+  "checked_at": "2026-10-08",
   "fallback_sources": []
  },
  {
@@ -8617,16 +8633,16 @@
    "connectivity"
   ],
   "jurisdiction": "global",
-  "license": "IETF Trust public feed (headline, summary and link)",
+  "license": "IETF Trust Legal Provisions 5.0 (TLP §3.c)",
   "terms_url": "https://trustee.ietf.org/documents/trust-legal-provisions/",
-  "commercial_use": "NOT_STATED",
-  "internal_use": "NOT_STATED",
-  "public_display": "NOT_STATED",
-  "redistribution": "NOT_STATED",
-  "derived_data": "NOT_STATED",
+  "commercial_use": "YES",
+  "internal_use": "YES",
+  "public_display": "CONDITIONAL",
+  "redistribution": "CONDITIONAL",
+  "derived_data": "NO",
   "caching": "NOT_STATED",
   "retention": "Not stated by the provider; Lambda keeps findings per its own retention rules.",
-  "attribution": null,
+  "attribution": "IETF — RFC text, unmodified (IETF Trust Legal Provisions)",
   "rate_limits": "Engine spacing 86400 s; provider limit not stated",
   "authentication": "None",
   "prohibited_uses": [],
@@ -8634,19 +8650,19 @@
   "ai_ml_use": "NOT_STATED",
   "training_use": "NOT_STATED",
   "provenance_requirements": "Each finding cites its source URL and retrieval time.",
-  "legal_risk": "MEDIUM",
-  "license_status": "UNCLEAR",
-  "basis": "TERMS_NOT_READ",
-  "conditions": "Kept running under review (R317): no licence could be read, and the source is not withdrawn for that alone. Headline, summary and link only.",
+  "legal_risk": "LOW",
+  "license_status": "VERIFIED_CONDITIONAL",
+  "basis": "EXPRESS_GRANT",
+  "conditions": "Portions are shown unmodified, attributed to the IETF and identifying the RFC (each item names its RFC and links it). Legends are required if more than one-fifth of an RFC is reproduced, which Lambda never does. No licence to modify (TLP §3.d).",
   "evidence_reference": [
    {
-    "quote": "The governing Trust Legal Provisions are a PDF linked from this page and were not read on 2026-10-05.",
-    "url": "https://trustee.ietf.org/documents/trust-legal-provisions/",
-    "read_at": "2026-10-05",
-    "kind": "observation"
+    "quote": "to copy, publish, display and distribute unmodified portions of IETF Contributions and IETF Documents and translations thereof, provided that: (x) each such portion is clearly attributed to IETF and identifies the RFC or other IETF Document or IETF Contribution from which it is taken",
+    "url": "https://trustee.ietf.org/wp-content/uploads/Corrected-TLP-5.0-legal-provsions.pdf",
+    "read_at": "2026-10-08",
+    "kind": "quote"
    }
   ],
-  "checked_at": "2026-10-05",
+  "checked_at": "2026-10-08",
   "fallback_sources": []
  },
  {
@@ -9791,8 +9807,8 @@
   ],
   "jurisdiction": "global",
   "license": "World Trade Organization public feed (headline, summary and link)",
-  "terms_url": "https://www.wto.org/english/info_e/disclaimer_e.htm",
-  "commercial_use": "NOT_STATED",
+  "terms_url": "https://www.wto.org/english/info_e/copyrights_permissions_e.htm",
+  "commercial_use": "NO",
   "internal_use": "NOT_STATED",
   "public_display": "NOT_STATED",
   "redistribution": "NOT_STATED",
@@ -9807,19 +9823,19 @@
   "ai_ml_use": "NOT_STATED",
   "training_use": "NOT_STATED",
   "provenance_requirements": "Each finding cites its source URL and retrieval time.",
-  "legal_risk": "MEDIUM",
-  "license_status": "UNCLEAR",
-  "basis": "TERMS_NOT_READ",
-  "conditions": "Kept running under review (R317): no licence could be read, and the source is not withdrawn for that alone. Headline, summary and link only.",
+  "legal_risk": "HIGH",
+  "license_status": "RESTRICTED",
+  "basis": "EXPRESS_RESTRICTION",
+  "conditions": "Withheld from Lambda (R317): restricted terms withhold the source until permission is granted. Permission by e-mail to the WTO — owner item D11.",
   "evidence_reference": [
    {
-    "quote": "WTO copyright page redirects to a 404; the disclaimer gives no reuse terms (2026-10-05).",
-    "url": "https://www.wto.org/english/info_e/disclaimer_e.htm",
-    "read_at": "2026-10-05",
-    "kind": "observation"
+    "quote": "Commercial use of materials from the website requires written permission from the WTO.",
+    "url": "https://www.wto.org/english/info_e/copyrights_permissions_e.htm",
+    "read_at": "2026-10-08",
+    "kind": "quote"
    }
   ],
-  "checked_at": "2026-10-05",
+  "checked_at": "2026-10-08",
   "fallback_sources": []
  },
  {
@@ -9833,16 +9849,16 @@
    "energy"
   ],
   "jurisdiction": "GB",
-  "license": "Creative Commons Attribution 4.0",
+  "license": "CC BY 4.0",
   "terms_url": "https://carbonintensity.org.uk/",
-  "commercial_use": "NOT_STATED",
-  "internal_use": "NOT_STATED",
-  "public_display": "NOT_STATED",
-  "redistribution": "NOT_STATED",
-  "derived_data": "NOT_STATED",
+  "commercial_use": "YES",
+  "internal_use": "YES",
+  "public_display": "CONDITIONAL",
+  "redistribution": "CONDITIONAL",
+  "derived_data": "CONDITIONAL",
   "caching": "NOT_STATED",
   "retention": "Not stated by the provider; Lambda keeps findings per its own retention rules.",
-  "attribution": null,
+  "attribution": "Carbon Intensity API — National Energy System Operator (NESO), CC BY 4.0",
   "rate_limits": "Engine spacing 1800 s; provider limit not stated",
   "authentication": "None",
   "prohibited_uses": [],
@@ -9850,19 +9866,25 @@
   "ai_ml_use": "NOT_STATED",
   "training_use": "NOT_STATED",
   "provenance_requirements": "Each finding cites its source URL and retrieval time.",
-  "legal_risk": "MEDIUM",
-  "license_status": "UNCLEAR",
-  "basis": "TERMS_NOT_READ",
-  "conditions": "Kept running under review (R317): no licence could be read, and the source is not withdrawn for that alone. Headline, summary and link only.",
+  "legal_risk": "LOW",
+  "license_status": "VERIFIED_CONDITIONAL",
+  "basis": "EXPRESS_GRANT",
+  "conditions": "CC BY 4.0 attribution. The site also links separate Terms of Use (terms.carbonintensity.org.uk), which did not answer on 2026-10-08 and remain unread; re-read when reachable.",
   "evidence_reference": [
    {
-    "quote": "The API site links a Terms page that answered 403 on 2026-10-05.",
+    "quote": "Our API is licensed under the CC BY 4.0 license.",
     "url": "https://carbonintensity.org.uk/",
-    "read_at": "2026-10-05",
+    "read_at": "2026-10-08",
+    "kind": "quote"
+   },
+   {
+    "quote": "terms.carbonintensity.org.uk did not answer on 2026-10-08 (batch 21).",
+    "url": "https://carbonintensity.org.uk/",
+    "read_at": "2026-10-08",
     "kind": "observation"
    }
   ],
-  "checked_at": "2026-10-05",
+  "checked_at": "2026-10-08",
   "fallback_sources": []
  },
  {
@@ -10043,8 +10065,7 @@
   ],
   "checked_at": "2026-10-05",
   "fallback_sources": [
-   "M-Lab measurement data (CC0 — verified 2026-10-05; served through BigQuery, not a keyless HTTP API)",
-   "ooni_measurements (under review)"
+   "M-Lab measurement data (CC0 — verified 2026-10-05; served through BigQuery, not a keyless HTTP API)"
   ]
  },
  {
@@ -10103,16 +10124,16 @@
    "connectivity"
   ],
   "jurisdiction": "global",
-  "license": "Creative Commons Attribution 4.0",
-  "terms_url": "https://ooni.org/about/data-policy/",
-  "commercial_use": "NOT_STATED",
+  "license": "CC BY-NC-SA 4.0",
+  "terms_url": "https://github.com/ooni/license/blob/master/data/LICENSE.md",
+  "commercial_use": "NO",
   "internal_use": "NOT_STATED",
-  "public_display": "NOT_STATED",
-  "redistribution": "NOT_STATED",
-  "derived_data": "NOT_STATED",
+  "public_display": "CONDITIONAL",
+  "redistribution": "CONDITIONAL",
+  "derived_data": "CONDITIONAL",
   "caching": "NOT_STATED",
   "retention": "Not stated by the provider; Lambda keeps findings per its own retention rules.",
-  "attribution": null,
+  "attribution": "OONI",
   "rate_limits": "Engine spacing 3600 s; provider limit not stated",
   "authentication": "None",
   "prohibited_uses": [],
@@ -10120,19 +10141,19 @@
   "ai_ml_use": "NOT_STATED",
   "training_use": "NOT_STATED",
   "provenance_requirements": "Each finding cites its source URL and retrieval time.",
-  "legal_risk": "MEDIUM",
-  "license_status": "UNCLEAR",
-  "basis": "AMBIGUOUS_TERMS",
-  "conditions": "Kept running under review: OONI states \"a Creative Commons license\" without naming which one on the pages read; the licence page linked as \"Data License\" was not reachable.",
+  "legal_risk": "HIGH",
+  "license_status": "RESTRICTED",
+  "basis": "EXPRESS_RESTRICTION",
+  "conditions": "Withheld from Lambda (R317): restricted terms withhold the source until permission is granted. Earlier record said CC BY 4.0; the data licence is non-commercial.",
   "evidence_reference": [
    {
-    "quote": "© 2026 Open Observatory of Network Interference (OONI). Content available under a Creative Commons license.",
-    "url": "https://ooni.org/about/data-policy/",
-    "read_at": "2026-10-05",
+    "quote": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License",
+    "url": "https://raw.githubusercontent.com/ooni/license/master/data/LICENSE.md",
+    "read_at": "2026-10-08",
     "kind": "quote"
    }
   ],
-  "checked_at": "2026-10-05",
+  "checked_at": "2026-10-08",
   "fallback_sources": []
  },
  {
@@ -10289,8 +10310,8 @@
   ],
   "jurisdiction": "CH",
   "license": "Swiss National Bank public feed (headline, summary and link)",
-  "terms_url": "https://www.snb.ch/en/",
-  "commercial_use": "NOT_STATED",
+  "terms_url": "https://www.snb.ch/en/srv/disclaimer_copyright",
+  "commercial_use": "NO",
   "internal_use": "NOT_STATED",
   "public_display": "NOT_STATED",
   "redistribution": "NOT_STATED",
@@ -10305,19 +10326,19 @@
   "ai_ml_use": "NOT_STATED",
   "training_use": "NOT_STATED",
   "provenance_requirements": "Each finding cites its source URL and retrieval time.",
-  "legal_risk": "MEDIUM",
-  "license_status": "UNCLEAR",
-  "basis": "TERMS_NOT_READ",
-  "conditions": "Kept running under review (R317): no licence could be read, and the source is not withdrawn for that alone. Headline, summary and link only.",
+  "legal_risk": "HIGH",
+  "license_status": "RESTRICTED",
+  "basis": "EXPRESS_RESTRICTION",
+  "conditions": "Withheld from Lambda (R317): restricted terms withhold the source until permission is granted.",
   "evidence_reference": [
    {
-    "quote": "SNB copyright page not found at the linked paths (404, 2026-10-05).",
-    "url": "https://www.snb.ch/en/",
-    "read_at": "2026-10-05",
-    "kind": "observation"
+    "quote": "Such information and data may be saved, translated (with reference to the source), transmitted or used in other ways, for non-commercial purposes",
+    "url": "https://www.snb.ch/en/srv/disclaimer_copyright",
+    "read_at": "2026-10-08",
+    "kind": "quote"
    }
   ],
-  "checked_at": "2026-10-05",
+  "checked_at": "2026-10-08",
   "fallback_sources": []
  },
  {
@@ -11635,16 +11656,16 @@
    "cyber-advisory"
   ],
   "jurisdiction": "global",
-  "license": "JPCERT/CC public feed (headline, summary and link)",
-  "terms_url": "https://www.jpcert.or.jp/",
-  "commercial_use": "NOT_STATED",
-  "internal_use": "NOT_STATED",
-  "public_display": "NOT_STATED",
-  "redistribution": "NOT_STATED",
+  "license": "JPCERT/CC website usage notes (quotation free with source)",
+  "terms_url": "https://www.jpcert.or.jp/guide.html",
+  "commercial_use": "CONDITIONAL",
+  "internal_use": "YES",
+  "public_display": "CONDITIONAL",
+  "redistribution": "CONDITIONAL",
   "derived_data": "NOT_STATED",
   "caching": "NOT_STATED",
   "retention": "Not stated by the provider; Lambda keeps findings per its own retention rules.",
-  "attribution": null,
+  "attribution": "JPCERT/CC",
   "rate_limits": "Engine spacing 3600 s; provider limit not stated",
   "authentication": "None",
   "prohibited_uses": [],
@@ -11652,19 +11673,19 @@
   "ai_ml_use": "NOT_STATED",
   "training_use": "NOT_STATED",
   "provenance_requirements": "Each finding cites its source URL and retrieval time.",
-  "legal_risk": "MEDIUM",
-  "license_status": "UNCLEAR",
-  "basis": "TERMS_NOT_READ",
-  "conditions": "Kept running under review (R317): no licence could be read, and the source is not withdrawn for that alone. Headline, summary and link only.",
+  "legal_risk": "LOW",
+  "license_status": "VERIFIED_CONDITIONAL",
+  "basis": "EXPRESS_GRANT",
+  "conditions": "Quotation is free when the source name, document title and URL are shown (every finding shows title and link; the credit names JPCERT/CC). JPCERT asks, as a request, to be told by email (office@jpcert.or.jp) where its documents are quoted — owner item D10. Reprinting or redistribution (転載・再配布) requires contacting JPCERT and is not done.",
   "evidence_reference": [
    {
-    "quote": "JPCERT/CC copyright pages answered 404 on 2026-10-05.",
-    "url": "https://www.jpcert.or.jp/",
-    "read_at": "2026-10-05",
-    "kind": "observation"
+    "quote": "本ウェブサイトで公開している文書の引用は自由に行っていただけます。引用に際しては、引用元名、資料名、URLを明示していただけるようお願いします。",
+    "url": "https://www.jpcert.or.jp/guide.html",
+    "read_at": "2026-10-08",
+    "kind": "quote"
    }
   ],
-  "checked_at": "2026-10-05",
+  "checked_at": "2026-10-08",
   "fallback_sources": []
  },
  {
@@ -11725,7 +11746,7 @@
   "jurisdiction": "global",
   "license": "CERT-Bund / BSI public feed (headline, summary and link)",
   "terms_url": "https://www.bsi.bund.de/DE/Service/Nutzungsbedingungen/Nutzungsbedingungen_node.html",
-  "commercial_use": "NOT_STATED",
+  "commercial_use": "NO",
   "internal_use": "NOT_STATED",
   "public_display": "NOT_STATED",
   "redistribution": "NOT_STATED",
@@ -11740,19 +11761,19 @@
   "ai_ml_use": "NOT_STATED",
   "training_use": "NOT_STATED",
   "provenance_requirements": "Each finding cites its source URL and retrieval time.",
-  "legal_risk": "MEDIUM",
-  "license_status": "UNCLEAR",
-  "basis": "TERMS_NOT_READ",
-  "conditions": "Kept running under review (R317): no licence could be read, and the source is not withdrawn for that alone. Headline, summary and link only.",
+  "legal_risk": "HIGH",
+  "license_status": "RESTRICTED",
+  "basis": "EXPRESS_RESTRICTION",
+  "conditions": "Withheld from Lambda (R317): restricted terms withhold the source until permission is granted. The terms also allow verbatim quotation with a source reference (§III Zitation); whether a commercial feed of advisory headlines is a quotation is a legal question, so the stricter reading applies. Agreement request — owner item D12.",
   "evidence_reference": [
    {
-    "quote": "The BSI Nutzungsbedingungen page loaded but its body text was not extractable on 2026-10-05.",
+    "quote": "Eine kommerzielle Verwendung von Inhalten, insbesondere denen des IT -Grundschutzes, bedarf einer lizenzrechtlichen Vereinbarung mit dem BSI .",
     "url": "https://www.bsi.bund.de/DE/Service/Nutzungsbedingungen/Nutzungsbedingungen_node.html",
-    "read_at": "2026-10-05",
-    "kind": "observation"
+    "read_at": "2026-10-08",
+    "kind": "quote"
    }
   ],
-  "checked_at": "2026-10-05",
+  "checked_at": "2026-10-08",
   "fallback_sources": []
  },
  {
@@ -11914,8 +11935,8 @@
   ],
   "jurisdiction": "global",
   "license": "Canonical public feed (headline, summary and link)",
-  "terms_url": "https://ubuntu.com/legal",
-  "commercial_use": "NOT_STATED",
+  "terms_url": "https://ubuntu.com/legal/terms",
+  "commercial_use": "NO",
   "internal_use": "NOT_STATED",
   "public_display": "NOT_STATED",
   "redistribution": "NOT_STATED",
@@ -11930,19 +11951,19 @@
   "ai_ml_use": "NOT_STATED",
   "training_use": "NOT_STATED",
   "provenance_requirements": "Each finding cites its source URL and retrieval time.",
-  "legal_risk": "MEDIUM",
-  "license_status": "UNCLEAR",
-  "basis": "TERMS_NOT_READ",
-  "conditions": "Kept running under review (R317): no licence could be read, and the source is not withdrawn for that alone. Headline, summary and link only.",
+  "legal_risk": "HIGH",
+  "license_status": "RESTRICTED",
+  "basis": "EXPRESS_RESTRICTION",
+  "conditions": "Withheld from Lambda (R317): restricted terms withhold the source until permission is granted. Ubuntu advisories remain reachable through OSV (CC BY-SA 4.0) via osv_dev.",
   "evidence_reference": [
    {
-    "quote": "Canonical legal pages read on 2026-10-05 showed only navigation text. (Ubuntu advisories are CC BY-SA 4.0 in OSV — a verified alternative path via osv_dev.)",
-    "url": "https://ubuntu.com/legal",
-    "read_at": "2026-10-05",
-    "kind": "observation"
+    "quote": "You are welcome to display on your computer, download and print pages from this website for personal, education and non-commercial use only.",
+    "url": "https://ubuntu.com/legal/terms",
+    "read_at": "2026-10-08",
+    "kind": "quote"
    }
   ],
-  "checked_at": "2026-10-05",
+  "checked_at": "2026-10-08",
   "fallback_sources": []
  },
  {
@@ -11958,7 +11979,7 @@
   "jurisdiction": "global",
   "license": "Red Hat public feed (headline, summary and link)",
   "terms_url": "https://www.redhat.com/en/about/terms-use",
-  "commercial_use": "NOT_STATED",
+  "commercial_use": "NO",
   "internal_use": "NOT_STATED",
   "public_display": "NOT_STATED",
   "redistribution": "NOT_STATED",
@@ -11973,19 +11994,19 @@
   "ai_ml_use": "NOT_STATED",
   "training_use": "NOT_STATED",
   "provenance_requirements": "Each finding cites its source URL and retrieval time.",
-  "legal_risk": "MEDIUM",
-  "license_status": "UNCLEAR",
-  "basis": "TERMS_NOT_READ",
-  "conditions": "Kept running under review (R317): no licence could be read, and the source is not withdrawn for that alone. Headline, summary and link only.",
+  "legal_risk": "HIGH",
+  "license_status": "RESTRICTED",
+  "basis": "EXPRESS_RESTRICTION",
+  "conditions": "Withheld from Lambda (R317): restricted terms withhold the source until permission is granted. DISCOVERED alternative: Red Hat security data (CSAF/VEX, RHSA feed) is published under CC BY 4.0 at access.redhat.com/security/data — adopting it is a source decision.",
   "evidence_reference": [
    {
-    "quote": "The redhat.com terms give no licence for blog content. DISCOVERED: Red Hat security data, including an RHSA RSS feed, is CC BY 4.0 (access.redhat.com/security/data) — a verified licence for a different feed; adopting it is a source decision.",
+    "quote": "Red Hat hereby grants you a copyright license to copy such material for your own personal or internal business purposes.",
     "url": "https://www.redhat.com/en/about/terms-use",
-    "read_at": "2026-10-05",
-    "kind": "observation"
+    "read_at": "2026-10-08",
+    "kind": "quote"
    }
   ],
-  "checked_at": "2026-10-05",
+  "checked_at": "2026-10-08",
   "fallback_sources": []
  },
  {
@@ -12194,7 +12215,7 @@
   "provenance_requirements": "Each finding cites its source URL and retrieval time.",
   "legal_risk": "MEDIUM",
   "license_status": "UNCLEAR",
-  "basis": "TERMS_NOT_READ",
+  "basis": "AMBIGUOUS_TERMS",
   "conditions": "Kept running under review (R317): no licence could be read, and the source is not withdrawn for that alone. Headline, summary and link only. R322: feed moved from googleprojectzero.blogspot.com (now a redirect) to projectzero.google/feed.xml; old URL kept in formerUrls.",
   "evidence_reference": [
    {
@@ -12202,9 +12223,15 @@
     "url": "https://projectzero.google/",
     "read_at": "2026-10-05",
     "kind": "observation"
+   },
+   {
+    "quote": "Google Terms of Service (effective July 30, 2026): \"You may use Google’s content as allowed by these terms and any service-specific additional terms, but we retain any intellectual property rights that we have in our content.\" No grant covers republishing blog posts.",
+    "url": "https://policies.google.com/terms",
+    "read_at": "2026-10-08",
+    "kind": "paraphrase"
    }
   ],
-  "checked_at": "2026-10-05",
+  "checked_at": "2026-10-08",
   "fallback_sources": []
  },
  {
@@ -14526,35 +14553,37 @@
   ],
   "jurisdiction": "global",
   "license": "RNZ public feed (headline, summary and link)",
-  "terms_url": "https://www.rnz.co.nz/",
-  "commercial_use": "NOT_STATED",
+  "terms_url": "https://www.rnz.co.nz/about/legal",
+  "commercial_use": "NO",
   "internal_use": "NOT_STATED",
-  "public_display": "NOT_STATED",
-  "redistribution": "NOT_STATED",
+  "public_display": "NO",
+  "redistribution": "NO",
   "derived_data": "NOT_STATED",
   "caching": "NOT_STATED",
   "retention": "Not stated by the provider; Lambda keeps findings per its own retention rules.",
   "attribution": null,
   "rate_limits": "Engine spacing 3600 s; provider limit not stated",
   "authentication": "None",
-  "prohibited_uses": [],
+  "prohibited_uses": [
+   "Aggregating RSS content on other websites"
+  ],
   "geographic_restrictions": null,
   "ai_ml_use": "NOT_STATED",
   "training_use": "NOT_STATED",
   "provenance_requirements": "Each finding cites its source URL and retrieval time.",
-  "legal_risk": "MEDIUM",
-  "license_status": "UNCLEAR",
-  "basis": "TERMS_NOT_READ",
-  "conditions": "Kept running under review (R317): no licence could be read, and the source is not withdrawn for that alone. Headline, summary and link only.",
+  "legal_risk": "HIGH",
+  "license_status": "PROHIBITED",
+  "basis": "EXPRESS_RESTRICTION",
+  "conditions": "The terms forbid using RNZ RSS feeds to aggregate content on other websites; withheld. Express permission from RNZ would be needed — owner item D13.",
   "evidence_reference": [
    {
-    "quote": "RNZ terms paths answered 404 on 2026-10-05.",
-    "url": "https://www.rnz.co.nz/",
-    "read_at": "2026-10-05",
-    "kind": "observation"
+    "quote": "The RSS Feeds must not be used to aggregate content on other websites. They are intended for personal use only.",
+    "url": "https://www.rnz.co.nz/about/legal",
+    "read_at": "2026-10-08",
+    "kind": "quote"
    }
   ],
-  "checked_at": "2026-10-05",
+  "checked_at": "2026-10-08",
   "fallback_sources": []
  },
  {

@@ -46,6 +46,11 @@ export function toEvidence(raw: unknown): Evidence | null {
   const retrievedAt = str(r.retrievedAt, 40)
   const when = Number.isFinite(Date.parse(retrievedAt)) ? retrievedAt : new Date().toISOString()
 
+  // Unlike retrievedAt, never filled in: a confirmation we cannot read did not
+  // happen, as far as the document is concerned (C14).
+  const confirmed = str(r.confirmedUnchangedAt, 40)
+  const confirmedUnchangedAt = Number.isFinite(Date.parse(confirmed)) ? confirmed : undefined
+
   return {
     claim,
     sourceKey,
@@ -54,6 +59,7 @@ export function toEvidence(raw: unknown): Evidence | null {
     confidence: str(r.confidence, 20) || 'unconfirmed',
     ...(entity?.value ? { entity } : {}),
     ...(admiralty ? { admiralty } : {}),
+    ...(confirmedUnchangedAt ? { confirmedUnchangedAt } : {}),
   } as Evidence
 }
 

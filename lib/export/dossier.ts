@@ -65,6 +65,12 @@ export interface Reference {
   /** How many findings cite it. */
   findings: number
   /**
+   * The latest time the provider confirmed this source's records unchanged
+   * (HTTP 304), or null. Retrieval stays the earliest time we actually received
+   * them; this says how recently they were vouched for (owner decision C14).
+   */
+  confirmedUnchangedAt: string | null
+  /**
    * The credit the source's licence requires, carried into every copy (CC BY
    * and OGL ask for it wherever the material is redistributed — an export is
    * exactly that). Null when the source asks for none. (BC-8, R324)
@@ -81,6 +87,8 @@ export interface DossierFinding {
   /** Citation number into `references`. */
   reference: number
   retrievedAt: string
+  /** When the provider last confirmed it unchanged (C14), or null. */
+  confirmedUnchangedAt: string | null
   /** e.g. "A2", or null when the source carried no rating. */
   admiralty: string | null
   confidence: string
@@ -145,6 +153,7 @@ export function buildDossier(input: DossierInput): Dossier {
         url,
         retrievedAt: e.retrievedAt,
         findings: 0,
+        confirmedUnchangedAt: null,
         credit: credit?.credit ?? null,
         licence: text ? { label: text.label, url: text.url } : null,
       }
@@ -153,6 +162,10 @@ export function buildDossier(input: DossierInput): Dossier {
     ref.findings += 1
     // Cite the earliest retrieval, which is when the claim was actually seen.
     if (e.retrievedAt < ref.retrievedAt) ref.retrievedAt = e.retrievedAt
+    // …and the latest confirmation that it still stands.
+    if (e.confirmedUnchangedAt && (!ref.confirmedUnchangedAt || e.confirmedUnchangedAt > ref.confirmedUnchangedAt)) {
+      ref.confirmedUnchangedAt = e.confirmedUnchangedAt
+    }
 
     findings.push({
       claim: e.claim,
@@ -160,6 +173,7 @@ export function buildDossier(input: DossierInput): Dossier {
       sourceKey: e.sourceKey,
       reference: ref.n,
       retrievedAt: e.retrievedAt,
+      confirmedUnchangedAt: e.confirmedUnchangedAt ?? null,
       admiralty: admiraltyOf(e),
       confidence: e.confidence,
     })
@@ -229,6 +243,7 @@ const CSV_COLUMNS = [
   'confidence',
   'credit',
   'licence',
+  'confirmed_unchanged_at',
 ] as const
 
 export function toCsv(d: Dossier): string {
@@ -248,6 +263,7 @@ export function toCsv(d: Dossier): string {
         f.confidence,
         refOf(f.reference)?.credit ?? '',
         refOf(f.reference)?.licence?.label ?? '',
+        f.confirmedUnchangedAt ?? '',
       ]
         .map(csvCell)
         .join(','),
@@ -277,6 +293,7 @@ export function toCitations(d: Dossier): string {
     const parts = [`[${r.n}] ${r.sourceKey}.`, `"${d.subject}" (${d.kind}).`]
     if (r.url) parts.push(r.url)
     parts.push(`Retrieved ${isoDay(r.retrievedAt)}.`)
+    if (r.confirmedUnchangedAt) parts.push(`Confirmed unchanged ${isoDay(r.confirmedUnchangedAt)}.`)
     return parts.join(' ')
   })
   return [
@@ -364,7 +381,9 @@ export function toMarkdown(d: Dossier): string {
       (r) =>
         `${r.n}. **${r.credit ? `${mdCell(r.credit)}** (\`${r.sourceKey}\`)` : `${r.sourceKey}**`} — ${
           r.url ? `<${r.url}>` : 'no public URL'
-        } — retrieved ${isoDay(r.retrievedAt)} (${r.findings} finding${r.findings === 1 ? '' : 's'})${
+        } — retrieved ${isoDay(r.retrievedAt)}${
+          r.confirmedUnchangedAt ? `, confirmed unchanged ${isoDay(r.confirmedUnchangedAt)}` : ''
+        } (${r.findings} finding${r.findings === 1 ? '' : 's'})${
           r.licence ? ` — licence: [${r.licence.label}](${r.licence.url})` : ''
         }`,
     ),
@@ -511,7 +530,9 @@ ${d.references
     (r) =>
       `  <li><strong>${e(r.credit ?? r.sourceKey)}</strong>${r.credit ? ` <span class="muted">(${e(r.sourceKey)})</span>` : ''} — ${link(
         r.url,
-      )} — retrieved ${e(isoDay(r.retrievedAt))} <span class="muted">(${r.findings} finding${r.findings === 1 ? '' : 's'})</span>${
+      )} — retrieved ${e(isoDay(r.retrievedAt))}${
+        r.confirmedUnchangedAt ? `, confirmed unchanged ${e(isoDay(r.confirmedUnchangedAt))}` : ''
+      } <span class="muted">(${r.findings} finding${r.findings === 1 ? '' : 's'})</span>${
         r.licence ? ` — licence: ${link(r.licence.url, r.licence.label)}` : ''
       }</li>`,
   )
