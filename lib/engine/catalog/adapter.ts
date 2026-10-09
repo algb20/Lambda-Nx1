@@ -373,6 +373,33 @@ export function requestUrl(entry: CatalogSource, now: Date): string {
   }
 }
 
+/**
+ * Validators from each feed's last full answer, with what it held (C14).
+ *
+ * Measured 2026-10-09: 48 of 118 active feeds answer `304 Not Modified` to a
+ * conditional request, and those carry about 70 % of the bytes of a full pass
+ * (`docs/RESEARCH/CONDITIONAL_GET_2026-10-09.md`). Asking "has it changed?"
+ * costs the publisher a header instead of a feed, which is the courtesy the
+ * charter asks of a passive reader.
+ *
+ * Module scope, like the source cache: a container that keeps nothing between
+ * invocations simply makes a full request, which is the behaviour before this.
+ * Keyed by source and remembered with the exact URL, so a feed whose address
+ * moves with the clock (`urlFor`) never reuses validators from another query.
+ */
+interface Revalidation {
+  url: string
+  etag: string | null
+  lastModified: string | null
+  evidence: Evidence[]
+}
+const VALIDATORS = new Map<string, Revalidation>()
+
+/** Forget every validator. Tests only. */
+export function resetValidators(): void {
+  VALIDATORS.clear()
+}
+
 export function catalogSource(entry: CatalogSource): Source {
   return {
     key: entry.key,
@@ -387,8 +414,15 @@ export function catalogSource(entry: CatalogSource): Source {
     minIntervalMs: entry.minIntervalSec * 1000,
 
     async run(_input, ctx: SourceContext): Promise<Evidence[]> {
-      const res = await ctx.fetch(requestUrl(entry, new Date()), {
+      const url = requestUrl(entry, new Date())
+      const prior = VALIDATORS.get(entry.key)
+      const known = prior && prior.url === url ? prior : null
+      const conditional: Record<string, string> = {}
+      if (known?.etag) conditional['If-None-Match'] = known.etag
+      if (known?.lastModified) conditional['If-Modified-Since'] = known.lastModified
+      const res = await ctx.fetch(url, {
         headers: {
+          ...conditional,
           /**
            * Named honestly with a contact route. Providers block anonymous
            * scrapers and they are right to; a source that will not say who it
@@ -412,9 +446,19 @@ export function catalogSource(entry: CatalogSource): Source {
               : 'application/rss+xml, application/atom+xml, application/xml;q=0.9, */*;q=0.5',
         },
       })
+      /**
+       * Unchanged, by the provider's own word. The records are the ones it sent
+       * last time, still carrying the `retrievedAt` of that response; only
+       * `confirmedUnchangedAt` is new. A healthy, current answer — never "empty"
+       * (S invariant 15).
+       */
+      if (res.status === 304 && known) {
+        const at = new Date().toISOString()
+        return known.evidence.map((e) => ({ ...e, confirmedUnchangedAt: at }))
+      }
       if (!res.ok) throw new Error(`${entry.key}: provider answered ${res.status}`)
 
-      const evidence =
+      const parsed =
         entry.kind === 'geojson'
           ? fromGeoJson(entry, await res.json(), new Date().toISOString())
           : entry.kind === 'json'
@@ -423,7 +467,12 @@ export function catalogSource(entry: CatalogSource): Source {
 
       // A cap, not a filter: one source flooding a run would crowd out every
       // other, turning breadth into a single provider's view of the world.
-      return evidence.slice(0, MAX_ITEMS_PER_SOURCE)
+      const evidence = parsed.slice(0, MAX_ITEMS_PER_SOURCE)
+      const etag = res.headers.get('etag')
+      const lastModified = res.headers.get('last-modified')
+      if (etag || lastModified) VALIDATORS.set(entry.key, { url, etag, lastModified, evidence })
+      else VALIDATORS.delete(entry.key)
+      return evidence
     },
   }
 }
