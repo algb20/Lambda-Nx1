@@ -5,7 +5,7 @@
 | **Purpose** | One living list of everything that cannot be finished in the repository: keys, environment variables, decisions, permissions, writes to live systems. Owner R322: «احفظ في قائمة غير المكتمل مثل المفاتيح أو المتغيرات وغيرها». |
 | **Rule** | No secret value is ever written here, in Git, or in any file (owner S2). A key is named; its value goes only into the hosting environment, by the owner. |
 | **Production** | Locked on `9c19303`. No Production environment variable or deploy is changed without a new owner decision (R306). |
-| **Updated** | 2026-10-09 (R332). Each item says where it came from. Close an item by striking it through, with the date and the commit or decision. |
+| **Updated** | 2026-10-09 (R334). Each item says where it came from. Close an item by striking it through, with the date and the commit or decision. |
 
 ## A. Source keys and tokens (environment only)
 
@@ -62,6 +62,7 @@ Listed so none is forgotten. Whether each is set in a given environment is **UNV
 | C11 | Adopt licence-verified fallbacks as new sources: Kystverket open AIS (NLOD, Norway only), Tor metrics/Onionoo (CC0), adsb.lol historical flights (ODbL, share-alike on the database). Each needs a source specification before code | GL-09; batch 22 |
 | C12 | Retry budget (BP §15, NEW-05): may the engine retry a failed call within one run, how often, and with what backoff? The part charter §3 already requires — never calling a host before its `Retry-After` — is built (batch 24); no retry was added | NEW-05; batch 24 |
 | C13 | CourtListener's terms forbid any FCRA use of data derived from it (credit, employment, housing, insurance eligibility; consumer reports). Should Lambda's own terms of service pass that restriction to users, and should court-record results carry a notice? The source runs under review meanwhile (LEGAL_REVIEW_REQUIRED) | Batch 26 |
+| C14 | Conditional GET (ETag / If-Modified-Since) for catalogue feeds: measured 48 of 118 active feeds answer 304, ≈ 70 % of bytes per pass (one feed, Project Zero, is 11.3 MB per fetch). Needs a decision on what a 304 means for `retrievedAt` / freshness, and where validators are stored | `docs/RESEARCH/CONDITIONAL_GET_2026-10-09.md` |
 
 ## D. Permissions and agreements to request (owner action)
 
