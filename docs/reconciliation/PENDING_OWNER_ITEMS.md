@@ -5,7 +5,7 @@
 | **Purpose** | One living list of everything that cannot be finished in the repository: keys, environment variables, decisions, permissions, writes to live systems. Owner R322: «احفظ في قائمة غير المكتمل مثل المفاتيح أو المتغيرات وغيرها». |
 | **Rule** | No secret value is ever written here, in Git, or in any file (owner S2). A key is named; its value goes only into the hosting environment, by the owner. |
 | **Production** | Locked on `9c19303`. No Production environment variable or deploy is changed without a new owner decision (R306). |
-| **Updated** | 2026-10-09 (R334). Each item says where it came from. Close an item by striking it through, with the date and the commit or decision. |
+| **Updated** | 2026-10-09 (R335). Each item says where it came from. Close an item by striking it through, with the date and the commit or decision. |
 
 ## A. Source keys and tokens (environment only)
 
@@ -59,10 +59,10 @@ Listed so none is forgotten. Whether each is set in a given environment is **UNV
 | C8 | Approve Blueprint changes BC-1 to BC-8 (licence registry into the Policy Engine, terms-change detection, and the rest) in the Master unification session. Already built in the repository: `npm run check:terms` (BC-5, manual today) and credits beside findings and in every export (BC-8; social publishing waits for 30.27.8.R) | Gap audit §4; batch 15 |
 | C9 | Lift the Production pause, when 30.27.8.R is closed | R294, R306 |
 | C10 | EU AI Act Art. 50(4): before publishing resumes, the Publication contract decides whether AI-written text carries the disclosure or passes a recorded human editorial review. Also: is Lambda a "deployer" publishing "to inform the public"? (legal advice). The interface already labels AI text "AI-generated" (batch 20) | R328; `docs/RESEARCH/FIELD_2026-10-08.md` §1 |
-| C11 | Adopt licence-verified fallbacks as new sources: Kystverket open AIS (NLOD, Norway only), Tor metrics/Onionoo (CC0), adsb.lol historical flights (ODbL, share-alike on the database). Each needs a source specification before code | GL-09; batch 22 |
-| C12 | Retry budget (BP §15, NEW-05): may the engine retry a failed call within one run, how often, and with what backoff? The part charter §3 already requires — never calling a host before its `Retry-After` — is built (batch 24); no retry was added | NEW-05; batch 24 |
+| C11 | Adopt licence-verified fallbacks as new sources: Kystverket open AIS (NLOD, Norway only), Tor metrics/Onionoo (CC0), adsb.lol historical flights (ODbL, share-alike on the database). Each needs a source specification before code | GL-09; batch 22. **no preference given 2026-10-09 (R335): not adopted; stays open** |
+| C12 | ~~decided 2026-10-09 (R335): no retry within a run; Retry-After honoured, last good answer served, next sweep tries again~~. Was: Retry budget (BP §15, NEW-05): may the engine retry a failed call within one run, how often, and with what backoff? The part charter §3 already requires — never calling a host before its `Retry-After` — is built (batch 24); no retry was added | NEW-05; batch 24 |
 | C13 | CourtListener's terms forbid any FCRA use of data derived from it (credit, employment, housing, insurance eligibility; consumer reports). Should Lambda's own terms of service pass that restriction to users, and should court-record results carry a notice? The source runs under review meanwhile (LEGAL_REVIEW_REQUIRED) | Batch 26 |
-| C14 | Conditional GET (ETag / If-Modified-Since) for catalogue feeds: measured 48 of 118 active feeds answer 304, ≈ 70 % of bytes per pass (one feed, Project Zero, is 11.3 MB per fetch). Needs a decision on what a 304 means for `retrievedAt` / freshness, and where validators are stored | `docs/RESEARCH/CONDITIONAL_GET_2026-10-09.md` |
+| C14 | ~~decided 2026-10-09 (R335): a separate "confirmed unchanged at" field; `retrievedAt` keeps its original value — being built (batch 27)~~. Was: Conditional GET (ETag / If-Modified-Since) for catalogue feeds: measured 48 of 118 active feeds answer 304, ≈ 70 % of bytes per pass (one feed, Project Zero, is 11.3 MB per fetch). Needs a decision on what a 304 means for `retrievedAt` / freshness, and where validators are stored | `docs/RESEARCH/CONDITIONAL_GET_2026-10-09.md` |
 
 ## D. Permissions and agreements to request (owner action)
 
@@ -93,7 +93,7 @@ Listed so none is forgotten. Whether each is set in a given environment is **UNV
 
 | # | Action | Why | Source |
 |---|---|---|---|
-| G1 | Merge `claude/bittorent-network-app-c8j9pv` into `main` (via a pull request, when the owner asks for one) | `main` still has `source-map-js` 1.2.1 — GitHub Dependabot alert #15 (high), fixed on this branch in batch 17. It also carries batches 11–17. Merging does not deploy Production (R306) | Batch 17 |
+| G1 | ~~Merge to `main`~~ — **done through batch 20**: PR #77 is merged on `main`, which now carries `source-map-js` 1.2.2 (Dependabot #15 fixed there). Batches 21 onward: new PR opened 2026-10-09 at the owner's request (R335); merge only on request. Merging does not deploy Production (R306) | Batch 17; R335 |
 
 ## F. Open research that Claude continues (no owner action needed)
 
