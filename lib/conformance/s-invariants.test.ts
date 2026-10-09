@@ -216,6 +216,19 @@ describe('S invariant 4 — every source is in the licence & usage registry (R31
     }
   })
 
+  it('never names a withheld source as a fallback (R330)', () => {
+    // A fallback is what runs when the primary cannot. On 2026-10-09 the RIPE
+    // Atlas record still offered ooni_measurements, withheld the day before
+    // (its data is CC BY-NC-SA 4.0). A fallback that cannot run is a gap
+    // written as if it were cover.
+    const ids = new Set(SOURCE_LICENSE_REGISTRY.map((r) => r.source_id))
+    const named = SOURCE_LICENSE_REGISTRY.flatMap((r) =>
+      r.fallback_sources.map((f) => ({ from: r.source_id, to: f.split(/[\s(]/)[0] })).filter(({ to }) => ids.has(to)),
+    )
+    expect(named.length).toBeGreaterThan(0)
+    expect(named.filter(({ to }) => policyOf(to) === 'WITHHOLD')).toEqual([])
+  })
+
   it('keeps Companies House off until the owner decides on its personal data (R322)', () => {
     // Officers and persons with significant control are private individuals;
     // the OGL excludes personal data. Switching the record on — even by setting

@@ -10049,8 +10049,7 @@
   ],
   "checked_at": "2026-10-05",
   "fallback_sources": [
-   "M-Lab measurement data (CC0 — verified 2026-10-05; served through BigQuery, not a keyless HTTP API)",
-   "ooni_measurements (under review)"
+   "M-Lab measurement data (CC0 — verified 2026-10-05; served through BigQuery, not a keyless HTTP API)"
   ]
  },
  {
